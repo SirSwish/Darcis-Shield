@@ -26,6 +26,5 @@ namespace UrbanChaosMapEditor.Models
         // Future expansion
         PlacePrim,
         PlaceBuilding,
-        PlaceLight
     }
 }

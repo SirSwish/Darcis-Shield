@@ -1,0 +1,82 @@
+<Window x:Class="UrbanChaosStoryboardEditor.Views.Dialogs.MissionEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Edit Mission"
+        Width="500" Height="550"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F0F0F0">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="Mission ID:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtId" IsReadOnly="True" 
+                 Background="#E0E0E0" Margin="0,4"/>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="Name:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtName" Margin="0,4"/>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="File:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtFile" Margin="0,4"/>
+
+        <Label Grid.Row="3" Grid.Column="0" Content="District:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtDistrict" Margin="0,4"/>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="Unlocked By:" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="4" Grid.Column="1" x:Name="TxtParent" Margin="0,4"
+                 ToolTip="Mission ID that must be completed to unlock this mission"/>
+
+        <Label Grid.Row="5" Grid.Column="0" Content="Type:" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="5" Grid.Column="1" x:Name="CboType" Margin="0,4">
+            <ComboBoxItem Content="1" IsSelected="True"/>
+            <ComboBoxItem Content="0"/>
+        </ComboBox>
+
+        <Label Grid.Row="6" Grid.Column="0" Content="Flags:" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CboFlags" Margin="0,4">
+            <ComboBoxItem Content="0" IsSelected="True"/>
+            <ComboBoxItem Content="1"/>
+        </ComboBox>
+
+        <Label Grid.Row="7" Grid.Column="0" Content="Audio File:" VerticalAlignment="Center"/>
+        <Grid Grid.Row="7" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" x:Name="TxtAudio" IsReadOnly="True" Margin="0,4"/>
+            <Button Grid.Column="1" Content="..." Width="30" Margin="4,4,0,4"
+                    Click="BrowseAudio_Click"/>
+        </Grid>
+
+        <Label Grid.Row="8" Grid.Column="0" Content="Briefing:" VerticalAlignment="Top" Margin="0,8,0,0"/>
+        <TextBox Grid.Row="8" Grid.Column="1" x:Name="TxtBriefing" 
+                 TextWrapping="Wrap" AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,4" MinHeight="120"/>
+
+        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Orientation="Horizontal" 
+                    HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="OK" Width="80" Padding="8,4" Margin="4,0"
+                    Click="OK_Click" IsDefault="True"/>
+            <Button Content="Cancel" Width="80" Padding="8,4" Margin="4,0"
+                    Click="Cancel_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

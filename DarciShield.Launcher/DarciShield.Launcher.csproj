@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Icons\app.ico" />
+    <None Remove="Assets\Images\Backgrounds\leather.png" />
+    <None Remove="Assets\Images\Backgrounds\shield.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Urban Chaos Light Editor\Urban Chaos Light Editor.csproj" />
+    <ProjectReference Include="..\Urban Chaos Map Editor\Urban Chaos Map Editor.csproj" />
+    <ProjectReference Include="..\Urban Chaos Mission Editor\Urban Chaos Mission Editor.csproj" />
+    <ProjectReference Include="..\Urban Chaos Storyboard Editor\Urban Chaos Storyboard Editor.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Icons\app.ico" />
+    <Resource Include="Assets\Images\Backgrounds\leather.png" />
+    <Resource Include="Assets\Images\Backgrounds\shield.png" />
+  </ItemGroup>
+
+</Project>

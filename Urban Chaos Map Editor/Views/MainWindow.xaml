@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:conv="clr-namespace:UrbanChaosMapEditor.Converters"
+        xmlns:conv="clr-namespace:UrbanChaosEditor.Shared.Converters;assembly=UrbanChaosEditor.Shared"
         xmlns:views="clr-namespace:UrbanChaosMapEditor.Views"
         xmlns:tabs="clr-namespace:UrbanChaosMapEditor.Views.EditorTabs"
         xmlns:models="clr-namespace:UrbanChaosMapEditor.Models"
@@ -36,7 +36,6 @@
         <KeyBinding Gesture="Ctrl+J" Command="{Binding ToggleObjectsCommand}" />
         <KeyBinding Gesture="Ctrl+Y" Command="{Binding TogglePrimGraphicsCommand}" />
         <KeyBinding Key="Delete" Command="{Binding DeletePrimCommand}" />
-        <KeyBinding Modifiers="Control" Key="L" Command="{Binding ToggleLightsCommand}" />
     </Window.InputBindings>
 
     <!-- Layout -->
@@ -54,16 +53,7 @@
                         <Image Source="/Assets/Icons/new.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
-                <MenuItem Header="New _Lights"
-                          Command="{Binding NewLightsCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/new.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <Separator/>
-
+                
                 <!-- Open -->
                 <MenuItem Header="_Open Map..."
                           Command="{Binding LoadMapCommand}"
@@ -72,16 +62,7 @@
                         <Image Source="/Assets/Icons/load.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
-                <MenuItem Header="Open _Lights..."
-                          Command="{Binding LoadLightsCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/load.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <Separator/>
-
+                
                 <!-- Save -->
                 <MenuItem Header="_Save Map"
                           Command="{Binding SaveMapCommand}"
@@ -90,41 +71,10 @@
                         <Image Source="/Assets/Icons/save.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
-
-                <MenuItem Header="Save _Lights"
-                          Command="{Binding SaveLightsCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/save.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="Save _All"
-                          Command="{Binding SaveAllCommand}"
-                          InputGestureText="Ctrl+Shift+S">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/save.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <Separator/>
-
+                
                 <!-- Save As -->
                 <MenuItem Header="Save Map _As..."
                           Command="{Binding SaveAsMapCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/saveas.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="Save Lights A_s..."
-                          Command="{Binding SaveAsLightsCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/saveas.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="Save All _As..."
-                          Command="{Binding SaveAllAsCommand}">
                     <MenuItem.Icon>
                         <Image Source="/Assets/Icons/saveas.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
@@ -173,7 +123,7 @@
                         <Image Source="/Assets/Icons/flatten.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                
+
                 <Separator/>
 
                 <MenuItem Header="Delete Selected Prim"
@@ -203,61 +153,6 @@
                 <MenuItem Header="_Paste Object"
                           InputGestureText="Ctrl+V"
                           Click="PastePrim_Click">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/pasteobject.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <!-- Lights -->
-                <Separator/>
-
-                <MenuItem Header="_Edit Light" Click="EditLight_Click">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/editlight.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                    <MenuItem.Style>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <!-- disable when no light selected -->
-                                <DataTrigger Binding="{Binding Map.SelectedLightIndex}" Value="-1">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Style>
-                </MenuItem>
-
-                <MenuItem Header="_Delete Light" Click="DeleteLight_Click" InputGestureText="Del">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/delete.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                    <MenuItem.Style>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Map.SelectedLightIndex}" Value="-1">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Style>
-                </MenuItem>
-
-                <MenuItem Header="_Copy Light" Click="CopyLight_Click" InputGestureText="Ctrl+C">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/copyobject.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                    <MenuItem.Style>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Map.SelectedLightIndex}" Value="-1">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Style>
-                </MenuItem>
-
-                <MenuItem Header="_Paste Light" Click="PasteLight_Click" InputGestureText="Ctrl+V">
                     <MenuItem.Icon>
                         <Image Source="/Assets/Icons/pasteobject.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
@@ -327,9 +222,9 @@
                           Command="{Binding ToggleBuildingsCommand}"
                           CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
                           InputGestureText="Ctrl+B">
-                                    <MenuItem.Icon>
-                                        <Image Source="/Assets/Icons/showbuildings.ico" Width="16" Height="16"/>
-                                    </MenuItem.Icon>
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/Icons/showbuildings.ico" Width="16" Height="16"/>
+                    </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Walkables"
                           IsCheckable="True"
@@ -337,8 +232,8 @@
                           Command="{Binding ToggleWalkablesCommand}"
                           CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
                           InputGestureText="Ctrl+W">
-                                    <MenuItem.Icon>
-                                        <Image Source="/Assets/Icons/showwalkables.ico" Width="16" Height="16"/>
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/Icons/showwalkables.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
 
@@ -350,17 +245,6 @@
                           InputGestureText="Ctrl+H">
                     <MenuItem.Icon>
                         <Image Source="/Assets/Icons/showheights.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="_Lights"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowLights}"
-                          Command="{Binding ToggleLightsCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+L">
-                    <MenuItem.Icon>
-                        <Image Width="16" Height="16" Source="/Assets/Icons/showlights.ico"/>
                     </MenuItem.Icon>
                 </MenuItem>
 
@@ -517,9 +401,6 @@
                         </TabItem>
                         <TabItem Header="Prims" Height="20" VerticalAlignment="Top">
                             <tabs:PrimsTab/>
-                        </TabItem>
-                        <TabItem Header="Lights">
-                            <tabs:LightsTab/>
                         </TabItem>
                         <TabItem Header="Buildings">
                             <tabs:BuildingsTab/>

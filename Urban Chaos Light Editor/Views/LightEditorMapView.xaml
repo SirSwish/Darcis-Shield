@@ -1,0 +1,59 @@
+<UserControl x:Class="UrbanChaosLightEditor.Views.LightEditorMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ovl="clr-namespace:UrbanChaosLightEditor.Views.MapOverlays"
+             Background="#1A1A1A"
+             Focusable="True">
+
+    <ScrollViewer x:Name="Scroller"
+                  HorizontalScrollBarVisibility="Auto" 
+                  VerticalScrollBarVisibility="Auto"
+                  CanContentScroll="False">
+        <Grid RenderOptions.BitmapScalingMode="NearestNeighbor">
+            <Grid.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}"/>
+            </Grid.LayoutTransform>
+
+            <Grid x:Name="Surface" Width="8192" Height="8192" Background="#1A1A1A">
+
+                <!-- Layer stack (from bottom to top) -->
+
+                <!-- 1. Textures Layer -->
+                <ovl:TexturesLayer
+    Width="8192" Height="8192"
+    Visibility="{Binding ShowTextures, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+    Panel.ZIndex="0"
+    IsHitTestVisible="False"/>
+
+                <!-- 2. Grid Lines Layer -->
+                <ovl:GridLinesLayer
+    Width="8192" Height="8192"
+    Visibility="{Binding ShowGridLines, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+    Panel.ZIndex="1"
+    IsHitTestVisible="False"/>
+
+                <!-- 3. Buildings Layer -->
+                <ovl:BuildingLayer
+    Width="8192" Height="8192"
+    Visibility="{Binding ShowBuildings, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+    Panel.ZIndex="2"
+    IsHitTestVisible="False"/>
+
+                <!-- 4. Prim Graphics Layer -->
+                <ovl:PrimGraphicsLayer
+    Width="8192" Height="8192"
+    Visibility="{Binding ShowPrimGraphics, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+    Panel.ZIndex="3"
+    IsHitTestVisible="False"/>
+
+                <!-- 5. Light Layer -->
+                <ovl:LightLayer x:Name="LightLayer" 
+    Width="8192" Height="8192"
+    Visibility="{Binding ShowLights, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+    Panel.ZIndex="10"
+    IsHitTestVisible="True"/>
+
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -18,10 +18,6 @@ namespace UrbanChaosMapEditor.Views
     {
         private bool _heightHotkeyLatched;
         private PrimListItem? _copiedPrim;
-        private LightEntry? _copiedLight;
-        private void DeleteLight_Click(object sender, RoutedEventArgs e) => DeleteSelectedLight();
-        private void CopyLight_Click(object sender, RoutedEventArgs e) => CopySelectedLight();
-        private void PasteLight_Click(object sender, RoutedEventArgs e) => PasteLightAtCursor();
         private const double MinExpandedEditorWidth = 300;  // <-- your minimum when expanded
         private const double CollapsedRailWidth = 28;       // width when collapsed
         private double _lastDrawerWidth = MinExpandedEditorWidth;
@@ -379,9 +375,6 @@ namespace UrbanChaosMapEditor.Views
                 PixelZ = sel.PixelZ
             };
 
-            // Last-copy-wins: clear light clipboard
-            _copiedLight = null;
-
             shell.StatusMessage = $"Copied “{sel.Name}” (#{sel.PrimNumber:000}).";
         }
 
@@ -471,10 +464,6 @@ namespace UrbanChaosMapEditor.Views
                     {
                         CopySelectedPrim();
                     }
-                    else if (map.SelectedLightIndex >= 0)
-                    {
-                        CopySelectedLight();
-                    }
                     else
                     {
                         shell.StatusMessage = "Nothing selected to copy.";
@@ -497,10 +486,6 @@ namespace UrbanChaosMapEditor.Views
                     if (_copiedPrim != null)
                     {
                         PastePrimAtCursor();
-                    }
-                    else if (_copiedLight != null)
-                    {
-                        PasteLightAtCursor();
                     }
                     else
                     {
@@ -573,13 +558,6 @@ namespace UrbanChaosMapEditor.Views
             // ==== Delete key ====
             if (e.Key == Key.Delete)
             {
-                if (DataContext is MainWindowViewModel vm && vm.Map.SelectedLightIndex >= 0)
-                {
-                    DeleteSelectedLight();
-                    e.Handled = true;
-                    return;
-                }
-
                 // existing prim delete path
                 if (DataContext is MainWindowViewModel vm2 && vm2.DeletePrimCommand.CanExecute(null))
                 {
@@ -681,182 +659,7 @@ namespace UrbanChaosMapEditor.Views
                 vm.StatusMessage = $"Set height of {sel.Name} to {newY} px";
             }
         }
-        private void AddLight_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is not MainWindowViewModel shell) return;
-
-            // Ensure there is a free slot before we ask for details
-            var acc = new LightsAccessor(LightsDataService.Instance);
-            var entries = acc.ReadAllEntries();
-            int freeIdx = entries.FindIndex(le => le.Used != 1);
-            if (freeIdx < 0)
-            {
-                shell.StatusMessage = "No free light slots (255 used).";
-                MessageBox.Show("All 255 light slots are used. Delete one before adding.",
-                                "Lights Full", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // Show dialog
-            var dlg = new AddEditLightDialog(
-          initialHeight: 0,
-          initialRange: 128,
-          initialRed: 0,
-          initialGreen: 0,
-          initialBlue: 0)
-            {
-                Owner = Application.Current.MainWindow
-            };
-
-            if (dlg.ShowDialog() == true)
-            {
-                // Enter placement mode with chosen params; we place X/Z on next click
-                shell.Map.BeginPlaceLight(dlg.ResultRange, dlg.ResultRed, dlg.ResultGreen, dlg.ResultBlue, dlg.ResultHeight);
-                shell.StatusMessage = "Placing light… Click on the map to set X/Z. Right-click/Esc to cancel.";
-                // (Optional) set focus to map so Esc works immediately
-                MapViewControl.Focus();
-            }
-        }
-        private void DeleteSelectedLight()
-        {
-            if (DataContext is not MainWindowViewModel shell) return;
-            var map = shell.Map;
-            int idx = map.SelectedLightIndex;
-            if (idx < 0) return;
-
-            try
-            {
-                var acc = new LightsAccessor(LightsDataService.Instance);
-                var e = acc.ReadEntry(idx);
-                if (e.Used == 1)
-                {
-                    e.Used = 0;
-                    // (optional) clear fields so it looks empty in the list
-                    e.Range = 0; e.Red = 0; e.Green = 0; e.Blue = 0;
-                    e.X = 0; e.Y = 0; e.Z = 0;
-
-                    acc.WriteEntry(idx, e);    // will trigger LightsBytesReset → Redraw + VM refresh
-                }
-
-                map.SelectedLightIndex = -1;
-                map.RefreshLightsList();
-                shell.StatusMessage = $"Deleted light at index {idx} (slot freed).";
-            }
-            catch (Exception ex)
-            {
-                shell.StatusMessage = "Error: failed to delete light.";
-                MessageBox.Show($"Failed to delete light.\n\n{ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private void CopySelectedLight()
-        {
-            if (DataContext is not MainWindowViewModel shell || shell.Map == null)
-            {
-                return;
-            }
-
-            var vm = shell.Map;
-            if (vm.SelectedLightIndex < 0)
-            {
-                shell.StatusMessage = "No light selected to copy.";
-                return;
-            }
-
-            try
-            {
-                var acc = new LightsAccessor(LightsDataService.Instance);
-                var e = acc.ReadEntry(vm.SelectedLightIndex);
-                if (e.Used != 1)
-                {
-                    shell.StatusMessage = "Selected light slot is not in use.";
-                    return;
-                }
-
-                // Snapshot template (override X/Z on paste)
-                _copiedLight = new LightEntry
-                {
-                    Range = e.Range,
-                    Red = e.Red,
-                    Green = e.Green,
-                    Blue = e.Blue,
-                    Next = 0,
-                    Used = 1,
-                    Flags = e.Flags,
-                    Padding = 0,
-                    X = e.X,  // not used on paste
-                    Y = e.Y,  // keep height
-                    Z = e.Z   // not used on paste
-                };
-
-                // Last-copy-wins: clear the other clipboard
-                _copiedPrim = null;
-
-                shell.StatusMessage = $"Copied light (Y={e.Y}, Range={e.Range}, RGB=({e.Red},{e.Green},{e.Blue})).";
-            }
-            catch (Exception ex)
-            {
-                shell.StatusMessage = "Error: failed to copy light.";
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
-        }
-
-        private void PasteLightAtCursor()
-        {
-            if (_copiedLight == null)
-            {
-                if (DataContext is MainWindowViewModel s0) s0.StatusMessage = "Light clipboard is empty.";
-                return;
-            }
-            if (DataContext is not MainWindowViewModel shell) return;
-
-            var vm = shell.Map;
-
-            try
-            {
-                var acc = new LightsAccessor(LightsDataService.Instance);
-                var all = acc.ReadAllEntries();
-
-                // find a free slot
-                int free = -1;
-                for (int i = 0; i < all.Count; i++)
-                    if (all[i].Used != 1) { free = i; break; }
-
-                if (free < 0) { shell.StatusMessage = "No free light slots (255 max)."; return; }
-
-                // IMPORTANT: convert cursor (game) -> UI -> world (lights)
-                int uiX = MapConstants.MapPixels - vm.CursorX;
-                int uiZ = MapConstants.MapPixels - vm.CursorZ;
-                int worldX = LightsAccessor.UiXToWorldX(uiX);
-                int worldZ = LightsAccessor.UiZToWorldZ(uiZ);
-
-                var tpl = _copiedLight;
-                var entry = new LightEntry
-                {
-                    Range = tpl.Range,
-                    Red = tpl.Red,
-                    Green = tpl.Green,
-                    Blue = tpl.Blue,
-                    Next = 0,
-                    Used = 1,
-                    Flags = tpl.Flags,
-                    Padding = 0,
-                    X = worldX,
-                    Y = tpl.Y,      // keep copied height
-                    Z = worldZ
-                };
-
-                acc.WriteEntry(free, entry);
-                vm.SelectedLightIndex = free;
-
-                shell.StatusMessage = $"Pasted light at X={worldX}, Z={worldZ} (Y={entry.Y}, Range={entry.Range}, RGB=({entry.Red},{entry.Green},{entry.Blue})).";
-            }
-            catch (Exception ex)
-            {
-                shell.StatusMessage = "Error: failed to paste light.";
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
-        }
+       
         private void OpenRecent_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel vm) return;
@@ -867,10 +670,7 @@ namespace UrbanChaosMapEditor.Views
             if (string.IsNullOrWhiteSpace(path)) return;
 
             var ext = System.IO.Path.GetExtension(path);
-            if (ext.Equals(".lgt", StringComparison.OrdinalIgnoreCase))
-                vm.OpenLightsFromPath(path);
-            else
-                vm.OpenMapFromPath(path);
+            vm.OpenMapFromPath(path);
 
             // keep MRU fresh
             UrbanChaosMapEditor.Services.RecentFilesService.Instance.Add(path);
@@ -910,78 +710,6 @@ namespace UrbanChaosMapEditor.Views
             var clear = new MenuItem { Header = "_Clear Recent" };
             clear.Click += ClearRecent_Click;
             m.Items.Add(clear);
-        }
-        private void LightsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            // Only if a row is actually selected (double-click whitespace should do nothing)
-            if (DataContext is MainWindowViewModel vm && vm.Map.SelectedLightIndex >= 0)
-                EditSelectedLight();
-        }
-
-        private void EditLight_Click(object sender, RoutedEventArgs e)
-        {
-            EditSelectedLight();
-        }
-
-        private void EditSelectedLight()
-        {
-            if (DataContext is not MainWindowViewModel shell) return;
-            var map = shell.Map;
-            int idx = map.SelectedLightIndex;
-            if (idx < 0) return;
-
-            try
-            {
-                var acc = new LightsAccessor(LightsDataService.Instance);
-                var entry = acc.ReadEntry(idx);
-
-                if (entry.Used != 1)
-                {
-                    shell.StatusMessage = "Selected slot is empty.";
-                    return;
-                }
-
-                // Seed dialog with the current values (pixels for Y)
-                var dlg = new Views.AddEditLightDialog(
-                    initialHeight: entry.Y,
-                    initialRange: entry.Range,
-                    initialRed: entry.Red,
-                    initialGreen: entry.Green,
-                    initialBlue: entry.Blue)
-                {
-                    Owner = this
-                };
-
-                if (dlg.ShowDialog() == true)
-                {
-                    // Apply changes; keep X/Z as-is, update Y (pixels), Range and RGB
-                    entry.Range = (byte)dlg.ResultRange;
-                    entry.Red = (sbyte)dlg.ResultRed;
-                    entry.Green = (sbyte)dlg.ResultGreen;
-                    entry.Blue = (sbyte)dlg.ResultBlue;
-                    entry.Y = dlg.ResultHeight; // pixels, not storeys
-
-                    acc.WriteEntry(idx, entry);      // triggers LightsBytesReset → UI refresh
-                    map.SelectedLightIndex = idx;    // keep selection
-                    map.RefreshLightsList();
-
-                    shell.StatusMessage = $"Edited light #{idx}  Y={entry.Y}  Range={entry.Range}  RGB=({entry.Red},{entry.Green},{entry.Blue}).";
-                }
-            }
-            catch (Exception ex)
-            {
-                if (DataContext is MainWindowViewModel vm2)
-                    vm2.StatusMessage = "Error: failed to edit light.";
-                MessageBox.Show($"Failed to edit light.\n\n{ex.Message}", "Error",
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private void MapLightProps_Click(object sender, RoutedEventArgs e)
-        {
-            var dlg = new LightPropertiesDialog { Owner = this };
-            dlg.ShowDialog();
-            // No extra refresh needed: LightsAccessor.Write* already triggers LightsBytesReset.
-        }
-
+        }      
     }
 }

@@ -62,28 +62,6 @@ namespace UrbanChaosMapEditor.ViewModels
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     }
 
-    public sealed class LightListItem : INotifyPropertyChanged
-    {
-        public int Index { get; set; }       // light slot index (0..n-1)
-        public int X { get; set; }           // world X
-        public int Z { get; set; }           // world Z
-        public int Y { get; init; }
-
-        public byte Range { get; set; }
-        public sbyte Red { get; set; }
-        public sbyte Green { get; set; }
-        public sbyte Blue { get; set; }
-
-        // handy for future centering/jumps
-        public int UiX { get; set; }
-        public int UiZ { get; set; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? n = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
-    }
-
-
     public sealed partial class MapViewModel : INotifyPropertyChanged
     {
 
@@ -101,6 +79,9 @@ namespace UrbanChaosMapEditor.ViewModels
         public ICommand SampleAltitudeCommand { get; }
         public ICommand ResetAltitudeCommand { get; }
         public ICommand DetectRoofCommand { get; }
+
+        private IFacetMultiDrawWindow? _facetMultiDrawWindow;
+
 
 
         private bool _isMapLoaded;
@@ -267,19 +248,6 @@ namespace UrbanChaosMapEditor.ViewModels
         private int _cursorTileY;
         public int CursorTileZ { get => _cursorTileY; set { if (_cursorTileY != value) { _cursorTileY = value; OnPropertyChanged(); } } }
 
-        private int _lightPlacementOffset = 0;   // 0..255 sub-pixels
-        public int LightPlacementOffset
-        {
-            get => _lightPlacementOffset;
-            set { if (_lightPlacementOffset != value) { _lightPlacementOffset = Math.Clamp(value, 0, 255); OnPropertyChanged(); } }
-        }
-
-        private int _lightPlacementYPixels = 0;
-        public int LightPlacementYPixels
-        {
-            get => _lightPlacementYPixels;
-            set { if (_lightPlacementYPixels != value) { _lightPlacementYPixels = value; OnPropertyChanged(); } }
-        }
 
         // ===== Unified tool selection =====
         private EditorTool _selectedTool = EditorTool.None;
@@ -654,76 +622,6 @@ namespace UrbanChaosMapEditor.ViewModels
             set { if (_newPrimNumber != value) { _newPrimNumber = value; OnPropertyChanged(); } }
         }
 
-        // Show/Hide lights overlay
-        private bool _showLights = true;
-        public bool ShowLights
-        {
-            get => _showLights;
-            set { if (_showLights != value) { _showLights = value; OnPropertyChanged(); } }
-        }
-
-        // Placement state (ghost + add)
-        private bool _isPlacingLight;
-        public bool IsPlacingLight
-        {
-            get => _isPlacingLight;
-            set { if (_isPlacingLight != value) { _isPlacingLight = value; OnPropertyChanged(); } }
-        }
-
-        // Ghost cursor (UI px)
-        private int? _lightGhostUiX;
-        public int? LightGhostUiX
-        {
-            get => _lightGhostUiX;
-            set { if (_lightGhostUiX != value) { _lightGhostUiX = value; OnPropertyChanged(); } }
-        }
-
-        private int? _lightGhostUiZ;
-        public int? LightGhostUiZ
-        {
-            get => _lightGhostUiZ;
-            set { if (_lightGhostUiZ != value) { _lightGhostUiZ = value; OnPropertyChanged(); } }
-        }
-
-        // Placement parameters (defaults)
-        private byte _lightPlacementRange = 128;
-        public byte LightPlacementRange
-        {
-            get => _lightPlacementRange;
-            set { if (_lightPlacementRange != value) { _lightPlacementRange = value; OnPropertyChanged(); } }
-        }
-
-        private sbyte _lightPlacementRed = 0, _lightPlacementGreen = 0, _lightPlacementBlue = 0;
-        public sbyte LightPlacementRed
-        {
-            get => _lightPlacementRed;
-            set { if (_lightPlacementRed != value) { _lightPlacementRed = value; OnPropertyChanged(); } }
-        }
-        public sbyte LightPlacementGreen
-        {
-            get => _lightPlacementGreen;
-            set { if (_lightPlacementGreen != value) { _lightPlacementGreen = value; OnPropertyChanged(); } }
-        }
-        public sbyte LightPlacementBlue
-        {
-            get => _lightPlacementBlue;
-            set { if (_lightPlacementBlue != value) { _lightPlacementBlue = value; OnPropertyChanged(); } }
-        }
-
-        private int _lightPlacementYStoreys = 0;
-        public int LightPlacementYStoreys
-        {
-            get => _lightPlacementYStoreys;
-            set { if (_lightPlacementYStoreys != value) { _lightPlacementYStoreys = value; OnPropertyChanged(); } }
-        }
-        // ===== Lights selection =====
-        private int _selectedLightIndex = -1;   // -1 = none
-        public int SelectedLightIndex
-        {
-            get => _selectedLightIndex;
-            set { if (_selectedLightIndex != value) { _selectedLightIndex = value; OnPropertyChanged(); } }
-        }
-
         private int _selectedBuildingId;
         public int SelectedBuildingId
         {
@@ -762,7 +660,6 @@ namespace UrbanChaosMapEditor.ViewModels
         public ObservableCollection<TextureThumb> SharedTextures { get; } = new();
         public ObservableCollection<TextureThumb> PrimTextures { get; } = new();
         public ObservableCollection<PrimListItem> Prims { get; } = new();
-        public ObservableCollection<LightListItem> Lights { get; } = new();
 
         // Palette buckets
         public ObservableCollection<PrimButton> CityAssets { get; } = new();
@@ -786,22 +683,6 @@ namespace UrbanChaosMapEditor.ViewModels
             mapSvc.MapCleared += (_, __) => IsMapLoaded = false;
             // if bytes reset implies “still loaded”, reflect it:
             mapSvc.MapBytesReset += (_, __) => IsMapLoaded = mapSvc.IsLoaded;
-
-            // Build list once at startup
-            System.Diagnostics.Debug.WriteLine("[MapVM] ctor: calling RefreshLightsList()");
-            try { RefreshLightsList(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine("[MapVM] ctor: RefreshLightsList failed: " + ex.Message); }
-            System.Diagnostics.Debug.WriteLine($"[MapVM] ctor: Lights after init = {Lights.Count}");
-
-            // Watch the collection changing (verifies UI source is getting items)
-            Lights.CollectionChanged += (_, e) =>
-                System.Diagnostics.Debug.WriteLine($"[MapVM] Lights.CollectionChanged → action={e.Action}, total now={Lights.Count}");
-
-            // Rebuild when the .lgt buffer changes
-            LightsDataService.Instance.LightsBytesReset += (_, __) =>
-            {
-                System.Diagnostics.Debug.WriteLine("[MapVM] LightsBytesReset received → RefreshLightsList()");
-                Application.Current?.Dispatcher.Invoke(RefreshLightsList);
-            };
 
             RaiseHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.RaiseHeight, _ => IsMapLoaded);
             LowerHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.LowerHeight, _ => IsMapLoaded);
@@ -857,19 +738,7 @@ namespace UrbanChaosMapEditor.ViewModels
             DragPreviewPrim = null;
         }
 
-        // Overload with offset (keep existing for compatibility)
-        public void BeginPlaceLight(byte range, sbyte r, sbyte g, sbyte b, int heightPixels)
-        {
-            LightPlacementRange = range;
-            LightPlacementRed = r;
-            LightPlacementGreen = g;
-            LightPlacementBlue = b;
-            LightPlacementYPixels = heightPixels;   // <— PIXELS, not storeys
-            IsPlacingLight = true;
-            LightGhostUiX = LightGhostUiZ = null;
-        }
-
-
+ 
         /// <summary>Rebuilds the three texture lists from the cache for the current world/set.</summary>
         public void RefreshTextureLists()
         {
@@ -1097,45 +966,6 @@ namespace UrbanChaosMapEditor.ViewModels
             _ladderTemplate = null;
         }
 
-        public void RefreshLightsList()
-        {
-            System.Diagnostics.Debug.WriteLine("[MapVM] RefreshLightsList START");
-            Lights.Clear();
-
-            var svc = LightsDataService.Instance;
-            var buf = svc.GetBytesCopy();
-
-            // Guard: only read when a full lights buffer is present
-            if (!svc.IsLoaded || buf.Length < LightsAccessor.TotalSize)
-                return;
-
-            var acc = new LightsAccessor(svc);
-            var entries = acc.ReadAllEntries();
-
-            System.Diagnostics.Debug.WriteLine($"[MapVM] ReadAllEntries → total={entries.Count}");
-
-            int added = 0;
-            for (int i = 0; i < entries.Count; i++)
-            {
-                var e = entries[i];
-                if (e.Used != 1) continue;
-
-                Lights.Add(new LightListItem
-                {
-                    Index = i,
-                    Range = e.Range,
-                    Red = e.Red,
-                    Green = e.Green,
-                    Blue = e.Blue,
-                    X = LightsAccessor.WorldXToUiX(e.X),
-                    Z = LightsAccessor.WorldZToUiZ(e.Z),
-                    Y = e.Y
-                });
-                added++;
-            }
-            System.Diagnostics.Debug.WriteLine($"[MapVM] RefreshLightsList END → added={added}, Lights.Count={Lights.Count}");
-        }
-
         public void RefreshPrimsList()
         {
             Prims.Clear();
@@ -1323,13 +1153,10 @@ namespace UrbanChaosMapEditor.ViewModels
         /// <summary>
         /// Begins facet multi-draw mode. Called by AddFacetWindow when user clicks "Draw on Map".
         /// </summary>
-        public void BeginFacetMultiDraw(AddWallWindow window, FacetTemplate template)
+        public void BeginFacetMultiDraw(IFacetMultiDrawWindow window, FacetTemplate template)
         {
-            _addFacetWindow = window;
+            _facetMultiDrawWindow = window;
             _facetTemplate = template;
-            _facetsAddedCount = 0;
-            _multiDrawFirstPoint = null;
-            MultiDrawPreviewLine = null;
             IsMultiDrawingFacets = true;
         }
 
@@ -1487,7 +1314,6 @@ namespace UrbanChaosMapEditor.ViewModels
                 $"pack://application:,,,/Assets/Textures/{set}/world{world}/style.tma",
                 UriKind.Absolute);
         }
-
 
         private async void LoadStylesForCurrentWorldAsync()
         {
@@ -1653,12 +1479,6 @@ namespace UrbanChaosMapEditor.ViewModels
             _addCableWindow = null;
         }
 
-
-        public void CancelPlaceLight()
-        {
-            IsPlacingLight = false;
-            LightGhostUiX = LightGhostUiZ = null;
-        }
 
         /// <summary>
         /// Begins door placement mode. Called by AddDoorWindow when user clicks "Draw on Map".

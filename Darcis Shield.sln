@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36408.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Map Editor", "Urban Chaos Map Editor\Urban Chaos Map Editor.csproj", "{FBB02119-BBA6-418E-9108-FA12C75A7C86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DarciShield.Launcher", "DarciShield.Launcher\DarciShield.Launcher.csproj", "{CA3A3767-81C9-4F29-B897-1811A528F031}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrbanChaosEditor.Shared", "UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj", "{BBA9FF5F-3B98-4392-97CF-D5FDAD79712E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Light Editor", "Urban Chaos Light Editor\Urban Chaos Light Editor.csproj", "{944E42B8-574E-41AA-9714-039B4D60345C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Storyboard Editor", "Urban Chaos Storyboard Editor\Urban Chaos Storyboard Editor.csproj", "{4436C0A1-DA84-4552-8C44-AFEB4CD6A1C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Mission Editor", "Urban Chaos Mission Editor\Urban Chaos Mission Editor.csproj", "{9685069B-38DC-49EA-8CDA-26B24EB681FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBB02119-BBA6-418E-9108-FA12C75A7C86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBB02119-BBA6-418E-9108-FA12C75A7C86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBB02119-BBA6-418E-9108-FA12C75A7C86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBB02119-BBA6-418E-9108-FA12C75A7C86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA3A3767-81C9-4F29-B897-1811A528F031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3A3767-81C9-4F29-B897-1811A528F031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA3A3767-81C9-4F29-B897-1811A528F031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3A3767-81C9-4F29-B897-1811A528F031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBA9FF5F-3B98-4392-97CF-D5FDAD79712E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBA9FF5F-3B98-4392-97CF-D5FDAD79712E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBA9FF5F-3B98-4392-97CF-D5FDAD79712E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBA9FF5F-3B98-4392-97CF-D5FDAD79712E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{944E42B8-574E-41AA-9714-039B4D60345C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{944E42B8-574E-41AA-9714-039B4D60345C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{944E42B8-574E-41AA-9714-039B4D60345C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{944E42B8-574E-41AA-9714-039B4D60345C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4436C0A1-DA84-4552-8C44-AFEB4CD6A1C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4436C0A1-DA84-4552-8C44-AFEB4CD6A1C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4436C0A1-DA84-4552-8C44-AFEB4CD6A1C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4436C0A1-DA84-4552-8C44-AFEB4CD6A1C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBDB6B67-8611-4905-A4F4-ADB3D564479B}
+	EndGlobalSection
+EndGlobal

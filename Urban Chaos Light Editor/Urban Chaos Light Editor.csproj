@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<NuGetAudit>False</NuGetAudit>
+		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="..\Urban Chaos Map Editor\Assets\Textures\**\*.png"
+				  Link="Assets\Textures\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+	<!-- Link PrimGraphics Assets from Map Editor -->
+	<ItemGroup>
+		<!-- Link PrimGraphics from Map Editor -->
+		<Resource Include="..\Urban Chaos Map Editor\Assets\Images\PrimGraphics\*.png"
+				  Link="Assets\Images\PrimGraphics\%(Filename)%(Extension)" />
+	</ItemGroup>
+</Project>

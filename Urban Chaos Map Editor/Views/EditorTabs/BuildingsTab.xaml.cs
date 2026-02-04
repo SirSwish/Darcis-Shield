@@ -386,6 +386,24 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
             }
         }
 
+        private void BtnAddFence_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            if (vm.SelectedBuilding == null)
+                return;
+
+            int buildingId = vm.SelectedBuildingId;
+
+            var wnd = new AddFenceWindow(buildingId)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            wnd.ShowDialog();
+        }
+
         private void BtnAddLadder_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not BuildingsTabViewModel vm)

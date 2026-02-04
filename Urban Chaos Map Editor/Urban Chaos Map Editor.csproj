@@ -34,6 +34,9 @@
     <Folder Include="Themes\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Update="Assets\Images\PrimGraphics\199.PNG">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

@@ -588,27 +588,28 @@
                                                        RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                         </Button>
 
-                        <!-- Add Fences (placeholder – visible when building selected) -->
+                        <!-- Add Fences (opens AddFenceWindow – visible when building selected) -->
                         <Button Style="{StaticResource CompactActionButton}"
-                                                    Width="30" Height="30"
-                                                    Padding="0"
-                                                    Background="Transparent"
-                                                    BorderBrush="Transparent"
-                                                    ToolTip="Add fences to the selected building"
-                                                    Margin="0,0,4,0"
-                                                    HorizontalContentAlignment="Center"
-                                                    VerticalContentAlignment="Center">
-                            <Button.Visibility>
-                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
-                                    <Binding.Converter>
-                                        <BooleanToVisibilityConverter/>
-                                    </Binding.Converter>
-                                </Binding>
-                            </Button.Visibility>
-                            <Image Source="/Assets/Icons/addfence.ico"
-                                                       Width="30" Height="30"
-                                                       SnapsToDevicePixels="True"
-                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                            Width="30" Height="30"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            ToolTip="Add fences to the selected building"
+                            Margin="0,0,4,0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Click="BtnAddFence_Click">
+                                                <Button.Visibility>
+                                                    <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                                        <Binding.Converter>
+                                                            <BooleanToVisibilityConverter/>
+                                                        </Binding.Converter>
+                                                    </Binding>
+                                                </Button.Visibility>
+                                                <Image Source="/Assets/Icons/addfence.ico"
+                               Width="30" Height="30"
+                               SnapsToDevicePixels="True"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                         </Button>
 
                         <!-- Add Gate (placeholder – visible when building selected) -->

@@ -1,0 +1,194 @@
+﻿<UserControl x:Class="UrbanChaosLightEditor.Views.LightsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#252526">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- List item style -->
+        <Style x:Key="LightListItemStyle" TargetType="ListViewItem">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="4"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#0078D4"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3C3C3C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Lights" FontSize="16" FontWeight="SemiBold" 
+                   Foreground="White" Margin="0,0,0,8"/>
+
+        <!-- Lights List -->
+        <ListView x:Name="LightsList"
+                  Grid.Row="1"
+                  ItemsSource="{Binding Lights}"
+                  SelectedIndex="{Binding SelectedLightIndex, Mode=TwoWay}"
+                  Background="#2B2B2B"
+                  BorderBrush="#444"
+                  ItemContainerStyle="{StaticResource LightListItemStyle}"
+                  MouseDoubleClick="LightsList_MouseDoubleClick"
+                  PreviewKeyDown="LightsList_PreviewKeyDown">
+
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="#" Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Index}" Foreground="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="X" Width="55">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding X}" Foreground="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Z" Width="55">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Z}" Foreground="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Y" Width="55">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Y}" Foreground="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Range" Width="50">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Range}" Foreground="White"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Color" Width="50">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Width="24" Height="16" CornerRadius="2" BorderBrush="#666" BorderThickness="1">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding PreviewColor}"/>
+                                    </Border.Background>
+                                </Border>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit..." Click="EditLight_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Copy" Click="CopyLight_Click" InputGestureText="Ctrl+C"/>
+                    <MenuItem Header="Paste" Click="PasteLight_Click" InputGestureText="Ctrl+V"/>
+                    <Separator/>
+                    <MenuItem Header="Delete" Click="DeleteLight_Click" InputGestureText="Del"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+        </ListView>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="2" Background="#2B2B2B" Padding="6" Margin="0,8,0,0" CornerRadius="4">
+            <WrapPanel Orientation="Horizontal">
+                <!-- Add Light -->
+                <Button Width="40" Height="36" Click="AddLight_Click" Margin="0,0,4,0"
+                        ToolTip="Add Light (click on map to place)">
+                    <TextBlock Text="➕" FontSize="18"/>
+                </Button>
+
+                <!-- Edit Light -->
+                <Button Width="40" Height="36" Click="EditLight_Click" Margin="0,0,4,0"
+                        ToolTip="Edit Selected Light"
+                        IsEnabled="{Binding HasSelectedLight}">
+                    <TextBlock Text="✏️" FontSize="18"/>
+                </Button>
+
+                <!-- Delete Light -->
+                <Button Width="40" Height="36" Click="DeleteLight_Click" Margin="0,0,4,0"
+                        ToolTip="Delete Selected Light"
+                        IsEnabled="{Binding HasSelectedLight}">
+                    <TextBlock Text="🗑️" FontSize="18"/>
+                </Button>
+
+                <Separator Width="1" Background="#555" Margin="4,0"/>
+
+                <!-- Copy -->
+                <Button Width="40" Height="36" Click="CopyLight_Click" Margin="0,0,4,0"
+                        ToolTip="Copy Light (Ctrl+C)"
+                        IsEnabled="{Binding HasSelectedLight}">
+                    <TextBlock Text="📋" FontSize="18"/>
+                </Button>
+
+                <!-- Paste -->
+                <Button Width="40" Height="36" Click="PasteLight_Click" Margin="0,0,4,0"
+                        ToolTip="Paste Light (Ctrl+V)"
+                        IsEnabled="{Binding CanPasteLight}">
+                    <TextBlock Text="📄" FontSize="18"/>
+                </Button>
+            </WrapPanel>
+        </Border>
+
+        <!-- Selected Light Properties -->
+        <Border Grid.Row="3" Background="#2B2B2B" Padding="8" Margin="0,8,0,0" CornerRadius="4"
+                Visibility="{Binding HasSelectedLight, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="Selected Light" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Index:" Foreground="#AAA"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedLight.Index}" Foreground="White"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Position:" Foreground="#AAA" Margin="0,4,0,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Foreground="White" Margin="0,4,0,0">
+                        <Run Text="{Binding SelectedLight.X, Mode=OneWay}"/>, 
+                        <Run Text="{Binding SelectedLight.Z, Mode=OneWay}"/> (Y: 
+                        <Run Text="{Binding SelectedLight.Y, Mode=OneWay}"/>)
+                    </TextBlock>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Range:" Foreground="#AAA" Margin="0,4,0,0"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedLight.Range}" Foreground="White" Margin="0,4,0,0"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="RGB:" Foreground="#AAA" Margin="0,4,0,0"/>
+                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Foreground="White">
+                            <Run Text="{Binding SelectedLight.Red, Mode=OneWay}"/>, 
+                            <Run Text="{Binding SelectedLight.Green, Mode=OneWay}"/>, 
+                            <Run Text="{Binding SelectedLight.Blue, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

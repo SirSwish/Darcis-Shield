@@ -1,0 +1,397 @@
+﻿<Window x:Class="UrbanChaosMapEditor.Views.Dialogs.Buildings.AddFenceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Fences" 
+        Width="460"
+        SizeToContent="Height"
+        Background="#202225"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Fg" Color="White"/>
+        <SolidColorBrush x:Key="Subtle" Color="#FFB0B0B0"/>
+        <SolidColorBrush x:Key="EditableBg" Color="#2A2D32"/>
+        <SolidColorBrush x:Key="EditableBorder" Color="#4A4D52"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+        </Style>
+
+        <!-- ComboBox text/items now black -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="#2F3136"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+
+        <Style x:Key="EditableField" TargetType="TextBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource EditableBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource EditableBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Subtle}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="100"/>
+        </Style>
+
+        <!-- Custom checkbox: bright white box + black tick, label text white -->
+        <Style x:Key="FlagCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <!-- The square box -->
+                            <Border x:Name="Border"
+                                    Width="14" Height="14"
+                                    CornerRadius="2"
+                                    Background="White"
+                                    BorderBrush="#333"
+                                    BorderThickness="1"
+                                    Margin="0,0,6,0">
+                                <!-- The tick mark -->
+                                <Path x:Name="CheckMark"
+                                      Visibility="Collapsed"
+                                      Stroke="Black"
+                                      StrokeThickness="2"
+                                      Data="M 2 7 L 5 10 L 11 2"/>
+                            </Border>
+
+                            <!-- The text -->
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                                <Setter Property="Foreground" Value="#888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#3A3D42"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4A4D52"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SmallButton" TargetType="Button">
+            <Setter Property="Background" Value="#3A3D42"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4A4D52"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#2D5A27"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3D7A37"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- No ScrollViewer: window height auto-fits content -->
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Add Facets to Building" 
+                       FontWeight="Bold" 
+                       FontSize="16"/>
+            <TextBlock x:Name="TxtBuildingInfo" 
+                       Foreground="{StaticResource Subtle}"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Properties -->
+        <Border Grid.Row="2" 
+                BorderBrush="#333" 
+                BorderThickness="1" 
+                CornerRadius="6" 
+                Padding="16">
+            <StackPanel>
+                <TextBlock Text="Facet Properties" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <!-- Fence Type -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Fence:" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="CmbFenceType" Width="200" Margin="8,0,0,0"/>
+                </StackPanel>
+                <!-- Height -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Height:" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtHeight" 
+                             Style="{StaticResource EditableField}" 
+                             Text="4"
+                             PreviewTextInput="NumericOnly_PreviewTextInput"/>
+                    <TextBlock Text="(coarse, 0-255)" 
+                               Foreground="{StaticResource Subtle}" 
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- FHeight -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Fine Height:" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtFHeight" 
+                             Style="{StaticResource EditableField}" 
+                             Text="0"
+                             PreviewTextInput="NumericOnly_PreviewTextInput"/>
+                    <TextBlock Text="(0-255)" 
+                               Foreground="{StaticResource Subtle}" 
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- BlockHeight -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Block Height:" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtBlockHeight" 
+                             Style="{StaticResource EditableField}" 
+                             Text="16"
+                             PreviewTextInput="NumericOnly_PreviewTextInput"/>
+                </StackPanel>
+
+                <!-- Y0/Y1 -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Y Offset:" Style="{StaticResource FieldLabel}"/>
+                    <TextBlock Text="Y0:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBox x:Name="TxtY0" 
+                             Style="{StaticResource EditableField}" 
+                             Width="60"
+                             Text="0"
+                             PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
+                    <TextBlock Text="Y1:" VerticalAlignment="Center" Margin="12,0,4,0"/>
+                    <TextBox x:Name="TxtY1" 
+                             Style="{StaticResource EditableField}" 
+                             Width="60"
+                             Text="0"
+                             PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
+                </StackPanel>
+
+                <!-- StyleIndex with Pick button -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                    <TextBlock Text="Style Index:" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtStyleIndex" 
+                             Style="{StaticResource EditableField}" 
+                             Text="1"
+                             PreviewTextInput="NumericOnly_PreviewTextInput"
+                             TextChanged="TxtStyleIndex_TextChanged"/>
+                    <Button x:Name="BtnPickStyle"
+                            Content="Pick..."
+                            Style="{StaticResource SmallButton}"
+                            Margin="8,0,0,0"
+                            Click="BtnPickStyle_Click"/>
+                    <TextBlock x:Name="TxtStyleName"
+                               Foreground="{StaticResource Subtle}" 
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"
+                               Text=""/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Style Preview Section (NEW) -->
+        <Border x:Name="StylePreviewBorder"
+                Grid.Row="4" 
+                BorderBrush="#333" 
+                BorderThickness="1" 
+                CornerRadius="6" 
+                Padding="12"
+                Background="#1A1C1E"
+                Visibility="Visible">
+            <StackPanel>
+                <TextBlock Text="Style Preview" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                <!-- Texture thumbnails -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Border Background="#2A2D32" CornerRadius="2" Padding="2" Margin="0,0,4,0">
+                        <Image x:Name="StyleThumb0" Width="56" Height="56" 
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"/>
+                    </Border>
+                    <Border Background="#2A2D32" CornerRadius="2" Padding="2" Margin="0,0,4,0">
+                        <Image x:Name="StyleThumb1" Width="56" Height="56" 
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"/>
+                    </Border>
+                    <Border Background="#2A2D32" CornerRadius="2" Padding="2" Margin="0,0,4,0">
+                        <Image x:Name="StyleThumb2" Width="56" Height="56" 
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"/>
+                    </Border>
+                    <Border Background="#2A2D32" CornerRadius="2" Padding="2" Margin="0,0,4,0">
+                        <Image x:Name="StyleThumb3" Width="56" Height="56" 
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"/>
+                    </Border>
+                    <Border Background="#2A2D32" CornerRadius="2" Padding="2">
+                        <Image x:Name="StyleThumb4" Width="56" Height="56" 
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Style info -->
+                <TextBlock x:Name="TxtStyleInfo"
+                           Foreground="{StaticResource Subtle}"
+                           FontSize="11"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0"
+                           Text="Select a style to see preview"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Flags -->
+        <Border Grid.Row="6" 
+                BorderBrush="#333" 
+                BorderThickness="1" 
+                CornerRadius="6" 
+                Padding="16"
+                Background="#202225">
+            <StackPanel>
+                <TextBlock Text="Flags" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Column 1 -->
+                    <CheckBox x:Name="ChkInvisible" Grid.Row="0" Grid.Column="0" 
+                              Content="Invisible (0x0001)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkInside" Grid.Row="1" Grid.Column="0" 
+                              Content="Inside (0x0008)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkDlit" Grid.Row="2" Grid.Column="0" 
+                              Content="Dlit (0x0010)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkHugFloor" Grid.Row="3" Grid.Column="0" 
+                              Content="Hug Floor (0x0020)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkElectrified" Grid.Row="4" Grid.Column="0" 
+                              Content="Electrified (0x0040)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkTwoSided" Grid.Row="5" Grid.Column="0" 
+                              Content="Two Sided (0x0080)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkUnclimbable" Grid.Row="6" Grid.Column="0" 
+                              Content="Unclimbable (0x0100)" Style="{StaticResource FlagCheckBox}"
+                              IsChecked="True"/>
+                    <CheckBox x:Name="ChkOnBuilding" Grid.Row="7" Grid.Column="0" 
+                              Content="On Building (0x0200)" Style="{StaticResource FlagCheckBox}"/>
+
+                    <!-- Column 2 -->
+                    <CheckBox x:Name="ChkBarbTop" Grid.Row="0" Grid.Column="1" 
+                              Content="Barb Top (0x0400)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkSeeThrough" Grid.Row="1" Grid.Column="1" 
+                              Content="See Through (0x0800)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkOpen" Grid.Row="2" Grid.Column="1" 
+                              Content="Open (0x1000)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkDeg90" Grid.Row="3" Grid.Column="1" 
+                              Content="90 Degrees (0x2000)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkTwoTextured" Grid.Row="4" Grid.Column="1" 
+                              Content="Two Textured (0x4000)" Style="{StaticResource FlagCheckBox}"/>
+                    <CheckBox x:Name="ChkFenceCut" Grid.Row="5" Grid.Column="1" 
+                              Content="Fence Cut (0x8000)" Style="{StaticResource FlagCheckBox}"/>
+                </Grid>
+
+                <!-- Flags hex display -->
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Combined:" Foreground="{StaticResource Subtle}" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="TxtFlagsHex" Text="0x0100"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Instructions -->
+        <Border Grid.Row="7" Margin="0,12,0,0">
+            <TextBlock TextWrapping="Wrap" 
+                       Foreground="{StaticResource Subtle}"
+                       FontSize="11">
+                <Run FontWeight="SemiBold" Foreground="White">Drawing Instructions:</Run>
+                <LineBreak/>
+                • Click "Draw on Map" to start drawing facets
+                <LineBreak/>
+                • Every two clicks creates a facet (click 1 = start, click 2 = end)
+                <LineBreak/>
+                • Each facet is saved immediately and shown on the map
+                <LineBreak/>
+                • Right-click to finish drawing
+                <LineBreak/>
+                • Coordinates snap to tile vertices (64px grid)
+            </TextBlock>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="9" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="Cancel" 
+                    Style="{StaticResource ActionButton}"
+                    Click="BtnCancel_Click"
+                    Margin="0,0,8,0"/>
+            <Button x:Name="BtnDraw"
+                    Content="📍 Draw on Map" 
+                    Style="{StaticResource PrimaryButton}"
+                    Click="BtnDraw_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

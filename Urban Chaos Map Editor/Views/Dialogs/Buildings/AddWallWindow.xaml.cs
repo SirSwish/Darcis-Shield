@@ -13,7 +13,7 @@ using UrbanChaosMapEditor.ViewModels;
 
 namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
 {
-    public partial class AddWallWindow : Window
+    public partial class AddWallWindow : Window, IFacetMultiDrawWindow
     {
         private static readonly Regex _digitsOnly = new Regex(@"^[0-9]+$");
         private static readonly Regex _signedDigitsOnly = new Regex(@"^-?[0-9]*$");

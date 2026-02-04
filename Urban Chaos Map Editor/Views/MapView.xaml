@@ -64,13 +64,7 @@
                         Visibility="{Binding ShowObjects, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="6"
                         IsHitTestVisible="True"/>
-
-                    <ovl:LightLayer
-                        Width="8192" Height="8192"
-                        Visibility="{Binding ShowLights, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="7"
-                        IsHitTestVisible="True"/>
-
+                    
                     <!-- NEW: Walkables overlay -->
                     <ovl:WalkablesLayer
                         x:Name="WalkablesOverlay"

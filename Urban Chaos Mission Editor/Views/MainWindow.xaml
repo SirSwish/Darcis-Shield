@@ -1,0 +1,440 @@
+﻿<Window x:Class="UrbanChaosMissionEditor.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UrbanChaosMissionEditor.Views"
+        xmlns:vm="clr-namespace:UrbanChaosMissionEditor.ViewModels"
+        xmlns:conv="clr-namespace:UrbanChaosMissionEditor.Converters"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Height="800" Width="1200"
+        MinHeight="600" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E1E">
+
+    <Window.Resources>
+        <!-- Converters -->
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVisibility"/>
+        <conv:ColorIndexToBrushConverter x:Key="ColorIndexToBrush"/>
+        <conv:CategoryToBrushConverter x:Key="CategoryToBrush"/>
+        <conv:FlagsToStringConverter x:Key="FlagsToString"/>
+        <conv:IntToHexConverter x:Key="IntToHex"/>
+
+        <!-- Styles -->
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <!-- Category Pill Style -->
+        <Style x:Key="CategoryPillStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- ListView Style -->
+        <Style TargetType="ListView">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="BorderBrush" Value="#3D3D3D"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+
+        <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="4"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#0078D4"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3D3D3D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenFileCommand}"/>
+        <KeyBinding Key="W" Modifiers="Ctrl" Command="{Binding CloseFileCommand}"/>
+        <KeyBinding Key="Add" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Key="Subtract" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Key="D0" Modifiers="Ctrl" Command="{Binding ResetZoomCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0" Background="#2D2D2D" Foreground="#FFFFFF">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open..." Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Close" Command="{Binding CloseFileCommand}" InputGestureText="Ctrl+W"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
+                <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
+                <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
+                <Separator/>
+                <MenuItem Header="_Show All Categories" Command="{Binding ShowAllCategoriesCommand}"/>
+                <MenuItem Header="_Hide All Categories" Command="{Binding HideAllCategoriesCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" MinWidth="200"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="280" MinWidth="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel: Mission Info + EventPoint List -->
+            <Grid Grid.Column="0" Background="#252526">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Mission Info Panel -->
+                <Border Grid.Row="0" Background="#1E1E1E" Padding="10" Margin="5"
+                        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="MISSION INFO" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,8"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Mission:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding MissionName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Map:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding MapName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding MapName}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Light Map:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LightMapName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding LightMapName}"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Version:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Version}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Event Pts:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EventPointCount}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Crime Rate:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CrimeRate}" Style="{StaticResource ValueTextStyle}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Category Filter Pills -->
+                <Border Grid.Row="1" Background="#1E1E1E" Padding="5" Margin="5"
+                        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="FILTERS" Style="{StaticResource HeaderTextStyle}" Margin="5,0,0,5"/>
+                        <ItemsControl ItemsSource="{Binding CategoryFilters}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CategoryPillStyle}"
+                                            Background="{Binding DisplayBrush}"
+                                            Opacity="{Binding Opacity}"
+                                            MouseLeftButtonDown="CategoryPill_Click">
+                                        <TextBlock Text="{Binding DisplayText}" 
+                                                   Foreground="White" 
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- EventPoint List -->
+                <Border Grid.Row="2" Margin="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="EVENT POINTS" Style="{StaticResource HeaderTextStyle}" 
+                                   Margin="5,5,5,5" Background="#1E1E1E" Padding="5"/>
+
+                        <ListView Grid.Row="1" 
+                                  x:Name="EventPointsListView"
+                                  ItemsSource="{Binding EventPoints}"
+                                  SelectedItem="{Binding SelectedEventPoint}"
+                                  SelectionMode="Single"
+                                  VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling"
+                                  MouseDoubleClick="EventPointsListView_MouseDoubleClick">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Color indicator -->
+                                        <Ellipse Grid.Column="0" Width="12" Height="12"
+                                                 Fill="{Binding ColorIndex, Converter={StaticResource ColorIndexToBrush}}"
+                                                 Stroke="#333333" StrokeThickness="1"/>
+
+                                        <!-- Name and summary -->
+                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                            <TextBlock Text="{Binding DisplayName}" 
+                                                       Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Summary}" 
+                                                       Foreground="#888888" FontSize="10"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+
+                                        <!-- Category pill -->
+                                        <Border Grid.Column="2" 
+                                                Background="{Binding CategoryBrush}"
+                                                CornerRadius="8" Padding="6,2" Margin="4,0,0,0"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding CategoryName}" 
+                                                       Foreground="White" FontSize="9"/>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Empty state -->
+                        <TextBlock Grid.Row="1" 
+                                   Text="No mission loaded.&#x0a;Use File → Open to load a .ucm file."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="#666666"
+                                   TextAlignment="Center"
+                                   Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}, ConverterParameter=Inverse}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Left Splitter -->
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
+                          Background="#3D3D3D"/>
+
+            <!-- Center: Map View -->
+            <Border Grid.Column="2" Background="#1A1A1A" Margin="2">
+                <local:MapViewControl x:Name="MapView" DataContext="{Binding}"/>
+            </Border>
+
+            <!-- Right Splitter -->
+            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Center"
+                          Background="#3D3D3D"/>
+
+            <!-- Right Panel: Selected EventPoint Details -->
+            <Border Grid.Column="4" Background="#252526">
+                <Grid>
+                    <!-- Details when selected -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding SelectedEventPoint, Converter={StaticResource NullToVisibility}}">
+                        <StackPanel Margin="10">
+                            <TextBlock Text="SELECTED EVENT POINT" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,10"/>
+
+                            <!-- Basic Info -->
+                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Index:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedEventPoint.Index}" Style="{StaticResource ValueTextStyle}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Type:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedEventPoint.WaypointTypeName}" Style="{StaticResource ValueTextStyle}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Group:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedEventPoint.GroupLetter}" Style="{StaticResource ValueTextStyle}"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Color:" Style="{StaticResource LabelTextStyle}"/>
+                                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                                        <Ellipse Width="12" Height="12" 
+                                                 Fill="{Binding SelectedEventPoint.ColorIndex, Converter={StaticResource ColorIndexToBrush}}"
+                                                 Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding SelectedEventPoint.ColorName}" Style="{StaticResource ValueTextStyle}"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Position:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedEventPoint.PositionString}" Style="{StaticResource ValueTextStyle}"/>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="World:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedEventPoint.WorldPositionString}" Style="{StaticResource ValueTextStyle}" FontSize="10"/>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Direction:" Style="{StaticResource LabelTextStyle}"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource ValueTextStyle}">
+                                        <Run Text="{Binding SelectedEventPoint.DirectionDegrees, StringFormat=F1, Mode=OneWay}"/>
+                                        <Run Text="°"/>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+
+                            <!-- Trigger Info -->
+                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="TRIGGER" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Trigger:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedEventPoint.TriggerTypeName}" Style="{StaticResource ValueTextStyle}"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="On Trigger:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedEventPoint.OnTriggerName}" Style="{StaticResource ValueTextStyle}"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Radius:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedEventPoint.Radius}" Style="{StaticResource ValueTextStyle}"/>
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="EP Ref:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedEventPoint.EPRef}" Style="{StaticResource ValueTextStyle}"/>
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Flags:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedEventPoint.Flags, Converter={StaticResource FlagsToString}}" 
+                                                   Style="{StaticResource ValueTextStyle}" TextWrapping="Wrap"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Extra Text (if any) -->
+                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10"
+                                    Visibility="{Binding SelectedEventPoint.ExtraText, Converter={StaticResource NullToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="TEXT CONTENT" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
+                                    <TextBox Text="{Binding SelectedEventPoint.ExtraText, Mode=OneWay}" 
+                                             IsReadOnly="True"
+                                             Background="#2D2D2D"
+                                             Foreground="#FFFFFF"
+                                             BorderBrush="#3D3D3D"
+                                             TextWrapping="Wrap"
+                                             MaxHeight="100"
+                                             VerticalScrollBarVisibility="Auto"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Data Array -->
+                            <Border Background="#1E1E1E" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Text="DATA ARRAY" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
+                                    <ItemsControl ItemsSource="{Binding SelectedEventPoint.Data}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="50"/>
+                                                        <ColumnDefinition Width="70"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Style="{StaticResource LabelTextStyle}">
+                                                        <Run Text="["/>
+                                                        <Run Text="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=(ItemsControl.AlternationIndex), Mode=OneWay}"/>
+                                                        <Run Text="]"/>
+                                                    </TextBlock>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource ValueTextStyle}"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Converter={StaticResource IntToHex}}" 
+                                                               Style="{StaticResource LabelTextStyle}" FontFamily="Consolas"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.AlternationCount>10</ItemsControl.AlternationCount>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- No selection state -->
+                    <TextBlock Text="Select an event point&#x0a;to view details"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="#666666"
+                               TextAlignment="Center"
+                               Visibility="{Binding SelectedEventPoint, Converter={StaticResource NullToVisibility}, ConverterParameter=Inverse}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="ForestGreen" Padding="5,3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="White"/>
+                <TextBlock Grid.Column="1" Foreground="White" Margin="20,0">
+                    <Run Text="Zoom: "/>
+                    <Run Text="{Binding MapZoom, StringFormat=P0, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Grid.Column="2" Text="{Binding FileName}" Foreground="White"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

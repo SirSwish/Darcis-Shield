@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>UrbanChaosMissionEditor</RootNamespace>
+		<AssemblyName>UrbanChaosMissionEditor</AssemblyName>
+		<Version>1.0.0</Version>
+		<Authors>Darci's Shield Team</Authors>
+		<Description>Urban Chaos Mission Editor - UCM File Editor</Description>
+		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+</Project>

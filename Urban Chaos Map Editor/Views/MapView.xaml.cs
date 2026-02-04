@@ -175,73 +175,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-
-            if (DataContext is MapViewModel vmLight && vmLight.IsPlacingLight)
-            {
-                Point p = e.GetPosition(Surface);
-
-                int uiX = (int)Math.Clamp(p.X, 0, MapConstants.MapPixels - 1);
-                int uiZ = (int)Math.Clamp(p.Y, 0, MapConstants.MapPixels - 1);
-
-                int worldX = LightsAccessor.UiXToWorldX(uiX);
-                int worldZ = LightsAccessor.UiZToWorldZ(uiZ);
-
-                int heightPixels = vmLight.LightPlacementYPixels;
-
-                try
-                {
-                    var acc = new LightsAccessor(LightsDataService.Instance);
-                    var list = acc.ReadAllEntries();
-                    int free = list.FindIndex(le => le.Used != 1);
-                    if (free < 0)
-                    {
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel sh0)
-                            sh0.StatusMessage = "No free light slots (255 used).";
-                        vmLight.IsPlacingLight = false;
-                        e.Handled = true;
-                        return;
-                    }
-
-                    var entry = new LightEntry
-                    {
-                        Range = vmLight.LightPlacementRange,
-                        Red = vmLight.LightPlacementRed,
-                        Green = vmLight.LightPlacementGreen,
-                        Blue = vmLight.LightPlacementBlue,
-                        Next = 0,
-                        Used = 1,
-                        Flags = 0,
-                        Padding = 0,
-                        X = worldX,
-                        Y = heightPixels,
-                        Z = worldZ
-                    };
-
-                    acc.WriteEntry(free, entry);     // persist
-                                                     // refresh UI list
-                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel sh1)
-                    {
-                        sh1.Map.RefreshLightsList();    // call your method that rebuilds Lights collection
-                        sh1.StatusMessage = $"Added light: range {entry.Range}, RGB({entry.Red},{entry.Green},{entry.Blue}) at XZ=({8192-uiX},{8192-uiZ}), Y={entry.Y}.";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel sh2)
-                        sh2.StatusMessage = "Error adding light.";
-                    MessageBox.Show($"Failed to add light.\n\n{ex.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                finally
-                {
-                    vmLight.IsPlacingLight = false;
-                    vmLight.LightGhostUiX = vmLight.LightGhostUiZ = null;
-                }
-
-                e.Handled = true;
-                return;
-            }
-
             // === Prim placement commit ===
             if (vm.IsPlacingPrim)
             {
@@ -1172,7 +1105,6 @@ namespace UrbanChaosMapEditor.Views
                 // NEW: clear any selection (prim or light)
                 bool cleared = false;
                 if (vm.Map.SelectedPrim != null) { vm.Map.SelectedPrim = null; cleared = true; }
-                if (vm.Map.SelectedLightIndex >= 0) { vm.Map.SelectedLightIndex = -1; cleared = true; }
 
                 vm.StatusMessage = cleared ? "Selection cleared." : "Action cleared.";
             }

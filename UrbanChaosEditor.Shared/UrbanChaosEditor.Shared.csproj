@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>UrbanChaosEditor.Shared</AssemblyName>
+		<RootNamespace>UrbanChaosEditor.Shared</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Folder Include="Views\" />
+	</ItemGroup>
+</Project>
