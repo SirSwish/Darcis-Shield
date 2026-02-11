@@ -1,7 +1,7 @@
 ﻿// /App.xaml.cs
 using System.Windows;
 using UrbanChaosMapEditor.Services;
-using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Services.Textures;
 using UrbanChaosMapEditor.ViewModels;
 using UrbanChaosMapEditor.Views;
 

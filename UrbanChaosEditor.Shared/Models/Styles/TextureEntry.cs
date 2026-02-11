@@ -1,5 +1,5 @@
 ﻿// Models/TextureEntry.cs
-namespace UrbanChaosMapEditor.Models
+namespace UrbanChaosEditor.Shared.Models
 {
     public sealed class TextureEntry
     {

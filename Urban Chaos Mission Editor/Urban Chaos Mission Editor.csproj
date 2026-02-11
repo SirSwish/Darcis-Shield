@@ -15,11 +15,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Assets\Icons\app.ico" />
+		<None Remove="Assets\Defaults\default.ucm" />
+		<None Remove="Assets\Icons\app.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="Assets\Icons\app.ico" />
+		<Content Include="Assets\Icons\app.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,7 +28,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="Assets\Icons\app.ico" />
+		<Resource Include="Assets\Defaults\default.ucm" />
+		<Resource Include="Assets\Icons\app.ico" />
 	</ItemGroup>
+
+	<!-- Reference the Map Editor project to access shared texture/prim resources -->
+	<ItemGroup>
+		<ProjectReference Include="..\Urban Chaos Light Editor\Urban Chaos Light Editor.csproj" />
+		<ProjectReference Include="..\Urban Chaos Map Editor\Urban Chaos Map Editor.csproj" />
+		<ProjectReference Include="..\Urban Chaos Storyboard Editor\Urban Chaos Storyboard Editor.csproj" />
+		<ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+	</ItemGroup>
+	
 
 </Project>

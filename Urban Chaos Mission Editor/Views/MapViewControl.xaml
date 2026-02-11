@@ -4,36 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UrbanChaosMissionEditor.Views"
-             xmlns:vm="clr-namespace:UrbanChaosMissionEditor.ViewModels"
+             xmlns:ovl="clr-namespace:UrbanChaosMissionEditor.Views.MapOverlays"
              xmlns:conv="clr-namespace:UrbanChaosMissionEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="600"
              Background="#1A1A1A"
-             ClipToBounds="True">
+             ClipToBounds="True"
+             Focusable="True">
 
     <UserControl.Resources>
-        <conv:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
-        <conv:ColorIndexToBrushConverter x:Key="ColorIndexToBrush"/>
-        <conv:SelectionToBrushConverter x:Key="SelectionToBrush"/>
-        <conv:SelectionToStrokeConverter x:Key="SelectionToStroke"/>
-
-        <!-- Grid line brush -->
-        <DrawingBrush x:Key="GridBrush" TileMode="Tile" 
-                      Viewport="0,0,64,64" ViewportUnits="Absolute">
-            <DrawingBrush.Drawing>
-                <GeometryDrawing>
-                    <GeometryDrawing.Geometry>
-                        <GeometryGroup>
-                            <LineGeometry StartPoint="0,0" EndPoint="64,0"/>
-                            <LineGeometry StartPoint="0,0" EndPoint="0,64"/>
-                        </GeometryGroup>
-                    </GeometryDrawing.Geometry>
-                    <GeometryDrawing.Pen>
-                        <Pen Brush="#2A2A2A" Thickness="1"/>
-                    </GeometryDrawing.Pen>
-                </GeometryDrawing>
-            </DrawingBrush.Drawing>
-        </DrawingBrush>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
     <Grid>
@@ -44,116 +24,67 @@
                       PanningMode="Both">
 
             <!-- Zoomable content -->
-            <Grid x:Name="ZoomContainer">
+            <Grid x:Name="ZoomContainer" RenderOptions.BitmapScalingMode="NearestNeighbor">
                 <Grid.LayoutTransform>
                     <ScaleTransform ScaleX="{Binding MapZoom}" ScaleY="{Binding MapZoom}"/>
                 </Grid.LayoutTransform>
 
-                <!-- Map canvas (8192x8192 representing 128x128 tiles) -->
-                <Canvas x:Name="MapCanvas" 
+                <!-- Map surface (8192x8192 representing 128x128 tiles) -->
+                <Grid x:Name="Surface" Width="8192" Height="8192" Background="#1A1A1A"
+                      MouseLeftButtonDown="Surface_MouseLeftButtonDown"
+                      MouseLeftButtonUp="Surface_MouseLeftButtonUp"
+                      MouseMove="Surface_MouseMove"
+                      MouseLeave="Surface_MouseLeave"
+                      MouseWheel="Surface_MouseWheel">
+
+                    <!-- Layer stack (from bottom to top) -->
+
+                    <!-- 1. Textures Layer -->
+                    <ovl:TexturesLayer x:Name="TexturesLayer"
                         Width="8192" Height="8192"
-                        Background="#1A1A1A"
-                        MouseLeftButtonDown="MapCanvas_MouseLeftButtonDown"
-                        MouseMove="MapCanvas_MouseMove"
-                        MouseLeave="MapCanvas_MouseLeave"
-                        MouseWheel="MapCanvas_MouseWheel">
+                        Visibility="{Binding ShowTextures, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="0"
+                        IsHitTestVisible="False"/>
 
-                    <!-- Grid overlay -->
-                    <Rectangle Width="8192" Height="8192" 
-                               Fill="{StaticResource GridBrush}"
-                               IsHitTestVisible="False"/>
+                    <!-- 2. Grid Lines Layer -->
+                    <ovl:GridLinesLayer x:Name="GridLinesLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowGridLines, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                        Panel.ZIndex="1"
+                        IsHitTestVisible="False"/>
 
-                    <!-- Major grid lines (every 8 tiles = 512 pixels) -->
-                    <ItemsControl IsHitTestVisible="False">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.Items>
-                            <!-- Vertical major lines -->
-                            <Line X1="512" Y1="0" X2="512" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="1024" Y1="0" X2="1024" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="1536" Y1="0" X2="1536" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="2048" Y1="0" X2="2048" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="2560" Y1="0" X2="2560" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="3072" Y1="0" X2="3072" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="3584" Y1="0" X2="3584" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="4096" Y1="0" X2="4096" Y2="8192" Stroke="#444444" StrokeThickness="2"/>
-                            <Line X1="4608" Y1="0" X2="4608" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="5120" Y1="0" X2="5120" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="5632" Y1="0" X2="5632" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="6144" Y1="0" X2="6144" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="6656" Y1="0" X2="6656" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="7168" Y1="0" X2="7168" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="7680" Y1="0" X2="7680" Y2="8192" Stroke="#333333" StrokeThickness="1"/>
+                    <!-- 3. Buildings Layer -->
+                    <ovl:BuildingLayer x:Name="BuildingLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowBuildings, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="2"
+                        IsHitTestVisible="False"/>
 
-                            <!-- Horizontal major lines -->
-                            <Line X1="0" Y1="512" X2="8192" Y2="512" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="1024" X2="8192" Y2="1024" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="1536" X2="8192" Y2="1536" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="2048" X2="8192" Y2="2048" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="2560" X2="8192" Y2="2560" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="3072" X2="8192" Y2="3072" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="3584" X2="8192" Y2="3584" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="4096" X2="8192" Y2="4096" Stroke="#444444" StrokeThickness="2"/>
-                            <Line X1="0" Y1="4608" X2="8192" Y2="4608" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="5120" X2="8192" Y2="5120" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="5632" X2="8192" Y2="5632" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="6144" X2="8192" Y2="6144" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="6656" X2="8192" Y2="6656" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="7168" X2="8192" Y2="7168" Stroke="#333333" StrokeThickness="1"/>
-                            <Line X1="0" Y1="7680" X2="8192" Y2="7680" Stroke="#333333" StrokeThickness="1"/>
-                        </ItemsControl.Items>
-                    </ItemsControl>
+                    <!-- 4. Prim Graphics Layer -->
+                    <ovl:PrimGraphicsLayer x:Name="PrimGraphicsLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowPrimGraphics, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="3"
+                        IsHitTestVisible="False"/>
 
-                    <!-- EventPoints layer -->
-                    <ItemsControl x:Name="EventPointsLayer"
-                                  ItemsSource="{Binding EventPoints}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:EventPointViewModel}">
-                                <Canvas Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
-                                    <!-- The circle representing the EventPoint -->
-                                    <Ellipse x:Name="PointEllipse"
-                                             Width="16" Height="16"
-                                             Fill="{Binding PointBrush}"
-                                             Stroke="{Binding IsSelected, Converter={StaticResource SelectionToBrush}}"
-                                             StrokeThickness="{Binding IsSelected, Converter={StaticResource SelectionToStroke}}"
-                                             Canvas.Left="{Binding PixelX}"
-                                             Canvas.Top="{Binding PixelZ}"
-                                             Margin="-8,-8,0,0"
-                                             Cursor="Hand"
-                                             ToolTip="{Binding TooltipText}">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Color="Black" 
-                                                              BlurRadius="4" 
-                                                              ShadowDepth="2"
-                                                              Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
-                                </Canvas>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <!-- 5. Light Layer -->
+                    <ovl:LightLayer x:Name="LightLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowLights, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        ShowRanges="{Binding ShowLightRanges}"
+                        Panel.ZIndex="4"
+                        IsHitTestVisible="False"/>
 
-                    <!-- Selection highlight ring (separate layer for z-order) -->
-                    <Ellipse x:Name="SelectionRing"
-                             Width="24" Height="24"
-                             Stroke="#FFFFFF"
-                             StrokeThickness="2"
-                             Fill="Transparent"
-                             Visibility="Collapsed"
-                             IsHitTestVisible="False">
-                        <Ellipse.Effect>
-                            <DropShadowEffect Color="White" BlurRadius="8" ShadowDepth="0"/>
-                        </Ellipse.Effect>
-                    </Ellipse>
-                </Canvas>
+                    <!-- 6. EventPoints Layer -->
+                    <ovl:EventPointsLayer x:Name="EventPointsLayer"
+                        Width="8192" Height="8192"
+                        EventPoints="{Binding EventPoints}"
+                        SelectedEventPoint="{Binding SelectedEventPoint}"
+                        Visibility="{Binding ShowEventPoints, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="10"
+                        IsHitTestVisible="False"/>
+
+                </Grid>
             </Grid>
         </ScrollViewer>
 
@@ -179,7 +110,7 @@
                     Background="#3D3D3D" Foreground="White" BorderBrush="#555555"/>
             <Border Background="#3D3D3D" Padding="8,0" VerticalAlignment="Center">
                 <TextBlock Foreground="White" VerticalAlignment="Center">
-                    <Run Text="{Binding MapZoom, StringFormat=P0}"/>
+                    <Run Text="{Binding MapZoom, StringFormat=P0, Mode=OneWay}"/>
                 </TextBlock>
             </Border>
             <Button Content="+" Width="30" Height="30" 

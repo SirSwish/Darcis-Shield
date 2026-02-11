@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
-using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Services.Textures;
 using UrbanChaosMapEditor.ViewModels;
 using static UrbanChaosMapEditor.Services.TexturesAccessor;
 

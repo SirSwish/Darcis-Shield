@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Reflection;
 using System.Text;
 using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.Models;
@@ -7,7 +6,7 @@ using UrbanChaosMissionEditor.Models;
 namespace UrbanChaosMissionEditor.Services;
 
 /// <summary>
-/// Service for reading UCM (Urban Chaos Mission) files
+/// Service for reading and writing UCM (Urban Chaos Mission) files
 /// </summary>
 public class UcmFileService
 {
@@ -52,7 +51,7 @@ public class UcmFileService
         // Read EventPoints (512 entries)
         for (int i = 0; i < Mission.MaxEventPoints; i++)
         {
-            mission.EventPoints[i] = ReadEventPoint(reader, i);
+            mission.EventPoints[i] = ReadEventPoint(reader, i + 1); // 1-based index
         }
 
         // Read SkillLevels (254 bytes)
@@ -79,6 +78,196 @@ public class UcmFileService
         }
 
         return mission;
+    }
+
+    /// <summary>
+    /// Write a Mission object to a UCM file
+    /// </summary>
+    public void WriteMission(Mission mission, string filePath)
+    {
+        // Create backup if file exists
+        if (File.Exists(filePath))
+        {
+            string backupPath = filePath + ".bak";
+            File.Copy(filePath, backupPath, overwrite: true);
+        }
+
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        using var writer = new BinaryWriter(fs, Encoding.ASCII);
+
+        // Write header
+        writer.Write(mission.Version);
+        writer.Write((uint)mission.Flags);
+
+        // Write path strings (260 bytes each, null-padded)
+        WriteFixedString(writer, mission.BriefName, 260);
+        WriteFixedString(writer, mission.LightMapName, 260);
+        WriteFixedString(writer, mission.MapName, 260);
+        WriteFixedString(writer, mission.MissionName, 260);
+        WriteFixedString(writer, mission.CitSezMapName, 260);
+
+        // Write metadata
+        writer.Write(mission.MapIndex);
+        writer.Write(mission.FreeEPoints);
+        writer.Write(mission.UsedEPoints);
+        writer.Write(mission.CrimeRate);
+        writer.Write(mission.CivsRate);
+
+        // Write EventPoints (512 entries)
+        for (int i = 0; i < Mission.MaxEventPoints; i++)
+        {
+            WriteEventPoint(writer, mission.EventPoints[i]);
+        }
+
+        // Write SkillLevels (254 bytes)
+        if (mission.SkillLevels == null || mission.SkillLevels.Length < 254)
+        {
+            writer.Write(new byte[254]);
+        }
+        else
+        {
+            writer.Write(mission.SkillLevels, 0, 254);
+        }
+
+        // Write tail rates
+        writer.Write(mission.BoredomRate);
+        writer.Write(mission.CarsRate);
+        writer.Write(mission.MusicWorld);
+
+        // Write extra data for text-based waypoints
+        for (int i = 0; i < Mission.MaxEventPoints; i++)
+        {
+            WriteEventExtra(writer, mission.EventPoints[i], mission.Version);
+        }
+
+        // Write MissionZones (128x128)
+        for (int x = 0; x < 128; x++)
+        {
+            for (int z = 0; z < 128; z++)
+            {
+                writer.Write(mission.MissionZones[x, z]);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Write a single EventPoint to the binary stream
+    /// </summary>
+    private void WriteEventPoint(BinaryWriter writer, EventPoint ep)
+    {
+        // First 14 bytes
+        writer.Write(ep.Colour);
+        writer.Write(ep.Group);
+        writer.Write((byte)ep.WaypointType);
+        writer.Write(ep.Used ? (byte)1 : (byte)0);
+        writer.Write((byte)ep.TriggeredBy);
+        writer.Write((byte)ep.OnTrigger);
+        writer.Write(ep.Direction);
+        writer.Write((byte)ep.Flags);
+        writer.Write(ep.EPRef);
+        writer.Write(ep.EPRefBool);
+        writer.Write(ep.AfterTimer);
+
+        // Data array (10 x 4 bytes = 40 bytes)
+        for (int j = 0; j < 10; j++)
+        {
+            writer.Write(ep.Data[j]);
+        }
+
+        // Position and links (20 bytes)
+        writer.Write(ep.Radius);
+        writer.Write(ep.X);
+        writer.Write(ep.Y);
+        writer.Write(ep.Z);
+        writer.Write(ep.Next);
+        writer.Write(ep.Prev);
+    }
+
+    /// <summary>
+    /// Write extra data (text strings) for an EventPoint
+    /// </summary>
+    private void WriteEventExtra(BinaryWriter writer, EventPoint ep, uint version)
+    {
+        if (!ep.Used) return;
+
+        // Check if this waypoint type has text data
+        bool hasText = ep.WaypointType switch
+        {
+            WaypointType.Message => true,
+            WaypointType.CreateMapExit => true,
+            WaypointType.Shout => true,
+            WaypointType.NavBeacon => true,
+            WaypointType.Conversation => true,
+            WaypointType.BonusPoints => true,
+            _ => false
+        };
+
+        if (hasText)
+        {
+            WriteTextExtra(writer, ep.ExtraText, version);
+        }
+
+        // Handle cutscene data
+        if (ep.WaypointType == WaypointType.CutScene)
+        {
+            if (version > 7)
+            {
+                // Write empty cutscene marker for now
+                // TODO: Implement proper CUTSCENE_write equivalent
+                writer.Write((byte)0);
+            }
+        }
+
+        // Write trigger text for shout triggers
+        if (ep.TriggeredBy == TriggerType.ShoutAll || ep.TriggeredBy == TriggerType.ShoutAny)
+        {
+            WriteTextExtra(writer, ep.TriggerText, version);
+        }
+    }
+
+    /// <summary>
+    /// Write text extra data
+    /// </summary>
+    private void WriteTextExtra(BinaryWriter writer, string? text, uint version)
+    {
+        text ??= string.Empty;
+
+        if (version > 7)
+        {
+            // Write type code (0x01 = text)
+            writer.Write((byte)0x01);
+        }
+
+        byte[] textBytes = Encoding.ASCII.GetBytes(text);
+
+        if (version > 4)
+        {
+            // Write length-prefixed string
+            writer.Write(textBytes.Length + 1); // +1 for null terminator
+            writer.Write(textBytes);
+            writer.Write((byte)0); // Null terminator
+        }
+        else
+        {
+            // Fixed 260 byte field
+            byte[] buffer = new byte[260];
+            Array.Copy(textBytes, buffer, Math.Min(textBytes.Length, 259));
+            writer.Write(buffer);
+        }
+    }
+
+    /// <summary>
+    /// Write a fixed-length null-padded string
+    /// </summary>
+    private void WriteFixedString(BinaryWriter writer, string value, int length)
+    {
+        byte[] buffer = new byte[length];
+        if (!string.IsNullOrEmpty(value))
+        {
+            byte[] valueBytes = Encoding.ASCII.GetBytes(value);
+            Array.Copy(valueBytes, buffer, Math.Min(valueBytes.Length, length - 1));
+        }
+        writer.Write(buffer);
     }
 
     /// <summary>

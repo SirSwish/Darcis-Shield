@@ -3,9 +3,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using UrbanChaosMapEditor.Models.Styles;
+using UrbanChaosEditor.Shared.Models.Styles;
 
-namespace UrbanChaosMapEditor.Services.DataServices
+namespace UrbanChaosEditor.Shared.Services.DataServices
 {
     public sealed class StyleDataService
     {

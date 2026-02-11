@@ -15,12 +15,83 @@
 
     <Window.Resources>
         <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
         <conv:NullToVisibilityConverter x:Key="NullToVisibility"/>
         <conv:ColorIndexToBrushConverter x:Key="ColorIndexToBrush"/>
         <conv:CategoryToBrushConverter x:Key="CategoryToBrush"/>
         <conv:FlagsToStringConverter x:Key="FlagsToString"/>
         <conv:IntToHexConverter x:Key="IntToHex"/>
+
+        <!-- Toggle button style for layer visibility (GREEN theme) -->
+        <Style x:Key="LayerToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinWidth" Value="70"/>
+            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="ForestGreen"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#32CD32"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#888"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toolbar button style -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4C4C4C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="ForestGreen"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <!-- Styles -->
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
@@ -59,7 +130,7 @@
             <Setter Property="Padding" Value="4"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#0078D4"/>
+                    <Setter Property="Background" Value="ForestGreen"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#3D3D3D"/>
@@ -69,15 +140,20 @@
     </Window.Resources>
 
     <Window.InputBindings>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NewFileCommand}"/>
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenFileCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveFileCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveAsFileCommand}"/>
         <KeyBinding Key="W" Modifiers="Ctrl" Command="{Binding CloseFileCommand}"/>
         <KeyBinding Key="Add" Command="{Binding ZoomInCommand}"/>
         <KeyBinding Key="Subtract" Command="{Binding ZoomOutCommand}"/>
         <KeyBinding Key="D0" Modifiers="Ctrl" Command="{Binding ResetZoomCommand}"/>
+        <KeyBinding Key="Delete" Command="{Binding DeleteEventPointCommand}"/>
     </Window.InputBindings>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -86,8 +162,16 @@
         <!-- Menu Bar -->
         <Menu Grid.Row="0" Background="#2D2D2D" Foreground="#FFFFFF">
             <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewFileCommand}" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="_Open..." Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Save" Command="{Binding SaveFileCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save _As..." Command="{Binding SaveAsFileCommand}" InputGestureText="Ctrl+Shift+S"/>
                 <MenuItem Header="_Close" Command="{Binding CloseFileCommand}" InputGestureText="Ctrl+W"/>
+                <Separator/>
+                <MenuItem Header="Open _Map..." Command="{Binding OpenMapCommand}" ToolTip="Manually load a .iam map file"/>
+                <MenuItem Header="Open _Lights..." Command="{Binding OpenLightsCommand}" ToolTip="Manually load a .lgt lights file"/>
+                <Separator/>
+                <MenuItem Header="_Mission Properties..." Command="{Binding MissionPropertiesCommand}" ToolTip="Edit mission file references and settings"/>
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
             </MenuItem>
@@ -96,13 +180,58 @@
                 <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
                 <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
                 <Separator/>
+                <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding ShowTextures}"/>
+                <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding ShowGridLines}"/>
+                <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding ShowBuildings}"/>
+                <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding ShowPrimGraphics}"/>
+                <MenuItem Header="Show _Lights" IsCheckable="True" IsChecked="{Binding ShowLights}"/>
+                <MenuItem Header="Show Light _Ranges" IsCheckable="True" IsChecked="{Binding ShowLightRanges}"/>
+                <MenuItem Header="Show _Event Points" IsCheckable="True" IsChecked="{Binding ShowEventPoints}"/>
+                <Separator/>
                 <MenuItem Header="_Show All Categories" Command="{Binding ShowAllCategoriesCommand}"/>
                 <MenuItem Header="_Hide All Categories" Command="{Binding HideAllCategoriesCommand}"/>
             </MenuItem>
         </Menu>
 
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Background="#2D2D2D" Padding="4">
+            <WrapPanel>
+                <!-- File operations -->
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="📁 Open" 
+                        Command="{Binding OpenFileCommand}" ToolTip="Open UCM File (Ctrl+O)"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="🗺️ Map" 
+                        Command="{Binding OpenMapCommand}" ToolTip="Open Map File"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="💡 Lights" 
+                        Command="{Binding OpenLightsCommand}" ToolTip="Open Lights File"/>
+
+                <Separator Margin="8,0" Background="#555"/>
+
+                <!-- Layer visibility toggles -->
+                <TextBlock Text="Layers:" Foreground="#AAA" VerticalAlignment="Center" Margin="4,0"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Textures" 
+                              IsChecked="{Binding ShowTextures}" IsEnabled="{Binding IsMapLoaded}"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Grid" 
+                              IsChecked="{Binding ShowGridLines}"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings" 
+                              IsChecked="{Binding ShowBuildings}" IsEnabled="{Binding IsMapLoaded}"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Objects" 
+                              IsChecked="{Binding ShowPrimGraphics}" IsEnabled="{Binding IsMapLoaded}"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Lights" 
+                              IsChecked="{Binding ShowLights}" IsEnabled="{Binding IsLightsLoaded}"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Events" 
+                              IsChecked="{Binding ShowEventPoints}" IsEnabled="{Binding HasMission}"/>
+
+                <Separator Margin="8,0" Background="#555"/>
+
+                <!-- Light range toggle -->
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="🔆 Ranges" 
+                              IsChecked="{Binding ShowLightRanges}" IsEnabled="{Binding IsLightsLoaded}"
+                              ToolTip="Show/hide light range circles"/>
+            </WrapPanel>
+        </Border>
+
         <!-- Main Content -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280" MinWidth="200"/>
                 <ColumnDefinition Width="Auto"/>
@@ -137,6 +266,8 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Mission:" Style="{StaticResource LabelTextStyle}"/>
@@ -156,6 +287,16 @@
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="Crime Rate:" Style="{StaticResource LabelTextStyle}"/>
                             <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CrimeRate}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <!-- Loaded files info -->
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Map File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding LoadedMapFileName}" Style="{StaticResource ValueTextStyle}" 
+                                       Foreground="{Binding IsMapLoaded, Converter={StaticResource BoolToVisibility}, ConverterParameter=GreenOrGray}"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Lights File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding LoadedLightsFileName}" Style="{StaticResource ValueTextStyle}"
+                                       TextTrimming="CharacterEllipsis"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -196,8 +337,25 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="EVENT POINTS" Style="{StaticResource HeaderTextStyle}" 
-                                   Margin="5,5,5,5" Background="#1E1E1E" Padding="5"/>
+                        <!-- Header with Add/Delete buttons -->
+                        <Grid Grid.Row="0" Background="#1E1E1E" Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="EVENT POINTS" Style="{StaticResource HeaderTextStyle}" Padding="5"/>
+                            <Button Grid.Column="1" Content="+ Add" 
+                                    Command="{Binding AddEventPointCommand}"
+                                    ToolTip="Add new EventPoint"
+                                    Padding="8,2" Margin="5,0"
+                                    Background="#0078D4" Foreground="White" BorderThickness="0"/>
+                            <Button Grid.Column="2" Content="Delete" 
+                                    Command="{Binding DeleteEventPointCommand}"
+                                    ToolTip="Delete selected EventPoint"
+                                    Padding="8,2" Margin="0,0,5,0"
+                                    Background="#D41C1C" Foreground="White" BorderThickness="0"/>
+                        </Grid>
 
                         <ListView Grid.Row="1" 
                                   x:Name="EventPointsListView"
@@ -261,7 +419,20 @@
 
             <!-- Center: Map View -->
             <Border Grid.Column="2" Background="#1A1A1A" Margin="2">
-                <local:MapViewControl x:Name="MapView" DataContext="{Binding}"/>
+                <Grid>
+                    <!-- Loading overlay -->
+                    <Border Background="#80000000" 
+                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                            Panel.ZIndex="100">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="Loading..." Foreground="White" FontSize="18" 
+                                       HorizontalAlignment="Center"/>
+                            <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <local:MapViewControl x:Name="MapView" DataContext="{Binding}"/>
+                </Grid>
             </Border>
 
             <!-- Right Splitter -->
@@ -320,7 +491,7 @@
                                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Direction:" Style="{StaticResource LabelTextStyle}"/>
                                     <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource ValueTextStyle}">
                                         <Run Text="{Binding SelectedEventPoint.DirectionDegrees, StringFormat=F1, Mode=OneWay}"/>
-                                        <Run Text="°"/>
+                                        <Run Text=" deg"/>
                                     </TextBlock>
                                 </Grid>
                             </Border>
@@ -420,20 +591,25 @@
         </Grid>
 
         <!-- Status Bar -->
-        <Border Grid.Row="2" Background="ForestGreen" Padding="5,3">
+        <Border Grid.Row="3" Background="ForestGreen" Padding="5,3">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="White"/>
                 <TextBlock Grid.Column="1" Foreground="White" Margin="20,0">
+                    <Run Text="Map: "/>
+                    <Run Text="{Binding LoadedMapFileName, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Grid.Column="2" Foreground="White" Margin="20,0">
                     <Run Text="Zoom: "/>
                     <Run Text="{Binding MapZoom, StringFormat=P0, Mode=OneWay}"/>
                 </TextBlock>
-                <TextBlock Grid.Column="2" Text="{Binding FileName}" Foreground="White"/>
+                <TextBlock Grid.Column="3" Text="{Binding FileName}" Foreground="White"/>
             </Grid>
         </Border>
     </Grid>

@@ -1,30 +1,100 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UrbanChaosMissionEditor.Models;
 using UrbanChaosMissionEditor.ViewModels;
+using UrbanChaosMissionEditor.Views.MapOverlays;
 
 namespace UrbanChaosMissionEditor.Views;
 
 /// <summary>
-/// Map view control for displaying EventPoints on a 128x128 grid (8192x8192 pixels)
+/// Map view control for displaying EventPoints and map layers on a 128x128 grid (8192x8192 pixels)
+/// Supports drag-to-move, drag-to-rotate, keyboard fine adjustment, and position selection mode.
 /// </summary>
 public partial class MapViewControl : UserControl
 {
     private const double MapSize = 8192.0;
     private const int GridSize = 128;
     private const double TileSize = MapSize / GridSize; // 64 pixels per tile
+    private const int PixelMoveAmount = 4; // World units per arrow key press (1 pixel = 4 world units)
 
     private EventPointViewModel? _hoveredEventPoint;
+
+    // Flag to suppress centering when selecting from map
+    private bool _suppressCenterOnSelection;
+
+    // Drag state
+    private enum DragMode { None, MovePoint, RotatePoint }
+    private DragMode _currentDragMode = DragMode.None;
+    private Point _dragStartPosition;
+    private int _originalX, _originalZ;
+    private byte _originalDirection;
+
+    // Position selection mode
+    private bool _positionSelectionMode;
+    private Action<int, int>? _positionSelectedCallback;
 
     public MapViewControl()
     {
         InitializeComponent();
-
-        // Subscribe to DataContext changes to handle selection updates
         DataContextChanged += OnDataContextChanged;
+
+        // Enable keyboard focus
+        Focusable = true;
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;
+
+    #region Preview Event Handlers (for Position Selection Mode)
+
+    private void UserControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine($"[MapViewControl] PreviewMouseLeftButtonDown fired, SelectionMode: {_positionSelectionMode}");
+
+        if (_positionSelectionMode)
+        {
+            // Get position relative to the Surface
+            var position = e.GetPosition(Surface);
+
+            System.Diagnostics.Debug.WriteLine($"[MapViewControl] Preview click at Surface position: ({position.X}, {position.Y})");
+
+            // Convert pixel to world coordinates (inverted)
+            int worldX = (int)((8192.0 - position.X) * 4);
+            int worldZ = (int)((8192.0 - position.Y) * 4);
+
+            System.Diagnostics.Debug.WriteLine($"[MapViewControl] Calculated world coords: ({worldX}, {worldZ})");
+
+            if (_positionSelectedCallback != null)
+            {
+                System.Diagnostics.Debug.WriteLine("[MapViewControl] Invoking callback from Preview handler");
+                var callback = _positionSelectedCallback;
+                ExitPositionSelectionMode();
+                callback.Invoke(worldX, worldZ);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[MapViewControl] WARNING: Callback is null in Preview handler!");
+                ExitPositionSelectionMode();
+            }
+
+            e.Handled = true;
+        }
+    }
+
+    private void UserControl_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (_positionSelectionMode)
+        {
+            // Update coordinate display even in selection mode
+            var position = e.GetPosition(Surface);
+            UpdateCoordinateDisplay(position);
+
+            // Ensure crosshair cursor
+            Cursor = Cursors.Cross;
+        }
+    }
+
+    #endregion
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
@@ -43,23 +113,18 @@ public partial class MapViewControl : UserControl
     {
         if (e.PropertyName == nameof(MainViewModel.SelectedEventPoint))
         {
-            UpdateSelectionRing();
-            ScrollToSelectedEventPoint();
-        }
-    }
+            // Only center if not suppressed (i.e., selection came from list, not map click)
+            if (!_suppressCenterOnSelection)
+            {
+                ScrollToSelectedEventPoint();
+            }
+            _suppressCenterOnSelection = false; // Reset flag
 
-    private void UpdateSelectionRing()
-    {
-        var selected = ViewModel?.SelectedEventPoint;
-        if (selected != null && selected.IsVisible)
-        {
-            Canvas.SetLeft(SelectionRing, selected.PixelX - 12);
-            Canvas.SetTop(SelectionRing, selected.PixelZ - 12);
-            SelectionRing.Visibility = Visibility.Visible;
+            EventPointsLayer?.Refresh();
         }
-        else
+        else if (e.PropertyName == nameof(MainViewModel.VisibleEventPoints))
         {
-            SelectionRing.Visibility = Visibility.Collapsed;
+            EventPointsLayer?.Refresh();
         }
     }
 
@@ -89,61 +154,209 @@ public partial class MapViewControl : UserControl
         ScrollContainer.ScrollToVerticalOffset(scrollY);
     }
 
-    private void MapCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    #region Position Selection Mode
+
+    /// <summary>
+    /// Enter position selection mode. The callback will be invoked with world coordinates when user clicks.
+    /// </summary>
+    public void EnterPositionSelectionMode(Action<int, int> callback)
     {
+        System.Diagnostics.Debug.WriteLine("[MapViewControl] EnterPositionSelectionMode called");
+        _positionSelectionMode = true;
+        _positionSelectedCallback = callback;
+        Cursor = Cursors.Cross;
+
+        // Visual feedback - show selection mode message
+        CoordinateText.Text = "[CLICK ON MAP TO SELECT POSITION - Press Escape to cancel]";
+
+        // Capture mouse to receive all mouse events
+        Mouse.Capture(this, CaptureMode.SubTree);
+
+        System.Diagnostics.Debug.WriteLine($"[MapViewControl] Selection mode active: {_positionSelectionMode}, Callback set: {_positionSelectedCallback != null}, MouseCaptured: {Mouse.Captured == this}");
+    }
+
+    /// <summary>
+    /// Exit position selection mode without selecting
+    /// </summary>
+    public void ExitPositionSelectionMode()
+    {
+        System.Diagnostics.Debug.WriteLine("[MapViewControl] ExitPositionSelectionMode called");
+        _positionSelectionMode = false;
+        _positionSelectedCallback = null;
+        Cursor = Cursors.Arrow;
+        CoordinateText.Text = string.Empty;
+
+        // Release mouse capture
+        if (Mouse.Captured == this)
+        {
+            Mouse.Capture(null);
+        }
+    }
+
+    public bool IsInPositionSelectionMode => _positionSelectionMode;
+
+    /// <summary>
+    /// Handle a position selection click forwarded from MainWindow
+    /// </summary>
+    public void HandlePositionSelectionClick(MouseButtonEventArgs e)
+    {
+        if (!_positionSelectionMode) return;
+
+        // Get position relative to the Surface (need to account for scroll and zoom)
+        var positionInMapView = e.GetPosition(this);
+        var positionInSurface = e.GetPosition(Surface);
+
+        System.Diagnostics.Debug.WriteLine($"[MapViewControl] HandlePositionSelectionClick - MapView pos: ({positionInMapView.X}, {positionInMapView.Y}), Surface pos: ({positionInSurface.X}, {positionInSurface.Y})");
+
+        // Convert pixel to world coordinates (inverted)
+        int worldX = (int)((8192.0 - positionInSurface.X) * 4);
+        int worldZ = (int)((8192.0 - positionInSurface.Y) * 4);
+
+        System.Diagnostics.Debug.WriteLine($"[MapViewControl] Calculated world coords: ({worldX}, {worldZ})");
+
+        if (_positionSelectedCallback != null)
+        {
+            System.Diagnostics.Debug.WriteLine("[MapViewControl] Invoking callback");
+            var callback = _positionSelectedCallback;
+            ExitPositionSelectionMode();
+            callback.Invoke(worldX, worldZ);
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine("[MapViewControl] WARNING: Callback is null!");
+            ExitPositionSelectionMode();
+        }
+    }
+
+    /// <summary>
+    /// Handle mouse move during position selection forwarded from MainWindow
+    /// </summary>
+    public void HandlePositionSelectionMove(MouseEventArgs e)
+    {
+        if (!_positionSelectionMode) return;
+
+        var position = e.GetPosition(Surface);
+        UpdateCoordinateDisplay(position);
+        Cursor = Cursors.Cross;
+    }
+
+    #endregion
+
+    #region Mouse Event Handlers
+
+    private void Surface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var position = e.GetPosition(Surface);
+
+        System.Diagnostics.Debug.WriteLine($"[MapViewControl] Surface_MouseLeftButtonDown at ({position.X}, {position.Y}), SelectionMode: {_positionSelectionMode}");
+
+        // Position selection is now handled in PreviewMouseLeftButtonDown
+        // Skip if we're in selection mode (should already be handled)
+        if (_positionSelectionMode)
+        {
+            return;
+        }
+
         if (ViewModel == null) return;
 
-        var position = e.GetPosition(MapCanvas);
+        // Check if we're clicking on the rotation handle of selected point
+        if (ViewModel.SelectedEventPoint != null && EventPointsLayer != null)
+        {
+            if (EventPointsLayer.IsOverRotationHandle(position))
+            {
+                // Start rotation drag
+                _currentDragMode = DragMode.RotatePoint;
+                _dragStartPosition = position;
+                _originalDirection = ViewModel.SelectedEventPoint.Direction;
+                Surface.CaptureMouse();
+                e.Handled = true;
+                return;
+            }
+        }
 
         // Find EventPoint at this position
         var eventPoint = ViewModel.FindEventPointAtPosition(position.X, position.Y, 12);
 
         if (eventPoint != null)
         {
+            // Suppress centering when selecting from map click
+            _suppressCenterOnSelection = true;
             ViewModel.SelectedEventPoint = eventPoint;
-        }
-        else
-        {
-            // Click on empty space - optionally deselect
-            // ViewModel.SelectedEventPoint = null;
+
+            // Check for double-click (ClickCount == 2)
+            if (e.ClickCount == 2)
+            {
+                // Open editor
+                if (ViewModel.EditEventPointCommand.CanExecute(null))
+                {
+                    ViewModel.EditEventPointCommand.Execute(null);
+                }
+                e.Handled = true;
+            }
+            else
+            {
+                // Start move drag
+                _currentDragMode = DragMode.MovePoint;
+                _dragStartPosition = position;
+                _originalX = eventPoint.Model.X;
+                _originalZ = eventPoint.Model.Z;
+                Surface.CaptureMouse();
+            }
         }
 
-        // Focus the canvas to receive keyboard input
-        MapCanvas.Focus();
+        // Focus the surface to receive keyboard input
+        Surface.Focus();
     }
 
-    private void MapCanvas_MouseMove(object sender, MouseEventArgs e)
+    private void Surface_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        var position = e.GetPosition(MapCanvas);
+        if (_currentDragMode != DragMode.None)
+        {
+            _currentDragMode = DragMode.None;
+            Surface.ReleaseMouseCapture();
+
+            // Mark as dirty if we moved/rotated
+            if (ViewModel != null)
+            {
+                ViewModel.IsDirty = true;
+            }
+        }
+    }
+
+    private void Surface_MouseMove(object sender, MouseEventArgs e)
+    {
+        var position = e.GetPosition(Surface);
+
+        // Handle drag operations
+        if (_currentDragMode == DragMode.MovePoint && ViewModel?.SelectedEventPoint != null)
+        {
+            HandleMovePointDrag(position, e);
+            return;
+        }
+        else if (_currentDragMode == DragMode.RotatePoint && ViewModel?.SelectedEventPoint != null)
+        {
+            HandleRotatePointDrag(position);
+            return;
+        }
 
         // Update coordinate display
-        int gridX = (int)(position.X / TileSize);
-        int gridZ = (int)(position.Y / TileSize);
+        UpdateCoordinateDisplay(position);
 
-        // Clamp to valid range
-        gridX = Math.Clamp(gridX, 0, GridSize - 1);
-        gridZ = Math.Clamp(gridZ, 0, GridSize - 1);
-
-        // World coordinates (256 per tile)
-        int worldX = (int)position.X * 4; // 8192 / 32768 = 0.25, so multiply by 4
-        int worldZ = (int)position.Y * 4;
-
-        CoordinateText.Text = $"Grid: ({gridX}, {gridZ})  World: ({worldX}, {worldZ})  Pixel: ({(int)position.X}, {(int)position.Y})";
+        // Update cursor based on what we're hovering over
+        UpdateCursor(position);
 
         // Handle hover highlighting
-        if (ViewModel != null)
+        if (ViewModel != null && !_positionSelectionMode)
         {
             var eventPoint = ViewModel.FindEventPointAtPosition(position.X, position.Y, 12);
 
             if (eventPoint != _hoveredEventPoint)
             {
-                // Clear old hover
                 if (_hoveredEventPoint != null)
                 {
                     _hoveredEventPoint.IsHovered = false;
                 }
 
-                // Set new hover
                 _hoveredEventPoint = eventPoint;
                 if (_hoveredEventPoint != null)
                 {
@@ -153,11 +366,112 @@ public partial class MapViewControl : UserControl
         }
     }
 
-    private void MapCanvas_MouseLeave(object sender, MouseEventArgs e)
+    private void HandleMovePointDrag(Point position, MouseEventArgs e)
     {
-        CoordinateText.Text = string.Empty;
+        var selected = ViewModel!.SelectedEventPoint!;
 
-        // Clear hover state
+        // Calculate new pixel position
+        double newPixelX = position.X;
+        double newPixelY = position.Y;
+
+        // Snap to grid if Ctrl is held
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+        {
+            // Snap to nearest grid vertex (corner)
+            newPixelX = Math.Round(newPixelX / TileSize) * TileSize;
+            newPixelY = Math.Round(newPixelY / TileSize) * TileSize;
+        }
+
+        // Clamp to map bounds
+        newPixelX = Math.Clamp(newPixelX, 0, MapSize);
+        newPixelY = Math.Clamp(newPixelY, 0, MapSize);
+
+        // Convert pixel to world coordinates (inverted: X = (8192 - Pixel) * 4)
+        int newWorldX = (int)((8192.0 - newPixelX) * 4);
+        int newWorldZ = (int)((8192.0 - newPixelY) * 4);
+
+        // Update the model
+        selected.Model.X = newWorldX;
+        selected.Model.Z = newWorldZ;
+
+        // Refresh display
+        EventPointsLayer?.Refresh();
+        UpdateCoordinateDisplay(position);
+    }
+
+    private void HandleRotatePointDrag(Point position)
+    {
+        var selected = ViewModel!.SelectedEventPoint!;
+        var center = new Point(selected.PixelX, selected.PixelZ);
+
+        // Calculate new direction from center to mouse position
+        byte newDirection = EventPointsLayer.CalculateDirectionFromPoints(center, position);
+
+        // Update the model
+        selected.Model.Direction = newDirection;
+
+        // Refresh display
+        EventPointsLayer?.Refresh();
+    }
+
+    private void UpdateCoordinateDisplay(Point position)
+    {
+        // Calculate UI grid position (top-left origin)
+        int uiGridX = (int)(position.X / TileSize);
+        int uiGridZ = (int)(position.Y / TileSize);
+
+        // Clamp to valid range
+        uiGridX = Math.Clamp(uiGridX, 0, GridSize - 1);
+        uiGridZ = Math.Clamp(uiGridZ, 0, GridSize - 1);
+
+        // Convert to game grid coordinates (inverted from UI)
+        int gameGridX = (GridSize - 1) - uiGridX;
+        int gameGridZ = (GridSize - 1) - uiGridZ;
+
+        // World coordinates - inverted to match game coordinate system
+        int worldX = (int)((8192.0 - position.X) * 4);
+        int worldZ = (int)((8192.0 - position.Y) * 4);
+
+        string modeText = _positionSelectionMode ? " [SELECT POSITION]" : "";
+        string dragText = _currentDragMode switch
+        {
+            DragMode.MovePoint => " [DRAGGING]",
+            DragMode.RotatePoint => " [ROTATING]",
+            _ => ""
+        };
+
+        CoordinateText.Text = $"Grid: ({gameGridX}, {gameGridZ})  World: ({worldX}, {worldZ})  Pixel: ({(int)position.X}, {(int)position.Y}){modeText}{dragText}";
+    }
+
+    private void UpdateCursor(Point position)
+    {
+        if (_positionSelectionMode)
+        {
+            Cursor = Cursors.Cross;
+            return;
+        }
+
+        if (ViewModel?.SelectedEventPoint != null && EventPointsLayer != null)
+        {
+            if (EventPointsLayer.IsOverRotationHandle(position))
+            {
+                Cursor = Cursors.Hand;
+                return;
+            }
+        }
+
+        var eventPoint = ViewModel?.FindEventPointAtPosition(position.X, position.Y, 12);
+        Cursor = eventPoint != null ? Cursors.SizeAll : Cursors.Arrow;
+    }
+
+    private void Surface_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (!_positionSelectionMode)
+        {
+            CoordinateText.Text = string.Empty;
+            Cursor = Cursors.Arrow;
+        }
+
         if (_hoveredEventPoint != null)
         {
             _hoveredEventPoint.IsHovered = false;
@@ -165,12 +479,65 @@ public partial class MapViewControl : UserControl
         }
     }
 
-    private void MapCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+    #endregion
+
+    #region Keyboard Event Handlers
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (ViewModel?.SelectedEventPoint == null) return;
+
+        var selected = ViewModel.SelectedEventPoint;
+        bool handled = false;
+
+        // Arrow keys for fine position adjustment (1 pixel = 4 world units)
+        // Since world coords are inverted, we need to invert the direction
+        switch (e.Key)
+        {
+            case Key.Left:
+                selected.Model.X += PixelMoveAmount; // Inverted: moving left in UI increases X
+                handled = true;
+                break;
+            case Key.Right:
+                selected.Model.X -= PixelMoveAmount; // Inverted: moving right in UI decreases X
+                handled = true;
+                break;
+            case Key.Up:
+                selected.Model.Z += PixelMoveAmount; // Inverted: moving up in UI increases Z
+                handled = true;
+                break;
+            case Key.Down:
+                selected.Model.Z -= PixelMoveAmount; // Inverted: moving down in UI decreases Z
+                handled = true;
+                break;
+        }
+
+        if (handled)
+        {
+            ViewModel.IsDirty = true;
+            EventPointsLayer?.Refresh();
+            e.Handled = true;
+        }
+    }
+
+    #endregion
+
+    #region Mouse Wheel (Zoom)
+
+    private void Surface_MouseWheel(object sender, MouseWheelEventArgs e)
     {
         if (ViewModel == null) return;
 
-        // Get mouse position before zoom
-        var mousePos = e.GetPosition(MapCanvas);
+        // Only zoom if Ctrl is held - otherwise let ScrollViewer handle normal scrolling
+        if (Keyboard.Modifiers != ModifierKeys.Control)
+        {
+            return; // Don't handle - let ScrollViewer scroll normally
+        }
+
+        // Get mouse position relative to the ScrollViewer viewport
+        var mouseInViewport = e.GetPosition(ScrollContainer);
 
         // Calculate zoom factor
         double zoomFactor = e.Delta > 0 ? 1.1 : 1 / 1.1;
@@ -183,16 +550,16 @@ public partial class MapViewControl : UserControl
         double oldScrollX = ScrollContainer.HorizontalOffset;
         double oldScrollY = ScrollContainer.VerticalOffset;
 
-        // Calculate the point we want to keep fixed (mouse position in content coordinates)
-        double contentX = (oldScrollX + mousePos.X) / oldZoom;
-        double contentY = (oldScrollY + mousePos.Y) / oldZoom;
+        // Calculate the point under the cursor in unscaled map coordinates
+        double mapX = (oldScrollX + mouseInViewport.X) / oldZoom;
+        double mapY = (oldScrollY + mouseInViewport.Y) / oldZoom;
 
         // Apply new zoom
         ViewModel.MapZoom = newZoom;
 
-        // Calculate new scroll position to keep the same point under the mouse
-        double newScrollX = contentX * newZoom - mousePos.X;
-        double newScrollY = contentY * newZoom - mousePos.Y;
+        // Calculate new scroll position to keep the same map point under the cursor
+        double newScrollX = mapX * newZoom - mouseInViewport.X;
+        double newScrollY = mapY * newZoom - mouseInViewport.Y;
 
         // Update scroll position after layout updates
         Dispatcher.BeginInvoke(new Action(() =>
@@ -204,10 +571,14 @@ public partial class MapViewControl : UserControl
         e.Handled = true;
     }
 
+    #endregion
+
+    #region Coordinate Conversion Helpers
+
     /// <summary>
-    /// Convert pixel coordinates to grid coordinates
+    /// Convert pixel coordinates to UI grid coordinates (top-left origin)
     /// </summary>
-    public static (int X, int Z) PixelToGrid(double pixelX, double pixelY)
+    public static (int X, int Z) PixelToUiGrid(double pixelX, double pixelY)
     {
         return (
             (int)(pixelX / TileSize),
@@ -216,13 +587,39 @@ public partial class MapViewControl : UserControl
     }
 
     /// <summary>
-    /// Convert grid coordinates to pixel coordinates (center of tile)
+    /// Convert pixel coordinates to game grid coordinates (bottom-right origin, inverted)
     /// </summary>
-    public static (double X, double Y) GridToPixel(int gridX, int gridZ)
+    public static (int X, int Z) PixelToGameGrid(double pixelX, double pixelY)
+    {
+        int uiX = (int)(pixelX / TileSize);
+        int uiZ = (int)(pixelY / TileSize);
+        return (
+            (GridSize - 1) - uiX,
+            (GridSize - 1) - uiZ
+        );
+    }
+
+    /// <summary>
+    /// Convert UI grid coordinates to pixel coordinates (center of tile)
+    /// </summary>
+    public static (double X, double Y) UiGridToPixel(int uiGridX, int uiGridZ)
     {
         return (
-            (gridX + 0.5) * TileSize,
-            (gridZ + 0.5) * TileSize
+            (uiGridX + 0.5) * TileSize,
+            (uiGridZ + 0.5) * TileSize
+        );
+    }
+
+    /// <summary>
+    /// Convert game grid coordinates (inverted) to pixel coordinates (center of tile)
+    /// </summary>
+    public static (double X, double Y) GameGridToPixel(int gameGridX, int gameGridZ)
+    {
+        int uiX = (GridSize - 1) - gameGridX;
+        int uiZ = (GridSize - 1) - gameGridZ;
+        return (
+            (uiX + 0.5) * TileSize,
+            (uiZ + 0.5) * TileSize
         );
     }
 
@@ -231,7 +628,6 @@ public partial class MapViewControl : UserControl
     /// </summary>
     public static (double X, double Y) WorldToPixel(int worldX, int worldZ)
     {
-        // World range: 0-32768, Pixel range: 0-8192
         return (
             worldX / 4.0,
             worldZ / 4.0
@@ -248,4 +644,6 @@ public partial class MapViewControl : UserControl
             (int)(pixelY * 4)
         );
     }
+
+    #endregion
 }

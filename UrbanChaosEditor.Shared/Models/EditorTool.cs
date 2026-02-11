@@ -1,5 +1,5 @@
 ﻿// /Models/EditorTool.cs
-namespace UrbanChaosMapEditor.Models
+namespace UrbanChaosEditor.Shared.Models
 {
     public enum EditorTool
     {

@@ -1,7 +1,7 @@
 ﻿// /Models/Objects/PrimFlags.cs
 using System;
 
-namespace UrbanChaosMapEditor.Models
+namespace UrbanChaosEditor.Shared.Models
 {
     public readonly struct PrimFlags
     {

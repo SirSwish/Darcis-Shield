@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Services.Textures;
 
 namespace UrbanChaosMapEditor.Views
 {

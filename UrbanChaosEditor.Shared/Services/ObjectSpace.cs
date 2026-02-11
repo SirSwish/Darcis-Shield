@@ -2,7 +2,7 @@
 // File: Models/ObjectSpace.cs
 using System;
 
-namespace UrbanChaosMapEditor.Models
+namespace UrbanChaosEditor.Shared.Models
 {
     public static class ObjectSpace
     {

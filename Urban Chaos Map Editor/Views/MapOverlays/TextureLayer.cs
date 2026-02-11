@@ -5,7 +5,7 @@ using System.Windows.Media;
 using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
 using UrbanChaosMapEditor.Services.DataServices;
-using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Services.Textures;
 
 namespace UrbanChaosMapEditor.Views.MapOverlays
 {

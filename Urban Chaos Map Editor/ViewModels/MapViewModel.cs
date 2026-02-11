@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
 using UrbanChaosMapEditor.Services.DataServices;
-using UrbanChaosMapEditor.Services.Textures; // brings in TextureGroup
+using UrbanChaosEditor.Shared.Services.Textures; // brings in TextureGroup
 using UrbanChaosMapEditor.Views.Dialogs.Buildings;
 using static UrbanChaosMapEditor.Models.PrimCatalog;
 using static UrbanChaosMapEditor.Services.TexturesAccessor;

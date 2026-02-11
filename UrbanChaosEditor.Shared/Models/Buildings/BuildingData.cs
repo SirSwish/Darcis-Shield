@@ -1,7 +1,7 @@
 ﻿// Models/BuildingData.cs
 using System;
 
-namespace UrbanChaosMapEditor.Models
+namespace UrbanChaosEditor.Shared.Models
 {
     // ----- DBuilding (what we actually use right now) -----
     // Stored 1-based facet range: [StartFacet .. EndFacet) for the building.

@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace UrbanChaosMapEditor.Services.Textures
+namespace UrbanChaosEditor.Shared.Services.Textures
 {
     public sealed class TextureLocator
     {

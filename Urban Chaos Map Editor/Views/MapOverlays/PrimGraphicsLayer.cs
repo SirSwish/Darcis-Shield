@@ -140,7 +140,8 @@ namespace UrbanChaosMapEditor.Views.MapOverlays
         private static PrimSprite? LoadPrimGraphic(byte primNumber)
         {
             string relativePath = $"Assets/Images/PrimGraphics/{primNumber:D3}.png";
-            var uri = new Uri($"pack://application:,,,/{relativePath}", UriKind.Absolute);
+            var uri = new Uri($"pack://application:,,,/UrbanChaosEditor.Shared;component/{relativePath}", UriKind.Absolute);
+
 
             try
             {

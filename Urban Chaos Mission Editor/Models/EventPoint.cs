@@ -118,24 +118,27 @@ public class EventPoint
     // Computed properties
 
     /// <summary>
-    /// X coordinate in map grid units (0-127)
+    /// X coordinate in map grid units (0-127) - inverted for display
+    /// Game grid (0,0) is at bottom-right, display grid (0,0) is at top-left
     /// </summary>
-    public int MapX => X >> 8;
+    public int MapX => 127 - (X >> 8);
 
     /// <summary>
-    /// Z coordinate in map grid units (0-127)
+    /// Z coordinate in map grid units (0-127) - inverted for display
     /// </summary>
-    public int MapZ => Z >> 8;
+    public int MapZ => 127 - (Z >> 8);
 
     /// <summary>
     /// X coordinate in pixels on an 8192x8192 map view
+    /// Inverted to match engine rendering (game origin is bottom-right)
     /// </summary>
-    public double PixelX => (X / 32768.0) * 8192.0;
+    public double PixelX => 8192.0 - (X / 4.0);
 
     /// <summary>
-    /// Z coordinate in pixels on an 8192x8192 map view (Y-axis in 2D)
+    /// Z coordinate in pixels on an 8192x8192 map view
+    /// Inverted to match engine rendering (game origin is bottom-right)
     /// </summary>
-    public double PixelZ => (Z / 32768.0) * 8192.0;
+    public double PixelZ => 8192.0 - (Z / 4.0);
 
     /// <summary>
     /// Direction in degrees (0-360)

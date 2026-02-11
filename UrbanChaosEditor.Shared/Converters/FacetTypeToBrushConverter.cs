@@ -19,7 +19,7 @@ namespace UrbanChaosEditor.Shared.Converters
             {
                 byte b => b,
                 int i => (byte)i,
-                UrbanChaosMapEditor.Models.FacetType ft => (byte)ft,
+                UrbanChaosEditor.Shared.Models.FacetType ft => (byte)ft,
                 _ => (byte)0
             };
 

@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows.Media;
 
-namespace UrbanChaosMissionEditor.Constants
+namespace UrbanChaosMissionEditor.Constants;
+
+/// <summary>
+/// Waypoint color definitions (from WayWind.cpp button_colours)
+/// </summary>
+public static class WaypointColors
 {
     /// <summary>
-    /// Waypoint color definitions (from WayWind.cpp button_colours)
+    /// RGB color values for the 15 waypoint colors
     /// </summary>
-    public static class WaypointColors
+    public static readonly (byte R, byte G, byte B, string Name)[] Colors =
     {
-        /// <summary>
-        /// RGB color values for the 15 waypoint colors
-        /// </summary>
-        public static readonly (byte R, byte G, byte B, string Name)[] Colors =
-        {
         (0, 0, 0, "Black"),
         (255, 255, 255, "White"),
         (255, 0, 0, "Red"),
@@ -34,40 +30,45 @@ namespace UrbanChaosMissionEditor.Constants
         (168, 178, 54, "Rat's Piss")
     };
 
-        /// <summary>
-        /// Get Color for a given color index
-        /// </summary>
-        public static Color GetColor(int index)
-        {
-            if (index < 0 || index >= Colors.Length)
-                return System.Windows.Media.Colors.Gray;
+    /// <summary>
+    /// Array of color names for ComboBox binding
+    /// </summary>
+    public static readonly string[] ColorNames = Colors.Select(c => c.Name).ToArray();
 
-            var c = Colors[index];
-            return Color.FromRgb(c.R, c.G, c.B);
-        }
+    /// <summary>
+    /// Get Color for a given color index
+    /// </summary>
+    public static Color GetColor(int index)
+    {
+        if (index < 0 || index >= Colors.Length)
+            return System.Windows.Media.Colors.Gray;
 
-        /// <summary>
-        /// Get SolidColorBrush for a given color index
-        /// </summary>
-        public static SolidColorBrush GetBrush(int index)
-        {
-            return new SolidColorBrush(GetColor(index));
-        }
+        var c = Colors[index];
+        return Color.FromRgb(c.R, c.G, c.B);
+    }
 
-        /// <summary>
-        /// Get color name for a given color index
-        /// </summary>
-        public static string GetColorName(int index)
-        {
-            if (index < 0 || index >= Colors.Length)
-                return "Unknown";
-            return Colors[index].Name;
-        }
+    /// <summary>
+    /// Get SolidColorBrush for a given color index
+    /// </summary>
+    public static SolidColorBrush GetBrush(int index)
+    {
+        return new SolidColorBrush(GetColor(index));
+    }
 
-        /// <summary>
-        /// Category colors for filter pills
-        /// </summary>
-        public static readonly Dictionary<WaypointCategory, Color> CategoryColors = new()
+    /// <summary>
+    /// Get color name for a given color index
+    /// </summary>
+    public static string GetColorName(int index)
+    {
+        if (index < 0 || index >= Colors.Length)
+            return "Unknown";
+        return Colors[index].Name;
+    }
+
+    /// <summary>
+    /// Category colors for filter pills
+    /// </summary>
+    public static readonly Dictionary<WaypointCategory, Color> CategoryColors = new()
     {
         { WaypointCategory.Player, Color.FromRgb(65, 105, 225) },      // Royal Blue
         { WaypointCategory.Enemies, Color.FromRgb(220, 20, 60) },      // Crimson
@@ -79,20 +80,19 @@ namespace UrbanChaosMissionEditor.Constants
         { WaypointCategory.TextMessages, Color.FromRgb(0, 191, 255) }  // Deep Sky Blue
     };
 
-        /// <summary>
-        /// Get category color
-        /// </summary>
-        public static Color GetCategoryColor(WaypointCategory category)
-        {
-            return CategoryColors.TryGetValue(category, out var color) ? color : System.Windows.Media.Colors.Gray;
-        }
+    /// <summary>
+    /// Get category color
+    /// </summary>
+    public static Color GetCategoryColor(WaypointCategory category)
+    {
+        return CategoryColors.TryGetValue(category, out var color) ? color : System.Windows.Media.Colors.Gray;
+    }
 
-        /// <summary>
-        /// Get category brush
-        /// </summary>
-        public static SolidColorBrush GetCategoryBrush(WaypointCategory category)
-        {
-            return new SolidColorBrush(GetCategoryColor(category));
-        }
+    /// <summary>
+    /// Get category brush
+    /// </summary>
+    public static SolidColorBrush GetCategoryBrush(WaypointCategory category)
+    {
+        return new SolidColorBrush(GetCategoryColor(category));
     }
 }

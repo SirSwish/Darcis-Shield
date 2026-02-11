@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Resources;
@@ -11,7 +12,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 
 
-namespace UrbanChaosMapEditor.Services.Textures
+namespace UrbanChaosEditor.Shared.Services.Textures
 {
     public sealed class TextureCacheService
     {
@@ -28,30 +29,98 @@ namespace UrbanChaosMapEditor.Services.Textures
 
         private TextureCacheService() { }
 
-        // NEW: which set to prefer when callers don’t include it in the key
+        // NEW: which set to prefer when callers don't include it in the key
         public string ActiveSet { get; set; } = "release"; // "release" or "beta"
 
         public async Task PreloadAllAsync(int decodeSize = 64)
         {
-            var asm = Application.ResourceAssembly ?? typeof(TextureCacheService).Assembly;
-            string? gResName = asm.GetManifestResourceNames()
+            // CRITICAL: Use the Shared assembly where textures are embedded, NOT Application.ResourceAssembly
+            var asm = typeof(TextureCacheService).Assembly;
+
+            Debug.WriteLine($"[TextureCacheService] Loading from assembly: {asm.FullName}");
+            Debug.WriteLine($"[TextureCacheService] Assembly location: {asm.Location}");
+
+            var manifestNames = asm.GetManifestResourceNames();
+            Debug.WriteLine($"[TextureCacheService] Manifest resource names ({manifestNames.Length}):");
+            foreach (var name in manifestNames)
+            {
+                Debug.WriteLine($"  - {name}");
+            }
+
+            string? gResName = manifestNames
                                   .FirstOrDefault(n => n.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase));
-            if (gResName is null) { Progress?.Invoke(this, new(0, 0)); Completed?.Invoke(this, EventArgs.Empty); return; }
+
+            if (gResName is null)
+            {
+                Debug.WriteLine("[TextureCacheService] ERROR: No .g.resources found!");
+                Progress?.Invoke(this, new(0, 0));
+                Completed?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            Debug.WriteLine($"[TextureCacheService] Using .g.resources: {gResName}");
 
             using var resStream = asm.GetManifestResourceStream(gResName);
-            if (resStream == null) { Progress?.Invoke(this, new(0, 0)); Completed?.Invoke(this, EventArgs.Empty); return; }
+            if (resStream == null)
+            {
+                Debug.WriteLine("[TextureCacheService] ERROR: Could not open resource stream!");
+                Progress?.Invoke(this, new(0, 0));
+                Completed?.Invoke(this, EventArgs.Empty);
+                return;
+            }
 
             var allResKeys = new List<string>();
             using (var reader = new ResourceReader(resStream))
             {
+                Debug.WriteLine("[TextureCacheService] All resources in .g.resources:");
+                int count = 0;
                 foreach (DictionaryEntry entry in reader)
                 {
-                    if (entry.Key is string k &&
-                        k.StartsWith("assets/textures/", StringComparison.OrdinalIgnoreCase) &&
-                        k.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                    if (entry.Key is string k)
                     {
-                        allResKeys.Add(k);
+                        // Log first 50 resources to see the pattern
+                        if (count < 50)
+                        {
+                            Debug.WriteLine($"  [{count}] {k}");
+                        }
+                        count++;
+
+                        // Check for textures - try multiple possible paths
+                        if ((k.Contains("textures", StringComparison.OrdinalIgnoreCase) ||
+                             k.Contains("world", StringComparison.OrdinalIgnoreCase) ||
+                             k.Contains("shared", StringComparison.OrdinalIgnoreCase)) &&
+                            k.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                        {
+                            allResKeys.Add(k);
+                        }
                     }
+                }
+                Debug.WriteLine($"[TextureCacheService] Total resources: {count}");
+            }
+
+            Debug.WriteLine($"[TextureCacheService] Found {allResKeys.Count} texture resources");
+            if (allResKeys.Count > 0)
+            {
+                Debug.WriteLine("[TextureCacheService] Sample texture paths:");
+                foreach (var k in allResKeys.Take(10))
+                {
+                    Debug.WriteLine($"  - {k}");
+                }
+            }
+
+            // Determine the base path pattern from the first texture
+            string basePath = "";
+            if (allResKeys.Count > 0)
+            {
+                var sample = allResKeys[0];
+                // Find where "release" or "beta" starts
+                int releaseIdx = sample.IndexOf("release", StringComparison.OrdinalIgnoreCase);
+                int betaIdx = sample.IndexOf("beta", StringComparison.OrdinalIgnoreCase);
+                int setIdx = releaseIdx >= 0 ? releaseIdx : betaIdx;
+                if (setIdx > 0)
+                {
+                    basePath = sample.Substring(0, setIdx);
+                    Debug.WriteLine($"[TextureCacheService] Detected base path: '{basePath}'");
                 }
             }
 
@@ -65,8 +134,11 @@ namespace UrbanChaosMapEditor.Services.Textures
                 {
                     try
                     {
-                        // resourceKey like: assets/textures/release/world20/tex018hi.png
-                        var relPath = resourceKey.Substring("assets/textures/".Length);
+                        // Strip the base path to get: release/world20/tex018hi.png
+                        var relPath = string.IsNullOrEmpty(basePath)
+                            ? resourceKey
+                            : resourceKey.Substring(basePath.Length);
+
                         var parts = relPath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length < 1) { done++; RaiseProgress(done, total); continue; }
 
@@ -92,7 +164,8 @@ namespace UrbanChaosMapEditor.Services.Textures
                         // final key disambiguated by set
                         var finalKey = $"{set}_{relativeKey}";  // e.g., release_world20_018
 
-                        var uri = new Uri("pack://application:,,,/" + resourceKey.Replace('\\', '/'), UriKind.Absolute);
+                        // Build the pack URI using the SHARED assembly name
+                        var uri = new Uri($"pack://application:,,,/UrbanChaosEditor.Shared;component/{resourceKey.Replace('\\', '/')}", UriKind.Absolute);
 
                         var bmp = new BitmapImage();
                         bmp.BeginInit();
@@ -104,10 +177,26 @@ namespace UrbanChaosMapEditor.Services.Textures
 
                         lock (_sync) { _byKey[finalKey] = bmp; }
                     }
-                    catch { /* skip bad */ }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[TextureCacheService] Error loading {resourceKey}: {ex.Message}");
+                    }
                     finally { done++; RaiseProgress(done, total); }
                 }
             });
+
+            Debug.WriteLine($"[TextureCacheService] Preload complete. Loaded {Count} textures.");
+            if (Count > 0)
+            {
+                Debug.WriteLine("[TextureCacheService] Sample keys in cache:");
+                lock (_sync)
+                {
+                    foreach (var k in _byKey.Keys.Take(10))
+                    {
+                        Debug.WriteLine($"  - {k}");
+                    }
+                }
+            }
 
             Completed?.Invoke(this, EventArgs.Empty);
         }

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace UrbanChaosMissionEditor.Constants;
 
-namespace UrbanChaosMissionEditor.Constants
+/// <summary>
+/// String arrays for display names (translated from EdStrings.cpp)
+/// </summary>
+public static class EditorStrings
 {
-    public static class EditorStrings
+    /// <summary>
+    /// Waypoint type display names (58 types)
+    /// </summary>
+    public static readonly string[] WaypointTypeNames =
     {
-        /// <summary>
-        /// Waypoint type display names (58 types)
-        /// </summary>
-        public static readonly string[] WaypointTypeNames =
-        {
         "None",                 // 0
         "Simple Waypoint",      // 1
         "Create Player",        // 2
@@ -73,11 +70,11 @@ namespace UrbanChaosMissionEditor.Constants
         "Shake Camera"          // 57
     };
 
-        /// <summary>
-        /// Trigger type display names (45 types)
-        /// </summary>
-        public static readonly string[] TriggerTypeNames =
-        {
+    /// <summary>
+    /// Trigger type display names (45 types)
+    /// </summary>
+    public static readonly string[] TriggerTypeNames =
+    {
         "None",                 // 0
         "Dependency",           // 1
         "Radius",               // 2
@@ -125,11 +122,11 @@ namespace UrbanChaosMissionEditor.Constants
         "Move Radius Dir"       // 44
     };
 
-        /// <summary>
-        /// On-trigger behavior names
-        /// </summary>
-        public static readonly string[] OnTriggerNames =
-        {
+    /// <summary>
+    /// On-trigger behavior names
+    /// </summary>
+    public static readonly string[] OnTriggerNames =
+    {
         "None",
         "Active",
         "Active While",
@@ -137,98 +134,135 @@ namespace UrbanChaosMissionEditor.Constants
         "Active Die"
     };
 
-        /// <summary>
-        /// Player type names
-        /// </summary>
-        public static readonly string[] PlayerTypeNames =
-        {
+    /// <summary>
+    /// Player type names
+    /// </summary>
+    public static readonly string[] PlayerTypeNames =
+    {
         "Darci",
         "Roper",
         "Cop",
         "Gang Member"
     };
 
-        /// <summary>
-        /// Enemy type names (23 types)
-        /// </summary>
-        public static readonly string[] EnemyTypeNames =
-        {
-        "Thug",
-        "Thug (Knife)",
-        "Thug (Baseball Bat)",
-        "Thug (Pistol)",
-        "Gang Member",
-        "Gang Member (Knife)",
-        "Gang Member (Uzi)",
-        "Gang Member (Shotgun)",
-        "Cop",
-        "Cop (Armed)",
-        "SWAT",
-        "Army",
-        "MIB",
-        "Roper",
-        "Midas Boss",
-        "Psycho",
-        "Dog",
-        "Bouncer",
-        "Mechanic",
-        "Sirene",
-        "Balrog Boss",
-        "Bum",
-        "Civilian"
+    /// <summary>
+    /// Enemy type names (23 types) - from wenemy_strings in EdStrings.cpp
+    /// </summary>
+    public static readonly string[] EnemyTypeNames =
+    {
+        "Civilian",                    // ET_CIV = 1
+        "Civilian with balloon",       // ET_CIV_BALLOON = 2
+        "Prostitute",                  // ET_SLAG = 3
+        "Prostitute fat ugly",         // ET_UGLY_FAT_SLAG = 4
+        "Workman",                     // ET_WORKMAN = 5
+        "Gang rasta",                  // ET_GANG_RASTA = 6
+        "Gang red",                    // ET_GANG_RED = 7
+        "Gang grey",                   // ET_GANG_GREY = 8
+        "Gang rasta with pistol",      // ET_GANG_RASTA_PISTOL = 9
+        "Gang red with shotgun",       // ET_GANG_RED_SHOTGUN = 10
+        "Gang grey with AK47",         // ET_GANG_GREY_AK47 = 11
+        "Cop",                         // ET_COP = 12
+        "Cop with pistol",             // ET_COP_PISTOL = 13
+        "Cop with shotgun",            // ET_COP_SHOTGUN = 14
+        "Cop with AK47",               // ET_COP_AK47 = 15
+        "Hostage",                     // ET_HOSTAGE = 16
+        "Workman with grenade",        // ET_WORKMAN_GRENADE = 17
+        "Tramp",                       // ET_TRAMP = 18
+        "M.I.B 1",                     // ET_MIB1 = 19
+        "M.I.B 2",                     // ET_MIB2 = 20
+        "M.I.B 3",                     // ET_MIB3 = 21
+        "Darci",                       // ET_DARCI = 22
+        "Roper"                        // ET_ROPER = 23
     };
 
-        /// <summary>
-        /// Enemy AI type names (22 types)
-        /// </summary>
-        public static readonly string[] EnemyAINames =
-        {
-        "None",
-        "Idle",
-        "Walk",
-        "Run",
-        "Jog",
-        "Sprint",
-        "Attack",
-        "Defend",
-        "Flee",
-        "Follow",
-        "Guard",
-        "Patrol",
-        "Search",
-        "Wander",
-        "Cover",
-        "Sniper",
-        "Ambush",
-        "Flank",
-        "Charge",
-        "Retreat",
-        "Support",
-        "Aggressive"
-    };
-
-        /// <summary>
-        /// Enemy movement type names
-        /// </summary>
-        public static readonly string[] EnemyMoveNames =
-        {
-        "Stand",
-        "Patrol Ordered",
-        "Patrol Random",
-        "Wander",
-        "Follow",
-        "Follow On See",
-        "Follow On See 2",
+    /// <summary>
+    /// Enemy AI type names - from wenemy_ai_strings in EdStrings.cpp
+    /// </summary>
+    public static readonly string[] EnemyAINames =
+    {
+        "Nothing",
+        "Civilian",
+        "Guard an area",
         "Assassin",
+        "Boss/Captain",
+        "Cop",
+        "Violent youth",
+        "Guard a door",
         "Bodyguard",
-        "Genocide"
+        "Driver",
+        "Bomb-disposer",
+        "Biker",
+        "Fight-test dummy",
+        "Bully",
+        "Cop driver",
+        "Suicide",
+        "Flee player",
+        "Group Genocide",
+        "M.I.B.",
+        "Summoner",
+        "Hypochondriac",
+        "Shoot dead assassin"
     };
 
-        /// <summary>
-        /// Vehicle type names (11 types)
-        /// </summary>
-        public static readonly string[] VehicleTypeNames =
-        {
+    /// <summary>
+    /// Enemy movement type names - from wenemy_move_strings in EdStrings.cpp
+    /// </summary>
+    public static readonly string[] EnemyMoveNames =
+    {
+        "Stand Still",
+        "Patrol Waypts (in order)",
+        "Patrol Waypts (randomly)",
+        "Wander",
+        "Follow",
+        "Warm hands",
+        "Follow on see",
+        "Dance",
+        "Hands up",
+        "Tied up"
+    };
+
+    /// <summary>
+    /// Enemy ability level names - from wenemy_ability_strings in EdStrings.cpp
+    /// </summary>
+    public static readonly string[] EnemyAbilityNames =
+    {
+        "Default",
+        "1 (weak)",
+        "2", "3", "4", "5", "6", "7",
+        "8 (average)",
+        "9", "10", "11", "12", "13", "14",
+        "15 (badass)"
+    };
+
+    /// <summary>
+    /// Enemy flag names - from wenemy_flag_strings in EdStrings.cpp
+    /// Bit flags in Data[4]
+    /// </summary>
+    public static readonly string[] EnemyFlagNames =
+    {
+        "Lazy",                // bit 0
+        "Diligent",            // bit 1
+        "Gang",                // bit 2
+        "Fight Back",          // bit 3
+        "Just kill player",    // bit 4
+        "Robotic",             // bit 5
+        "Restricted Movement", // bit 6
+        "Only player kills",   // bit 7
+        "Blue Zone",           // bit 8
+        "Cyan Zone",           // bit 9
+        "Yellow Zone",         // bit 10
+        "Magenta Zone",        // bit 11
+        "Invulnerable",        // bit 12
+        "Guilty",              // bit 13
+        "Fake wandering",      // bit 14
+        "Can be carried"       // bit 15
+    };
+
+    /// <summary>
+    /// Vehicle type names (11 types)
+    /// </summary>
+    public static readonly string[] VehicleTypeNames =
+    {
         "Car",
         "Van",
         "Taxi",
@@ -242,22 +276,22 @@ namespace UrbanChaosMissionEditor.Constants
         "Hovercraft"
     };
 
-        /// <summary>
-        /// Vehicle behavior names
-        /// </summary>
-        public static readonly string[] VehicleBehaviorNames =
-        {
+    /// <summary>
+    /// Vehicle behavior names
+    /// </summary>
+    public static readonly string[] VehicleBehaviorNames =
+    {
         "Player Drives",
         "Patrol",
         "Guard",
         "Track"
     };
 
-        /// <summary>
-        /// Vehicle key type names
-        /// </summary>
-        public static readonly string[] VehicleKeyNames =
-        {
+    /// <summary>
+    /// Vehicle key type names
+    /// </summary>
+    public static readonly string[] VehicleKeyNames =
+    {
         "Unlocked",
         "Red Key",
         "Blue Key",
@@ -267,11 +301,11 @@ namespace UrbanChaosMissionEditor.Constants
         "Locked"
     };
 
-        /// <summary>
-        /// Item type names (25 types)
-        /// </summary>
-        public static readonly string[] ItemTypeNames =
-        {
+    /// <summary>
+    /// Item type names (25 types)
+    /// </summary>
+    public static readonly string[] ItemTypeNames =
+    {
         "Key",
         "Pistol",
         "Health",
@@ -299,22 +333,22 @@ namespace UrbanChaosMissionEditor.Constants
         "Fire Extinguisher"
     };
 
-        /// <summary>
-        /// Creature type names
-        /// </summary>
-        public static readonly string[] CreatureTypeNames =
-        {
+    /// <summary>
+    /// Creature type names
+    /// </summary>
+    public static readonly string[] CreatureTypeNames =
+    {
         "Bat",
         "Gargoyle",
         "Balrog",
         "Bane"
     };
 
-        /// <summary>
-        /// Barrel type names
-        /// </summary>
-        public static readonly string[] BarrelTypeNames =
-        {
+    /// <summary>
+    /// Barrel type names
+    /// </summary>
+    public static readonly string[] BarrelTypeNames =
+    {
         "Barrel",
         "Cone",
         "Bin",
@@ -324,50 +358,50 @@ namespace UrbanChaosMissionEditor.Constants
         "Burning Drums"
     };
 
-        /// <summary>
-        /// Bomb type names
-        /// </summary>
-        public static readonly string[] BombTypeNames =
-        {
+    /// <summary>
+    /// Bomb type names
+    /// </summary>
+    public static readonly string[] BombTypeNames =
+    {
         "Dynamite Stick",
         "Egg Timer",
         "Hi-Tech LED"
     };
 
-        /// <summary>
-        /// Trap type names
-        /// </summary>
-        public static readonly string[] TrapTypeNames =
-        {
+    /// <summary>
+    /// Trap type names
+    /// </summary>
+    public static readonly string[] TrapTypeNames =
+    {
         "Steam Jet"
     };
 
-        /// <summary>
-        /// Trap axis names
-        /// </summary>
-        public static readonly string[] TrapAxisNames =
-        {
+    /// <summary>
+    /// Trap axis names
+    /// </summary>
+    public static readonly string[] TrapAxisNames =
+    {
         "Forward",
         "Up",
         "Down"
     };
 
-        /// <summary>
-        /// Spot FX type names
-        /// </summary>
-        public static readonly string[] SpotFXNames =
-        {
+    /// <summary>
+    /// Spot FX type names
+    /// </summary>
+    public static readonly string[] SpotFXNames =
+    {
         "Water Fountain",
         "Water Drip",
         "Smoke",
         "Smoke Heavy"
     };
 
-        /// <summary>
-        /// Warehouse FX type names
-        /// </summary>
-        public static readonly string[] WareFXNames =
-        {
+    /// <summary>
+    /// Warehouse FX type names
+    /// </summary>
+    public static readonly string[] WareFXNames =
+    {
         "Silence",
         "Police HQ",
         "Restaurant",
@@ -375,43 +409,43 @@ namespace UrbanChaosMissionEditor.Constants
         "Club Music"
     };
 
-        /// <summary>
-        /// Sign type names
-        /// </summary>
-        public static readonly string[] SignTypeNames =
-        {
+    /// <summary>
+    /// Sign type names
+    /// </summary>
+    public static readonly string[] SignTypeNames =
+    {
         "U-Turn",
         "Right Turn",
         "Ahead",
         "Stop"
     };
 
-        /// <summary>
-        /// Activate prim type names
-        /// </summary>
-        public static readonly string[] ActivatePrimNames =
-        {
+    /// <summary>
+    /// Activate prim type names
+    /// </summary>
+    public static readonly string[] ActivatePrimNames =
+    {
         "Door",
         "Electric Fence",
         "Security Camera",
         "Anim Prim"
     };
 
-        /// <summary>
-        /// Camera move type names
-        /// </summary>
-        public static readonly string[] CameraMoveNames =
-        {
+    /// <summary>
+    /// Camera move type names
+    /// </summary>
+    public static readonly string[] CameraMoveNames =
+    {
         "Normal",
         "Smooth",
         "Wobbly"
     };
 
-        /// <summary>
-        /// Camera type names
-        /// </summary>
-        public static readonly string[] CameraTypeNames =
-        {
+    /// <summary>
+    /// Camera type names
+    /// </summary>
+    public static readonly string[] CameraTypeNames =
+    {
         "Normal",
         "Security Cam",
         "Camcorder",
@@ -419,52 +453,52 @@ namespace UrbanChaosMissionEditor.Constants
         "Targetting"
     };
 
-        /// <summary>
-        /// Target type names
-        /// </summary>
-        public static readonly string[] TargetTypeNames =
-        {
+    /// <summary>
+    /// Target type names
+    /// </summary>
+    public static readonly string[] TargetTypeNames =
+    {
         "Normal",
         "Attached",
         "Nearest Living"
     };
 
-        /// <summary>
-        /// Dynamic light type names
-        /// </summary>
-        public static readonly string[] DynamicLightNames =
-        {
+    /// <summary>
+    /// Dynamic light type names
+    /// </summary>
+    public static readonly string[] DynamicLightNames =
+    {
         "Flashing On/Off",
         "Two Tone",
         "Disco",
         "Flame"
     };
 
-        /// <summary>
-        /// Message speaker type names
-        /// </summary>
-        public static readonly string[] MessageSpeakerNames =
-        {
+    /// <summary>
+    /// Message speaker type names
+    /// </summary>
+    public static readonly string[] MessageSpeakerNames =
+    {
         "Radio",
         "Street Name",
         "Tutorial"
     };
 
-        /// <summary>
-        /// Bonus point type names
-        /// </summary>
-        public static readonly string[] BonusPointTypeNames =
-        {
+    /// <summary>
+    /// Bonus point type names
+    /// </summary>
+    public static readonly string[] BonusPointTypeNames =
+    {
         "Primary",
         "Secondary",
         "Bonus"
     };
 
-        /// <summary>
-        /// Waypoint color names
-        /// </summary>
-        public static readonly string[] ColorNames =
-        {
+    /// <summary>
+    /// Waypoint color names
+    /// </summary>
+    public static readonly string[] ColorNames =
+    {
         "Black",
         "White",
         "Red",
@@ -482,35 +516,34 @@ namespace UrbanChaosMissionEditor.Constants
         "Rat's Piss"
     };
 
-        /// <summary>
-        /// Group letter names (A-Z)
-        /// </summary>
-        public static string GetGroupName(byte group)
-        {
-            if (group > 25) return "?";
-            return ((char)('A' + group)).ToString();
-        }
+    /// <summary>
+    /// Group letter names (A-Z)
+    /// </summary>
+    public static string GetGroupName(byte group)
+    {
+        if (group > 25) return "?";
+        return ((char)('A' + group)).ToString();
+    }
 
-        /// <summary>
-        /// Get waypoint type name safely
-        /// </summary>
-        public static string GetWaypointTypeName(WaypointType type)
-        {
-            int index = (int)type;
-            if (index >= 0 && index < WaypointTypeNames.Length)
-                return WaypointTypeNames[index];
-            return $"Unknown ({index})";
-        }
+    /// <summary>
+    /// Get waypoint type name safely
+    /// </summary>
+    public static string GetWaypointTypeName(WaypointType type)
+    {
+        int index = (int)type;
+        if (index >= 0 && index < WaypointTypeNames.Length)
+            return WaypointTypeNames[index];
+        return $"Unknown ({index})";
+    }
 
-        /// <summary>
-        /// Get trigger type name safely
-        /// </summary>
-        public static string GetTriggerTypeName(TriggerType type)
-        {
-            int index = (int)type;
-            if (index >= 0 && index < TriggerTypeNames.Length)
-                return TriggerTypeNames[index];
-            return $"Unknown ({index})";
-        }
+    /// <summary>
+    /// Get trigger type name safely
+    /// </summary>
+    public static string GetTriggerTypeName(TriggerType type)
+    {
+        int index = (int)type;
+        if (index >= 0 && index < TriggerTypeNames.Length)
+            return TriggerTypeNames[index];
+        return $"Unknown ({index})";
     }
 }

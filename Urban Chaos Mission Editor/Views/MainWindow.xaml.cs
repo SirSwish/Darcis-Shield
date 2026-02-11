@@ -1,50 +1,84 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UrbanChaosMissionEditor.ViewModels;
 using UrbanChaosMissionEditor.Views.Dialogs;
 
-namespace UrbanChaosMissionEditor.Views
+namespace UrbanChaosMissionEditor.Views;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-            DataContext = new MainViewModel();
+        InitializeComponent();
+        DataContext = new MainViewModel();
 
-            // Handle command line arguments
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length > 1 && System.IO.File.Exists(args[1]))
-            {
-                ((MainViewModel)DataContext).LoadMission(args[1]);
-            }
+        // Handle command line arguments
+        var args = Environment.GetCommandLineArgs();
+        if (args.Length > 1 && System.IO.File.Exists(args[1]))
+        {
+            ((MainViewModel)DataContext).LoadMission(args[1]);
         }
 
-        private void CategoryPill_Click(object sender, MouseButtonEventArgs e)
+        // Hook preview mouse events for position selection mode
+        PreviewMouseLeftButtonDown += MainWindow_PreviewMouseLeftButtonDown;
+        PreviewMouseMove += MainWindow_PreviewMouseMove;
+    }
+
+    /// <summary>
+    /// Exposes the MapViewControl for position selection from dialogs
+    /// </summary>
+    public MapViewControl MapViewControl => MapView;
+
+    private void MainWindow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (MapView.IsInPositionSelectionMode)
         {
-            if (sender is FrameworkElement element &&
-                element.DataContext is CategoryFilterViewModel filter)
+            System.Diagnostics.Debug.WriteLine("[MainWindow] PreviewMouseLeftButtonDown in position selection mode");
+
+            // Get position relative to the MapView's Surface
+            var position = e.GetPosition(MapView);
+            System.Diagnostics.Debug.WriteLine($"[MainWindow] Position relative to MapView: ({position.X}, {position.Y})");
+
+            // Check if click is within the MapView bounds
+            if (position.X >= 0 && position.Y >= 0 &&
+                position.X <= MapView.ActualWidth && position.Y <= MapView.ActualHeight)
             {
-                filter.Toggle();
+                // Forward the click handling to MapView
+                MapView.HandlePositionSelectionClick(e);
+                e.Handled = true;
             }
         }
+    }
 
-        private void EventPointsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    private void MainWindow_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (MapView.IsInPositionSelectionMode)
         {
-            if (DataContext is MainViewModel vm && vm.SelectedEventPoint != null)
+            // Forward mouse move to MapView for coordinate display
+            MapView.HandlePositionSelectionMove(e);
+        }
+    }
+
+    private void CategoryPill_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement element &&
+            element.DataContext is CategoryFilterViewModel filter)
+        {
+            filter.Toggle();
+        }
+    }
+
+    private void EventPointsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && vm.SelectedEventPoint != null)
+        {
+            // Open editor dialog
+            if (vm.EditEventPointCommand.CanExecute(null))
             {
-                EventPointDetailDialog.ShowDialog(vm.SelectedEventPoint, this);
+                vm.EditEventPointCommand.Execute(null);
             }
         }
     }

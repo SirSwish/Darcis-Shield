@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace UrbanChaosMapEditor.Models.Styles
+namespace UrbanChaosEditor.Shared.Models.Styles
 {
     public class TMAFile
     {

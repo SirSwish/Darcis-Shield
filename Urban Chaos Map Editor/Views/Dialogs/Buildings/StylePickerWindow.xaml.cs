@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UrbanChaosMapEditor.Models.Styles;
 using UrbanChaosMapEditor.Services.DataServices;
-using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Services.Textures;
 
 namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
 {

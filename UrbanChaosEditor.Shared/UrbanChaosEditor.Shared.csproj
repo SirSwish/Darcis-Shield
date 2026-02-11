@@ -7,7 +7,15 @@
 		<AssemblyName>UrbanChaosEditor.Shared</AssemblyName>
 		<RootNamespace>UrbanChaosEditor.Shared</RootNamespace>
 	</PropertyGroup>
+
+	<!-- Include all assets as WPF Resources (accessible via pack:// URIs) -->
 	<ItemGroup>
-	  <Folder Include="Views\" />
+		<Resource Include="Assets\**\*.*" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Views\**" />
+	  <EmbeddedResource Remove="Views\**" />
+	  <None Remove="Views\**" />
+	  <Page Remove="Views\**" />
 	</ItemGroup>
 </Project>
