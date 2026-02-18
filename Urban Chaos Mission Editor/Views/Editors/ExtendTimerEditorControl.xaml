@@ -1,0 +1,69 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.ExtendTimerEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,10,0">
+            <TextBlock Text="Extend Timer Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Target Timer" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Target EP Index:"/>
+                <TextBox Grid.Column="1"
+                         Text="{Binding ExtendTimerTargetEP, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Data[0] - Must reference an EventPoint whose TriggeredBy is Visible Countdown"/>
+            </Grid>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+            <TextBlock Text="Extension Amount" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Amount:"/>
+                <TextBox Grid.Column="1"
+                         Text="{Binding ExtendTimerAmount, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Data[1] - Must be non-zero (units defined by the game logic)"/>
+            </Grid>
+
+            <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+                <Run Text="This EventPoint extends a Visible Countdown timer."/>
+                <LineBreak/>
+                <Run Text="Data[0] must reference an EventPoint whose TriggeredBy is Visible Countdown."/>
+                <LineBreak/>
+                <Run Text="Data[1] must be non-zero (extension amount)."/>
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

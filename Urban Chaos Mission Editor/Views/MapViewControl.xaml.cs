@@ -34,6 +34,11 @@ public partial class MapViewControl : UserControl
     private bool _positionSelectionMode;
     private Action<int, int>? _positionSelectedCallback;
 
+    // Track last known mouse world position for AddEventPoint
+    private int _lastMouseWorldX = 16384; // Center of map
+    private int _lastMouseWorldZ = 16384;
+    private bool _hasMousePosition;
+
     public MapViewControl()
     {
         InitializeComponent();
@@ -194,6 +199,62 @@ public partial class MapViewControl : UserControl
     }
 
     public bool IsInPositionSelectionMode => _positionSelectionMode;
+
+    /// <summary>
+    /// Get the current world position for placing new EventPoints.
+    /// Returns the last known mouse position if available, otherwise calculates
+    /// the center of the visible viewport, or falls back to map center.
+    /// </summary>
+    /// <returns>Tuple of (WorldX, WorldZ) coordinates</returns>
+    public (int WorldX, int WorldZ) GetCurrentWorldPosition()
+    {
+        // If we have a recent mouse position, use that
+        if (_hasMousePosition)
+        {
+            return (_lastMouseWorldX, _lastMouseWorldZ);
+        }
+
+        // Try to calculate center of visible viewport
+        try
+        {
+            var scrollViewer = FindParent<ScrollViewer>(Surface);
+            if (scrollViewer != null)
+            {
+                // Calculate the center of the visible area
+                double centerPixelX = scrollViewer.HorizontalOffset + (scrollViewer.ViewportWidth / 2);
+                double centerPixelY = scrollViewer.VerticalOffset + (scrollViewer.ViewportHeight / 2);
+
+                // Clamp to valid map area
+                centerPixelX = Math.Clamp(centerPixelX, 0, MapSize);
+                centerPixelY = Math.Clamp(centerPixelY, 0, MapSize);
+
+                // Convert to world coordinates (inverted)
+                int worldX = (int)((MapSize - centerPixelX) * 4);
+                int worldZ = (int)((MapSize - centerPixelY) * 4);
+
+                return (worldX, worldZ);
+            }
+        }
+        catch
+        {
+            // Fall through to default
+        }
+
+        // Default to center of map
+        return (16384, 16384);
+    }
+
+    private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        var parent = System.Windows.Media.VisualTreeHelper.GetParent(child);
+        while (parent != null)
+        {
+            if (parent is T typedParent)
+                return typedParent;
+            parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+        }
+        return null;
+    }
 
     /// <summary>
     /// Handle a position selection click forwarded from MainWindow
@@ -431,6 +492,11 @@ public partial class MapViewControl : UserControl
         // World coordinates - inverted to match game coordinate system
         int worldX = (int)((8192.0 - position.X) * 4);
         int worldZ = (int)((8192.0 - position.Y) * 4);
+
+        // Track the mouse position for AddEventPoint
+        _lastMouseWorldX = worldX;
+        _lastMouseWorldZ = worldZ;
+        _hasMousePosition = true;
 
         string modeText = _positionSelectionMode ? " [SELECT POSITION]" : "";
         string dragText = _currentDragMode switch

@@ -145,6 +145,7 @@
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveFileCommand}"/>
         <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveAsFileCommand}"/>
         <KeyBinding Key="W" Modifiers="Ctrl" Command="{Binding CloseFileCommand}"/>
+        <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding AddEventPointCommand}"/>
         <KeyBinding Key="Add" Command="{Binding ZoomInCommand}"/>
         <KeyBinding Key="Subtract" Command="{Binding ZoomOutCommand}"/>
         <KeyBinding Key="D0" Modifiers="Ctrl" Command="{Binding ResetZoomCommand}"/>
@@ -174,6 +175,13 @@
                 <MenuItem Header="_Mission Properties..." Command="{Binding MissionPropertiesCommand}" ToolTip="Edit mission file references and settings"/>
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Add EventPoint..." Command="{Binding AddEventPointCommand}" InputGestureText="Ctrl+M" ToolTip="Add a new EventPoint at current mouse position"/>
+                <MenuItem Header="_Edit EventPoint..." Command="{Binding EditEventPointCommand}" ToolTip="Edit the selected EventPoint"/>
+                <MenuItem Header="_Delete EventPoint" Command="{Binding DeleteEventPointCommand}" InputGestureText="Delete" ToolTip="Delete the selected EventPoint"/>
+                <Separator/>
+                <MenuItem Header="_Center On Selected" Command="{Binding CenterOnSelectedCommand}" ToolTip="Center the map on the selected EventPoint"/>
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
@@ -347,7 +355,7 @@
                             <TextBlock Grid.Column="0" Text="EVENT POINTS" Style="{StaticResource HeaderTextStyle}" Padding="5"/>
                             <Button Grid.Column="1" Content="+ Add" 
                                     Command="{Binding AddEventPointCommand}"
-                                    ToolTip="Add new EventPoint"
+                                    ToolTip="Add new EventPoint (Ctrl+M)"
                                     Padding="8,2" Margin="5,0"
                                     Background="#0078D4" Foreground="White" BorderThickness="0"/>
                             <Button Grid.Column="2" Content="Delete" 

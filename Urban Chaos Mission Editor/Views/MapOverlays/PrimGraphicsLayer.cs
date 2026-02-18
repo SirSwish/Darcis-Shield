@@ -408,7 +408,7 @@ public sealed class PrimGraphicsLayer : FrameworkElement
             case 194: cx = 8.0; cy = 51.0; break;
             case 195: cx = 8.0; cy = 42.0; break;
             case 196: cx = 8.0; cy = 42.0; break;
-            case 197: cx = 9.0; cy = 80.0; break;
+            case 197: cx = 9.0; cy = 71.0; break;
             case 198: cx = 64.0; cy = 9.0; break;
             case 199: cx = 64.0; cy = 9.0; break;
             case 200: cx = 50.0; cy = 45.0; break;

@@ -1,0 +1,96 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.SpotEffectEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="Black"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,10,0">
+            <TextBlock Text="Spot Effect Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+            <!-- Type -->
+            <TextBlock Text="Effect Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="110"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Type:"/>
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding SpotFXTypeOptions}"
+                          SelectedIndex="{Binding SpotFXType}"
+                          ToolTip="Spot FX type"/>
+            </Grid>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+            <!-- Scale -->
+            <TextBlock Text="Scale" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="110"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="90"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Scale:"/>
+                <Slider Grid.Column="1"
+                        Minimum="0" Maximum="1024"
+                        Value="{Binding SpotFXScale}"
+                        TickFrequency="1" IsSnapToTickEnabled="True"
+                        ToolTip="Scale (0-1024)"/>
+                <TextBox Grid.Column="2"
+                         Text="{Binding SpotFXScale, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Scale (0-1024)"/>
+            </Grid>
+
+            <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+                <Run Text="Creates a spot effect at this EventPoint."/>
+                <LineBreak/>
+                <Run Text="Type is stored in Data[0], scale in Data[1] (0-1024)."/>
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,146 @@
+﻿<UserControl x:Class="UrbanChaosMissionEditor.Controls.TimelineControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="800"
+             Background="#FF1E1E1E"
+             Focusable="True"
+             KeyDown="OnKeyDown">
+
+    <UserControl.Resources>
+        <!-- Channel row height -->
+        <sys:Double x:Key="ChannelHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">40</sys:Double>
+        <sys:Double x:Key="HeaderWidth" xmlns:sys="clr-namespace:System;assembly=mscorlib">120</sys:Double>
+        <sys:Double x:Key="RulerHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">30</sys:Double>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Timeline area -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="#FF2D2D30" Padding="5">
+            <StackPanel Orientation="Horizontal">
+                <!-- Playback controls -->
+                <Button x:Name="BtnGoToStart" Content="⏮" Width="28" Height="24" 
+                        ToolTip="Go to Start" Click="GoToStart_Click" Margin="0,0,2,0"/>
+                <Button x:Name="BtnStepBack" Content="⏪" Width="28" Height="24" 
+                        ToolTip="Step Back" Click="StepBack_Click" Margin="0,0,2,0"/>
+                <Button x:Name="BtnPlayPause" Content="▶" Width="28" Height="24" 
+                        ToolTip="Play/Pause" Click="PlayPause_Click" Margin="0,0,2,0"/>
+                <Button x:Name="BtnStepForward" Content="⏩" Width="28" Height="24" 
+                        ToolTip="Step Forward" Click="StepForward_Click" Margin="0,0,2,0"/>
+                <Button x:Name="BtnGoToEnd" Content="⏭" Width="28" Height="24" 
+                        ToolTip="Go to End" Click="GoToEnd_Click" Margin="0,0,10,0"/>
+
+                <Separator Width="1" Background="#FF555555" Margin="5,2"/>
+
+                <!-- Current position display -->
+                <TextBlock Text="Frame:" VerticalAlignment="Center" Foreground="#FFAAAAAA" Margin="10,0,5,0"/>
+                <TextBox x:Name="TxtCurrentFrame" Width="50" Text="0" 
+                         VerticalAlignment="Center" TextAlignment="Right"
+                         Background="#FF3E3E42" Foreground="#FFEEEEEE" BorderBrush="#FF555555"
+                         KeyDown="TxtCurrentFrame_KeyDown"/>
+                <TextBlock x:Name="TxtTotalFrames" Text=" / 0" VerticalAlignment="Center" 
+                           Foreground="#FF888888" Margin="2,0,0,0"/>
+
+                <Separator Width="1" Background="#FF555555" Margin="10,2"/>
+
+                <!-- Zoom controls -->
+                <TextBlock Text="Zoom:" VerticalAlignment="Center" Foreground="#FFAAAAAA" Margin="5,0,5,0"/>
+                <Slider x:Name="ZoomSlider" Width="100" Minimum="1" Maximum="20" Value="5"
+                        VerticalAlignment="Center" ValueChanged="ZoomSlider_ValueChanged"/>
+                <TextBlock x:Name="TxtZoomLevel" Text="5 px/f" VerticalAlignment="Center" 
+                           Foreground="#FF888888" Margin="5,0,0,0" Width="45"/>
+
+                <Separator Width="1" Background="#FF555555" Margin="10,2"/>
+
+                <!-- Snap toggle -->
+                <CheckBox x:Name="ChkSnap" Content="Snap to Grid" IsChecked="True"
+                          VerticalAlignment="Center" Foreground="#FFCCCCCC" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main timeline area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Channel headers -->
+                <ColumnDefinition Width="120"/>
+                <!-- Timeline content -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Channel headers (fixed left column) -->
+            <Border Grid.Column="0" Background="#FF252526" BorderBrush="#FF3E3E42" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Ruler spacer -->
+                        <RowDefinition Height="30"/>
+                        <!-- Channel headers -->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Corner (above headers, left of ruler) -->
+                    <Border Grid.Row="0" Background="#FF2D2D30" BorderBrush="#FF3E3E42" BorderThickness="0,0,0,1">
+                        <TextBlock Text="Channels" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Foreground="#FF888888" FontSize="10"/>
+                    </Border>
+
+                    <!-- Channel header list -->
+                    <ScrollViewer Grid.Row="1" x:Name="HeaderScrollViewer" 
+                                  VerticalScrollBarVisibility="Hidden" 
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="ChannelHeadersPanel"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Timeline content (scrollable) -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <!-- Time ruler -->
+                    <RowDefinition Height="30"/>
+                    <!-- Tracks -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Time ruler -->
+                <Border Grid.Row="0" Background="#FF2D2D30" BorderBrush="#FF3E3E42" BorderThickness="0,0,0,1"
+                        ClipToBounds="True">
+                    <Canvas x:Name="RulerCanvas" 
+                            MouseLeftButtonDown="RulerCanvas_MouseLeftButtonDown"
+                            MouseMove="RulerCanvas_MouseMove"
+                            MouseLeftButtonUp="RulerCanvas_MouseLeftButtonUp"/>
+                </Border>
+
+                <!-- Timeline tracks area -->
+                <ScrollViewer Grid.Row="1" x:Name="TimelineScrollViewer"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              ScrollChanged="TimelineScrollViewer_ScrollChanged">
+                    <Grid>
+                        <!-- Background grid lines canvas -->
+                        <Canvas x:Name="GridLinesCanvas" IsHitTestVisible="False"/>
+
+                        <!-- Channels and packets canvas -->
+                        <Canvas x:Name="TracksCanvas"
+                                MouseLeftButtonDown="TracksCanvas_MouseLeftButtonDown"
+                                MouseMove="TracksCanvas_MouseMove"
+                                MouseLeftButtonUp="TracksCanvas_MouseLeftButtonUp"
+                                MouseRightButtonDown="TracksCanvas_MouseRightButtonDown"
+                                ClipToBounds="True"/>
+
+                        <!-- Playhead line (drawn on top) -->
+                        <Canvas x:Name="PlayheadCanvas" IsHitTestVisible="False"/>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

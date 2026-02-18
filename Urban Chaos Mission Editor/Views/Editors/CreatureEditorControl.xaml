@@ -1,0 +1,86 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.CreatureEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="Black"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="Creature Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <!-- Basic Settings -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Type:"/>
+            <ComboBox Grid.Row="0" Grid.Column="1" 
+                      ItemsSource="{Binding CreatureTypeOptions}"
+                      SelectedIndex="{Binding CreatureType}"
+                      ToolTip="The type of creature to spawn"/>
+
+            <Label Grid.Row="1" Grid.Column="0" Content="Count:"/>
+            <TextBox Grid.Row="1" Grid.Column="1" 
+                     Text="{Binding CreatureCount, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Number of creatures to spawn (1-99)"/>
+        </Grid>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Info text -->
+        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+            <Run Text="Creatures spawn at this position when triggered."/>
+            <LineBreak/><LineBreak/>
+            <Run Text="- Bat - Small flying enemy"/>
+            <LineBreak/>
+            <Run Text="- Gargoyle - Stone demon creature"/>
+            <LineBreak/>
+            <Run Text="- Balrog - Large fire demon boss"/>
+            <LineBreak/>
+            <Run Text="- Bane - Supernatural entity"/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>

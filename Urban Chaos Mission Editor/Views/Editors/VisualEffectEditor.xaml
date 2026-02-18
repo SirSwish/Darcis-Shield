@@ -1,0 +1,91 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.VisualEffectEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="Visual Effect Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <!-- Effect Types (Bitmask - multiple can be selected) -->
+        <TextBlock Text="Effect Types:" Margin="0,0,0,5"/>
+        <TextBlock Text="(Select one or more effects to trigger)" 
+                   Foreground="#FF888888" FontStyle="Italic" FontSize="11" Margin="0,0,0,5"/>
+
+        <StackPanel Margin="10,0,0,10">
+            <CheckBox Content="Flare" 
+                      IsChecked="{Binding VfxFlare}"
+                      ToolTip="Bright light flare effect"/>
+            <CheckBox Content="Fire Dome" 
+                      IsChecked="{Binding VfxFireDome}"
+                      ToolTip="Dome-shaped fire explosion"/>
+            <CheckBox Content="Shockwave" 
+                      IsChecked="{Binding VfxShockwave}"
+                      ToolTip="Expanding shockwave ring"/>
+            <CheckBox Content="Smoke Trails" 
+                      IsChecked="{Binding VfxSmokeTrails}"
+                      ToolTip="Rising smoke trail particles"/>
+            <CheckBox Content="Bonfire" 
+                      IsChecked="{Binding VfxBonfire}"
+                      ToolTip="Continuous burning fire effect"/>
+        </StackPanel>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Scale -->
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" Content="Scale:"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBox Text="{Binding VfxScale, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Effect scale (0-1024). Higher values = larger effect"/>
+                <TextBlock Text="(0-1024)" Foreground="#FF888888" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Effect descriptions -->
+        <TextBlock Text="Effect Descriptions:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+            <Run Text="- Flare - Bright light burst, good for explosions"/>
+            <LineBreak/>
+            <Run Text="- Fire Dome - Spherical fire expansion"/>
+            <LineBreak/>
+            <Run Text="- Shockwave - Ground-level expanding ring"/>
+            <LineBreak/>
+            <Run Text="- Smoke Trails - Vertical smoke particles"/>
+            <LineBreak/>
+            <Run Text="- Bonfire - Persistent fire at location"/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>

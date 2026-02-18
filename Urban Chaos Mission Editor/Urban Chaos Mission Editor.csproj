@@ -15,12 +15,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Views\Editors\SimpleWaypointEditorControl.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Remove="Assets\Defaults\default.ucm" />
 		<None Remove="Assets\Icons\app.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Views\Editors\SimpleWaypointEditorControl.xaml.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

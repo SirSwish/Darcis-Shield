@@ -1,0 +1,102 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.ConversationEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="Conversation Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <!-- Participants -->
+        <TextBlock Text="Participants" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Person 1 EP:"/>
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                <TextBox Text="{Binding ConversePerson1, UpdateSourceTrigger=PropertyChanged}"
+                         Width="80" HorizontalAlignment="Left"
+                         ToolTip="EventPoint index of the first participant (Create Player or Create Enemies)"/>
+                <TextBlock Text="(player/enemy EP index)" Foreground="#FF888888" 
+                           VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+            </StackPanel>
+
+            <Label Grid.Row="1" Grid.Column="0" Content="Person 2 EP:"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <TextBox Text="{Binding ConversePerson2, UpdateSourceTrigger=PropertyChanged}"
+                         Width="80" HorizontalAlignment="Left"
+                         ToolTip="EventPoint index of the second participant (Create Player or Create Enemies)"/>
+                <TextBlock Text="(player/enemy EP index)" Foreground="#FF888888" 
+                           VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+            </StackPanel>
+        </Grid>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Camera Option -->
+        <CheckBox Content="Grab Camera" 
+                  IsChecked="{Binding ConverseGrabCamera}"
+                  ToolTip="Take control of the camera during conversation"/>
+
+        <Separator Background="#FF555555" Margin="0,10,0,10"/>
+
+        <!-- Conversation Text -->
+        <TextBlock Text="Conversation Script" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock Text="Enter the dialogue script below (max 2550 characters):" 
+                   Foreground="#FF888888" FontStyle="Italic" FontSize="11" Margin="0,0,0,5"/>
+        <TextBox Text="{Binding ExtraText, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 Height="150"
+                 MaxLength="2550"
+                 ToolTip="The conversation dialogue script"/>
+
+        <Separator Background="#FF555555" Margin="0,10,0,10"/>
+
+        <!-- Script Format Info -->
+        <TextBlock Text="Script Format:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+            <Run Text="The conversation script contains dialogue lines that alternate between"/>
+            <Run Text="Person 1 and Person 2. Each line should be on a separate line."/>
+            <LineBreak/><LineBreak/>
+            <Run Text="Example:"/>
+            <LineBreak/>
+            <Run Text="  Hey, what's going on?"/>
+            <LineBreak/>
+            <Run Text="  Nothing much. Just patrolling."/>
+            <LineBreak/>
+            <Run Text="  Keep your eyes open."/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>

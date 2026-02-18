@@ -13,13 +13,17 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainViewModel();
+        var viewModel = new MainViewModel();
+        DataContext = viewModel;
+
+        // Wire up the position callback for AddEventPoint
+        viewModel.GetCurrentWorldPosition = () => MapView.GetCurrentWorldPosition();
 
         // Handle command line arguments
         var args = Environment.GetCommandLineArgs();
         if (args.Length > 1 && System.IO.File.Exists(args[1]))
         {
-            ((MainViewModel)DataContext).LoadMission(args[1]);
+            viewModel.LoadMission(args[1]);
         }
 
         // Hook preview mouse events for position selection mode

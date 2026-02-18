@@ -1,0 +1,178 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.AdjustEnemyEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="Black"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,10,0">
+            <TextBlock Text="Adjust Enemy Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+            <!-- Target Enemy EP -->
+            <Border Background="#FF4A3030" Padding="10" Margin="0,0,0,10" CornerRadius="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="Target Enemy EP:" FontWeight="SemiBold"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <TextBox Text="{Binding AdjustEnemyTarget, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="EventPoint index of the Create Enemies waypoint to adjust"/>
+                        <TextBlock Text="(EP index of enemy to modify)" Foreground="#FF888888" 
+                                   VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Text="New Enemy Properties:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <TextBlock Text="(These values will replace the target enemy's settings when triggered)" 
+                       Foreground="#FF888888" FontStyle="Italic" FontSize="11" Margin="0,0,0,10"/>
+
+            <!-- Basic Settings -->
+            <TextBlock Text="Basic Settings" FontWeight="SemiBold" Margin="0,10,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Enemy Type:"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" 
+                          ItemsSource="{Binding EnemyTypeOptions}"
+                          SelectedIndex="{Binding EnemyType}"
+                          ToolTip="The type of enemy"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Count:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" 
+                         Text="{Binding EnemyCount, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Number of enemies (1-99)"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Health:"/>
+                <TextBox Grid.Row="2" Grid.Column="1" 
+                         Text="{Binding EnemyConstitution, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Enemy health/constitution (0-100)"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Movement:"/>
+                <ComboBox Grid.Row="3" Grid.Column="1" 
+                          ItemsSource="{Binding EnemyMoveOptions}"
+                          SelectedIndex="{Binding EnemyMoveType}"
+                          ToolTip="Movement behavior"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="AI Type:"/>
+                <ComboBox Grid.Row="4" Grid.Column="1" 
+                          ItemsSource="{Binding EnemyAIOptions}"
+                          SelectedIndex="{Binding EnemyAIType}"
+                          ToolTip="AI behavior type"/>
+            </Grid>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+            <!-- AI Targets -->
+            <TextBlock Text="AI Targets" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Guard EP:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" 
+                         Text="{Binding EnemyGuardTarget, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="EventPoint index to guard"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Follow EP:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" 
+                         Text="{Binding EnemyFollowTarget, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="EventPoint index to follow"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Ability:"/>
+                <ComboBox Grid.Row="2" Grid.Column="1" 
+                          ItemsSource="{Binding EnemyAbilityOptions}"
+                          SelectedIndex="{Binding EnemyAbilityLevel}"
+                          ToolTip="Ability/skill level"/>
+            </Grid>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+            <!-- Behavior Flags -->
+            <TextBlock Text="Behavior Flags" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <WrapPanel Margin="0,0,0,10">
+                <CheckBox Content="Lazy" IsChecked="{Binding EnemyFlagLazy}" Width="120" ToolTip="Less aggressive behavior"/>
+                <CheckBox Content="Diligent" IsChecked="{Binding EnemyFlagDiligent}" Width="120" ToolTip="More aggressive behavior"/>
+                <CheckBox Content="Gang Member" IsChecked="{Binding EnemyFlagGang}" Width="120" ToolTip="Part of a gang"/>
+                <CheckBox Content="Fight Back" IsChecked="{Binding EnemyFlagFightBack}" Width="120" ToolTip="Will fight back when attacked"/>
+                <CheckBox Content="Just Kill Player" IsChecked="{Binding EnemyFlagJustKillPlayer}" Width="120" ToolTip="Only targets the player"/>
+                <CheckBox Content="Robotic" IsChecked="{Binding EnemyFlagRobotic}" Width="120" ToolTip="Robotic behavior"/>
+                <CheckBox Content="Invulnerable" IsChecked="{Binding EnemyFlagInvulnerable}" Width="120" ToolTip="Cannot be killed"/>
+                <CheckBox Content="Guilty" IsChecked="{Binding EnemyFlagGuilty}" Width="120" ToolTip="Marked as guilty"/>
+            </WrapPanel>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+            <!-- Info -->
+            <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+                <Run Text="Adjust Enemy modifies an existing Create Enemies EventPoint when triggered."/>
+                <LineBreak/>
+                <Run Text="Set the Target Enemy EP to the index of the enemy waypoint you want to modify."/>
+                <LineBreak/>
+                <Run Text="The new properties will replace the target's settings when this waypoint triggers."/>
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

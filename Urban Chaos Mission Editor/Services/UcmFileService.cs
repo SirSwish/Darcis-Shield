@@ -184,7 +184,7 @@ public class UcmFileService
     }
 
     /// <summary>
-    /// Write extra data (text strings) for an EventPoint
+    /// Write extra data (text strings, cutscene data) for an EventPoint
     /// </summary>
     private void WriteEventExtra(BinaryWriter writer, EventPoint ep, uint version)
     {
@@ -212,9 +212,20 @@ public class UcmFileService
         {
             if (version > 7)
             {
-                // Write empty cutscene marker for now
-                // TODO: Implement proper CUTSCENE_write equivalent
-                writer.Write((byte)0);
+                // Write type code (2 = cutscene)
+                writer.Write((byte)2);
+
+                // Write cutscene data
+                if (ep.CutsceneData != null)
+                {
+                    CutsceneDataIO.Write(writer, ep.CutsceneData);
+                }
+                else
+                {
+                    // Write empty cutscene (version + 0 channels)
+                    writer.Write((byte)CutsceneConstants.CurrentVersion); // version
+                    writer.Write((byte)0); // channelcount = 0
+                }
             }
         }
 
@@ -242,7 +253,7 @@ public class UcmFileService
 
         if (version > 4)
         {
-            // Write length-prefixed string
+            // Variable length with length prefix
             writer.Write(textBytes.Length + 1); // +1 for null terminator
             writer.Write(textBytes);
             writer.Write((byte)0); // Null terminator
@@ -338,8 +349,10 @@ public class UcmFileService
             if (version > 7)
             {
                 byte typeCode = reader.ReadByte();
-                // Cutscene data format is complex - skip for now
-                // TODO: Implement CUTSCENE_read equivalent
+                if (typeCode == 2) // Cutscene type code
+                {
+                    ep.CutsceneData = CutsceneDataIO.Read(reader);
+                }
             }
         }
 

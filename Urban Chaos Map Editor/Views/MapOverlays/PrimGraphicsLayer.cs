@@ -961,7 +961,7 @@ namespace UrbanChaosMapEditor.Views.MapOverlays
                     break;
                 case 197:
                     cx = 9.0;
-                    cy = 80.0;
+                    cy = 71.0;
                     break;
                 case 198:
                     cx = 64.0;

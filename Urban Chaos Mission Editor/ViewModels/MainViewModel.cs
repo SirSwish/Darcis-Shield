@@ -36,6 +36,12 @@ public class MainViewModel : BaseViewModel
     private bool _showLightRanges = false;
     private bool _showEventPoints = true;
 
+    /// <summary>
+    /// Callback to get current world position for placing new EventPoints.
+    /// Should be set by the View to provide mouse position or visible center.
+    /// </summary>
+    public Func<(int WorldX, int WorldZ)>? GetCurrentWorldPosition { get; set; }
+
     public MainViewModel() : this(new UcmFileService(), new WpfDialogService())
     {
     }
@@ -726,7 +732,18 @@ public class MainViewModel : BaseViewModel
             return;
         }
 
-        // Step 3: Create new EventPoint with the selected type
+        // Step 3: Get initial position from callback or use center of map
+        int initialX = 16384;
+        int initialZ = 16384;
+
+        if (GetCurrentWorldPosition != null)
+        {
+            var (worldX, worldZ) = GetCurrentWorldPosition();
+            initialX = worldX;
+            initialZ = worldZ;
+        }
+
+        // Step 4: Create new EventPoint with the selected type
         var newEventPoint = new Models.EventPoint
         {
             Index = freeIndex + 1, // 1-based index
@@ -738,14 +755,12 @@ public class MainViewModel : BaseViewModel
             Flags = Constants.WaypointFlags.None,
             TriggeredBy = Constants.TriggerType.None,
             OnTrigger = Constants.OnTriggerBehavior.None,
-            // Set to center of map initially
-            // PixelX = 8192 - (X / 4) = 8192 - (16384 / 4) = 8192 - 4096 = 4096 (center)
-            X = 16384,
+            X = initialX,
             Y = 0,
-            Z = 16384,
+            Z = initialZ,
         };
 
-        // Step 4: Open the editor for the new EventPoint
+        // Step 5: Open the editor for the new EventPoint
         var editorVm = new EventPointEditorViewModel(newEventPoint);
         var editorWindow = new Views.EventPointEditorWindow
         {

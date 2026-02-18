@@ -1,0 +1,119 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.BonusPointsEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="Black"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="Bonus Points Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <!-- Bonus Type and Points -->
+        <TextBlock Text="Objective Settings" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Type:"/>
+            <ComboBox Grid.Row="0" Grid.Column="1" 
+                      ItemsSource="{Binding BonusTypeOptions}"
+                      SelectedIndex="{Binding BonusType}"
+                      ToolTip="Type of objective or bonus"/>
+
+            <Label Grid.Row="1" Grid.Column="0" Content="Points:"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <TextBox Text="{Binding BonusPoints, UpdateSourceTrigger=PropertyChanged}"
+                         Width="80" HorizontalAlignment="Left"
+                         ToolTip="Number of points awarded (0-1000)"/>
+                <TextBlock Text="(0-1000)" Foreground="#FF888888" 
+                           VerticalAlignment="Center" Margin="10,0,0,0" FontStyle="Italic"/>
+            </StackPanel>
+        </Grid>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Gender (for translation) -->
+        <TextBlock Text="Translation Gender" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock Text="Used for proper grammar in translated versions:" 
+                   Foreground="#FF888888" FontStyle="Italic" FontSize="11" Margin="0,0,0,5"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <RadioButton Content="Male" 
+                         IsChecked="{Binding BonusGenderMale}"
+                         GroupName="BonusGender" Margin="0,0,20,0"/>
+            <RadioButton Content="Female" 
+                         IsChecked="{Binding BonusGenderFemale}"
+                         GroupName="BonusGender"/>
+        </StackPanel>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Bonus Text -->
+        <TextBlock Text="Display Text" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock Text="Message shown when bonus is awarded (max 2550 characters):" 
+                   Foreground="#FF888888" FontStyle="Italic" FontSize="11" Margin="0,0,0,5"/>
+        <TextBox Text="{Binding ExtraText, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 Height="100"
+                 MaxLength="2550"
+                 ToolTip="The text displayed when this bonus is awarded"/>
+
+        <Separator Background="#FF555555" Margin="0,10,0,10"/>
+
+        <!-- Type Descriptions -->
+        <TextBlock Text="Objective Types:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+            <Run Text="- Primary Objective - Main mission goal, required for completion"/>
+            <LineBreak/>
+            <Run Text="- Secondary Objective - Optional goal, awards extra points"/>
+            <LineBreak/>
+            <Run Text="- Bonus - Hidden or special achievement"/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>

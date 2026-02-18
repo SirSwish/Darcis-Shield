@@ -1,0 +1,107 @@
+<UserControl x:Class="UrbanChaosMissionEditor.Views.Editors.ActivatePrimEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="Black"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="Activate Prim Configuration" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <!-- Prim Type -->
+        <TextBlock Text="Prim Type" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" Content="Type:"/>
+            <ComboBox Grid.Column="1" 
+                      ItemsSource="{Binding ActivatePrimTypeOptions}"
+                      SelectedIndex="{Binding ActivatePrimType}"
+                      ToolTip="Type of prim to activate"/>
+        </Grid>
+
+        <Separator Background="#FF555555" Margin="0,5,0,10"/>
+
+        <!-- Animation Number (only visible for Anim Prim) -->
+        <StackPanel Visibility="{Binding ActivatePrimAnimVisibility}">
+            <TextBlock Text="Animation Settings" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Animation:"/>
+                <Slider Grid.Column="1" 
+                        Minimum="1" Maximum="99" 
+                        Value="{Binding ActivatePrimAnim}"
+                        TickFrequency="1" IsSnapToTickEnabled="True"
+                        ToolTip="Animation number to play (1-99)"/>
+                <TextBox Grid.Column="2" 
+                         Text="{Binding ActivatePrimAnim, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Animation number to play (1-99)"/>
+            </Grid>
+
+            <Separator Background="#FF555555" Margin="0,5,0,10"/>
+        </StackPanel>
+
+        <!-- Type-specific descriptions -->
+        <TextBlock Text="Description" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <Border Background="#FF3A3A3D" Padding="10" CornerRadius="4" Margin="0,0,0,10">
+            <TextBlock Text="{Binding ActivatePrimDescription}" TextWrapping="Wrap" Foreground="#FFAAAAAA"/>
+        </Border>
+
+        <!-- Info -->
+        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic" FontSize="11">
+            <Run Text="Activates an interactive prim (map element) when triggered."/>
+            <LineBreak/>
+            <Run Text="The prim to activate is typically linked via the EP Reference in Trigger Settings,"/>
+            <LineBreak/>
+            <Run Text="or determined by proximity to the EventPoint position."/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>
