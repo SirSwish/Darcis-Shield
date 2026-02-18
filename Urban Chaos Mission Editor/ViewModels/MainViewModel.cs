@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
+using System.Windows.Media;
 using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.Infrastructure;
 using UrbanChaosMissionEditor.Models;
@@ -35,12 +36,62 @@ public class MainViewModel : BaseViewModel
     private bool _showLights = false;
     private bool _showLightRanges = false;
     private bool _showEventPoints = true;
+    private bool _showZones = true;
+    private bool _isZonePaintMode;
+    private bool _isZoneEraseMode;
+    private ZoneType _selectedZoneType = ZoneType.NoWander;
+
+    private EventPoint? _clipboardEventPoint;
+
+    // Filter properties
+    private string _searchText = string.Empty;
+    private int _selectedColorFilter = -1;  // -1 = All colors
+    private int _selectedGroupFilter = -1;  // -1 = All groups
 
     /// <summary>
     /// Callback to get current world position for placing new EventPoints.
     /// Should be set by the View to provide mouse position or visible center.
     /// </summary>
     public Func<(int WorldX, int WorldZ)>? GetCurrentWorldPosition { get; set; }
+
+    public bool ShowZones
+    {
+        get => _showZones;
+        set => SetProperty(ref _showZones, value);
+    }
+
+    public bool IsZonePaintMode
+    {
+        get => _isZonePaintMode;
+        set
+        {
+            if (SetProperty(ref _isZonePaintMode, value))
+            {
+                // Disable erase mode when paint mode enabled
+                if (value) IsZoneEraseMode = false;
+            }
+        }
+    }
+
+    public bool IsZoneEraseMode
+    {
+        get => _isZoneEraseMode;
+        set
+        {
+            if (SetProperty(ref _isZoneEraseMode, value))
+            {
+                // Disable paint mode when erase mode enabled
+                if (value) IsZonePaintMode = false;
+            }
+        }
+    }
+
+    public ZoneType SelectedZoneType
+    {
+        get => _selectedZoneType;
+        set => SetProperty(ref _selectedZoneType, value);
+    }
+
 
     public MainViewModel() : this(new UcmFileService(), new WpfDialogService())
     {
@@ -81,6 +132,14 @@ public class MainViewModel : BaseViewModel
         AddEventPointCommand = new RelayCommand(ExecuteAddEventPoint, () => HasMission);
         DeleteEventPointCommand = new RelayCommand(ExecuteDeleteEventPoint, () => SelectedEventPoint != null);
 
+        CopyEventPointCommand = new RelayCommand(ExecuteCopyEventPoint, () => SelectedEventPoint != null);
+        PasteEventPointCommand = new RelayCommand(ExecutePasteEventPoint, () => _clipboardEventPoint != null && HasMission);
+        ClearAllZonesCommand = new RelayCommand(ExecuteClearAllZones, () => HasMission);
+
+        ClearFiltersCommand = new RelayCommand(ExecuteClearFilters);
+        InitializeFilterOptions();
+
+
         // Initialize category filters
         InitializeCategoryFilters();
     }
@@ -89,6 +148,23 @@ public class MainViewModel : BaseViewModel
 
     public ObservableCollection<EventPointViewModel> EventPoints { get; } = new();
     public ObservableCollection<CategoryFilterViewModel> CategoryFilters { get; } = new();
+    // Color filter options (for ComboBox)
+    public ObservableCollection<ColorFilterOption> ColorFilterOptions { get; } = new();
+
+    // Group filter options (for ComboBox)  
+    public ObservableCollection<GroupFilterOption> GroupFilterOptions { get; } = new();
+
+    public ObservableCollection<ZoneTypeOption> ZoneTypeOptions { get; } = new()
+    {
+        new ZoneTypeOption(ZoneType.Inside,   "Inside",   ZoneColors.GetBrush(ZoneType.Inside)),
+        new ZoneTypeOption(ZoneType.Reverb,   "Reverb",   ZoneColors.GetBrush(ZoneType.Reverb)),
+        new ZoneTypeOption(ZoneType.NoWander, "No Wander",ZoneColors.GetBrush(ZoneType.NoWander)),
+        new ZoneTypeOption(ZoneType.Blue,    "Blue",   ZoneColors.GetBrush(ZoneType.Blue)),
+        new ZoneTypeOption(ZoneType.Cyan,    "Cyan", ZoneColors.GetBrush(ZoneType.Cyan)),
+        new ZoneTypeOption(ZoneType.Yellow,    "Yellow",   ZoneColors.GetBrush(ZoneType.Yellow)),
+        new ZoneTypeOption(ZoneType.Magenta,    "Magenta",   ZoneColors.GetBrush(ZoneType.Magenta)),
+        new ZoneTypeOption(ZoneType.NoGo,     "No Go",    ZoneColors.GetBrush(ZoneType.NoGo)),
+    };
 
     // Commands
 
@@ -111,6 +187,10 @@ public class MainViewModel : BaseViewModel
     public ICommand EditEventPointCommand { get; }
     public ICommand AddEventPointCommand { get; }
     public ICommand DeleteEventPointCommand { get; }
+    public ICommand CopyEventPointCommand { get; }
+    public ICommand PasteEventPointCommand { get; }
+    public ICommand ClearFiltersCommand { get; }
+    public ICommand ClearAllZonesCommand { get; }
 
     // Layer Visibility Properties
 
@@ -176,6 +256,42 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                ApplyFilters();
+            }
+        }
+    }
+
+    public int SelectedColorFilter
+    {
+        get => _selectedColorFilter;
+        set
+        {
+            if (SetProperty(ref _selectedColorFilter, value))
+            {
+                ApplyFilters();
+            }
+        }
+    }
+
+    public int SelectedGroupFilter
+    {
+        get => _selectedGroupFilter;
+        set
+        {
+            if (SetProperty(ref _selectedGroupFilter, value))
+            {
+                ApplyFilters();
+            }
+        }
+    }
+
     public bool IsMapLoaded => ReadOnlyMapDataService.Instance.IsLoaded;
     public bool IsLightsLoaded => ReadOnlyLightsDataService.Instance.IsLoaded;
 
@@ -208,6 +324,7 @@ public class MainViewModel : BaseViewModel
                 OnPropertyChanged(nameof(CarsRate));
                 OnPropertyChanged(nameof(MusicWorld));
                 OnPropertyChanged(nameof(Version));
+                OnPropertyChanged(nameof(BriefName));
             }
         }
     }
@@ -296,6 +413,7 @@ public class MainViewModel : BaseViewModel
 
     public string MissionName => _currentMission?.MissionName ?? string.Empty;
     public string MapName => _currentMission?.MapName ?? string.Empty;
+    public string BriefName => _currentMission?.BriefName ?? string.Empty;
     public string LightMapName => _currentMission?.LightMapName ?? string.Empty;
     public int EventPointCount => _currentMission?.UsedEventPointCount ?? 0;
     public byte CrimeRate => _currentMission?.CrimeRate ?? 0;
@@ -329,7 +447,78 @@ public class MainViewModel : BaseViewModel
     }
 
     // Command implementations
+    private void InitializeFilterOptions()
+    {
+        // Color options: "All Colors" + 15 color names
+        ColorFilterOptions.Add(new ColorFilterOption(-1, "All Colors", null));
+        for (int i = 0; i < WaypointColors.ColorNames.Length; i++)
+        {
+            ColorFilterOptions.Add(new ColorFilterOption(i, WaypointColors.ColorNames[i], WaypointColors.GetBrush((byte)i)));
+        }
 
+        // Group options: "All Groups" + A-Z
+        GroupFilterOptions.Add(new GroupFilterOption(-1, "All Groups"));
+        for (int i = 0; i < 26; i++)
+        {
+            GroupFilterOptions.Add(new GroupFilterOption(i, ((char)('A' + i)).ToString()));
+        }
+    }
+
+    private void ExecuteClearFilters()
+    {
+        SearchText = string.Empty;
+        SelectedColorFilter = -1;
+        SelectedGroupFilter = -1;
+
+        // Enable all category filters
+        foreach (var filter in CategoryFilters)
+        {
+            filter.IsEnabled = true;
+        }
+    }
+
+
+    // Update ApplyFilters() method:
+    private void ApplyFilters()
+    {
+        var enabledCategories = CategoryFilters
+            .Where(f => f.IsEnabled)
+            .Select(f => f.Category)
+            .ToHashSet();
+
+        foreach (var ep in EventPoints)
+        {
+            bool visible = true;
+
+            // Category filter
+            if (!enabledCategories.Contains(ep.Category))
+                visible = false;
+
+            // Color filter
+            if (visible && _selectedColorFilter >= 0 && ep.ColorIndex != _selectedColorFilter)
+                visible = false;
+
+            // Group filter
+            if (visible && _selectedGroupFilter >= 0 && ep.Model.Group != _selectedGroupFilter)
+                visible = false;
+
+            // Text search filter
+            if (visible && !string.IsNullOrWhiteSpace(_searchText))
+            {
+                var searchLower = _searchText.ToLowerInvariant();
+                var matchesName = ep.DisplayName.ToLowerInvariant().Contains(searchLower);
+                var matchesSummary = ep.Summary?.ToLowerInvariant().Contains(searchLower) ?? false;
+                var matchesIndex = ep.Index.ToString().Contains(_searchText);
+
+                if (!matchesName && !matchesSummary && !matchesIndex)
+                    visible = false;
+            }
+
+            ep.IsVisible = visible;
+        }
+
+        OnPropertyChanged(nameof(VisibleEventPoints));
+    }
     private void ExecuteNewFile()
     {
         // Check for unsaved changes
@@ -802,7 +991,8 @@ public class MainViewModel : BaseViewModel
     {
         if (_currentMission == null) return -1;
 
-        for (int i = 0; i < Models.Mission.MaxEventPoints; i++)
+        // Start at index 1 - index 0 is reserved/unused
+        for (int i = 1; i < Models.Mission.MaxEventPoints; i++)
         {
             var ep = _currentMission.EventPoints[i];
             if (ep == null || !ep.Used)
@@ -814,6 +1004,146 @@ public class MainViewModel : BaseViewModel
         return -1; // No free slots
     }
 
+    /// <summary>
+    /// Check if an EventPoint can be safely deleted (no other EPs reference it)
+    /// </summary>
+    /// <param name="ep">The EventPoint to check</param>
+    /// <param name="referencingPoints">Output list of EPs that reference this one</param>
+    /// <returns>True if safe to delete, false if other EPs reference it</returns>
+    private bool CanDeleteEventPoint(EventPointViewModel ep, out List<EventPointViewModel> referencingPoints)
+    {
+        referencingPoints = new List<EventPointViewModel>();
+        int targetIndex = ep.Index;
+
+        foreach (var other in EventPoints.Where(e => e.Index != targetIndex))
+        {
+            bool references = false;
+            string referenceType = "";
+
+            // Check EPRef
+            if (other.EPRef == targetIndex)
+            {
+                references = true;
+                referenceType = "EPRef";
+            }
+            // Check EPRefBool
+            else if (other.Model.EPRefBool == targetIndex)
+            {
+                references = true;
+                referenceType = "EPRefBool";
+            }
+            // Check Next pointer
+            else if (other.Model.Next == targetIndex)
+            {
+                references = true;
+                referenceType = "Next";
+            }
+            // Check Prev pointer  
+            else if (other.Model.Prev == targetIndex)
+            {
+                references = true;
+                referenceType = "Prev";
+            }
+            // Check Data array for common reference patterns
+            else
+            {
+                // Many waypoint types store EP references in Data array
+                // Check common positions
+                switch (other.WaypointType)
+                {
+                    case WaypointType.Conversation:
+                        // Data[1] = converse_p1, Data[2] = converse_p2
+                        if (other.Model.Data[1] == targetIndex || other.Model.Data[2] == targetIndex)
+                        {
+                            references = true;
+                            referenceType = "Conversation participant";
+                        }
+                        break;
+
+                    case WaypointType.AdjustEnemy:
+                        // Data[6] = enemy_to_change
+                        if (other.Model.Data[6] == targetIndex)
+                        {
+                            references = true;
+                            referenceType = "Target enemy";
+                        }
+                        break;
+
+                    case WaypointType.MoveThing:
+                        // Data[0] = which_waypoint
+                        if (other.Model.Data[0] == targetIndex)
+                        {
+                            references = true;
+                            referenceType = "Move target";
+                        }
+                        break;
+
+                    case WaypointType.CreateVehicle:
+                        // Data[2] = veh_targ
+                        if (other.Model.Data[2] == targetIndex)
+                        {
+                            references = true;
+                            referenceType = "Vehicle target";
+                        }
+                        break;
+
+                    case WaypointType.Message:
+                        // Data[2] = message_who (if it's an EP reference)
+                        if (other.Model.Data[2] == targetIndex && other.Model.Data[2] != 0 &&
+                            other.Model.Data[2] != 0xFFFF && other.Model.Data[2] != 0xFFFE)
+                        {
+                            references = true;
+                            referenceType = "Message speaker";
+                        }
+                        break;
+
+                    case WaypointType.KillWaypoint:
+                        // Data[0] = target waypoint to kill
+                        if (other.Model.Data[0] == targetIndex)
+                        {
+                            references = true;
+                            referenceType = "Kill target";
+                        }
+                        break;
+                }
+            }
+
+            if (references)
+            {
+                referencingPoints.Add(other);
+            }
+        }
+
+        return referencingPoints.Count == 0;
+    }
+
+    private void ExecuteClearAllZones()
+    {
+        if (_currentMission == null) return;
+
+        if (!_dialogService.ShowConfirmation(
+            "Are you sure you want to clear all zone data?",
+            "Clear All Zones"))
+        {
+            return;
+        }
+
+        // Clear the zone array
+        for (int x = 0; x < 128; x++)
+        {
+            for (int z = 0; z < 128; z++)
+            {
+                _currentMission.MissionZones[x, z] = 0;
+            }
+        }
+
+        IsDirty = true;
+        StatusMessage = "Cleared all zones";
+
+        // Trigger redraw
+        OnPropertyChanged(nameof(ShowZones));
+    }
+
     private void ExecuteDeleteEventPoint()
     {
         if (_currentMission == null || SelectedEventPoint == null) return;
@@ -821,16 +1151,40 @@ public class MainViewModel : BaseViewModel
         var ep = SelectedEventPoint;
         var typeName = Constants.EditorStrings.GetWaypointTypeName(ep.Model.WaypointType);
 
-        // Confirm deletion
-        if (!_dialogService.ShowConfirmation(
-            $"Are you sure you want to delete EventPoint {ep.Index} ({typeName})?",
-            "Delete EventPoint"))
+        // Check for references first
+        if (!CanDeleteEventPoint(ep, out var referencingPoints))
         {
-            return;
+            // Build warning message
+            var refList = string.Join("\n", referencingPoints.Take(10).Select(r =>
+                $"  • Waypoint {r.Index}: {EditorStrings.GetWaypointTypeName(r.WaypointType)}"));
+
+            if (referencingPoints.Count > 10)
+                refList += $"\n  ... and {referencingPoints.Count - 10} more";
+
+            var result = _dialogService.ShowYesNoCancelDialog(
+                "Delete Referenced EventPoint",  // TITLE first
+                $"Warning: Deleting EventPoint {ep.Index} ({typeName})\n\n" +
+                $"The following {referencingPoints.Count} EventPoint(s) reference this waypoint:\n\n" +
+                refList + "\n\n" +
+                "Deleting will leave these references pointing to an invalid waypoint.\n\n" +
+                "Delete anyway?");  // MESSAGE second
+
+            if (result != true)
+                return;
+        }
+        else
+        {
+            // Normal confirmation
+            if (!_dialogService.ShowConfirmation(
+                $"Are you sure you want to delete EventPoint {ep.Index} ({typeName})?",
+                "Delete EventPoint"))
+            {
+                return;
+            }
         }
 
         // Find the array index (Index is 1-based, array is 0-based)
-        int arrayIndex = ep.Index - 1;
+        int arrayIndex = ep.Index;
 
         if (arrayIndex >= 0 && arrayIndex < Models.Mission.MaxEventPoints)
         {
@@ -1081,20 +1435,41 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    private void ApplyFilters()
+
+    /// <summary>
+    /// Set zone value at grid coordinates
+    /// </summary>
+    public void SetZoneFlag(int gridX, int gridZ, ZoneType flag, bool set)
     {
-        var enabledCategories = CategoryFilters
-            .Where(f => f.IsEnabled)
-            .Select(f => f.Category)
-            .ToHashSet();
+        if (_currentMission == null) return;
+        if (gridX < 0 || gridX >= 128 || gridZ < 0 || gridZ >= 128) return;
+        if (flag == ZoneType.None) return; // meaningless for bit ops
 
-        foreach (var ep in EventPoints)
-        {
-            ep.IsVisible = enabledCategories.Contains(ep.Category);
-        }
+        byte cur = _currentMission.MissionZones[gridX, gridZ];
 
-        OnPropertyChanged(nameof(VisibleEventPoints));
+        cur = set
+            ? (byte)(cur | (byte)flag)
+            : (byte)(cur & ~(byte)flag);
+
+        _currentMission.MissionZones[gridX, gridZ] = cur;
+        IsDirty = true;
     }
+
+    /// <summary>
+    /// Get zone value at grid coordinates
+    /// </summary>
+    public ZoneType GetZone(int gridX, int gridZ)
+    {
+        if (_currentMission == null) return ZoneType.None;
+        if (gridX < 0 || gridX >= 128 || gridZ < 0 || gridZ >= 128) return ZoneType.None;
+
+        return (ZoneType)_currentMission.MissionZones[gridX, gridZ];
+    }
+
+    /// <summary>
+    /// Get the entire zone array for rendering
+    /// </summary>
+    public byte[,]? GetZoneArray() => _currentMission?.MissionZones;
 
     /// <summary>
     /// Select an EventPoint by its index
@@ -1123,5 +1498,144 @@ public class MainViewModel : BaseViewModel
                 return dx * dx + dy * dy;
             })
             .FirstOrDefault();
+    }
+
+    private void ExecuteCopyEventPoint()
+    {
+        if (SelectedEventPoint == null) return;
+
+        // Deep clone the EventPoint
+        _clipboardEventPoint = CloneEventPoint(SelectedEventPoint.Model);
+
+        StatusMessage = $"Copied EventPoint {SelectedEventPoint.Index}: {EditorStrings.GetWaypointTypeName(SelectedEventPoint.WaypointType)}";
+
+        // Update CanExecute for paste
+        ((RelayCommand)PasteEventPointCommand).RaiseCanExecuteChanged();
+    }
+
+    private void ExecutePasteEventPoint()
+    {
+        if (_clipboardEventPoint == null || _currentMission == null) return;
+
+        // Find a free slot
+        int freeIndex = FindFreeEventPointSlot();
+        if (freeIndex < 0)
+        {
+            _dialogService.ShowError("No free EventPoint slots available. Maximum is 512.");
+            return;
+        }
+
+        // Clone the clipboard EventPoint
+        var newEventPoint = CloneEventPoint(_clipboardEventPoint);
+
+        // Assign new index
+        newEventPoint.Index = freeIndex; // Array index = display index
+
+        // Get position from current mouse location or viewport center
+        if (GetCurrentWorldPosition != null)
+        {
+            var (worldX, worldZ) = GetCurrentWorldPosition();
+            newEventPoint.X = worldX;
+            newEventPoint.Z = worldZ;
+        }
+
+        // Clear chain references (don't copy Next/Prev links)
+        newEventPoint.Next = 0;
+        newEventPoint.Prev = 0;
+
+        // Add to mission
+        _currentMission.EventPoints[freeIndex] = newEventPoint;
+
+        // Add to observable collection
+        var viewModel = new EventPointViewModel(newEventPoint);
+        EventPoints.Add(viewModel);
+
+        // Update and select
+        UpdateCategoryCounts();
+        ApplyFilters();
+        SelectedEventPoint = viewModel;
+
+        StatusMessage = $"Pasted EventPoint {newEventPoint.Index}: {EditorStrings.GetWaypointTypeName(newEventPoint.WaypointType)}";
+        IsDirty = true;
+    }
+
+    /// <summary>
+    /// Deep clone an EventPoint
+    /// </summary>
+    private static EventPoint CloneEventPoint(EventPoint source)
+    {
+        var clone = new EventPoint
+        {
+            Index = source.Index,
+            WaypointType = source.WaypointType,
+            Used = source.Used,
+            Group = source.Group,
+            Colour = source.Colour,
+            Direction = source.Direction,
+            Flags = source.Flags,
+            TriggeredBy = source.TriggeredBy,
+            OnTrigger = source.OnTrigger,
+            X = source.X,
+            Y = source.Y,
+            Z = source.Z,
+            Radius = source.Radius,
+            EPRef = source.EPRef,
+            EPRefBool = source.EPRefBool,
+            Next = source.Next,
+            Prev = source.Prev,
+            ExtraText = source.ExtraText,
+            TriggerText = source.TriggerText,
+        };
+
+        // Deep copy the Data array
+        if (source.Data != null)
+        {
+            clone.Data = new int[source.Data.Length];
+            Array.Copy(source.Data, clone.Data, source.Data.Length);
+        }
+
+        // Copy cutscene data if present
+        clone.CutsceneData = source.CutsceneData;  // Note: This is a shallow copy - 
+                                                   // implement deep clone if needed
+
+        return clone;
+    }
+    public class ColorFilterOption
+    {
+        public int Value { get; }
+        public string DisplayName { get; }
+        public SolidColorBrush? ColorBrush { get; }
+
+        public ColorFilterOption(int value, string displayName, SolidColorBrush? colorBrush)
+        {
+            Value = value;
+            DisplayName = displayName;
+            ColorBrush = colorBrush;
+        }
+    }
+
+    public class GroupFilterOption
+    {
+        public int Value { get; }
+        public string DisplayName { get; }
+
+        public GroupFilterOption(int value, string displayName)
+        {
+            Value = value;
+            DisplayName = displayName;
+        }
+    }
+    public class ZoneTypeOption
+    {
+        public ZoneType Value { get; }
+        public string DisplayName { get; }
+        public System.Windows.Media.SolidColorBrush ColorBrush { get; }
+
+        public ZoneTypeOption(ZoneType value, string displayName, System.Windows.Media.SolidColorBrush colorBrush)
+        {
+            Value = value;
+            DisplayName = displayName;
+            ColorBrush = colorBrush;
+        }
     }
 }

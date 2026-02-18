@@ -57,6 +57,24 @@ public class EventPointViewModel : BaseViewModel
         set => SetProperty(ref _isHovered, value);
     }
 
+    /// <summary>
+    /// Summary text truncated to 15 characters for list display
+    /// </summary>
+    public string SummaryTruncated
+    {
+        get
+        {
+            var summary = _model.GetSummary();
+            if (string.IsNullOrEmpty(summary))
+                return string.Empty;
+
+            if (summary.Length <= 15)
+                return summary;
+
+            return summary.Substring(0, 15) + "…";
+        }
+    }
+
     // Delegate properties to model
 
     public string DisplayName => _model.DisplayName;
@@ -467,6 +485,7 @@ public class EventPointViewModel : BaseViewModel
         // Notify all display properties have changed
         OnPropertyChanged(nameof(DisplayName));
         OnPropertyChanged(nameof(Summary));
+        OnPropertyChanged(nameof(SummaryTruncated));
         OnPropertyChanged(nameof(WaypointType));
         OnPropertyChanged(nameof(Category));
         OnPropertyChanged(nameof(GroupLetter));

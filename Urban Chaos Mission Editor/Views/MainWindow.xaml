@@ -22,6 +22,8 @@
         <conv:CategoryToBrushConverter x:Key="CategoryToBrush"/>
         <conv:FlagsToStringConverter x:Key="FlagsToString"/>
         <conv:IntToHexConverter x:Key="IntToHex"/>
+        <conv:EnumToBoolConverter x:Key="EnumToBool"/>
+        <conv:BoolToColorConverter x:Key="BoolToColorConverter"/>
 
         <!-- Toggle button style for layer visibility (GREEN theme) -->
         <Style x:Key="LayerToggleStyle" TargetType="ToggleButton">
@@ -57,6 +59,49 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- ComboBox (collapsed selection shows black text on green background) -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="ForestGreen"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#444444"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- ComboBox dropdown items -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="6,4"/>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3D3D3D"/>
+                </Trigger>
+
+                <!-- Selected item in the dropdown: black text -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="ForestGreen"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Expander Style for dark theme -->
+        <Style TargetType="Expander">
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <!-- CheckBox style for dark theme -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#CCCCCC"/>
         </Style>
 
         <!-- Toolbar button style -->
@@ -150,6 +195,8 @@
         <KeyBinding Key="Subtract" Command="{Binding ZoomOutCommand}"/>
         <KeyBinding Key="D0" Modifiers="Ctrl" Command="{Binding ResetZoomCommand}"/>
         <KeyBinding Key="Delete" Command="{Binding DeleteEventPointCommand}"/>
+        <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyEventPointCommand}"/>
+        <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteEventPointCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -171,7 +218,6 @@
                 <Separator/>
                 <MenuItem Header="Open _Map..." Command="{Binding OpenMapCommand}" ToolTip="Manually load a .iam map file"/>
                 <MenuItem Header="Open _Lights..." Command="{Binding OpenLightsCommand}" ToolTip="Manually load a .lgt lights file"/>
-                <Separator/>
                 <MenuItem Header="_Mission Properties..." Command="{Binding MissionPropertiesCommand}" ToolTip="Edit mission file references and settings"/>
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
@@ -180,21 +226,61 @@
                 <MenuItem Header="_Add EventPoint..." Command="{Binding AddEventPointCommand}" InputGestureText="Ctrl+M" ToolTip="Add a new EventPoint at current mouse position"/>
                 <MenuItem Header="_Edit EventPoint..." Command="{Binding EditEventPointCommand}" ToolTip="Edit the selected EventPoint"/>
                 <MenuItem Header="_Delete EventPoint" Command="{Binding DeleteEventPointCommand}" InputGestureText="Delete" ToolTip="Delete the selected EventPoint"/>
+                <MenuItem Header="_Copy EventPoint" Command="{Binding CopyEventPointCommand}" InputGestureText="Ctrl+C" ToolTip="Copy the selected EventPoint"/>
+                <MenuItem Header="_Paste EventPoint" Command="{Binding PasteEventPointCommand}" InputGestureText="Ctrl+V" ToolTip="Paste EventPoint at cursor position"/>
                 <Separator/>
-                <MenuItem Header="_Center On Selected" Command="{Binding CenterOnSelectedCommand}" ToolTip="Center the map on the selected EventPoint"/>
+                <MenuItem Header="Ce_nter On Selected" Command="{Binding CenterOnSelectedCommand}" ToolTip="Center the map on the selected EventPoint"/>
+            </MenuItem>
+            <MenuItem Header="_Zones">
+                <MenuItem Header="_Paint Zone Mode" IsCheckable="True" IsChecked="{Binding IsZonePaintMode}" ToolTip="Click and drag on map to paint zones"/>
+                <MenuItem Header="_Erase Zone Mode" IsCheckable="True" IsChecked="{Binding IsZoneEraseMode}" ToolTip="Click and drag on map to erase zones"/>
+                <Separator/>
+                <MenuItem Header="Zone _Type">
+                    <MenuItem Header="Inside (Black)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Inside}"/>
+                    <MenuItem Header="Reverb (Grey)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Reverb}"/>
+                    <MenuItem Header="No Wander (Red)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=NoWander}"/>
+
+                    <Separator/>
+
+                    <MenuItem Header="Zone 1 (Blue)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Zone1}"/>
+                    <MenuItem Header="Zone 2 (Cyan)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Zone2}"/>
+                    <MenuItem Header="Zone 3 (Yellow)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Zone3}"/>
+                    <MenuItem Header="Zone 4 (Magenta)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=Zone4}"/>
+
+                    <Separator/>
+
+                    <MenuItem Header="No-Go (Dark Grey)" IsCheckable="True"
+              IsChecked="{Binding SelectedZoneType, Converter={StaticResource EnumToBool}, ConverterParameter=NoGo}"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Clear _All Zones" Command="{Binding ClearAllZonesCommand}" ToolTip="Remove all zone data"/>
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
                 <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
                 <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
                 <Separator/>
-                <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding ShowTextures}"/>
-                <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding ShowGridLines}"/>
-                <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding ShowBuildings}"/>
-                <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding ShowPrimGraphics}"/>
-                <MenuItem Header="Show _Lights" IsCheckable="True" IsChecked="{Binding ShowLights}"/>
-                <MenuItem Header="Show Light _Ranges" IsCheckable="True" IsChecked="{Binding ShowLightRanges}"/>
-                <MenuItem Header="Show _Event Points" IsCheckable="True" IsChecked="{Binding ShowEventPoints}"/>
+                <MenuItem Header="Mission Layers">
+                    <MenuItem Header="Show _Event Points" IsCheckable="True" IsChecked="{Binding ShowEventPoints}"/>
+                    <MenuItem Header="Show _Zones" IsCheckable="True" IsChecked="{Binding ShowZones}"/>
+                </MenuItem>
+                <MenuItem Header="Map Layers">
+                    <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding ShowGridLines}"/>
+                    <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding ShowTextures}"/>
+                    <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding ShowBuildings}"/>
+                    <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding ShowPrimGraphics}"/>
+                </MenuItem>
+                <MenuItem Header="Lights Layers">
+                    <MenuItem Header="Show _Lights" IsCheckable="True" IsChecked="{Binding ShowLights}"/>
+                    <MenuItem Header="Show Light _Ranges" IsCheckable="True" IsChecked="{Binding ShowLightRanges}"/>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Show All Categories" Command="{Binding ShowAllCategoriesCommand}"/>
                 <MenuItem Header="_Hide All Categories" Command="{Binding HideAllCategoriesCommand}"/>
@@ -206,35 +292,70 @@
             <WrapPanel>
                 <!-- File operations -->
                 <Button Style="{StaticResource ToolbarButtonStyle}" Content="📁 Open" 
-                        Command="{Binding OpenFileCommand}" ToolTip="Open UCM File (Ctrl+O)"/>
+                Command="{Binding OpenFileCommand}" ToolTip="Open UCM File (Ctrl+O)"/>
                 <Button Style="{StaticResource ToolbarButtonStyle}" Content="🗺️ Map" 
-                        Command="{Binding OpenMapCommand}" ToolTip="Open Map File"/>
+                Command="{Binding OpenMapCommand}" ToolTip="Open Map File"/>
                 <Button Style="{StaticResource ToolbarButtonStyle}" Content="💡 Lights" 
-                        Command="{Binding OpenLightsCommand}" ToolTip="Open Lights File"/>
+                Command="{Binding OpenLightsCommand}" ToolTip="Open Lights File"/>
 
                 <Separator Margin="8,0" Background="#555"/>
 
-                <!-- Layer visibility toggles -->
+                <!-- Layer visibility toggles - ORGANIZED BY: Mission | Map | Lights -->
                 <TextBlock Text="Layers:" Foreground="#AAA" VerticalAlignment="Center" Margin="4,0"/>
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Textures" 
-                              IsChecked="{Binding ShowTextures}" IsEnabled="{Binding IsMapLoaded}"/>
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Grid" 
-                              IsChecked="{Binding ShowGridLines}"/>
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings" 
-                              IsChecked="{Binding ShowBuildings}" IsEnabled="{Binding IsMapLoaded}"/>
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Objects" 
-                              IsChecked="{Binding ShowPrimGraphics}" IsEnabled="{Binding IsMapLoaded}"/>
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Lights" 
-                              IsChecked="{Binding ShowLights}" IsEnabled="{Binding IsLightsLoaded}"/>
+
+                <!-- Mission layers -->
                 <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Events" 
-                              IsChecked="{Binding ShowEventPoints}" IsEnabled="{Binding HasMission}"/>
+                      IsChecked="{Binding ShowEventPoints}" IsEnabled="{Binding HasMission}"
+                      ToolTip="Show/hide EventPoints"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Zones" 
+                      IsChecked="{Binding ShowZones}" IsEnabled="{Binding HasMission}"
+                      ToolTip="Show/hide Mission Zones"/>
+
+                <Separator Margin="4,4" Background="#444" Width="1"/>
+
+                <!-- Map layers -->
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Grid" 
+                      IsChecked="{Binding ShowGridLines}"
+                      ToolTip="Show/hide grid lines"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Textures" 
+                      IsChecked="{Binding ShowTextures}" IsEnabled="{Binding IsMapLoaded}"
+                      ToolTip="Show/hide terrain textures"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings" 
+                      IsChecked="{Binding ShowBuildings}" IsEnabled="{Binding IsMapLoaded}"
+                      ToolTip="Show/hide buildings"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Objects" 
+                      IsChecked="{Binding ShowPrimGraphics}" IsEnabled="{Binding IsMapLoaded}"
+                      ToolTip="Show/hide prim objects"/>
+
+                <Separator Margin="4,4" Background="#444" Width="1"/>
+
+                <!-- Lights layers -->
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Lights" 
+                      IsChecked="{Binding ShowLights}" IsEnabled="{Binding IsLightsLoaded}"
+                      ToolTip="Show/hide light positions"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Ranges" 
+                      IsChecked="{Binding ShowLightRanges}" IsEnabled="{Binding IsLightsLoaded}"
+                      ToolTip="Show/hide light range circles"/>
 
                 <Separator Margin="8,0" Background="#555"/>
 
-                <!-- Light range toggle -->
-                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="🔆 Ranges" 
-                              IsChecked="{Binding ShowLightRanges}" IsEnabled="{Binding IsLightsLoaded}"
-                              ToolTip="Show/hide light range circles"/>
+                <!-- Zone painting tools (only visible when mission loaded) -->
+                <StackPanel Orientation="Horizontal" 
+                    Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Zone:" Foreground="#AAA" VerticalAlignment="Center" Margin="4,0"/>
+                    <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="🖌️ Paint" 
+                          IsChecked="{Binding IsZonePaintMode}"
+                          ToolTip="Paint zones on map"/>
+                    <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="🧹 Erase" 
+                          IsChecked="{Binding IsZoneEraseMode}"
+                          ToolTip="Erase zones from map"/>
+                    <ComboBox ItemsSource="{Binding ZoneTypeOptions}"
+                      SelectedValue="{Binding SelectedZoneType}"
+                      SelectedValuePath="Value"
+                      DisplayMemberPath="DisplayName"
+                      Width="100" Margin="4,0"
+                      ToolTip="Zone type to paint"/>
+                </StackPanel>
             </WrapPanel>
         </Border>
 
@@ -258,9 +379,21 @@
 
                 <!-- Mission Info Panel -->
                 <Border Grid.Row="0" Background="#1E1E1E" Padding="10" Margin="5"
-                        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
+        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
-                        <TextBlock Text="MISSION INFO" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,8"/>
+                        <!-- Header with Edit button -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="MISSION INFO" Style="{StaticResource HeaderTextStyle}"/>
+                            <Button Grid.Column="1" Content="✏️ Edit" 
+                    Command="{Binding MissionPropertiesCommand}"
+                    Padding="8,2" FontSize="10"
+                    Background="#3C3C3C" Foreground="#AAA" BorderThickness="0"
+                    ToolTip="Edit Mission Properties"/>
+                        </Grid>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -276,64 +409,188 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
+                            <!-- Mission name -->
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Mission:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding MissionName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding MissionName}" Style="{StaticResource ValueTextStyle}" 
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding MissionName}"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Map:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding MapName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding MapName}"/>
+                            <!-- Brief name -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Brief:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BriefName}" Style="{StaticResource ValueTextStyle}" 
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding BriefName}"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Light Map:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LightMapName}" Style="{StaticResource ValueTextStyle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding LightMapName}"/>
+                            <!-- Map path -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Map:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MapName}" Style="{StaticResource ValueTextStyle}" 
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding MapName}"/>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Version:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Version}" Style="{StaticResource ValueTextStyle}"/>
+                            <!-- Light map path -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Light Map:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LightMapName}" Style="{StaticResource ValueTextStyle}" 
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding LightMapName}"/>
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Event Pts:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EventPointCount}" Style="{StaticResource ValueTextStyle}"/>
+                            <!-- Version -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Version:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Version}" Style="{StaticResource ValueTextStyle}"/>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Crime Rate:" Style="{StaticResource LabelTextStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CrimeRate}" Style="{StaticResource ValueTextStyle}"/>
+                            <!-- Event point count -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Event Pts:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding EventPointCount}" Style="{StaticResource ValueTextStyle}"/>
 
-                            <!-- Loaded files info -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Map File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding LoadedMapFileName}" Style="{StaticResource ValueTextStyle}" 
-                                       Foreground="{Binding IsMapLoaded, Converter={StaticResource BoolToVisibility}, ConverterParameter=GreenOrGray}"
-                                       TextTrimming="CharacterEllipsis"/>
+                            <!-- Separator -->
+                            <Separator Grid.Row="6" Grid.ColumnSpan="2" Background="#333" Margin="0,4"/>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Lights File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
-                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding LoadedLightsFileName}" Style="{StaticResource ValueTextStyle}"
-                                       TextTrimming="CharacterEllipsis"/>
+                            <!-- Rates section -->
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Crime:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CrimeRate}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Civilians:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding CivsRate}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="9" Grid.Column="0" Text="Boredom:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding BoredomRate}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="10" Grid.Column="0" Text="Cars:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding CarsRate}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <TextBlock Grid.Row="11" Grid.Column="0" Text="Music:" Style="{StaticResource LabelTextStyle}"/>
+                            <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding MusicWorld}" Style="{StaticResource ValueTextStyle}"/>
+
+                            <!-- Separator -->
+                            <Separator Grid.Row="12" Grid.ColumnSpan="2" Background="#333" Margin="0,4,0,0"/>
                         </Grid>
+
+                        <!-- Loaded files info (collapsible) -->
+                        <Expander Header="Loaded Files" IsExpanded="False" Foreground="#888" FontSize="10" Margin="0,4,0,0">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Map File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding LoadedMapFileName}" Style="{StaticResource ValueTextStyle}" 
+                           Foreground="{Binding IsMapLoaded, Converter={StaticResource BoolToColorConverter}}"
+                           TextTrimming="CharacterEllipsis"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Lights File:" Style="{StaticResource LabelTextStyle}" Foreground="#666"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LoadedLightsFileName}" Style="{StaticResource ValueTextStyle}"
+                           Foreground="{Binding IsLightsLoaded, Converter={StaticResource BoolToColorConverter}}"
+                           TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Expander>
                     </StackPanel>
                 </Border>
 
-                <!-- Category Filter Pills -->
-                <Border Grid.Row="1" Background="#1E1E1E" Padding="5" Margin="5"
-                        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
+                <!-- Filters Section -->
+                <Border Grid.Row="1" Background="#1E1E1E" Padding="8" Margin="5"
+        Visibility="{Binding HasMission, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
-                        <TextBlock Text="FILTERS" Style="{StaticResource HeaderTextStyle}" Margin="5,0,0,5"/>
-                        <ItemsControl ItemsSource="{Binding CategoryFilters}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource CategoryPillStyle}"
-                                            Background="{Binding DisplayBrush}"
-                                            Opacity="{Binding Opacity}"
-                                            MouseLeftButtonDown="CategoryPill_Click">
-                                        <TextBlock Text="{Binding DisplayText}" 
-                                                   Foreground="White" 
-                                                   FontSize="10"
-                                                   FontWeight="SemiBold"/>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <!-- Header with Clear button -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="FILTERS" Style="{StaticResource HeaderTextStyle}"/>
+                            <Button Grid.Column="1" Content="Clear" 
+                    Command="{Binding ClearFiltersCommand}"
+                    Padding="8,2" FontSize="10"
+                    Background="#3C3C3C" Foreground="#AAA" BorderThickness="0"/>
+                        </Grid>
+
+                        <!-- Text Search -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBox Grid.Column="1" 
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     Background="#2D2D2D" Foreground="#FFF" BorderBrush="#444"
+                     Padding="6,4" FontSize="11"
+                     ToolTip="Search by name, summary, or index"/>
+                        </Grid>
+
+                        <!-- Color and Group Filters Row -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Color Filter -->
+                            <ComboBox Grid.Column="0"
+                          ItemsSource="{Binding ColorFilterOptions}"
+                          SelectedValue="{Binding SelectedColorFilter}"
+                          SelectedValuePath="Value"
+                          FontSize="11"
+                          ToolTip="Filter by color">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Ellipse Width="10" Height="10"
+                                         Fill="{Binding ColorBrush}"
+                                         Stroke="#333" StrokeThickness="1"
+                                         Margin="0,0,6,0"
+                                         Visibility="{Binding ColorBrush, Converter={StaticResource NullToVisibility}}"/>
+                                                            <TextBlock Text="{Binding DisplayName}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- Group Filter -->
+                            <ComboBox Grid.Column="2"
+          ItemsSource="{Binding GroupFilterOptions}"
+          SelectedValue="{Binding SelectedGroupFilter}"
+          SelectedValuePath="Value"
+          DisplayMemberPath="DisplayName"
+          FontSize="11"
+          ToolTip="Filter by group letter"/>
+                        </Grid>
+
+                        <!-- Category Filter (Compact Checkboxes) -->
+                        <Expander Header="Categories" IsExpanded="False" 
+                  Foreground="#AAA" FontSize="11">
+                            <ItemsControl ItemsSource="{Binding CategoryFilters}" Margin="0,4,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsEnabled}"
+                                  Margin="0,2,8,2"
+                                  Foreground="#CCC" FontSize="10"
+                                  ToolTip="{Binding Count, StringFormat={}{0} items}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="8" Height="8" 
+                                         Fill="{Binding DisplayBrush}" 
+                                         Margin="0,0,4,0"/>
+                                                <TextBlock Text="{Binding Category}"/>
+                                                <TextBlock Text="{Binding Count, StringFormat=' ({0})'}" 
+                                           Foreground="#666" FontSize="9"/>
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Expander>
                     </StackPanel>
                 </Border>
 
@@ -366,48 +623,62 @@
                         </Grid>
 
                         <ListView Grid.Row="1" 
-                                  x:Name="EventPointsListView"
-                                  ItemsSource="{Binding EventPoints}"
-                                  SelectedItem="{Binding SelectedEventPoint}"
-                                  SelectionMode="Single"
-                                  VirtualizingPanel.IsVirtualizing="True"
-                                  VirtualizingPanel.VirtualizationMode="Recycling"
-                                  MouseDoubleClick="EventPointsListView_MouseDoubleClick">
+          x:Name="EventPointsListView"
+          ItemsSource="{Binding EventPoints}"
+          SelectedItem="{Binding SelectedEventPoint}"
+          SelectionMode="Single"
+          VirtualizingPanel.IsVirtualizing="True"
+          VirtualizingPanel.VirtualizationMode="Recycling"
+          MouseDoubleClick="EventPointsListView_MouseDoubleClick">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <!-- THIS IS THE FIX: Visibility on the container, not the content -->
+                                    <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="4"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="ForestGreen"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#3D3D3D"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="16"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-
                                         <!-- Color indicator -->
                                         <Ellipse Grid.Column="0" Width="12" Height="12"
-                                                 Fill="{Binding ColorIndex, Converter={StaticResource ColorIndexToBrush}}"
-                                                 Stroke="#333333" StrokeThickness="1"/>
-
+                         Fill="{Binding ColorIndex, Converter={StaticResource ColorIndexToBrush}}"
+                         Stroke="#333333" StrokeThickness="1"/>
                                         <!-- Name and summary -->
                                         <StackPanel Grid.Column="1" Margin="8,0,0,0">
                                             <TextBlock Text="{Binding DisplayName}" 
-                                                       Foreground="#FFFFFF" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Summary}" 
-                                                       Foreground="#888888" FontSize="10"
-                                                       TextTrimming="CharacterEllipsis"/>
+                               Foreground="#FFFFFF" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding SummaryTruncated}" 
+                               Foreground="#888888" FontSize="10"
+                               TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
-
                                         <!-- Category pill -->
                                         <Border Grid.Column="2" 
-                                                Background="{Binding CategoryBrush}"
-                                                CornerRadius="8" Padding="6,2" Margin="4,0,0,0"
-                                                VerticalAlignment="Center">
+                        Background="{Binding CategoryBrush}"
+                        CornerRadius="8" Padding="6,2" Margin="4,0,0,0"
+                        VerticalAlignment="Center">
                                             <TextBlock Text="{Binding CategoryName}" 
-                                                       Foreground="White" FontSize="9"/>
+                               Foreground="White" FontSize="9"/>
                                         </Border>
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
+
 
                         <!-- Empty state -->
                         <TextBlock Grid.Row="1" 

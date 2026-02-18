@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.Models;
 using UrbanChaosMissionEditor.ViewModels;
 using UrbanChaosMissionEditor.Views.MapOverlays;
@@ -157,6 +158,34 @@ public partial class MapViewControl : UserControl
 
         ScrollContainer.ScrollToHorizontalOffset(scrollX);
         ScrollContainer.ScrollToVerticalOffset(scrollY);
+    }
+
+    private void HandleZonePainting(Point position)
+    {
+        var viewModel = ViewModel;
+        if (viewModel == null) return;
+        if (!viewModel.IsZonePaintMode && !viewModel.IsZoneEraseMode) return;
+
+        // Convert pixel position to grid coordinates
+        int gridX = (int)(position.X / 64.0);
+        int gridZ = (int)(position.Y / 64.0);
+
+        // Invert for game coordinates
+        gridX = 127 - gridX;
+        gridZ = 127 - gridZ;
+
+        if (gridX < 0 || gridX >= 128 || gridZ < 0 || gridZ >= 128) return;
+
+        if (viewModel.IsZonePaintMode)
+        {
+            viewModel.SetZoneFlag(gridX, gridZ, viewModel.SelectedZoneType, set: true);
+        }
+        else if (viewModel.IsZoneEraseMode)
+        {
+            viewModel.SetZoneFlag(gridX, gridZ, viewModel.SelectedZoneType, set: false);
+        }
+
+        ZoneLayer?.Refresh();
     }
 
     #region Position Selection Mode
@@ -399,6 +428,11 @@ public partial class MapViewControl : UserControl
             HandleRotatePointDrag(position);
             return;
         }
+
+        if (e.LeftButton == MouseButtonState.Pressed)
+         {
+             HandleZonePainting(e.GetPosition(Surface));
+         }
 
         // Update coordinate display
         UpdateCoordinateDisplay(position);

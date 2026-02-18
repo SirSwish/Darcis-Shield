@@ -75,13 +75,19 @@
                         Panel.ZIndex="4"
                         IsHitTestVisible="False"/>
 
+              
+                    <ovl:ZoneOverlay x:Name="ZoneLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowZones, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="9"
+                        IsHitTestVisible="False"/>
+
                     <!-- 6. EventPoints Layer -->
                     <ovl:EventPointsLayer x:Name="EventPointsLayer"
                         Width="8192" Height="8192"
                         EventPoints="{Binding EventPoints}"
                         SelectedEventPoint="{Binding SelectedEventPoint}"
                         Visibility="{Binding ShowEventPoints, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
-                        Panel.ZIndex="10"
                         IsHitTestVisible="False"/>
 
                 </Grid>

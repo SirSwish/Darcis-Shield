@@ -51,7 +51,7 @@ public class UcmFileService
         // Read EventPoints (512 entries)
         for (int i = 0; i < Mission.MaxEventPoints; i++)
         {
-            mission.EventPoints[i] = ReadEventPoint(reader, i + 1); // 1-based index
+            mission.EventPoints[i] = ReadEventPoint(reader, i); // Array index = display index
         }
 
         // Read SkillLevels (254 bytes)
