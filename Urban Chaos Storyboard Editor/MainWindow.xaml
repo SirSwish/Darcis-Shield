@@ -7,10 +7,6 @@
         WindowStartupLocation="CenterScreen"
         Background="#1E1E1E">
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-    </Window.Resources>
-
     <Window.InputBindings>
         <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NewCommand}"/>
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenCommand}"/>
@@ -26,7 +22,7 @@
         </Grid.RowDefinitions>
 
         <!-- Menu Bar -->
-        <Menu Grid.Row="0" Background="#E0E0E0" Foreground="Black">
+        <Menu Grid.Row="0">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Command="{Binding NewCommand}" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="_Open..." Command="{Binding OpenCommand}" InputGestureText="Ctrl+O"/>
@@ -193,37 +189,9 @@
             <!-- Right Panel with Tabs -->
             <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1" Background="#252526">
                 <TabControl Background="#252526" BorderThickness="0">
-                    <TabControl.Resources>
-                        <Style TargetType="TabItem">
-                            <Setter Property="Background" Value="#3C3C3C"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="Padding" Value="12,6"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="TabItem">
-                                        <Border x:Name="Border" Background="{TemplateBinding Background}" 
-                                                BorderBrush="#555" BorderThickness="1,1,1,0" 
-                                                Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="#252526"/>
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="#4C4C4C"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </TabControl.Resources>
-
                     <TabItem Header="Districts">
                         <views:DistrictsPanel x:Name="DistrictsPanel"/>
                     </TabItem>
-
                     <TabItem Header="Missions">
                         <views:MissionsPanel x:Name="MissionsPanel"/>
                     </TabItem>
@@ -232,7 +200,7 @@
         </Grid>
 
         <!-- Status Bar - WHITE -->
-        <StatusBar Grid.Row="3" Background="White" Foreground="Black">
+        <StatusBar Grid.Row="3">
             <StatusBarItem>
                 <TextBlock Text="{Binding StatusText}"/>
             </StatusBarItem>

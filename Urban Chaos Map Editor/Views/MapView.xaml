@@ -94,5 +94,50 @@
                 </Grid>
             </Grid>
         </ScrollViewer>
+        <!-- Coordinate overlay (bottom-left) - matches Mission Editor -->
+        <Border Background="#80000000" 
+        HorizontalAlignment="Left" 
+        VerticalAlignment="Bottom"
+        Padding="8,4"
+        Margin="10">
+            <TextBlock x:Name="CoordinateText" 
+               Foreground="White" 
+               FontFamily="Consolas"
+               FontSize="11">
+        <Run Text="X: "/>
+        <Run Text="{Binding CursorX}"/>
+        <Run Text=" ("/>
+        <Run Text="{Binding CursorTileX}"/>
+        <Run Text=")  Z: "/>
+        <Run Text="{Binding CursorZ}"/>
+        <Run Text=" ("/>
+        <Run Text="{Binding CursorTileZ}"/>
+        <Run Text=")"/>
+            </TextBlock>
+        </Border>
+
+        <!-- Zoom controls (bottom-right) - matches Mission Editor -->
+        <StackPanel Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="10">
+            <Button Content="-" Width="30" Height="30" 
+            Command="{Binding ZoomOutCommand}"
+            Background="#3D3D3D" Foreground="White" BorderBrush="#555555"
+            ToolTip="Zoom Out"/>
+            <Border Background="#3D3D3D" Padding="8,0" VerticalAlignment="Center">
+                <TextBlock Foreground="White" VerticalAlignment="Center">
+            <Run Text="{Binding Zoom, StringFormat=P0, Mode=OneWay}"/>
+                </TextBlock>
+            </Border>
+            <Button Content="+" Width="30" Height="30" 
+            Command="{Binding ZoomInCommand}"
+            Background="#3D3D3D" Foreground="White" BorderBrush="#555555"
+            ToolTip="Zoom In"/>
+            <Button Content="Reset" Width="50" Height="30" Margin="5,0,0,0"
+            Command="{Binding ResetZoomCommand}"
+            Background="#3D3D3D" Foreground="White" BorderBrush="#555555"
+            ToolTip="Reset Zoom (Ctrl+0)"/>
+        </StackPanel>
     </Grid>
 </UserControl>

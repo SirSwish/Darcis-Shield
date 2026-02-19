@@ -15,9 +15,91 @@
 
     <!-- Local resources -->
     <Window.Resources>
-        <!-- Added: converters referenced below -->
+        <!-- Converters -->
         <conv:NullToBoolConverter x:Key="NullToBool" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- CONSISTENT DARK THEME COLORS -->
+        <SolidColorBrush x:Key="BackgroundDark" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="BackgroundMedium" Color="#252526"/>
+        <SolidColorBrush x:Key="BackgroundLight" Color="#2D2D2D"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#3E3E42"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#CCCCCC"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#888888"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#861b2d"/>
+        <SolidColorBrush x:Key="AccentColorLight" Color="#a62b3f"/>
+        <SolidColorBrush x:Key="AccentColorDark" Color="#660000"/>
+
+        <!-- Toggle button style for layer visibility (RED theme - Map Editor identity) -->
+        <Style x:Key="LayerToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinWidth" Value="70"/>
+            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" 
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#861b2d"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#a62b3f"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#888"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toolbar button style -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Background" Value="#3C3C3C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4C4C4C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#861b2d"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <!-- Key bindings -->
@@ -41,311 +123,140 @@
     <!-- Layout -->
     <DockPanel LastChildFill="True">
 
-        <!-- Menu (top) -->
-        <Menu DockPanel.Dock="Top">
+        <!-- Menu (top) - DARK THEME -->
+        <Menu DockPanel.Dock="Top" Background="#2D2D2D" Foreground="#FFFFFF">
             <MenuItem Header="_File">
-
-                <!-- New -->
-                <MenuItem Header="_New Map"
-                          Command="{Binding NewMapCommand}"
-                          InputGestureText="Ctrl+N">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/new.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                
-                <!-- Open -->
-                <MenuItem Header="_Open Map..."
-                          Command="{Binding LoadMapCommand}"
-                          InputGestureText="Ctrl+O">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/load.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                
-                <!-- Save -->
-                <MenuItem Header="_Save Map"
-                          Command="{Binding SaveMapCommand}"
-                          InputGestureText="Ctrl+S">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/save.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                
-                <!-- Save As -->
-                <MenuItem Header="Save Map _As..."
-                          Command="{Binding SaveAsMapCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/saveas.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
+                <MenuItem Header="_New Map" Command="{Binding NewMapCommand}" InputGestureText="Ctrl+N"/>
+                <MenuItem Header="_Open Map..." Command="{Binding LoadMapCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Save Map" Command="{Binding SaveMapCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save Map _As..." Command="{Binding SaveAsMapCommand}" InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
-
                 <MenuItem Header="_Recent" SubmenuOpened="Recent_SubmenuOpened">
-                    <!-- Hidden placeholder so WPF treats this as a header and will open the submenu -->
                     <Separator Visibility="Collapsed"/>
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/recent.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
                 </MenuItem>
-
-                <!-- Exit -->
-                <MenuItem Header="E_xit"
-                          Command="{Binding ExitCommand}"
-                          InputGestureText="Alt+F4">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/exit.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
+                <Separator/>
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGestureText="Alt+F4"/>
             </MenuItem>
 
             <MenuItem Header="_Edit">
-                <!-- Heights -->
-                <MenuItem Header="_Raise Height"   Command="{Binding Map.RaiseHeightCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/raise.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Lower Height"   Command="{Binding Map.LowerHeightCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/lower.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Level (click-drag)" Command="{Binding Map.LevelHeightCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/level.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Flatten Height (set 0)" Command="{Binding Map.FlattenHeightCommand}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/flatten.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
+                <MenuItem Header="_Raise Height" Command="{Binding Map.RaiseHeightCommand}"/>
+                <MenuItem Header="_Lower Height" Command="{Binding Map.LowerHeightCommand}"/>
+                <MenuItem Header="_Level (click-drag)" Command="{Binding Map.LevelHeightCommand}"/>
+                <MenuItem Header="_Flatten Height (set 0)" Command="{Binding Map.FlattenHeightCommand}"/>
                 <Separator/>
-
-                <MenuItem Header="Delete Selected Prim"
-                          Command="{Binding DeletePrimCommand}"
-                          IsEnabled="{Binding Map.SelectedPrim, Converter={StaticResource NullToBool}}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/delete.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Object _Height..."
-                          Click="PrimHeight_Click"
-                          IsEnabled="{Binding Map.SelectedPrim, Converter={StaticResource NullToBool}}">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showprimheight.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <!-- Copy / Paste prims -->
-                <MenuItem Header="_Copy Object"
-                          InputGestureText="Ctrl+C"
-                          Click="CopyPrim_Click">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/copyobject.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="_Paste Object"
-                          InputGestureText="Ctrl+V"
-                          Click="PastePrim_Click">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/pasteobject.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
+                <MenuItem Header="_Copy Object" InputGestureText="Ctrl+C" Click="CopyPrim_Click"/>
+                <MenuItem Header="_Paste Object" InputGestureText="Ctrl+V" Click="PastePrim_Click"/>
+                <MenuItem Header="_Delete Selected Object" Command="{Binding DeletePrimCommand}" InputGestureText="Delete"
+                  IsEnabled="{Binding Map.SelectedPrim, Converter={StaticResource NullToBool}}"/>
+                <MenuItem Header="Object _Height..." Click="PrimHeight_Click"
+                  IsEnabled="{Binding Map.SelectedPrim, Converter={StaticResource NullToBool}}"/>
             </MenuItem>
 
             <MenuItem Header="_View">
-                <MenuItem Header="_Textures"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowTextures}"
-                          Command="{Binding ToggleTexturesCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+T">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showtextures.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <!-- Grid Lines -->
-                <MenuItem Header="_Grid Lines"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowGridLines}"
-                          Command="{Binding ToggleGridLinesCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+G">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showgrid.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="_Objects"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowObjects}"
-                          Command="{Binding ToggleObjectsCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+J">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showobjects.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="_Prim Graphics"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowPrimGraphics}"
-                          Command="{Binding TogglePrimGraphicsCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+Y">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showobjects.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <!-- MapWho -->
-                <MenuItem Header="_MapWho"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowMapWho}"
-                          Command="{Binding ToggleMapWhoCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+M">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showmapwho.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Buildings"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowBuildings}"
-                          Command="{Binding ToggleBuildingsCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+B">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showbuildings.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Walkables"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowWalkables}"
-                          Command="{Binding ToggleWalkablesCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+W">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showwalkables.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <MenuItem Header="_Heights"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.ShowHeights}"
-                          Command="{Binding ToggleHeightsCommand}"
-                          CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
-                          InputGestureText="Ctrl+H">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/showheights.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
-                <Separator/>
-
-                <!-- Reset Zoom -->
-                <MenuItem Header="_Reset Zoom"
-                          Command="{Binding ResetZoomCommand}"
-                          InputGestureText="Ctrl+0">
-                    <MenuItem.Icon>
-                        <Image Source="/Assets/Icons/resetzoom.ico" Width="16" Height="16"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-
+                <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
+                <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
+                <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
                 <MenuItem Header="_Go to Cell..." Click="GoToCell_Click"/>
                 <Separator/>
-
-                <MenuItem Header="_Use Beta Textures"
-                          IsCheckable="True"
-                          IsChecked="{Binding Map.UseBetaTextures, Mode=TwoWay}">
-                    <MenuItem.ToolTip>
-                        <TextBlock Text="Switch between Release and Beta texture sets (requires textures preloaded)."/>
-                    </MenuItem.ToolTip>
+                <MenuItem Header="Map Layers">
+                    <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding Map.ShowTextures}" InputGestureText="Ctrl+T"/>
+                    <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding Map.ShowGridLines}" InputGestureText="Ctrl+G"/>
+                    <MenuItem Header="Show _Heights" IsCheckable="True" IsChecked="{Binding Map.ShowHeights}" InputGestureText="Ctrl+H"/>
+                    <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding Map.ShowBuildings}" InputGestureText="Ctrl+B"/>
+                    <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding Map.ShowObjects}" InputGestureText="Ctrl+J"/>
+                    <MenuItem Header="Show Object _Graphics" IsCheckable="True" IsChecked="{Binding Map.ShowPrimGraphics}" InputGestureText="Ctrl+Y"/>
+                    <MenuItem Header="Show _Walkables" IsCheckable="True" IsChecked="{Binding Map.ShowWalkables}" InputGestureText="Ctrl+W"/>
+                    <MenuItem Header="Show _MapWho" IsCheckable="True" IsChecked="{Binding Map.ShowMapWho}" InputGestureText="Ctrl+M"/>
                 </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Use Beta Textures" IsCheckable="True" IsChecked="{Binding Map.UseBetaTextures, Mode=TwoWay}"/>
             </MenuItem>
-
         </Menu>
 
-        <!-- Status / Info Bar -->
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Background="#2D2D2D" Padding="4">
+            <WrapPanel>
+                <!-- File operations -->
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="📁 Open" 
+                Command="{Binding LoadMapCommand}" ToolTip="Open Map File (Ctrl+O)"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="💾 Save" 
+                Command="{Binding SaveMapCommand}" ToolTip="Save Map File (Ctrl+S)"/>
+
+                <Separator Margin="8,0" Background="#555"/>
+
+                <!-- Layer visibility toggles -->
+                <TextBlock Text="Layers:" Foreground="#AAA" VerticalAlignment="Center" Margin="4,0"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Textures" 
+                      IsChecked="{Binding Map.ShowTextures}" ToolTip="Ctrl+T"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Grid" 
+                      IsChecked="{Binding Map.ShowGridLines}" ToolTip="Ctrl+G"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Heights" 
+                      IsChecked="{Binding Map.ShowHeights}" ToolTip="Ctrl+H"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings" 
+                      IsChecked="{Binding Map.ShowBuildings}" ToolTip="Ctrl+B"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Objects" 
+                      IsChecked="{Binding Map.ShowObjects}" ToolTip="Ctrl+J"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Graphics" 
+                      IsChecked="{Binding Map.ShowPrimGraphics}" ToolTip="Ctrl+Y"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Walkables" 
+                      IsChecked="{Binding Map.ShowWalkables}" ToolTip="Ctrl+W"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="MapWho" 
+                      IsChecked="{Binding Map.ShowMapWho}" ToolTip="Ctrl+M"/>
+            </WrapPanel>
+        </Border>
+
+        <!-- Status / Info Bar - RED THEME (Map Editor identity) -->
         <Border DockPanel.Dock="Bottom"
-                Height="22"
-                Background="#861b2d"
-                BorderThickness="0,1,0,0"
-                BorderBrush="#660000">
-            <Grid Background="Transparent">
+        Height="24"
+        Background="#861b2d"
+        BorderThickness="0,1,0,0"
+        BorderBrush="#660000">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <!-- left status -->
-                    <ColumnDefinition Width="Auto"/>
-                    <!-- action -->
-                    <ColumnDefinition Width="Auto"/>
-                    <!-- files -->
-                    <ColumnDefinition Width="Auto"/>
-                    <!-- spacer pushes right side to edge -->
                     <ColumnDefinition Width="*"/>
-                    <!-- coords -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- spinner -->
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Left: status text -->
                 <TextBlock Grid.Column="0"
-                           Text="{Binding StatusMessage}"
-                           VerticalAlignment="Center"
-                           Margin="8,0,0,0"
-                           Foreground="White"
-                           FontSize="12"/>
+                   Text="{Binding StatusMessage}"
+                   VerticalAlignment="Center"
+                   Margin="8,0"
+                   Foreground="White"
+                   FontSize="12"/>
 
-                <!-- Action status -->
+                <!-- Files info -->
                 <TextBlock Grid.Column="1"
-                           Margin="8,0"
-                           VerticalAlignment="Center"
-                           Foreground="White"
-                           FontSize="12"
-                           Text="{Binding EditorActionStatus}"/>
-
-                <!-- Map/Lights file display -->
-                <TextBlock Grid.Column="2"
-                           Margin="8,0"
-                           VerticalAlignment="Center"
-                           Foreground="White"
-                           FontSize="12"
-                           Text="{Binding StatusFiles}"/>
-
-                <!-- Right: coordinates -->
-                <TextBlock Grid.Column="4"
-                           Margin="0,0,8,0"
-                           VerticalAlignment="Center"
-                           Foreground="White"
-                           FontSize="12">
-                    <Run Text="X: "/>
-                    <Run Text="{Binding Map.CursorX}"/>
-                    <Run Text=" ("/>
-                    <Run Text="{Binding Map.CursorTileX}"/>
-                    <Run Text=")  Z: "/>
-                    <Run Text="{Binding Map.CursorZ}"/>
-                    <Run Text=" ("/>
-                    <Run Text="{Binding Map.CursorTileZ}"/>
-                    <Run Text=")"/>
+                   VerticalAlignment="Center"
+                   Foreground="White"
+                   FontSize="12"
+                   Margin="8,0">
+            <Run Text="Map: "/>
+            <Run Text="{Binding StatusFiles, Mode=OneWay}"/>
                 </TextBlock>
 
-                <!-- Far right: tiny indeterminate spinner (only when busy) -->
-                <ProgressBar Grid.Column="5"
-                             Width="90"
-                             Height="6"
-                             Margin="0,0,8,0"
-                             VerticalAlignment="Center"
-                             IsIndeterminate="True"
-                             Foreground="White"
-                             Background="#770000"
-                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
+                <!-- Zoom level -->
+                <TextBlock Grid.Column="2"
+                   VerticalAlignment="Center"
+                   Foreground="White"
+                   FontSize="12"
+                   Margin="8,0">
+            <Run Text="Zoom: "/>
+            <Run Text="{Binding Map.Zoom, StringFormat=P0, Mode=OneWay}"/>
+                </TextBlock>
+
+                <!-- Spinner (when busy) -->
+                <ProgressBar Grid.Column="3"
+                     Width="80"
+                     Height="6"
+                     Margin="8,0"
+                     VerticalAlignment="Center"
+                     IsIndeterminate="True"
+                     Foreground="White"
+                     Background="#770000"
+                     Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
             </Grid>
         </Border>
 
@@ -362,44 +273,41 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left fold-out editor drawer -->
+            <!-- Left fold-out editor drawer - UPDATED DARK THEME -->
+            <!-- Left fold-out editor drawer - UPDATED DARK THEME -->
             <Expander x:Name="EditorExpander"
-              Grid.Column="0"
-              IsExpanded="True"
-              ExpandDirection="Right"
-              Background="#222"
-              Foreground="White"
-              BorderBrush="#333"
-              BorderThickness="0,0,1,0"
-              Expanded="EditorExpander_Expanded"
-              Collapsed="EditorExpander_Collapsed" Grid.ColumnSpan="2">
+          Grid.Column="0"
+          IsExpanded="True"
+          ExpandDirection="Right"
+          Background="#1E1E1E"
+          Foreground="White"
+          BorderBrush="#3E3E42"
+          BorderThickness="0,0,1,0"
+          Expanded="EditorExpander_Expanded"
+          Collapsed="EditorExpander_Collapsed" 
+          Grid.ColumnSpan="2">
 
                 <Expander.Header>
                     <TextBlock Text="Editor"
-                       FontWeight="SemiBold"
-                       Padding="4"
-                       Foreground="White">
+                   FontWeight="SemiBold"
+                   Padding="4"
+                   Foreground="White">
                         <TextBlock.LayoutTransform>
                             <RotateTransform Angle="-90"/>
                         </TextBlock.LayoutTransform>
                     </TextBlock>
                 </Expander.Header>
 
-                <!-- Drawer content -->
-                <Grid Background="#2b2b2b">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="107*"/>
-                        <RowDefinition Height="92*"/>
-                    </Grid.RowDefinitions>
-
-                    <TabControl Grid.RowSpan="2">
+                <!-- Drawer content - UPDATED DARK THEME -->
+                <Grid Background="#252526">
+                    <TabControl Background="#252526" Foreground="White">
                         <TabItem Header="Heights">
                             <tabs:HeightsTab/>
                         </TabItem>
                         <TabItem Header="Textures">
                             <tabs:TexturesTab/>
                         </TabItem>
-                        <TabItem Header="Prims" Height="20" VerticalAlignment="Top">
+                        <TabItem Header="Prims">
                             <tabs:PrimsTab/>
                         </TabItem>
                         <TabItem Header="Buildings">
