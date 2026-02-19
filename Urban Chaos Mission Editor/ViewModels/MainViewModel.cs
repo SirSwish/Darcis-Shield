@@ -41,6 +41,14 @@ public class MainViewModel : BaseViewModel
     private bool _isZoneEraseMode;
     private ZoneType _selectedZoneType = ZoneType.NoWander;
 
+    private bool _isZoneRectPreviewActive;
+    private int _zoneRectStartX = -1, _zoneRectStartZ = -1;
+    private int _zoneRectEndX = -1, _zoneRectEndZ = -1;
+
+    // Hovered zone cell (game coords, 0..127). -1 means "none"
+    private int _hoverZoneX = -1;
+    private int _hoverZoneZ = -1;
+
     private EventPoint? _clipboardEventPoint;
 
     // Filter properties
@@ -92,6 +100,86 @@ public class MainViewModel : BaseViewModel
         set => SetProperty(ref _selectedZoneType, value);
     }
 
+    public int HoverZoneX => _hoverZoneX;
+    public int HoverZoneZ => _hoverZoneZ;
+    public bool HasZoneHover => _hoverZoneX >= 0 && _hoverZoneZ >= 0;
+
+    public bool SetZoneHover(int gridX, int gridZ)
+    {
+        if (gridX == _hoverZoneX && gridZ == _hoverZoneZ) return false;
+
+        _hoverZoneX = gridX;
+        _hoverZoneZ = gridZ;
+        OnPropertyChanged(nameof(HoverZoneX));
+        OnPropertyChanged(nameof(HoverZoneZ));
+        OnPropertyChanged(nameof(HasZoneHover));
+        return true;
+    }
+
+    public bool ClearZoneHover()
+    {
+        if (!HasZoneHover) return false;
+
+        _hoverZoneX = -1;
+        _hoverZoneZ = -1;
+        OnPropertyChanged(nameof(HoverZoneX));
+        OnPropertyChanged(nameof(HoverZoneZ));
+        OnPropertyChanged(nameof(HasZoneHover));
+        return true;
+    }
+
+    /// <summary>
+    /// Sets or clears a single zone FLAG on a tile without overwriting other bits.
+    /// </summary>
+    public void SetZoneFlag(int gridX, int gridZ, ZoneType flag, bool set)
+    {
+        if (_currentMission == null) return;
+        if (gridX < 0 || gridX >= 128 || gridZ < 0 || gridZ >= 128) return;
+        if (flag == ZoneType.None) return;
+
+        byte cur = _currentMission.MissionZones[gridX, gridZ];
+        byte mask = (byte)flag;
+        byte next = set ? (byte)(cur | mask) : (byte)(cur & ~mask);
+
+        if (next == cur) return;
+
+        _currentMission.MissionZones[gridX, gridZ] = next;
+        IsDirty = true;
+    }
+    public bool IsZoneRectPreviewActive => _isZoneRectPreviewActive;
+    public int ZoneRectStartX => _zoneRectStartX;
+    public int ZoneRectStartZ => _zoneRectStartZ;
+    public int ZoneRectEndX => _zoneRectEndX;
+    public int ZoneRectEndZ => _zoneRectEndZ;
+
+    public void SetZoneRectPreview(int startX, int startZ, int endX, int endZ)
+    {
+        _isZoneRectPreviewActive = true;
+        _zoneRectStartX = startX;
+        _zoneRectStartZ = startZ;
+        _zoneRectEndX = endX;
+        _zoneRectEndZ = endZ;
+
+        OnPropertyChanged(nameof(IsZoneRectPreviewActive));
+        OnPropertyChanged(nameof(ZoneRectStartX));
+        OnPropertyChanged(nameof(ZoneRectStartZ));
+        OnPropertyChanged(nameof(ZoneRectEndX));
+        OnPropertyChanged(nameof(ZoneRectEndZ));
+    }
+
+    public void ClearZoneRectPreview()
+    {
+        if (!_isZoneRectPreviewActive) return;
+
+        _isZoneRectPreviewActive = false;
+        _zoneRectStartX = _zoneRectStartZ = _zoneRectEndX = _zoneRectEndZ = -1;
+
+        OnPropertyChanged(nameof(IsZoneRectPreviewActive));
+        OnPropertyChanged(nameof(ZoneRectStartX));
+        OnPropertyChanged(nameof(ZoneRectStartZ));
+        OnPropertyChanged(nameof(ZoneRectEndX));
+        OnPropertyChanged(nameof(ZoneRectEndZ));
+    }
 
     public MainViewModel() : this(new UcmFileService(), new WpfDialogService())
     {
@@ -1435,25 +1523,6 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-
-    /// <summary>
-    /// Set zone value at grid coordinates
-    /// </summary>
-    public void SetZoneFlag(int gridX, int gridZ, ZoneType flag, bool set)
-    {
-        if (_currentMission == null) return;
-        if (gridX < 0 || gridX >= 128 || gridZ < 0 || gridZ >= 128) return;
-        if (flag == ZoneType.None) return; // meaningless for bit ops
-
-        byte cur = _currentMission.MissionZones[gridX, gridZ];
-
-        cur = set
-            ? (byte)(cur | (byte)flag)
-            : (byte)(cur & ~(byte)flag);
-
-        _currentMission.MissionZones[gridX, gridZ] = cur;
-        IsDirty = true;
-    }
 
     /// <summary>
     /// Get zone value at grid coordinates
