@@ -1,4 +1,15 @@
-﻿using System;
+﻿// ============================================================
+// LightEditor/Views/MapOverlays/LightLayer.cs
+// ============================================================
+// NOTE: The Light Editor's LightLayer is a Canvas-based interactive layer
+// with drag-to-move functionality. It should remain as the existing
+// implementation since it has specialized editing behavior.
+// 
+// However, it could optionally extend SharedLightLayer for the
+// rendering portion while keeping the interactive Canvas behavior.
+// ============================================================
+
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,9 +22,19 @@ using UrbanChaosLightEditor.ViewModels;
 
 namespace UrbanChaosLightEditor.Views.MapOverlays
 {
+    /// <summary>
+    /// Interactive light layer for Light Editor.
+    /// Uses Canvas with Shape children for hit testing and drag interactions.
+    /// This is specialized for the Light Editor and not shared.
+    /// </summary>
     public sealed class LightLayer : Canvas
     {
+        // [Existing implementation remains unchanged]
+        // This is the interactive version with drag-to-move, selection, etc.
+        // See the original LightLayer.cs in the Light Editor project.
+
         private readonly LightsAccessor _acc = new LightsAccessor(LightsDataService.Instance);
+        private MainWindowViewModel? _vm;
 
         // Drag state
         private bool _mouseDown;
@@ -24,7 +45,6 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
         private int _dragIndex = -1;
         private Shape? _dragShape;
         private double _dragRadius;
-        private MainWindowViewModel? _vm;
 
         private const double DragThreshold = 4.0;
 
@@ -32,10 +52,9 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
         {
             Width = 8192;
             Height = 8192;
-            Background = null; // Only child shapes are hit targets
+            Background = null;
             IsHitTestVisible = true;
             Panel.SetZIndex(this, 6);
-
             Loaded += (_, __) =>
             {
                 Redraw();

@@ -1,85 +1,59 @@
-﻿// /Views/MapOverlays/TextureLayer.cs
+﻿// ============================================================
+// MapEditor/Views/MapOverlays/TexturesLayer.cs
+// ============================================================
 using System;
-using System.Windows;
-using System.Windows.Media;
-using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
 using UrbanChaosMapEditor.Services.DataServices;
-using UrbanChaosEditor.Shared.Services.Textures;
+using UrbanChaosEditor.Shared.Views.MapOverlays;
 
 namespace UrbanChaosMapEditor.Views.MapOverlays
 {
-    public sealed class TexturesLayer : FrameworkElement
+    /// <summary>
+    /// Textures layer for Map Editor - Direct rendering for editing.
+    /// </summary>
+    public sealed class TexturesLayer : SharedTexturesLayer
     {
-        private readonly TexturesAccessor _tex = new TexturesAccessor(MapDataService.Instance);
-
         public TexturesLayer()
         {
-            Width = MapConstants.MapPixels;
-            Height = MapConstants.MapPixels;
-            IsHitTestVisible = false;
+            // Map Editor uses direct rendering for fast edits
+            RenderMode = TextureRenderMode.Direct;
 
-            // Repaint when data changes or new buffer arrives
-            MapDataService.Instance.MapLoaded += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapSaved += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapCleared += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapBytesReset += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            // Optional: repaint after textures cached
-            TextureCacheService.Instance.Completed += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            TexturesChangeBus.Instance.Changed += (_, __) => Dispatcher.Invoke(InvalidateVisual);
+            // Set up data provider
+            SetTextureProvider(new MapEditorTextureProvider());
+
+            // Subscribe to texture change events
+            TexturesChangeBus.Instance.Changed += (_, __) => RefreshOnUiThread();
+        }
+    }
+
+    /// <summary>
+    /// Adapter to connect MapDataService to ITextureDataProvider.
+    /// </summary>
+    internal class MapEditorTextureProvider : ITextureDataProvider
+    {
+        private readonly TexturesAccessor _tex;
+
+        public MapEditorTextureProvider()
+        {
+            _tex = new TexturesAccessor(MapDataService.Instance);
         }
 
-        protected override Size MeasureOverride(Size availableSize)
-            => new(MapConstants.MapPixels, MapConstants.MapPixels);
+        public bool IsLoaded => MapDataService.Instance.IsLoaded;
+        public byte[]? GetBytesCopy() => MapDataService.Instance.MapBytes;
 
-        protected override void OnRender(DrawingContext dc)
+        public (string relativeKey, int rotationDeg) GetTileTextureKeyAndRotation(int tx, int ty)
+            => _tex.GetTileTextureKeyAndRotation(tx, ty);
+
+        public void SubscribeMapLoaded(Action callback)
         {
-            if (!MapDataService.Instance.IsLoaded) return;
+            // Map Editor uses EventHandler<MapLoadedEventArgs>
+            MapDataService.Instance.MapLoaded += (sender, args) => callback();
+        }
 
-            int ts = MapConstants.TileSize;
-
-            // Placeholder brush if missing texture
-            var placeholder = new SolidColorBrush(Color.FromRgb(255, 0, 255)); // magenta
-            placeholder.Freeze();
-
-            for (int ty = 0; ty < MapConstants.TilesPerSide; ty++)
-            {
-                for (int tx = 0; tx < MapConstants.TilesPerSide; tx++)
-                {
-                    Rect target = new(tx * ts, ty * ts, ts, ts);
-
-                    // Key + angle
-                    string relKey; int deg;
-                    try
-                    {
-                        var info = _tex.GetTileTextureKeyAndRotation(tx, ty);
-                        relKey = info.relativeKey;
-                        deg = info.rotationDeg;
-                    }
-                    catch
-                    {
-                        dc.DrawRectangle(placeholder, null, target);
-                        continue;
-                    }
-
-                    // Get bitmap
-                    if (!TextureCacheService.Instance.TryGetRelative(relKey, out var bmp) || bmp is null)
-                    {
-                        dc.DrawRectangle(placeholder, null, target);
-                        continue;
-                    }
-
-                    // Draw with rotation around tile center
-                    Point center = new(target.X + ts / 2.0, target.Y + ts / 2.0);
-                    if (deg != 0)
-                        dc.PushTransform(new RotateTransform(deg, center.X, center.Y));
-
-                    dc.DrawImage(bmp, target);
-
-                    if (deg != 0)
-                        dc.Pop();
-                }
-            }
+        public void SubscribeMapCleared(Action callback)
+        {
+            // Map Editor uses EventHandler<MapLoadedEventArgs> for cleared too
+            MapDataService.Instance.MapCleared += (sender, args) => callback();
         }
     }
 }

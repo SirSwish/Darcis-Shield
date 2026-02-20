@@ -12,10 +12,4 @@
 	<ItemGroup>
 		<Resource Include="Assets\**\*.*" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Compile Remove="Views\**" />
-	  <EmbeddedResource Remove="Views\**" />
-	  <None Remove="Views\**" />
-	  <Page Remove="Views\**" />
-	</ItemGroup>
 </Project>

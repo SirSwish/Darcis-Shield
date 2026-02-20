@@ -91,7 +91,7 @@
 
     <DockPanel>
         <!-- Menu Bar -->
-        <Menu DockPanel.Dock="Top" Background="{StaticResource BackgroundLight}" Foreground="{StaticResource TextPrimary}>
+        <Menu DockPanel.Dock="Top" Background="{StaticResource BackgroundLight}" Foreground="{StaticResource TextPrimary}">
             <MenuItem Header="_File">
                 <MenuItem Header="_New Lights File" Command="{Binding NewLightsCommand}" InputGestureText="Ctrl+N"/>
                 <Separator/>
