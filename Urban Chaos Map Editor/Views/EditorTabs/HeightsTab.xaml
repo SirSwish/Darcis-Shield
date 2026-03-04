@@ -1,4 +1,4 @@
-<UserControl x:Class="UrbanChaosMapEditor.Views.EditorTabs.HeightsTab"
+﻿<UserControl x:Class="UrbanChaosMapEditor.Views.EditorTabs.HeightsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:UrbanChaosMapEditor.ViewModels">
@@ -75,6 +75,28 @@
                     </StackPanel>
                 </Button>
             </WrapPanel>
+
+            <!-- ===================== AREA SET HEIGHT ===================== -->
+            <TextBlock Text="Set Height by Drag Area" FontWeight="SemiBold" Margin="0,8,0,6"/>
+            <TextBlock Text="Enter a height value, click Drag Area, then click-drag a rectangle on the map. All vertices inside will be set."
+           Opacity="0.6" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6" VerticalAlignment="Center">
+                <TextBlock Text="Height:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBox x:Name="AreaHeightInput"
+             Width="64"
+             Text="{Binding Map.AreaSetHeightValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=0}"
+             HorizontalContentAlignment="Right"
+             PreviewTextInput="AreaHeight_PreviewTextInput"
+             DataObject.Pasting="AreaHeight_OnPaste"
+             ToolTip="Signed height value (-127..127)"/>
+
+                <Button Margin="12,0,0,0"
+            Padding="10,6"
+            Content="🟦 Drag Area"
+            Click="DragArea_Click"
+            ToolTip="Click, then drag on the map to define a rectangle. Release to apply."/>
+            </StackPanel>
 
             <Separator Margin="0,8,0,8"/>
             <TextBlock Text="Templates" FontWeight="SemiBold" Margin="0,0,0,6"/>
@@ -179,47 +201,6 @@
                                        VerticalAlignment="Center"/>
                         </Grid>
                         <TextBlock Text="Reset" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Button>
-            </WrapPanel>
-
-            <!-- ===================== ROOF BUILDING ===================== -->
-            <Separator Margin="0,12,0,12"/>
-
-            <TextBlock Text="Automatic Roof Building" FontWeight="SemiBold" Margin="0,0,0,6"/>
-            <TextBlock Text="Detect closed facet shapes and set interior cell altitudes" 
-                       Opacity="0.6" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
-
-            <WrapPanel>
-                <!-- Build Roof from Selection -->
-                <Button x:Name="BuildRoofButton" Margin="0,0,6,6" Padding="6,6"
-                        ToolTip="Build Roof: use selected facets to create a roof surface"
-                        Click="BuildRoof_Click">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Grid Width="24" Height="24">
-                            <Rectangle Fill="#8844CC" RadiusX="2" RadiusY="2"/>
-                            <TextBlock Text="R" FontWeight="Bold" FontSize="14" 
-                                       Foreground="White" 
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-                        </Grid>
-                        <TextBlock Text="Build Roof" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Button>
-
-                <!-- Detect Near Point -->
-                <Button x:Name="DetectRoofButton" Margin="0,0,6,6" Padding="6,6"
-                        ToolTip="Detect Roof: click in map to find closed shapes nearby"
-                        Click="DetectRoof_Click">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Grid Width="24" Height="24">
-                            <Rectangle Fill="#CC8844" RadiusX="2" RadiusY="2"/>
-                            <TextBlock Text="D" FontWeight="Bold" FontSize="14" 
-                                       Foreground="White" 
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"/>
-                        </Grid>
-                        <TextBlock Text="Detect" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Button>
             </WrapPanel>

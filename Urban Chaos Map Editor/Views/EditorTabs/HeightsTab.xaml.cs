@@ -47,6 +47,37 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
 
         #endregion
 
+        #region Area Height Tool (Drag Rectangle)
+
+        private void AreaHeight_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            var newText = textBox?.Text.Insert(textBox.SelectionStart, e.Text) ?? e.Text;
+            e.Handled = !_signedDigits.IsMatch(newText);
+        }
+
+        private void AreaHeight_OnPaste(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(DataFormats.Text))
+            {
+                var text = e.DataObject.GetData(DataFormats.Text) as string ?? "";
+                if (!_signedDigits.IsMatch(text)) e.CancelCommand();
+            }
+            else e.CancelCommand();
+        }
+
+        private void DragArea_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel vm) return;
+
+            // Force the tool; the actual drag logic lives in HeightsLayer
+            vm.Map.SelectedTool = EditorTool.AreaSetHeight;
+
+            Debug.WriteLine("[HeightsTab] AreaSetHeight tool selected (drag rectangle)");
+        }
+
+        #endregion
+
         #region Altitude Input Validation
 
         private void Altitude_PreviewTextInput(object sender, TextCompositionEventArgs e)

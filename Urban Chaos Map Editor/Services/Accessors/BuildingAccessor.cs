@@ -564,7 +564,89 @@ namespace UrbanChaosMapEditor.Services
 
 
         // -------------------- ADD THESE HELPERS INSIDE BuildingsAccessor --------------------
+        public bool TryUpdateDStyleValue(int dstyleIndex, short newRawStyleId)
+        {
+            if (!_svc.IsLoaded) return false;
 
+            _svc.ComputeAndCacheBuildingRegion();
+            if (!_svc.TryGetBuildingRegion(out int start, out int len)) return false;
+
+            // SaveType lives at file start in your code
+            var bytesCopy = _svc.GetBytesCopy();
+            int saveType = BitConverter.ToInt32(bytesCopy, 0);
+
+            ushort nextDBuilding = ReadU16(bytesCopy, start + 2);
+            ushort nextDFacet = ReadU16(bytesCopy, start + 4);
+            ushort nextDStyle = ReadU16(bytesCopy, start + 6);
+
+            int totalBuildings = Math.Max(0, nextDBuilding - 1);
+            int totalFacets = Math.Max(0, nextDFacet - 1);
+
+            if (dstyleIndex < 0 || dstyleIndex >= nextDStyle)
+                return false;
+
+            int buildingsOff = start + HeaderSize;
+            int facetsOff = buildingsOff + totalBuildings * DBuildingSize + AfterBuildingsPad;
+            int stylesOff = facetsOff + totalFacets * DFacetSize;
+
+            int off = stylesOff + dstyleIndex * 2;
+
+            _svc.Edit(bytes =>
+            {
+                bytes[off + 0] = (byte)(newRawStyleId & 0xFF);
+                bytes[off + 1] = (byte)((newRawStyleId >> 8) & 0xFF);
+            });
+
+            // If you have notifications, do them here:
+            // BuildingsChangeBus.Instance.NotifyChanged();
+
+            return true;
+        }
+
+        public bool TryUpdateDStoreyBaseStyle(int storeyId, ushort newBaseStyleId)
+        {
+            if (!_svc.IsLoaded) return false;
+
+            _svc.ComputeAndCacheBuildingRegion();
+            if (!_svc.TryGetBuildingRegion(out int start, out int len)) return false;
+
+            var bytesCopy = _svc.GetBytesCopy();
+            int saveType = BitConverter.ToInt32(bytesCopy, 0);
+
+            if (saveType < 17) return false;
+
+            ushort nextDBuilding = ReadU16(bytesCopy, start + 2);
+            ushort nextDFacet = ReadU16(bytesCopy, start + 4);
+            ushort nextDStyle = ReadU16(bytesCopy, start + 6);
+            ushort nextPaintMem = ReadU16(bytesCopy, start + 8);
+            ushort nextDStorey = ReadU16(bytesCopy, start + 10);
+
+            int totalBuildings = Math.Max(0, nextDBuilding - 1);
+            int totalFacets = Math.Max(0, nextDFacet - 1);
+
+            // NOTE: storeyId here is the one stored as -dstyles[i]
+            // Your format commonly keeps slot 0 unused, so storeyId must be within [1 .. nextDStorey-1]
+            if (storeyId <= 0 || storeyId >= nextDStorey)
+                return false;
+
+            int buildingsOff = start + HeaderSize;
+            int facetsOff = buildingsOff + totalBuildings * DBuildingSize + AfterBuildingsPad;
+            int stylesOff = facetsOff + totalFacets * DFacetSize;
+
+            int paintMemOff = stylesOff + nextDStyle * 2;
+            int storeysOff = paintMemOff + nextPaintMem;
+
+            int off = storeysOff + storeyId * DStoreyRecSize;   // storeyId is used as index (slot 0 unused)
+            _svc.Edit(bytes =>
+            {
+                bytes[off + 0] = (byte)(newBaseStyleId & 0xFF);
+                bytes[off + 1] = (byte)((newBaseStyleId >> 8) & 0xFF);
+            });
+
+            // BuildingsChangeBus.Instance.NotifyChanged();
+
+            return true;
+        }
         private static int ReadS24(byte[] b, int off)
         {
             int v = b[off + 0] | (b[off + 1] << 8) | (b[off + 2] << 16);

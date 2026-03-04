@@ -53,6 +53,8 @@ namespace UrbanChaosMapEditor.Services
 
         /// <summary>
         /// Add a new walkable to a building.
+        /// Automatically reuses empty (soft-deleted) slots if available,
+        /// otherwise appends to end of walkable list.
         /// </summary>
         public AddWalkableResult TryAddWalkable(WalkableTemplate template)
         {
@@ -71,6 +73,15 @@ namespace UrbanChaosMapEditor.Services
             if (template.BuildingId1 < 1 || template.BuildingId1 >= snap.NextDBuilding)
                 return AddWalkableResult.Fail($"Invalid building ID: {template.BuildingId1}");
 
+            // First, try to find an empty slot to reuse
+            int emptySlot = FindEmptyWalkableSlot();
+            if (emptySlot > 0)
+            {
+                Debug.WriteLine($"[WalkableAdder] Found empty slot {emptySlot}, reusing it instead of appending");
+                return TryReuseWalkableSlot(emptySlot, template);
+            }
+
+            // No empty slot found, append to end
             var bytes = _svc.GetBytesCopy();
 
             // Read walkables header
@@ -93,28 +104,12 @@ namespace UrbanChaosMapEditor.Services
             // Calculate Y value: worldY >> 5
             byte walkableY = (byte)Math.Clamp(template.WorldY >> 5, 0, 255);
 
-            Debug.WriteLine($"[WalkableAdder] Adding walkable: ID={newWalkableId1}, Building={template.BuildingId1}, " +
+            Debug.WriteLine($"[WalkableAdder] Appending new walkable: ID={newWalkableId1}, Building={template.BuildingId1}, " +
                            $"Rect=({template.X1},{template.Z1})->({template.X2},{template.Z2}), " +
                            $"WorldY={template.WorldY}, Y={walkableY}, Next={oldWalkableHead}");
 
             // Create new DWalkable (22 bytes)
             var newWalkable = new byte[DWalkableSize];
-
-            // Offsets in DWalkable:
-            // 0-1:  StartPoint (unused)
-            // 2-3:  EndPoint (unused)
-            // 4-5:  StartFace3 (unused)
-            // 6-7:  EndFace3 (unused)
-            // 8-9:  StartFace4
-            // 10-11: EndFace4
-            // 12:   X1
-            // 13:   Z1
-            // 14:   X2
-            // 15:   Z2
-            // 16:   Y
-            // 17:   StoreyY
-            // 18-19: Next
-            // 20-21: Building
 
             WriteU16(newWalkable, 0, 0);  // StartPoint
             WriteU16(newWalkable, 2, 0);  // EndPoint
@@ -165,6 +160,138 @@ namespace UrbanChaosMapEditor.Services
             Debug.WriteLine($"[WalkableAdder] Successfully added walkable {newWalkableId1}");
 
             return AddWalkableResult.Ok(newWalkableId1);
+        }
+
+        /// <summary>
+        /// Reuse an existing (soft-deleted) walkable slot instead of appending.
+        /// This writes data into an existing slot, preserving the walkable ID.
+        /// If the slot has preserved RF4 range and Next pointer from soft-deletion, they are reused.
+        /// </summary>
+        public AddWalkableResult TryReuseWalkableSlot(int existingSlotId1, WalkableTemplate template)
+        {
+            if (!_svc.IsLoaded)
+                return AddWalkableResult.Fail("No map loaded.");
+
+            if (existingSlotId1 < 1)
+                return AddWalkableResult.Fail("Invalid slot ID.");
+
+            var acc = new BuildingsAccessor(_svc);
+            var snap = acc.ReadSnapshot();
+
+            if (snap.Buildings == null)
+                return AddWalkableResult.Fail("Failed to read buildings.");
+
+            if (snap.WalkablesStart < 0)
+                return AddWalkableResult.Fail("Walkables section not found.");
+
+            if (template.BuildingId1 < 1 || template.BuildingId1 >= snap.NextDBuilding)
+                return AddWalkableResult.Fail($"Invalid building ID: {template.BuildingId1}");
+
+            if (snap.Walkables == null || existingSlotId1 >= snap.Walkables.Length)
+                return AddWalkableResult.Fail($"Slot {existingSlotId1} does not exist.");
+
+            var bytes = _svc.GetBytesCopy();
+
+            // Read walkables header
+            int walkablesHeaderOff = snap.WalkablesStart;
+            ushort nextWalkable = ReadU16(bytes, walkablesHeaderOff);
+            ushort nextRoofFace4 = ReadU16(bytes, walkablesHeaderOff + 2);
+
+            // Calculate slot offset
+            int walkablesDataOff = walkablesHeaderOff + 4;
+            int slotOffset = walkablesDataOff + existingSlotId1 * DWalkableSize;
+
+            // Read preserved values from soft-deleted slot
+            ushort existingStartFace4 = ReadU16(bytes, slotOffset + 8);
+            ushort existingEndFace4 = ReadU16(bytes, slotOffset + 10);
+            ushort existingNext = ReadU16(bytes, slotOffset + 18);
+            ushort existingBuilding = ReadU16(bytes, slotOffset + 20);
+
+            bool hasPreservedRF4Range = (existingEndFace4 > existingStartFace4);
+            bool hasPreservedChain = (existingNext > 0 || existingBuilding > 0);
+
+            // Calculate Y value: worldY >> 5
+            byte walkableY = (byte)Math.Clamp(template.WorldY >> 5, 0, 255);
+
+            Debug.WriteLine($"[WalkableAdder] Reusing walkable slot {existingSlotId1}");
+            Debug.WriteLine($"[WalkableAdder]   Preserved: RF4[{existingStartFace4}..{existingEndFace4}), Next={existingNext}, Building={existingBuilding}");
+            Debug.WriteLine($"[WalkableAdder]   New: Building={template.BuildingId1}, " +
+                           $"Rect=({template.X1},{template.Z1})->({template.X2},{template.Z2}), " +
+                           $"WorldY={template.WorldY}, Y={walkableY}");
+
+            // Write walkable data directly into the existing slot
+            WriteU16(bytes, slotOffset + 0, 0);  // StartPoint
+            WriteU16(bytes, slotOffset + 2, 0);  // EndPoint
+            WriteU16(bytes, slotOffset + 4, 0);  // StartFace3
+            WriteU16(bytes, slotOffset + 6, 0);  // EndFace3
+
+            // Use preserved RF4 range if available
+            if (hasPreservedRF4Range)
+            {
+                WriteU16(bytes, slotOffset + 8, existingStartFace4);
+                WriteU16(bytes, slotOffset + 10, existingEndFace4);
+            }
+            else
+            {
+                WriteU16(bytes, slotOffset + 8, nextRoofFace4);
+                WriteU16(bytes, slotOffset + 10, nextRoofFace4);
+            }
+
+            bytes[slotOffset + 12] = template.X1;
+            bytes[slotOffset + 13] = template.Z1;
+            bytes[slotOffset + 14] = template.X2;
+            bytes[slotOffset + 15] = template.Z2;
+            bytes[slotOffset + 16] = walkableY;
+            bytes[slotOffset + 17] = template.StoreyY;
+
+            // CRITICAL: Preserve the Next pointer to maintain chain integrity!
+            // The chain was set up when the original walkable was created.
+            // Soft-delete preserved it, so we keep it.
+            WriteU16(bytes, slotOffset + 18, existingNext);
+
+            // Use the template's building ID (should match preserved, but allow override)
+            WriteU16(bytes, slotOffset + 20, (ushort)template.BuildingId1);
+
+            // DO NOT update Building.Walkable - the chain is already intact!
+            // The building already points to the head of the chain, which eventually
+            // leads to this slot via Next pointers.
+
+            // Apply changes (no file restructuring needed!)
+            _svc.ReplaceBytes(bytes);
+            _svc.MarkDirty();
+
+            Debug.WriteLine($"[WalkableAdder] Successfully reused walkable slot {existingSlotId1} (chain preserved)");
+
+            return AddWalkableResult.Ok(existingSlotId1);
+        }
+
+        /// <summary>
+        /// Find a soft-deleted walkable slot that can be reused.
+        /// Returns 0 if no empty slots found.
+        /// A soft-deleted slot has bounds zeroed (X1=Z1=X2=Z2=Y=0) but may have:
+        /// - Preserved RF4 range (StartFace4/EndFace4)
+        /// - Preserved chain info (Next pointer, Building ID)
+        /// </summary>
+        public int FindEmptyWalkableSlot()
+        {
+            if (!_svc.IsLoaded) return 0;
+
+            var acc = new BuildingsAccessor(_svc);
+            if (!acc.TryGetWalkables(out var walkables, out _))
+                return 0;
+
+            for (int i = 1; i < walkables.Length; i++)
+            {
+                var w = walkables[i];
+                // A soft-deleted walkable has bounds and Y zeroed
+                // But may still have RF4 range, Next, and Building preserved
+                if (w.X1 == 0 && w.Z1 == 0 && w.X2 == 0 && w.Z2 == 0 && w.Y == 0)
+                {
+                    Debug.WriteLine($"[WalkableAdder] Found empty slot {i}: RF4[{w.StartFace4}..{w.EndFace4}), Next={w.Next}, Building={w.Building}");
+                    return i;
+                }
+            }
+            return 0;
         }
 
         /// <summary>

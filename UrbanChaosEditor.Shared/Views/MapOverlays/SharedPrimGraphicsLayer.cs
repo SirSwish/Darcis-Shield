@@ -224,33 +224,106 @@ public class SharedPrimGraphicsLayer : MapOverlayBase
 
     /// <summary>
     /// Loads NNN.png from embedded WPF resources.
+    /// Tries multiple approaches for cross-assembly resource loading.
     /// </summary>
     protected virtual PrimSprite? LoadPrimGraphic(byte primNumber)
     {
-        string relativePath = $"{PrimGraphicsPath}/{primNumber:D3}.png";
-        var uri = new Uri($"pack://application:,,,/{ResourceAssemblyName};component/{relativePath}", UriKind.Absolute);
+        string fileName = $"{primNumber:D3}.png";
 
-        try
+        // Build list of URIs to try
+        var urisToTry = new List<string>();
+
+        // 1. Shared assembly with component syntax
+        urisToTry.Add($"pack://application:,,,/UrbanChaosEditor.Shared;component/{PrimGraphicsPath}/{fileName}");
+
+        // 2. Shared assembly with "Urban Chaos Editor.Shared" (spaces)
+        urisToTry.Add($"pack://application:,,,/Urban Chaos Editor.Shared;component/{PrimGraphicsPath}/{fileName}");
+
+        // 3. Try configured assembly name if different
+        if (!string.IsNullOrEmpty(ResourceAssemblyName) &&
+            ResourceAssemblyName != "UrbanChaosEditor.Shared" &&
+            ResourceAssemblyName != "Urban Chaos Editor.Shared")
         {
-            var bmp = new BitmapImage();
-            bmp.BeginInit();
-            bmp.UriSource = uri;
-            bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.EndInit();
-            bmp.Freeze();
-
-            double w = bmp.PixelWidth;
-            double h = bmp.PixelHeight;
-
-            var anchor = PrimAnchors.GetAnchorForPrim(primNumber, w, h);
-
-            return new PrimSprite(bmp, anchor.X, anchor.Y, w, h);
+            urisToTry.Add($"pack://application:,,,/{ResourceAssemblyName};component/{PrimGraphicsPath}/{fileName}");
         }
-        catch (Exception ex)
+
+        // 4. Local application resources (no assembly prefix)
+        urisToTry.Add($"pack://application:,,,/{PrimGraphicsPath}/{fileName}");
+
+        foreach (var uriString in urisToTry)
         {
-            Debug.WriteLine($"[SharedPrimGraphicsLayer] FAILED to load prim {primNumber}: {ex.Message}");
-            return null;
+            try
+            {
+                var uri = new Uri(uriString, UriKind.Absolute);
+
+                // Try using Application.GetResourceStream first (more reliable for cross-assembly)
+                var streamInfo = System.Windows.Application.GetResourceStream(uri);
+                if (streamInfo != null)
+                {
+                    using var stream = streamInfo.Stream;
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.StreamSource = stream;
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                    bmp.Freeze();
+
+                    double w = bmp.PixelWidth;
+                    double h = bmp.PixelHeight;
+                    var anchor = PrimAnchors.GetAnchorForPrim(primNumber, w, h);
+
+                    if (_spriteCache.Count == 0)
+                    {
+                        Debug.WriteLine($"[SharedPrimGraphicsLayer] SUCCESS via GetResourceStream: {uriString}");
+                    }
+
+                    return new PrimSprite(bmp, anchor.X, anchor.Y, w, h);
+                }
+            }
+            catch
+            {
+                // Try next
+            }
+
+            // Fallback: try direct BitmapImage loading
+            try
+            {
+                var uri = new Uri(uriString, UriKind.Absolute);
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.UriSource = uri;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+                bmp.Freeze();
+
+                double w = bmp.PixelWidth;
+                double h = bmp.PixelHeight;
+                var anchor = PrimAnchors.GetAnchorForPrim(primNumber, w, h);
+
+                if (_spriteCache.Count == 0)
+                {
+                    Debug.WriteLine($"[SharedPrimGraphicsLayer] SUCCESS via BitmapImage: {uriString}");
+                }
+
+                return new PrimSprite(bmp, anchor.X, anchor.Y, w, h);
+            }
+            catch
+            {
+                // Try next
+            }
         }
+
+        // All attempts failed
+        if (_spriteCache.Count < 3) // Only log first few failures
+        {
+            Debug.WriteLine($"[SharedPrimGraphicsLayer] FAILED to load prim {primNumber}. Tried URIs:");
+            foreach (var uri in urisToTry)
+            {
+                Debug.WriteLine($"  - {uri}");
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

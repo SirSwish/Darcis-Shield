@@ -7,6 +7,7 @@ namespace UrbanChaosMapEditor.Models
 
         // Terrain Heights (vertex height offsets)
         RaiseHeight,
+        AreaSetHeight,
         LowerHeight,
         LevelHeight,
         FlattenHeight,

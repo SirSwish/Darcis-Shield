@@ -266,9 +266,10 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
             // Pages 0-3 (indices 0-255) = world textures
             // Pages 4-7 (indices 256-511) = shared
             // For paint bytes, we only use 0-127, which is pages 0-1 (world textures)
+            const string TexturesAsm = "UrbanChaosEditor.Shared";
             string subfolder = $"world{_worldNumber}";
 
-            string packUri = $"pack://application:,,,/Assets/Textures/{_variant}/{subfolder}/tex{textureIndex:D3}hi.png";
+            string packUri = $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{textureIndex:D3}hi.png";
             try
             {
                 var sri = Application.GetResourceStream(new Uri(packUri));
@@ -560,8 +561,9 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
             else subfolder = $"world{_worldNumber}";
 
             int totalIndex = page * 64 + ty * 8 + tx;
+            const string TexturesAsm = "UrbanChaosEditor.Shared";
 
-            string packUri = $"pack://application:,,,/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
+            string packUri = $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
             try
             {
                 var sri = Application.GetResourceStream(new Uri(packUri));

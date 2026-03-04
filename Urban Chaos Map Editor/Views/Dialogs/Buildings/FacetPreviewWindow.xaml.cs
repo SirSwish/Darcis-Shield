@@ -25,6 +25,7 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
     public partial class FacetPreviewWindow : Window
     {
         private const int PanelPx = 64;
+        private const string TexturesAsm = "UrbanChaosEditor.Shared";
 
         private DFacetRec _facet;
         private readonly int _facetIndex1;
@@ -995,7 +996,8 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
             if (string.IsNullOrWhiteSpace(_variant) || _worldNumber <= 0) return;
             if (StyleDataService.Instance.IsLoaded) return;
 
-            string packUri = $"pack://application:,,,/Assets/Textures/{_variant}/world{_worldNumber}/style.tma";
+            string packUri =
+    $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/world{_worldNumber}/style.tma";
             try
             {
                 var sri = Application.GetResourceStream(new Uri(packUri, UriKind.Absolute));
@@ -1020,7 +1022,8 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
 
             foreach (var subfolder in candidates)
             {
-                string packUri = $"pack://application:,,,/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
+                string packUri =
+                    $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
                 try
                 {
                     var sri = Application.GetResourceStream(new Uri(packUri));
@@ -1099,6 +1102,133 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
                     DrawPreview(_facet);
                 }
             }
+        }
+
+        private async void BtnChangeStyle_Click(object sender, RoutedEventArgs e)
+        {
+            // Same restrictions as painting (style ignored)
+            if (_facet.Type == FacetType.Ladder)
+            {
+                MessageBox.Show("Ladders ignore style textures (procedural).",
+                    "Cannot Change Style", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_facet.Type == FacetType.Door || _facet.Type == FacetType.InsideDoor || _facet.Type == FacetType.OutsideDoor)
+            {
+                MessageBox.Show("Doors ignore style textures (procedural black).",
+                    "Cannot Change Style", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            await EnsureStylesLoadedAsync();
+
+            int currentBaseStyle = GetCurrentBaseStyleId();
+            var picker = new StylePickerWindow(currentBaseStyle) { Owner = this };
+
+            if (picker.ShowDialog() != true || !picker.WasConfirmed || picker.SelectedStyleIndex <= 0)
+                return;
+
+            int newStyleId = picker.SelectedStyleIndex;
+
+            var acc = new BuildingsAccessor(MapDataService.Instance);
+
+            int changed = ApplyNewStyleToFacet(acc, newStyleId);
+            if (changed <= 0)
+            {
+                MessageBox.Show("Failed to apply style (out of bounds or missing building data).",
+                    "Change Style Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Reload snapshot and refresh preview UI
+            var arrays = acc.ReadSnapshot();
+            _dstyles = arrays.Styles ?? Array.Empty<short>();
+            _paintMem = arrays.PaintMem ?? Array.Empty<byte>();
+            _storeys = arrays.Storeys ?? Array.Empty<BuildingArrays.DStoreyRec>();
+
+            SummarizeStyleAndRecipe(_facet);
+            DrawPreview(_facet);
+
+            // Optional: notify rest of app if you have a bus
+            // BuildingsChangeBus.Instance.NotifyFacetChanged(_facetIndex1);
+            // BuildingsChangeBus.Instance.NotifyChanged();
+        }
+
+        private int GetCurrentBaseStyleId()
+        {
+            if (_dstyles.Length == 0) return 1;
+            if (_facet.StyleIndex < 0 || _facet.StyleIndex >= _dstyles.Length) return 1;
+
+            short dval = _dstyles[_facet.StyleIndex];
+
+            // RAW: dval is raw style id
+            if (dval >= 0)
+                return NormalizeStyleId(dval);
+
+            // PAINTED: dval is -storeyId. Base style lives in storeys[storeyId].StyleIndex (common in your format).
+            int storeyId = -dval;
+            if (_storeys.Length == 0) return 1;
+
+            // Your project has mixed indexing in places; this makes it robust:
+            if (storeyId >= 0 && storeyId < _storeys.Length)
+                return NormalizeStyleId(_storeys[storeyId].StyleIndex);
+
+            if (storeyId - 1 >= 0 && storeyId - 1 < _storeys.Length)
+                return NormalizeStyleId(_storeys[storeyId - 1].StyleIndex);
+
+            return 1;
+        }
+
+        private int ApplyNewStyleToFacet(BuildingsAccessor acc, int newStyleId)
+        {
+            if (_dstyles.Length == 0) return 0;
+
+            // We update ALL dstyle slots used by this facet’s vertical bands
+            int totalPixelsY = _facet.Height * 16 + _facet.FHeight;
+            int panelsDown = Math.Max(1, (totalPixelsY + (PanelPx - 1)) / PanelPx);
+
+            bool twoTextured = (_facet.Flags & FacetFlags.TwoTextured) != 0;
+            bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
+            bool hugFloor = (_facet.Flags & FacetFlags.HugFloor) != 0;
+
+            int step = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+            int start = _facet.StyleIndex;
+            if (twoTextured) start--;
+
+            int changed = 0;
+
+            // Distinct indices (avoid duplicates)
+            var indices = new HashSet<int>();
+            for (int rowFromBottom = 0; rowFromBottom < panelsDown; rowFromBottom++)
+            {
+                int idx = start + rowFromBottom * step;
+                if (idx >= 0) indices.Add(idx);
+            }
+
+            foreach (int dstyleIndex in indices.OrderBy(x => x))
+            {
+                if (dstyleIndex < 0 || dstyleIndex >= _dstyles.Length)
+                    continue;
+
+                short cur = _dstyles[dstyleIndex];
+
+                if (cur >= 0)
+                {
+                    // RAW: write new raw style into dstyles slot
+                    if (acc.TryUpdateDStyleValue(dstyleIndex, (short)newStyleId))
+                        changed++;
+                }
+                else
+                {
+                    // PAINTED: update base style in the referenced DStorey (keep paint overrides)
+                    int storeyId = -cur;
+                    if (acc.TryUpdateDStoreyBaseStyle(storeyId, (ushort)newStyleId))
+                        changed++;
+                }
+            }
+
+            return changed;
         }
 
         #endregion

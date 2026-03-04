@@ -64,13 +64,16 @@ namespace UrbanChaosMapEditor.Services
             var newBuilding = new byte[DBuildingSize];
             WriteU16(newBuilding, 0, oldNextFacet);  // StartFacet
             WriteU16(newBuilding, 2, oldNextFacet);  // EndFacet (same = empty)
-            // WorldX/Y/Z at offsets 4-15 = 0 (already zero)
+            // WorldX at +4-7 = 0 (already zero)
+            // WorldY at +8-10 = 0 (already zero)
+            newBuilding[11] = (byte)type;             // Type (IMPORTANT: offset 11, not 21!)
+            // WorldZ at +12-15 = 0 (already zero)
             WriteU16(newBuilding, 16, 0);            // Walkable = none
             newBuilding[18] = 0;                      // Counter0
             newBuilding[19] = 0;                      // Counter1
-            newBuilding[20] = 0;                      // Ware
-            newBuilding[21] = (byte)type;             // Type
-            // Bytes 22-23 padding
+            // Bytes 20-21 are padding/unknown
+            newBuilding[22] = 0;                      // Ware
+            // Byte 23 is padding
 
             // Everything from the pad onwards stays the same, just shifted
             int afterBuildingsLen = bytes.Length - padOff;
@@ -99,7 +102,7 @@ namespace UrbanChaosMapEditor.Services
 
             var newBytes = ms.ToArray();
 
-            Debug.WriteLine($"[BuildingAdder] Added building #{newBuildingId1} type={type}. " +
+            Debug.WriteLine($"[BuildingAdder] Added building #{newBuildingId1} type={type} (byte value {(byte)type} at offset 11). " +
                            $"Old file: {bytes.Length} bytes, new file: {newBytes.Length} bytes " +
                            $"(should be +{DBuildingSize} bytes)");
 

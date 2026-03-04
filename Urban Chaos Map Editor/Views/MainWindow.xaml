@@ -11,7 +11,9 @@
         Title="{Binding Title}"
         WindowStartupLocation="CenterScreen"
         Width="1280" Height="860"
-        ResizeMode="CanResize">
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResize"
+        Background="#1E1E1E">
 
     <!-- Local resources -->
     <Window.Resources>
@@ -171,6 +173,31 @@
                 <Separator/>
                 <MenuItem Header="_Use Beta Textures" IsCheckable="True" IsChecked="{Binding Map.UseBetaTextures, Mode=TwoWay}"/>
             </MenuItem>
+
+            <MenuItem Header="_Diagnostics">
+                <MenuItem Header="Diagnose _Walkables..." Click="DiagnoseWalkables_Click"/>
+                <Separator/>
+                <MenuItem Header="🏢 _Indoor Building Editor..." Click="IndoorBuildingEditor_Click"
+                          ToolTip="View and edit DStorey, dstyles, and other indoor building components"/>
+                <Separator/>
+                <MenuItem Header="Dump Selected _Building Raw Bytes..." Click="DumpBuildingBytes_Click"/>
+                <MenuItem Header="Dump Selected _Facet Raw Bytes..." Click="DumpFacetBytes_Click"/>
+                <MenuItem Header="Dump Building _Walkables + RoofFace4..." Click="DumpBuildingWalkables_Click"/>
+                <MenuItem Header="Dump _Walkable Raw Bytes..." Click="DumpWalkableRawBytes_Click"
+                          ToolTip="Dump raw 22-byte structure for a specific walkable (for comparison)"/>
+                <MenuItem Header="Dump _InsideStorey for Building..." Click="DumpInsideStoreyForBuilding_Click"
+                          ToolTip="Dump InsideStorey entries linked to a building (for roof rendering analysis)"/>
+                <Separator/>
+                <MenuItem Header="Dump _PAP_HI Cell Info..." Click="DumpPapHiCell_Click"/>
+                <Separator/>
+                <MenuItem Header="_Edit Walkable Points..." Click="EditWalkablePoints_Click" 
+                          ToolTip="Modify StartPoint/EndPoint values for testing roof rendering"/>
+                <MenuItem Header="Set _RF4 DrawFlags..." Click="SetRF4DrawFlags_Click"
+                          ToolTip="Change DrawFlags for all RoofFace4 entries in a walkable (test 0x00 vs 0x08)"/>
+                <MenuItem Header="🎨 _Paint RF4 Tiles..." Click="PaintRF4Tiles_Click"
+                          ToolTip="Visual grid editor for painting individual roof tiles"/>
+                <MenuItem Header="PAP_HI Cell _Editor..." Click="EditPapHiCell_Click"/>
+            </MenuItem>
         </Menu>
 
         <!-- Toolbar -->
@@ -202,6 +229,8 @@
                       IsChecked="{Binding Map.ShowWalkables}" ToolTip="Ctrl+W"/>
                 <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="MapWho" 
                       IsChecked="{Binding Map.ShowMapWho}" ToolTip="Ctrl+M"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Roofs" 
+                        IsChecked="{Binding Map.ShowRoofs}" ToolTip="Ctrl+R"/>
             </WrapPanel>
         </Border>
 

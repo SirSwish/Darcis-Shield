@@ -1,4 +1,6 @@
-﻿using System;
+﻿// /Services/LightsDataService.cs
+// FIXED: Correct layout based on C++ source code analysis
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,55 +12,51 @@ namespace UrbanChaosLightEditor.Services
 {
     /// <summary>
     /// Manages the in-memory .lgt bytes and basic load/save/dirty state.
-    /// Also exposes parsed models (Header, Entries, Properties, NightColour).
+    /// 
+    /// CORRECTED Layout (from C++ ed.h/ed.cpp):
+    ///   0x0000: Header (12 bytes)
+    ///   0x000C: ED_Light[0..255] (256 × 20 = 5120 bytes) - index 0 is sentinel
+    ///   0x140C: Properties (36 bytes)
+    ///   0x1430: NightColour (3 bytes)
+    ///   Total = 5171 bytes
     /// </summary>
     public sealed class LightsDataService
     {
-        // Singleton
         public static LightsDataService Instance { get; } = new LightsDataService();
+
         private LightsDataService()
         {
             Debug.WriteLine("[LightsDataService] Singleton instance created");
         }
 
-        // ---- Constants (v1 format) ----
+        // ---- Constants (CORRECTED from C++ source) ----
         private const int HeaderSize = 12;
-        private const int ReservedAfterHeader = 20;
         private const int EntrySize = 20;
-        private const int EntryCount = 255;
+        private const int EntryCount = 256;  // ED_MAX_LIGHTS = 256 (index 0 is sentinel)
+        private const int EntriesOffset = HeaderSize;  // NO padding! Entries at offset 12
+        private const int PropertiesOffset = EntriesOffset + EntrySize * EntryCount;  // 5132
         private const int PropertiesSize = 36;
+        private const int NightColourOffset = PropertiesOffset + PropertiesSize;  // 5168
         private const int NightColourSize = 3;
-        private const int TotalSize = HeaderSize + ReservedAfterHeader + EntrySize * EntryCount + PropertiesSize + NightColourSize; // 5171
+        private const int TotalSize = NightColourOffset + NightColourSize;  // 5171
 
         // ---- State ----
         private byte[] _bytes = Array.Empty<byte>();
         private bool _isLoaded;
         private bool _hasChanges;
 
-        /// <summary>Full path of the current .lgt file (null if unsaved template/default).</summary>
         public string? CurrentPath { get; private set; }
-
-        /// <summary>Alias for compatibility with ViewModels that use CurrentFilePath.</summary>
         public string? CurrentFilePath => CurrentPath;
-
-        /// <summary>True once a lights buffer is present in memory (from load or template).</summary>
         public bool IsLoaded => _isLoaded;
-
-        /// <summary>True if there are unsaved changes.</summary>
         public bool HasChanges => _hasChanges;
 
-        /// <summary>Returns a copy of the current lights bytes (never null).</summary>
-        public byte[] GetBytesCopy()
-        {
-            Debug.WriteLine($"[LightsDataService.GetBytesCopy] Returning {_bytes.Length} bytes");
-            return (byte[])_bytes.Clone();
-        }
+        public byte[] GetBytesCopy() => (byte[])_bytes.Clone();
 
-        // ---- Parsed Model (kept in sync with _bytes) ----
+        // ---- Parsed Model ----
         public LightHeader Header { get; private set; } = new();
         public List<LightEntry> Entries { get; private set; } = new(EntryCount);
-        public LightProperties Properties { get; private set; }
-        public LightNightColour NightColour { get; private set; }
+        public LightProperties Properties { get; set; }
+        public LightNightColour NightColour { get; set; }
 
         // ---- Events ----
         public event EventHandler<PathEventArgs>? LightsLoaded;
@@ -68,49 +66,40 @@ namespace UrbanChaosLightEditor.Services
         public event EventHandler? DirtyStateChanged;
 
         // ---------------------------------------------------------------------
-        // Load / Save (raw)
+        // Load / Save
         // ---------------------------------------------------------------------
 
-        /// <summary>Load lights from disk into memory (resets dirty) and parse models.</summary>
         public async Task LoadAsync(string path)
         {
-            Debug.WriteLine($"[LightsDataService.LoadAsync] Starting for path: {path}");
+            Debug.WriteLine($"[LightsDataService.LoadAsync] Loading: {path}");
 
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Path is null/empty.", nameof(path));
 
-            Debug.WriteLine($"[LightsDataService.LoadAsync] Reading file...");
             _bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
             Debug.WriteLine($"[LightsDataService.LoadAsync] Read {_bytes.Length} bytes (expected >= {TotalSize})");
 
             if (_bytes.Length < TotalSize)
                 throw new InvalidDataException($".lgt file too small (got {_bytes.Length}, expected ≥ {TotalSize}).");
 
-            Debug.WriteLine($"[LightsDataService.LoadAsync] Calling ParseFromBytes...");
             ParseFromBytes(_bytes);
-            Debug.WriteLine($"[LightsDataService.LoadAsync] ParseFromBytes complete");
 
             _isLoaded = true;
             _hasChanges = false;
             CurrentPath = path;
 
-            Debug.WriteLine($"[LightsDataService.LoadAsync] Raising events...");
             LightsBytesReset?.Invoke(this, EventArgs.Empty);
             LightsLoaded?.Invoke(this, new PathEventArgs(path));
             DirtyStateChanged?.Invoke(this, EventArgs.Empty);
 
-            Debug.WriteLine($"[LightsDataService.LoadAsync] Complete - Loaded {Entries.Count} entries");
+            Debug.WriteLine($"[LightsDataService.LoadAsync] Complete - {Entries.Count} entries");
         }
 
-        /// <summary>
-        /// Seeds the lights buffer from provided template bytes (not dirty) and parse models.
-        /// Leaves CurrentPath = null (unsaved).
-        /// </summary>
         public void NewFromTemplate(byte[] bytes)
         {
             if (bytes is null) throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length < TotalSize)
-                throw new InvalidDataException($"Template .lgt is too small (got {bytes.Length}, expected ≥ {TotalSize}).");
+                throw new InvalidDataException($"Template too small (got {bytes.Length}, expected ≥ {TotalSize}).");
 
             _bytes = (byte[])bytes.Clone();
             ParseFromBytes(_bytes);
@@ -120,31 +109,39 @@ namespace UrbanChaosLightEditor.Services
             CurrentPath = null;
 
             LightsBytesReset?.Invoke(this, EventArgs.Empty);
+            LightsLoaded?.Invoke(this, new PathEventArgs("(new)"));
             DirtyStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>Saves to CurrentPath. Throws if there is no current path.</summary>
         public async Task SaveAsync()
         {
             if (string.IsNullOrWhiteSpace(CurrentPath))
-                throw new InvalidOperationException("No current lights file path. Use SaveAsAsync first.");
+                throw new InvalidOperationException("No current path. Use SaveAsAsync first.");
 
-            _bytes = BuildBytesFromModel();
-            await File.WriteAllBytesAsync(CurrentPath, _bytes).ConfigureAwait(false);
+            Debug.WriteLine($"[LightsDataService.SaveAsync] Saving to {CurrentPath}");
+            Debug.WriteLine($"[LightsDataService.SaveAsync] NightFlag=0x{Properties.NightFlag:X8}");
+
+            var bytesToSave = BuildBytesFromModel();
+            await File.WriteAllBytesAsync(CurrentPath, bytesToSave).ConfigureAwait(false);
+
+            _bytes = bytesToSave;
             _hasChanges = false;
 
             LightsSaved?.Invoke(this, new PathEventArgs(CurrentPath));
             DirtyStateChanged?.Invoke(this, EventArgs.Empty);
+
+            Debug.WriteLine($"[LightsDataService.SaveAsync] Saved {bytesToSave.Length} bytes");
         }
 
-        /// <summary>Saves to a new path and updates CurrentPath.</summary>
         public async Task SaveAsAsync(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Path is null/empty.", nameof(path));
 
-            _bytes = BuildBytesFromModel();
-            await File.WriteAllBytesAsync(path, _bytes).ConfigureAwait(false);
+            var bytesToSave = BuildBytesFromModel();
+            await File.WriteAllBytesAsync(path, bytesToSave).ConfigureAwait(false);
+
+            _bytes = bytesToSave;
             CurrentPath = path;
             _hasChanges = false;
 
@@ -152,7 +149,6 @@ namespace UrbanChaosLightEditor.Services
             DirtyStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>Clears the lights buffer and resets state.</summary>
         public void Clear()
         {
             _bytes = Array.Empty<byte>();
@@ -169,19 +165,18 @@ namespace UrbanChaosLightEditor.Services
             DirtyStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>Replace the entire lights buffer. Marks dirty by default. Parses models.</summary>
         public void ReplaceAllBytes(byte[] bytes, bool markDirty = true)
         {
             if (bytes is null) throw new ArgumentNullException(nameof(bytes));
             if (bytes.Length < TotalSize)
-                throw new InvalidDataException($".lgt buffer too small (got {bytes.Length}, expected ≥ {TotalSize}).");
+                throw new InvalidDataException($"Buffer too small (got {bytes.Length}, expected ≥ {TotalSize}).");
 
             _bytes = (byte[])bytes.Clone();
             _isLoaded = true;
 
             ParseFromBytes(_bytes);
 
-            if (markDirty)
+            if (markDirty && !_hasChanges)
             {
                 _hasChanges = true;
                 DirtyStateChanged?.Invoke(this, EventArgs.Empty);
@@ -190,157 +185,135 @@ namespace UrbanChaosLightEditor.Services
             LightsBytesReset?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>Marks the lights as dirty.</summary>
-        public void MarkDirty()
-        {
-            if (_hasChanges) return;
-            _hasChanges = true;
-            DirtyStateChanged?.Invoke(this, EventArgs.Empty);
-        }
-
         // ---------------------------------------------------------------------
-        // Parsed model helpers
+        // Parsing
         // ---------------------------------------------------------------------
 
         private void ParseFromBytes(byte[] bytes)
         {
-            Debug.WriteLine($"[ParseFromBytes] Starting with {bytes.Length} bytes");
+            Debug.WriteLine($"[ParseFromBytes] Buffer size = {bytes.Length}");
 
-            int offset = 0;
-
-            // Parse header
-            Debug.WriteLine($"[ParseFromBytes] Reading header at offset {offset}");
+            // Header
+            int sizeField = BitConverter.ToInt32(bytes, 0);
             Header = new LightHeader
             {
-                SizeOfEdLight = BitConverter.ToInt32(bytes, offset + 0),
-                EdMaxLights = BitConverter.ToInt32(bytes, offset + 4),
-                SizeOfNightColour = BitConverter.ToInt32(bytes, offset + 8)
+                SizeOfEdLight = sizeField,
+                EdMaxLights = BitConverter.ToInt32(bytes, 4),
+                SizeOfNightColour = BitConverter.ToInt32(bytes, 8)
             };
-            Debug.WriteLine($"[ParseFromBytes] Header: SizeOfEdLight={Header.SizeOfEdLight} (version={Header.Version}, size={Header.SizeOfEdLightLower}), EdMaxLights={Header.EdMaxLights}, SizeOfNightColour={Header.SizeOfNightColour}");
+            Debug.WriteLine($"[ParseFromBytes] Header: size={Header.SizeOfEdLightLower}, ver={Header.Version}, max={Header.EdMaxLights}");
 
-            offset += HeaderSize + ReservedAfterHeader;
-            Debug.WriteLine($"[ParseFromBytes] Entries start at offset {offset} (0x{offset:X})");
-
-            // Parse entries
-            var list = new List<LightEntry>(EntryCount);
+            // Entries (256 total, starting at offset 12)
+            Entries = new List<LightEntry>(EntryCount);
             int usedCount = 0;
 
             for (int i = 0; i < EntryCount; i++)
             {
-                var e = new LightEntry
+                int off = EntriesOffset + i * EntrySize;
+                if (off + EntrySize > bytes.Length) break;
+
+                var entry = new LightEntry
                 {
-                    Range = bytes[offset + 0],
-                    Red = unchecked((sbyte)bytes[offset + 1]),
-                    Green = unchecked((sbyte)bytes[offset + 2]),
-                    Blue = unchecked((sbyte)bytes[offset + 3]),
-                    Next = bytes[offset + 4],
-                    Used = bytes[offset + 5],
-                    Flags = bytes[offset + 6],
-                    Padding = bytes[offset + 7],
-                    X = BitConverter.ToInt32(bytes, offset + 8),
-                    Y = BitConverter.ToInt32(bytes, offset + 12),
-                    Z = BitConverter.ToInt32(bytes, offset + 16)
+                    Range = bytes[off + 0],
+                    Red = unchecked((sbyte)bytes[off + 1]),
+                    Green = unchecked((sbyte)bytes[off + 2]),
+                    Blue = unchecked((sbyte)bytes[off + 3]),
+                    Next = bytes[off + 4],
+                    Used = bytes[off + 5],
+                    Flags = bytes[off + 6],
+                    Padding = bytes[off + 7],
+                    X = BitConverter.ToInt32(bytes, off + 8),
+                    Y = BitConverter.ToInt32(bytes, off + 12),
+                    Z = BitConverter.ToInt32(bytes, off + 16),
                 };
-                list.Add(e);
-
-                if (e.Used == 1)
-                {
-                    usedCount++;
-                    if (usedCount <= 5) // Log first 5 used lights
-                    {
-                        Debug.WriteLine($"[ParseFromBytes] Entry[{i}]: Used=1, Range={e.Range}, RGB=({e.Red},{e.Green},{e.Blue}), Pos=({e.X},{e.Y},{e.Z})");
-                    }
-                }
-
-                offset += EntrySize;
+                Entries.Add(entry);
+                if (entry.Used == 1) usedCount++;
             }
-            Entries = list;
-            Debug.WriteLine($"[ParseFromBytes] Parsed {list.Count} entries, {usedCount} are used");
+            Debug.WriteLine($"[ParseFromBytes] {Entries.Count} entries, {usedCount} used");
 
-            // Parse properties
-            Debug.WriteLine($"[ParseFromBytes] Properties at offset {offset} (0x{offset:X})");
+            // Properties (at offset 5132)
             Properties = new LightProperties
             {
-                EdLightFree = BitConverter.ToInt32(bytes, offset + 0),
-                NightFlag = BitConverter.ToUInt32(bytes, offset + 4),
-                NightAmbD3DColour = BitConverter.ToUInt32(bytes, offset + 8),
-                NightAmbD3DSpecular = BitConverter.ToUInt32(bytes, offset + 12),
-                NightAmbRed = BitConverter.ToInt32(bytes, offset + 16),
-                NightAmbGreen = BitConverter.ToInt32(bytes, offset + 20),
-                NightAmbBlue = BitConverter.ToInt32(bytes, offset + 24),
-                NightLampostRed = unchecked((sbyte)bytes[offset + 28]),
-                NightLampostGreen = unchecked((sbyte)bytes[offset + 29]),
-                NightLampostBlue = unchecked((sbyte)bytes[offset + 30]),
-                Padding = bytes[offset + 31],
-                NightLampostRadius = BitConverter.ToInt32(bytes, offset + 32),
+                EdLightFree = BitConverter.ToInt32(bytes, PropertiesOffset + 0),
+                NightFlag = BitConverter.ToUInt32(bytes, PropertiesOffset + 4),
+                NightAmbD3DColour = BitConverter.ToUInt32(bytes, PropertiesOffset + 8),
+                NightAmbD3DSpecular = BitConverter.ToUInt32(bytes, PropertiesOffset + 12),
+                NightAmbRed = BitConverter.ToInt32(bytes, PropertiesOffset + 16),
+                NightAmbGreen = BitConverter.ToInt32(bytes, PropertiesOffset + 20),
+                NightAmbBlue = BitConverter.ToInt32(bytes, PropertiesOffset + 24),
+                NightLampostRed = unchecked((sbyte)bytes[PropertiesOffset + 28]),
+                NightLampostGreen = unchecked((sbyte)bytes[PropertiesOffset + 29]),
+                NightLampostBlue = unchecked((sbyte)bytes[PropertiesOffset + 30]),
+                Padding = bytes[PropertiesOffset + 31],
+                NightLampostRadius = BitConverter.ToInt32(bytes, PropertiesOffset + 32),
             };
-            Debug.WriteLine($"[ParseFromBytes] Properties: EdLightFree={Properties.EdLightFree}, NightFlag={Properties.NightFlag}, D3DColour=0x{Properties.NightAmbD3DColour:X8}");
-            offset += PropertiesSize;
+            Debug.WriteLine($"[ParseFromBytes] NightFlag=0x{Properties.NightFlag:X8}, D3D=0x{Properties.NightAmbD3DColour:X8}");
 
-            // Parse night colour
-            Debug.WriteLine($"[ParseFromBytes] NightColour at offset {offset} (0x{offset:X})");
+            // NightColour (at offset 5168)
             NightColour = new LightNightColour
             {
-                Red = bytes[offset + 0],
-                Green = bytes[offset + 1],
-                Blue = bytes[offset + 2]
+                Red = bytes[NightColourOffset + 0],
+                Green = bytes[NightColourOffset + 1],
+                Blue = bytes[NightColourOffset + 2]
             };
-            Debug.WriteLine($"[ParseFromBytes] NightColour: RGB=({NightColour.Red},{NightColour.Green},{NightColour.Blue})");
-            Debug.WriteLine($"[ParseFromBytes] Complete");
         }
 
         private byte[] BuildBytesFromModel()
         {
-            if (_bytes is null || _bytes.Length < HeaderSize)
-                throw new InvalidOperationException("No existing header available.");
-
             var outBytes = new byte[TotalSize];
-            int offset = 0;
 
-            Array.Copy(_bytes, 0, outBytes, 0, HeaderSize);
-            offset += HeaderSize + ReservedAfterHeader;
+            // Header (12 bytes)
+            int sizeOfEdLight = EntrySize | (1 << 16);  // size=20, version=1
+            BitConverter.GetBytes(sizeOfEdLight).CopyTo(outBytes, 0);
+            BitConverter.GetBytes(EntryCount).CopyTo(outBytes, 4);
+            BitConverter.GetBytes(NightColourSize).CopyTo(outBytes, 8);
 
+            // Entries (256 × 20 bytes at offset 12)
             for (int i = 0; i < EntryCount; i++)
             {
+                int off = EntriesOffset + i * EntrySize;
                 LightEntry e = i < Entries.Count ? Entries[i] : default;
-                outBytes[offset + 0] = e.Range;
-                outBytes[offset + 1] = unchecked((byte)e.Red);
-                outBytes[offset + 2] = unchecked((byte)e.Green);
-                outBytes[offset + 3] = unchecked((byte)e.Blue);
-                outBytes[offset + 4] = e.Next;
-                outBytes[offset + 5] = e.Used;
-                outBytes[offset + 6] = e.Flags;
-                outBytes[offset + 7] = e.Padding;
-                Array.Copy(BitConverter.GetBytes(e.X), 0, outBytes, offset + 8, 4);
-                Array.Copy(BitConverter.GetBytes(e.Y), 0, outBytes, offset + 12, 4);
-                Array.Copy(BitConverter.GetBytes(e.Z), 0, outBytes, offset + 16, 4);
-                offset += EntrySize;
+
+                outBytes[off + 0] = e.Range;
+                outBytes[off + 1] = unchecked((byte)e.Red);
+                outBytes[off + 2] = unchecked((byte)e.Green);
+                outBytes[off + 3] = unchecked((byte)e.Blue);
+                outBytes[off + 4] = e.Next;
+                outBytes[off + 5] = e.Used;
+                outBytes[off + 6] = e.Flags;
+                outBytes[off + 7] = e.Padding;
+                BitConverter.GetBytes(e.X).CopyTo(outBytes, off + 8);
+                BitConverter.GetBytes(e.Y).CopyTo(outBytes, off + 12);
+                BitConverter.GetBytes(e.Z).CopyTo(outBytes, off + 16);
             }
 
-            Array.Copy(BitConverter.GetBytes(Properties.EdLightFree), 0, outBytes, offset + 0, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightFlag), 0, outBytes, offset + 4, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightAmbD3DColour), 0, outBytes, offset + 8, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightAmbD3DSpecular), 0, outBytes, offset + 12, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightAmbRed), 0, outBytes, offset + 16, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightAmbGreen), 0, outBytes, offset + 20, 4);
-            Array.Copy(BitConverter.GetBytes(Properties.NightAmbBlue), 0, outBytes, offset + 24, 4);
-            outBytes[offset + 28] = unchecked((byte)Properties.NightLampostRed);
-            outBytes[offset + 29] = unchecked((byte)Properties.NightLampostGreen);
-            outBytes[offset + 30] = unchecked((byte)Properties.NightLampostBlue);
-            outBytes[offset + 31] = Properties.Padding;
-            Array.Copy(BitConverter.GetBytes(Properties.NightLampostRadius), 0, outBytes, offset + 32, 4);
-            offset += PropertiesSize;
+            // Properties (36 bytes at offset 5132)
+            BitConverter.GetBytes(Properties.EdLightFree).CopyTo(outBytes, PropertiesOffset + 0);
+            BitConverter.GetBytes(Properties.NightFlag).CopyTo(outBytes, PropertiesOffset + 4);
+            BitConverter.GetBytes(Properties.NightAmbD3DColour).CopyTo(outBytes, PropertiesOffset + 8);
+            BitConverter.GetBytes(Properties.NightAmbD3DSpecular).CopyTo(outBytes, PropertiesOffset + 12);
+            BitConverter.GetBytes(Properties.NightAmbRed).CopyTo(outBytes, PropertiesOffset + 16);
+            BitConverter.GetBytes(Properties.NightAmbGreen).CopyTo(outBytes, PropertiesOffset + 20);
+            BitConverter.GetBytes(Properties.NightAmbBlue).CopyTo(outBytes, PropertiesOffset + 24);
+            outBytes[PropertiesOffset + 28] = unchecked((byte)Properties.NightLampostRed);
+            outBytes[PropertiesOffset + 29] = unchecked((byte)Properties.NightLampostGreen);
+            outBytes[PropertiesOffset + 30] = unchecked((byte)Properties.NightLampostBlue);
+            outBytes[PropertiesOffset + 31] = Properties.Padding;
+            BitConverter.GetBytes(Properties.NightLampostRadius).CopyTo(outBytes, PropertiesOffset + 32);
 
-            outBytes[offset + 0] = NightColour.Red;
-            outBytes[offset + 1] = NightColour.Green;
-            outBytes[offset + 2] = NightColour.Blue;
+            // NightColour (3 bytes at offset 5168)
+            outBytes[NightColourOffset + 0] = NightColour.Red;
+            outBytes[NightColourOffset + 1] = NightColour.Green;
+            outBytes[NightColourOffset + 2] = NightColour.Blue;
 
+            Debug.WriteLine($"[BuildBytesFromModel] Built {outBytes.Length} bytes, NightFlag=0x{Properties.NightFlag:X8}");
             return outBytes;
         }
 
         // ---------------------------------------------------------------------
-        // Default .lgt loader (pack resource)
+        // Default .lgt creation
         // ---------------------------------------------------------------------
+
         public static byte[] LoadDefaultResourceBytes()
         {
             try
@@ -355,84 +328,54 @@ namespace UrbanChaosLightEditor.Services
                     return ms.ToArray();
                 }
             }
-            catch
-            {
-                // Fall through to create empty template
-            }
+            catch { }
 
-            // Create an empty default .lgt file if resource not found
             return CreateEmptyLgtBuffer();
         }
 
-        /// <summary>
-        /// Creates a valid empty .lgt buffer with proper header and structure.
-        /// </summary>
         public static byte[] CreateEmptyLgtBuffer()
         {
             var bytes = new byte[TotalSize];
-            int offset = 0;
 
-            // Header (12 bytes)
-            // SizeOfEdLight: Entry size (20) in low word, version (1) in high word
-            int sizeOfEdLight = 20 | (1 << 16);
-            BitConverter.GetBytes(sizeOfEdLight).CopyTo(bytes, offset);
-            offset += 4;
+            // Header
+            int sizeOfEdLight = EntrySize | (1 << 16);
+            BitConverter.GetBytes(sizeOfEdLight).CopyTo(bytes, 0);
+            BitConverter.GetBytes(EntryCount).CopyTo(bytes, 4);
+            BitConverter.GetBytes(NightColourSize).CopyTo(bytes, 8);
 
-            // EdMaxLights: 255
-            BitConverter.GetBytes(255).CopyTo(bytes, offset);
-            offset += 4;
+            // Initialize free list (entries 1-255, entry 0 is sentinel)
+            for (int i = 1; i < EntryCount - 1; i++)
+            {
+                int off = EntriesOffset + i * EntrySize;
+                bytes[off + 4] = (byte)(i + 1);  // Next
+                bytes[off + 5] = 0;               // Used = false
+            }
+            // Last entry's next = 0
+            bytes[EntriesOffset + (EntryCount - 1) * EntrySize + 4] = 0;
 
-            // SizeOfNightColour: 3
-            BitConverter.GetBytes(3).CopyTo(bytes, offset);
-            offset += 4;
+            // Properties
+            BitConverter.GetBytes(1).CopyTo(bytes, PropertiesOffset + 0);  // EdLightFree = 1
+            BitConverter.GetBytes(0u).CopyTo(bytes, PropertiesOffset + 4);  // NightFlag = 0 (night mode)
+            BitConverter.GetBytes(0xFF404040u).CopyTo(bytes, PropertiesOffset + 8);   // D3D colour
+            BitConverter.GetBytes(0xFF000000u).CopyTo(bytes, PropertiesOffset + 12);  // Specular
+            BitConverter.GetBytes(64).CopyTo(bytes, PropertiesOffset + 16);  // AmbRed
+            BitConverter.GetBytes(64).CopyTo(bytes, PropertiesOffset + 20);  // AmbGreen
+            BitConverter.GetBytes(64).CopyTo(bytes, PropertiesOffset + 24);  // AmbBlue
+            bytes[PropertiesOffset + 28] = 127;  // LampostRed
+            bytes[PropertiesOffset + 29] = 127;  // LampostGreen
+            bytes[PropertiesOffset + 30] = 100;  // LampostBlue
+            bytes[PropertiesOffset + 31] = 0;    // Padding
+            BitConverter.GetBytes(512).CopyTo(bytes, PropertiesOffset + 32);  // LampostRadius
 
-            // Reserved padding (20 bytes) - leave as zeros
-            offset += ReservedAfterHeader;
-
-            // 255 entries (all unused, 20 bytes each) - leave as zeros
-            offset += EntrySize * EntryCount;
-
-            // Properties (36 bytes)
-            // EdLightFree = 1 (first slot is free)
-            BitConverter.GetBytes(1).CopyTo(bytes, offset);
-            offset += 4;
-
-            // NightFlag = 0
-            offset += 4;
-
-            // NightAmbD3DColour = 0xFF404040 (dark gray with full alpha)
-            BitConverter.GetBytes(0xFF404040u).CopyTo(bytes, offset);
-            offset += 4;
-
-            // NightAmbD3DSpecular = 0xFF000000 (black with full alpha)
-            BitConverter.GetBytes(0xFF000000u).CopyTo(bytes, offset);
-            offset += 4;
-
-            // NightAmbRed/Green/Blue = 64, 64, 64
-            BitConverter.GetBytes(64).CopyTo(bytes, offset); offset += 4;
-            BitConverter.GetBytes(64).CopyTo(bytes, offset); offset += 4;
-            BitConverter.GetBytes(64).CopyTo(bytes, offset); offset += 4;
-
-            // NightLampostRed/Green/Blue/Padding (4 bytes)
-            bytes[offset++] = 127; // Red
-            bytes[offset++] = 127; // Green
-            bytes[offset++] = 100; // Blue (slightly less for warmer tone)
-            bytes[offset++] = 0;   // Padding
-
-            // NightLampostRadius = 512
-            BitConverter.GetBytes(512).CopyTo(bytes, offset);
-            offset += 4;
-
-            // Night colour (3 bytes) = dark blue sky
-            bytes[offset++] = 20;  // Red
-            bytes[offset++] = 20;  // Green
-            bytes[offset++] = 40;  // Blue
+            // NightColour (dark blue sky)
+            bytes[NightColourOffset + 0] = 20;
+            bytes[NightColourOffset + 1] = 20;
+            bytes[NightColourOffset + 2] = 40;
 
             return bytes;
         }
     }
 
-    /// <summary>Simple event args that carry a file path.</summary>
     public sealed class PathEventArgs : EventArgs
     {
         public string Path { get; }

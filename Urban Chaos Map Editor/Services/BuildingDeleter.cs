@@ -103,8 +103,21 @@ namespace UrbanChaosMapEditor.Services
             }
 
             Debug.WriteLine($"[BuildingDeleter] Deleting building #{buildingId1}: " +
-                           $"{facetsToDelete} facets, {walkablesToDelete} walkables, " +
-                           $"{roofFace4IdsToDelete.Count} roofFace4 entries");
+                          $"{facetsToDelete} facets, {walkablesToDelete} walkables, " +
+                          $"{roofFace4IdsToDelete.Count} roofFace4 entries");
+
+            // Clear any roof enclosure PAP_HI tiles BEFORE deleting the building
+            // (we need the facets to still exist to detect the polygon)
+            try
+            {
+                RoofEnclosureService.ClearRoofEnclosure(buildingId1);
+                Debug.WriteLine($"[BuildingDeleter] Cleared roof enclosure for building #{buildingId1}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[BuildingDeleter] Failed to clear roof enclosure: {ex.Message}");
+                // Continue with deletion even if roof clearing fails
+            }
 
             // Perform the actual deletion by rewriting the building block
             try

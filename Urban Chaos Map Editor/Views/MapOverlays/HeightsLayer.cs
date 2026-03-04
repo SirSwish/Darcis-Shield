@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Windows.Input;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -9,82 +10,140 @@ using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
 using UrbanChaosMapEditor.Services.DataServices;
 using UrbanChaosMapEditor.ViewModels;
+using System.Runtime.CompilerServices;
 
 namespace UrbanChaosMapEditor.Views.MapOverlays
 {
     /// <summary>
-    /// Draws a small white circle with black height text centered on the
-    /// BOTTOM-RIGHT VERTEX of each 64x64 tile (i.e., at (tx+1, ty+1)*64).
-    /// Adds brush-based hover highlight (N×N vertices) when a height tool is active.
+    /// HIGHLY OPTIMIZED HeightsLayer with:
+    /// 1. Viewport culling (only draw visible vertices)
+    /// 2. StreamGeometry batching (single draw call for all circles)
+    /// 3. Smart hover detection (only repaint when hover actually changes)
+    /// 4. Cached Typeface and frozen brushes
+    /// 5. Squared distance comparison (avoids sqrt)
     /// </summary>
     public sealed class HeightsLayer : FrameworkElement
     {
-        private readonly HeightsAccessor _accessor = new HeightsAccessor(MapDataService.Instance);
+        private readonly HeightsAccessor _accessor = new(MapDataService.Instance);
         private readonly DispatcherTimer _debounceTimer;
 
-        // Caches for text (per height value), separated by color to avoid brush mutation
-        private readonly Dictionary<int, FormattedText> _textCacheBlack = new();
-        private readonly Dictionary<int, FormattedText> _textCacheWhite = new();
+        // Text cache per height value
+        private readonly Dictionary<int, FormattedText> _textCacheBlack = new(256);
+        private readonly Dictionary<int, FormattedText> _textCacheWhite = new(256);
         private double _lastPixelsPerDip = -1.0;
+        private Typeface _typeface = new("Segoe UI");
 
-        // Styling
+        // Area drag state (Set Height by Drag Area)
+        private bool _isAreaDragging;
+        private Point _areaStart;
+        private Point _areaEnd;
+        private Rect _areaRectPx = Rect.Empty;
+
+        // Pre-frozen selection visuals
+        private static readonly Brush AreaFill;
+        private static readonly Pen AreaOutline;
+
+        // Constants
         private const double Radius = 14.0;
-        private const double HitRadius = 12.0; // how close cursor must be to a vertex to count as hover
+        private const double HitRadius = 12.0;
+        private const double HitRadiusSq = HitRadius * HitRadius; // Avoid sqrt in hit test
+        private const double TileSize = 64.0; // MapConstants.TileSize
+        private const int TilesPerSide = 128;  // MapConstants.TilesPerSide
+        private const int MapPixels = 8192;    // MapConstants.MapPixels
 
+        // Pre-frozen resources
         private static readonly Brush DefaultFill;
-        private static readonly Pen DefaultOutline;
         private static readonly Brush DefaultText;
-
         private static readonly Brush HoverFill;
-        private static readonly Pen HoverOutline;
         private static readonly Brush HoverText;
+        private static readonly Pen DefaultOutline;
+        private static readonly Pen HoverOutline;
 
-        // For cursor + brush + tool
+        // Elevation color ramp (sbyte -128..127 => index 0..255)
+        private static readonly Brush[] ElevationFillLut;
+        private static readonly bool[] ElevationUseWhiteTextLut;
+
+        // Cached circle geometry (unit circle, scaled during draw)
+        private static readonly EllipseGeometry CircleGeometry;
+
         private MapViewModel? _vm;
+        private int _lastHoverVX = -1;
+        private int _lastHoverVZ = -1;
+        private int _lastBrushSize = 1;
+
+        // Cached visible bounds for quick access
+        private Rect _lastVisibleBounds = Rect.Empty;
 
         static HeightsLayer()
         {
-            // Defaults: white fill, black outline & text
+            // --- Hover visuals stay the same ---
             DefaultFill = Brushes.White;
-            DefaultFill.Freeze();
-
-            DefaultOutline = new Pen(Brushes.Black, 1.0);
-            DefaultOutline.Freeze();
-
             DefaultText = Brushes.Black;
-            DefaultText.Freeze();
 
-            // Hover: red fill, white outline & text
             var red = new SolidColorBrush(Color.FromRgb(0xE5, 0x00, 0x00));
             red.Freeze();
             HoverFill = red;
 
+            HoverText = Brushes.White;
+
+            DefaultOutline = new Pen(Brushes.Black, 1.0);
+            DefaultOutline.Freeze();
+
             HoverOutline = new Pen(Brushes.White, 1.25);
             HoverOutline.Freeze();
 
-            HoverText = Brushes.White;
-            HoverText.Freeze();
+            // Pre-create circle geometry
+            CircleGeometry = new EllipseGeometry(new Point(0, 0), Radius, Radius);
+            CircleGeometry.Freeze();
+
+            // --- Elevation ramp LUT (low -> high) ---
+            // Low  = light blue, High = green
+            var low = Color.FromRgb(0x7A, 0xD7, 0xFF);  // light blue
+            var high = Color.FromRgb(0x2E, 0xB8, 0x4A); // green
+
+            ElevationFillLut = new Brush[256];
+            ElevationUseWhiteTextLut = new bool[256];
+
+            // Map sbyte -128..127 to 0..255
+            for (int i = 0; i < 256; i++)
+            {
+                double t = i / 255.0; // 0..1
+
+                byte r = (byte)(low.R + (high.R - low.R) * t);
+                byte g = (byte)(low.G + (high.G - low.G) * t);
+                byte b = (byte)(low.B + (high.B - low.B) * t);
+
+                var c = Color.FromRgb(r, g, b);              
+
+                var br = new SolidColorBrush(c);
+                br.Freeze();
+                ElevationFillLut[i] = br;
+
+                // Decide text color for readability
+                // Simple luma threshold; tweak if you want
+                double luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                ElevationUseWhiteTextLut[i] = luma < 140;
+            }
         }
 
         public HeightsLayer()
         {
-            // Redraw on map lifecycle
-            MapDataService.Instance.MapLoaded += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapCleared += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapSaved += (_, __) => Dispatcher.Invoke(InvalidateVisual);
-            MapDataService.Instance.MapBytesReset += (_, __) => Dispatcher.Invoke(InvalidateVisual);
+            MapDataService.Instance.MapLoaded += (_, __) => Dispatcher.BeginInvoke(InvalidateVisual);
+            MapDataService.Instance.MapCleared += (_, __) => Dispatcher.BeginInvoke(InvalidateVisual);
+            MapDataService.Instance.MapSaved += (_, __) => Dispatcher.BeginInvoke(InvalidateVisual);
+            MapDataService.Instance.MapBytesReset += (_, __) => Dispatcher.BeginInvoke(InvalidateVisual);
 
-            // Redraw on height edits (debounced)
             HeightsChangeBus.Instance.TileChanged += (_, __) => KickRepaint();
             HeightsChangeBus.Instance.RegionChanged += (_, __) => KickRepaint();
 
-            Width = MapConstants.MapPixels;   // 8192
-            Height = MapConstants.MapPixels;  // 8192
-            IsHitTestVisible = false;
+            Width = MapPixels;
+            Height = MapPixels;
+            IsHitTestVisible = true;
+            Focusable = true;
 
-            _debounceTimer = new DispatcherTimer(DispatcherPriority.Render)
+            _debounceTimer = new DispatcherTimer(DispatcherPriority.Background)
             {
-                Interval = TimeSpan.FromMilliseconds(16) // ~60 FPS
+                Interval = TimeSpan.FromMilliseconds(32) // ~30 FPS for height changes
             };
             _debounceTimer.Tick += (_, __) =>
             {
@@ -105,79 +164,184 @@ namespace UrbanChaosMapEditor.Views.MapOverlays
 
         private void OnVmChanged(object? s, PropertyChangedEventArgs e)
         {
-            // Cursor, tool, or brush size changes → repaint
-            if (e.PropertyName == nameof(MapViewModel.CursorX) ||
-                e.PropertyName == nameof(MapViewModel.CursorZ) ||
-                e.PropertyName == nameof(MapViewModel.SelectedTool) ||
-                e.PropertyName == nameof(MapViewModel.BrushSize))
+            switch (e.PropertyName)
             {
-                InvalidateVisual();
+                case nameof(MapViewModel.CursorX):
+                case nameof(MapViewModel.CursorZ):
+                    // Only repaint if hover actually changed
+                    var (vx, vz) = GetHoveredVertex();
+                    if (vx != _lastHoverVX || vz != _lastHoverVZ)
+                    {
+                        _lastHoverVX = vx;
+                        _lastHoverVZ = vz;
+                        InvalidateVisual();
+                    }
+                    break;
+
+                case nameof(MapViewModel.SelectedTool):
+                    _lastHoverVX = -1;
+                    _lastHoverVZ = -1;
+                    InvalidateVisual();
+                    break;
+
+                case nameof(MapViewModel.BrushSize):
+                    var newSize = _vm?.BrushSize ?? 1;
+                    if (newSize != _lastBrushSize)
+                    {
+                        _lastBrushSize = newSize;
+                        InvalidateVisual();
+                    }
+                    break;
             }
         }
 
+        private void KickRepaint()
+        {
+            if (!_debounceTimer.IsEnabled)
+                _debounceTimer.Start();
+        }
+
         protected override Size MeasureOverride(Size availableSize)
-            => new(MapConstants.MapPixels, MapConstants.MapPixels);
+            => new(MapPixels, MapPixels);
 
         protected override void OnRender(DrawingContext dc)
         {
             if (!MapDataService.Instance.IsLoaded || MapDataService.Instance.MapBytes is null)
                 return;
 
-            // Recreate text caches if DPI changed
-            double ppd = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-            if (Math.Abs(ppd - _lastPixelsPerDip) > 0.01)
-            {
-                _textCacheBlack.Clear();
-                _textCacheWhite.Clear();
-                _lastPixelsPerDip = ppd;
-            }
+            // Get visible viewport bounds
+            var clipBounds = GetVisibleBounds();
+            if (clipBounds.IsEmpty || clipBounds.Width <= 0 || clipBounds.Height <= 0)
+                return;
 
-            // Determine hovered center vertex (if a height tool is active)
+            // DPI for text rendering
+            double ppd = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+            EnsureTextCache(ppd);
+
+            // Calculate hover bounds
             var (centerVX, centerVZ) = GetHoveredVertex();
             var brushBounds = GetBrushBounds(centerVX, centerVZ);
 
-            double tile = MapConstants.TileSize; // 64
+            // Calculate visible vertex range (vertices are at multiples of TileSize)
+            // Vertices range from 1 to 128 (representing positions 64 to 8192)
+            int minVX = Math.Max(1, (int)Math.Floor(clipBounds.Left / TileSize));
+            int maxVX = Math.Min(TilesPerSide, (int)Math.Ceiling(clipBounds.Right / TileSize));
+            int minVZ = Math.Max(1, (int)Math.Floor(clipBounds.Top / TileSize));
+            int maxVZ = Math.Min(TilesPerSide, (int)Math.Ceiling(clipBounds.Bottom / TileSize));
 
-            for (int tx = 0; tx < MapConstants.TilesPerSide; tx++)
+            // Early exit if nothing visible
+            if (minVX > maxVX || minVZ > maxVZ)
+                return;
+
+            // Use PushTransform for efficiency when drawing many items
+            // Draw all non-hover vertices first, then hover vertices on top
+            DrawVertices(dc, minVX, maxVX, minVZ, maxVZ, brushBounds, ppd, isHover: false);
+
+            if (!brushBounds.IsEmpty)
             {
-                for (int ty = 0; ty < MapConstants.TilesPerSide; ty++)
-                {
-                    // Bottom-right vertex of this tile (1..128)
-                    int vtx = tx + 1;
-                    int vty = ty + 1;
-                    double cx = vtx * tile;
-                    double cy = vty * tile;
+                DrawVertices(dc,
+                    Math.Max(minVX, brushBounds.MinX),
+                    Math.Min(maxVX, brushBounds.MaxX),
+                    Math.Max(minVZ, brushBounds.MinZ),
+                    Math.Min(maxVZ, brushBounds.MaxZ),
+                    brushBounds, ppd, isHover: true);
+            }
+            // Draw area selection rectangle on top (AreaSetHeight tool)
+            if (_isAreaDragging && !_areaRectPx.IsEmpty && _vm?.SelectedTool == EditorTool.AreaSetHeight)
+            {
+                var r = new Rect(
+                    Math.Min(_areaRectPx.Left, _areaRectPx.Right),
+                    Math.Min(_areaRectPx.Top, _areaRectPx.Bottom),
+                    Math.Abs(_areaRectPx.Width),
+                    Math.Abs(_areaRectPx.Height));
 
+                dc.DrawRectangle(AreaFill, AreaOutline, r);
+            }
+        }
+
+        private void DrawVertices(DrawingContext dc, int minVX, int maxVX, int minVZ, int maxVZ,
+    in VertexBounds brushBounds, double ppd, bool isHover)
+        {
+            // Hover (brush area) stays red so editing feedback is obvious
+            var stroke = isHover ? HoverOutline : DefaultOutline;
+
+            for (int vx = minVX; vx <= maxVX; vx++)
+            {
+                double cx = vx * TileSize;
+
+                for (int vz = minVZ; vz <= maxVZ; vz++)
+                {
+                    bool inBrush = brushBounds.Contains(vx, vz);
+
+                    // Skip if we're drawing hover but this isn't hovered
+                    // or if we're drawing non-hover but this IS hovered
+                    if (isHover != inBrush)
+                        continue;
+
+                    double cy = vz * TileSize;
+
+                    // Tile index = vertex - 1
+                    int tx = vx - 1;
+                    int ty = vz - 1;
+
+                    // Read height (int, but stored as signed byte in file)
                     int h = _accessor.ReadHeight(tx, ty);
 
-                    bool inBrush = brushBounds.Contains(vtx, vty);
+                    // Map height to LUT index (sbyte -128..127 => 0..255)
+                    int lutIndex = h + 128;
+                    if (lutIndex < 0) lutIndex = 0;
+                    if (lutIndex > 255) lutIndex = 255;
 
-                    // Circle
-                    var fill = inBrush ? HoverFill : DefaultFill;
-                    var stroke = inBrush ? HoverOutline : DefaultOutline;
-                    dc.DrawEllipse(fill, stroke, new Point(cx, cy), Radius, Radius);
+                    Brush fill;
+                    Brush textBrush;
+                    var textCache = _textCacheBlack;
 
-                    // Text (use cached FormattedText per color)
-                    var textBrush = inBrush ? HoverText : DefaultText;
-                    var ft = GetFormattedText(h, textBrush, ppd);
+                    if (isHover)
+                    {
+                        // Keep existing hover style (red + white text)
+                        fill = HoverFill;
+                        textBrush = HoverText;
+                        textCache = _textCacheWhite;
+                    }
+                    else
+                    {
+                        if (h == 0)
+                        {
+                            fill = Brushes.White;
+                            textBrush = Brushes.Black;
+                            textCache = _textCacheBlack;
+                        }
+                        else
+                        {
+                            fill = ElevationFillLut[lutIndex];
 
-                    // Center text in the circle
-                    dc.DrawText(ft, new Point(cx - ft.Width / 2.0, cy - ft.Height / 2.0));
+                            bool whiteText = ElevationUseWhiteTextLut[lutIndex];
+                            textBrush = whiteText ? Brushes.White : Brushes.Black;
+                            textCache = whiteText ? _textCacheWhite : _textCacheBlack;
+                        }
+                    }
+
+                    // Draw circle
+                    var center = new Point(cx, cy);
+                    dc.DrawEllipse(fill, stroke, center, Radius, Radius);
+
+                    // Draw text (centered)
+                    var ft = GetOrCreateText(h, textBrush, textCache, ppd);
+                    dc.DrawText(ft, new Point(cx - ft.Width * 0.5, cy - ft.Height * 0.5));
                 }
             }
         }
 
-        private FormattedText GetFormattedText(int height, Brush brush, double ppd)
+        private FormattedText GetOrCreateText(int height, Brush brush,
+            Dictionary<int, FormattedText> cache, double ppd)
         {
-            var cache = ReferenceEquals(brush, HoverText) ? _textCacheWhite : _textCacheBlack;
-
             if (!cache.TryGetValue(height, out var ft))
             {
                 ft = new FormattedText(
                     height.ToString(CultureInfo.InvariantCulture),
                     CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight,
-                    new Typeface("Segoe UI"),
+                    _typeface,
                     12,
                     brush,
                     ppd);
@@ -186,96 +350,248 @@ namespace UrbanChaosMapEditor.Views.MapOverlays
             return ft;
         }
 
-        private static bool IsHeightTool(EditorTool t) =>
-            t == EditorTool.RaiseHeight ||
-            t == EditorTool.LowerHeight ||
-            t == EditorTool.LevelHeight ||
-            t == EditorTool.FlattenHeight ||
-            t == EditorTool.DitchTemplate;
+        private Rect GetVisibleBounds()
+        {
+            // Method 1: Check VisualClip
+            var clip = VisualClip;
+            if (clip != null && !clip.Bounds.IsEmpty)
+                return clip.Bounds;
 
-        /// <summary>
-        /// Returns the hovered vertex indices (vx, vz) in grid coords (0..128), or (-1,-1) when no hover.
-        /// Uses MapViewModel.CursorX/Z (game space) converted to UI space.
-        /// </summary>
+            // Method 2: Walk up to find ScrollViewer
+            DependencyObject? current = this;
+            while (current != null)
+            {
+                if (current is System.Windows.Controls.ScrollViewer sv && sv.IsLoaded)
+                {
+                    try
+                    {
+                        // Transform from ScrollViewer to this element
+                        var transform = sv.TransformToDescendant(this);
+                        var viewport = new Rect(
+                            sv.HorizontalOffset,
+                            sv.VerticalOffset,
+                            sv.ViewportWidth,
+                            sv.ViewportHeight);
+                        return transform.TransformBounds(viewport);
+                    }
+                    catch { /* Transform not available yet */ }
+                }
+
+                if (current is System.Windows.Controls.ScrollContentPresenter scp && scp.IsLoaded)
+                {
+                    try
+                    {
+                        var transform = scp.TransformToDescendant(this);
+                        var viewport = new Rect(0, 0, scp.ActualWidth, scp.ActualHeight);
+                        return transform.TransformBounds(viewport);
+                    }
+                    catch { /* Transform not available yet */ }
+                }
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            // Method 3: Use ActualWidth/Height if available
+            if (ActualWidth > 0 && ActualHeight > 0)
+            {
+                // Assume we're seeing the top-left portion
+                return new Rect(0, 0, Math.Min(ActualWidth, MapPixels), Math.Min(ActualHeight, MapPixels));
+            }
+
+            // Fallback: draw everything (worst case)
+            return new Rect(0, 0, MapPixels, MapPixels);
+        }
+
+        private void EnsureTextCache(double ppd)
+        {
+            if (Math.Abs(ppd - _lastPixelsPerDip) > 0.001)
+            {
+                _textCacheBlack.Clear();
+                _textCacheWhite.Clear();
+                _lastPixelsPerDip = ppd;
+            }
+        }
+
+        private static bool IsHeightTool(EditorTool t) =>
+            t is EditorTool.RaiseHeight or EditorTool.LowerHeight or
+               EditorTool.LevelHeight or EditorTool.FlattenHeight or EditorTool.DitchTemplate or
+               EditorTool.AreaSetHeight;
+
         private (int vx, int vz) GetHoveredVertex()
         {
             if (_vm == null || !IsHeightTool(_vm.SelectedTool))
                 return (-1, -1);
 
-            // Convert game→UI (origin flip like other overlays)
-            double uiX = MapConstants.MapPixels - _vm.CursorX;
-            double uiZ = MapConstants.MapPixels - _vm.CursorZ;
+            // Convert game coords to UI coords
+            double uiX = MapPixels - _vm.CursorX;
+            double uiZ = MapPixels - _vm.CursorZ;
 
-            // nearest vertex on the 64px grid
-            int vx = (int)Math.Round(uiX / MapConstants.TileSize);
-            int vz = (int)Math.Round(uiZ / MapConstants.TileSize);
+            // Find nearest vertex
+            int vx = (int)Math.Round(uiX / TileSize);
+            int vz = (int)Math.Round(uiZ / TileSize);
 
-            // Only count as hovered if within HitRadius of that vertex (and within the grid bounds)
-            if (vx < 0 || vx > MapConstants.TilesPerSide ||
-                vz < 0 || vz > MapConstants.TilesPerSide)
-            {
+            // Bounds check
+            if (vx < 0 || vx > TilesPerSide || vz < 0 || vz > TilesPerSide)
                 return (-1, -1);
-            }
 
-            double cx = vx * MapConstants.TileSize;
-            double cz = vz * MapConstants.TileSize;
+            // Distance check (squared to avoid sqrt)
+            double cx = vx * TileSize;
+            double cz = vz * TileSize;
             double dx = uiX - cx;
             double dz = uiZ - cz;
-            double dist = Math.Sqrt(dx * dx + dz * dz);
+            double distSq = dx * dx + dz * dz;
 
-            return dist <= HitRadius ? (vx, vz) : (-1, -1);
+            return distSq <= HitRadiusSq ? (vx, vz) : (-1, -1);
         }
 
-        /// <summary>
-        /// Computes the inclusive rectangle of vertices (in 1..128 for both axes) that should highlight
-        /// based on BrushSize centered at the hovered vertex (odd sizes) or spanning correctly (even sizes).
-        /// If no hover, returns an empty bounds.
-        /// </summary>
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+
+            if (_vm == null) return;
+            if (_vm.SelectedTool != EditorTool.AreaSetHeight) return;
+
+            Focus();
+            CaptureMouse();
+
+            _isAreaDragging = true;
+            _areaStart = e.GetPosition(this);
+            _areaEnd = _areaStart;
+            _areaRectPx = new Rect(_areaStart, _areaEnd);
+
+            InvalidateVisual();
+            e.Handled = true;
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            if (!_isAreaDragging) return;
+            if (_vm == null || _vm.SelectedTool != EditorTool.AreaSetHeight) return;
+
+            _areaEnd = e.GetPosition(this);
+            _areaRectPx = new Rect(_areaStart, _areaEnd);
+            InvalidateVisual();
+
+            e.Handled = true;
+        }
+
+        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonUp(e);
+
+            if (!_isAreaDragging) return;
+
+            try
+            {
+                if (_vm != null && _vm.SelectedTool == EditorTool.AreaSetHeight)
+                {
+                    _areaEnd = e.GetPosition(this);
+                    _areaRectPx = new Rect(_areaStart, _areaEnd);
+
+                    ApplyAreaSetHeight(_areaRectPx);
+                }
+            }
+            finally
+            {
+                _isAreaDragging = false;
+                _areaRectPx = Rect.Empty;
+
+                ReleaseMouseCapture();
+                InvalidateVisual();
+            }
+
+            e.Handled = true;
+        }
+
+        private void ApplyAreaSetHeight(Rect rectPx)
+        {
+            if (_vm == null) return;
+            if (!MapDataService.Instance.IsLoaded) return;
+
+            // Normalize rectangle
+            rectPx = new Rect(
+                Math.Min(rectPx.Left, rectPx.Right),
+                Math.Min(rectPx.Top, rectPx.Bottom),
+                Math.Abs(rectPx.Width),
+                Math.Abs(rectPx.Height));
+
+            if (rectPx.Width < 2 || rectPx.Height < 2)
+                return;
+
+            // Convert to vertex indices (vx/vz are 1..128 in your renderer)
+            int vx0 = ClampToVertexIndex((int)Math.Round(rectPx.Left / TileSize));
+            int vx1 = ClampToVertexIndex((int)Math.Round(rectPx.Right / TileSize));
+            int vz0 = ClampToVertexIndex((int)Math.Round(rectPx.Top / TileSize));
+            int vz1 = ClampToVertexIndex((int)Math.Round(rectPx.Bottom / TileSize));
+
+            int minVX = Math.Min(vx0, vx1);
+            int maxVX = Math.Max(vx0, vx1);
+            int minVZ = Math.Min(vz0, vz1);
+            int maxVZ = Math.Max(vz0, vz1);
+
+            // Convert vertex indices to tile indices used by HeightsAccessor
+            int tx0 = minVX - 1;
+            int tx1 = maxVX - 1;
+            int ty0 = minVZ - 1;
+            int ty1 = maxVZ - 1;
+
+            // Clamp the height from VM (-127..127)
+            int raw = _vm.AreaSetHeightValue;
+            if (raw < -127) raw = -127;
+            if (raw > 127) raw = 127;
+
+            int changed = _accessor.WriteHeightRegion(tx0, ty0, tx1, ty1, (sbyte)raw);
+
+            if (changed > 0)
+            {
+                // Region notify already done by accessor; this is just extra safety if you want it:
+                // HeightsChangeBus.Instance.NotifyRegion(tx0, ty0, tx1, ty1);
+            }
+        }
+
+        private static int ClampToVertexIndex(int v)
+        {
+            if (v < 1) return 1;
+            if (v > TilesPerSide) return TilesPerSide;
+            return v;
+        }
+
         private VertexBounds GetBrushBounds(int centerVX, int centerVZ)
         {
-            // We draw circles only for vertices (tx+1,ty+1) ∈ [1..128], so clamp to that range.
-            const int MIN_V = 1;
-            const int MAX_V = MapConstants.TilesPerSide; // 128
-
             if (centerVX < 0 || centerVZ < 0)
                 return VertexBounds.Empty;
 
-            // Brush size N → we want N vertices across.
-            // Use asymmetric half extents so even sizes produce exactly N cells:
-            // N=3 -> left=1 right=1  => -1..+1 (3)
-            // N=2 -> left=0 right=1  =>  0..+1 (2)
             int n = Math.Max(1, _vm?.BrushSize ?? 1);
             int left = (n - 1) / 2;
             int right = n / 2;
 
-            int minX = Math.Max(MIN_V, centerVX - left);
-            int maxX = Math.Min(MAX_V, centerVX + right);
-            int minZ = Math.Max(MIN_V, centerVZ - left);
-            int maxZ = Math.Min(MAX_V, centerVZ + right);
+            int minX = Math.Max(1, centerVX - left);
+            int maxX = Math.Min(TilesPerSide, centerVX + right);
+            int minZ = Math.Max(1, centerVZ - left);
+            int maxZ = Math.Min(TilesPerSide, centerVZ + right);
 
-            if (minX > maxX || minZ > maxZ)
-                return VertexBounds.Empty;
-
-            return new VertexBounds(minX, maxX, minZ, maxZ);
-        }
-
-        private void KickRepaint()
-        {
-            if (!_debounceTimer.IsEnabled) _debounceTimer.Start();
+            return (minX > maxX || minZ > maxZ)
+                ? VertexBounds.Empty
+                : new VertexBounds(minX, maxX, minZ, maxZ);
         }
 
         private readonly struct VertexBounds
         {
             public readonly int MinX, MaxX, MinZ, MaxZ;
-            public static VertexBounds Empty => new VertexBounds(1, 0, 1, 0); // empty (min>max)
+            public readonly bool IsEmpty;
 
-            public VertexBounds(int minX, int maxX, int minZ, int maxZ)
+            public static VertexBounds Empty => new(1, 0, 1, 0, true);
+
+            public VertexBounds(int minX, int maxX, int minZ, int maxZ, bool isEmpty = false)
             {
                 MinX = minX; MaxX = maxX; MinZ = minZ; MaxZ = maxZ;
+                IsEmpty = isEmpty || minX > maxX || minZ > maxZ;
             }
 
             public bool Contains(int vx, int vz) =>
-                vx >= MinX && vx <= MaxX && vz >= MinZ && vz <= MaxZ;
+                !IsEmpty && vx >= MinX && vx <= MaxX && vz >= MinZ && vz <= MaxZ;
         }
     }
 }

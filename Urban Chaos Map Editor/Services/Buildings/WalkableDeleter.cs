@@ -49,8 +49,10 @@ namespace UrbanChaosMapEditor.Services
 
         /// <summary>
         /// Delete a walkable by its 1-based ID.
+        /// By default uses soft delete (zeros the entry, preserves IDs).
+        /// Set softDelete=false to physically remove and shift IDs (not recommended).
         /// </summary>
-        public DeleteWalkableResult DeleteWalkable(int walkableId1)
+        public DeleteWalkableResult DeleteWalkable(int walkableId1, bool softDelete = true)
         {
             if (!_svc.IsLoaded)
                 return DeleteWalkableResult.Failed("No map loaded.");
@@ -73,13 +75,20 @@ namespace UrbanChaosMapEditor.Services
             var walkable = walkables[walkableId1];
             int roofFacesToDelete = Math.Max(0, walkable.EndFace4 - walkable.StartFace4);
 
-            Debug.WriteLine($"[WalkableDeleter] Deleting walkable {walkableId1}: Building={walkable.Building}, " +
+            Debug.WriteLine($"[WalkableDeleter] Deleting walkable {walkableId1} (softDelete={softDelete}): Building={walkable.Building}, " +
                           $"Rect=({walkable.X1},{walkable.Z1})->({walkable.X2},{walkable.Z2}), " +
                           $"RoofFaces={walkable.StartFace4}-{walkable.EndFace4}");
 
             try
             {
-                RewriteWithoutWalkable(snap, walkableId1, walkables, roofFaces);
+                if (softDelete)
+                {
+                    SoftDeleteWalkable(snap, walkableId1, walkables);
+                }
+                else
+                {
+                    RewriteWithoutWalkable(snap, walkableId1, walkables, roofFaces);
+                }
             }
             catch (Exception ex)
             {
@@ -89,7 +98,78 @@ namespace UrbanChaosMapEditor.Services
             _svc.MarkDirty();
             Debug.WriteLine($"[WalkableDeleter] Successfully deleted walkable {walkableId1}");
 
-            return DeleteWalkableResult.Succeeded(roofFacesToDelete);
+            return DeleteWalkableResult.Succeeded(softDelete ? 0 : roofFacesToDelete);
+        }
+
+        /// <summary>
+        /// Soft delete: Zero out the walkable entry AND its RF4 entries but keep slots in place.
+        /// This preserves walkable AND RF4 IDs - no shifting occurs.
+        /// IMPORTANT: We do NOT modify Next chain pointers in OTHER walkables, because
+        /// when the slot is reused, the chain should remain intact.
+        /// </summary>
+        private void SoftDeleteWalkable(BuildingArrays snap, int walkableId1, DWalkableRec[] walkables)
+        {
+            var bytes = _svc.GetBytesCopy();
+            var walkableToDelete = walkables[walkableId1];
+
+            int walkablesOff = snap.WalkablesStart;
+            ushort nextWalkable = ReadU16(bytes, walkablesOff);
+            ushort nextRoofFace4 = ReadU16(bytes, walkablesOff + 2);
+
+            int walkablesDataOff = walkablesOff + 4;
+            int walkableOffset = walkablesDataOff + walkableId1 * DWalkableSize;
+
+            // Calculate RF4 data offset
+            int roofFacesDataOff = walkablesDataOff + nextWalkable * DWalkableSize;
+
+            Debug.WriteLine($"[WalkableDeleter] Soft deleting walkable {walkableId1} at offset 0x{walkableOffset:X}");
+
+            // Soft-delete associated RF4 entries (zero them out but keep slots)
+            int rf4Start = walkableToDelete.StartFace4;
+            int rf4End = walkableToDelete.EndFace4;
+            int rf4Count = rf4End - rf4Start;
+
+            if (rf4Count > 0)
+            {
+                Debug.WriteLine($"[WalkableDeleter] Soft deleting {rf4Count} RF4 entries [{rf4Start}..{rf4End})");
+                for (int i = rf4Start; i < rf4End; i++)
+                {
+                    int rf4Offset = roofFacesDataOff + i * RoofFace4Size;
+                    // Zero out the 10-byte RF4 entry
+                    for (int j = 0; j < RoofFace4Size; j++)
+                    {
+                        bytes[rf4Offset + j] = 0;
+                    }
+                }
+            }
+
+            // Zero out most of the 22-byte walkable entry, BUT PRESERVE:
+            // - StartFace4/EndFace4 (so RF4 slots can be reused)
+            // - Next pointer (so chain remains intact for slot reuse)
+            // - Building ID (so we know which building this slot belonged to)
+            ushort preservedStartFace4 = ReadU16(bytes, walkableOffset + 8);
+            ushort preservedEndFace4 = ReadU16(bytes, walkableOffset + 10);
+            ushort preservedNext = ReadU16(bytes, walkableOffset + 18);
+            ushort preservedBuilding = ReadU16(bytes, walkableOffset + 20);
+
+            // Zero the entry
+            for (int i = 0; i < DWalkableSize; i++)
+            {
+                bytes[walkableOffset + i] = 0;
+            }
+
+            // Restore preserved fields
+            WriteU16(bytes, walkableOffset + 8, preservedStartFace4);
+            WriteU16(bytes, walkableOffset + 10, preservedEndFace4);
+            WriteU16(bytes, walkableOffset + 18, preservedNext);
+            WriteU16(bytes, walkableOffset + 20, preservedBuilding);
+
+            Debug.WriteLine($"[WalkableDeleter] Preserved: RF4 range [{preservedStartFace4}..{preservedEndFace4}), Next={preservedNext}, Building={preservedBuilding}");
+
+            // DO NOT update Next pointers in other walkables - keep chain intact!
+            // DO NOT update Building.Walkable pointer - the slot will be reused with same ID
+
+            _svc.ReplaceBytes(bytes);
         }
 
         /// <summary>
@@ -105,6 +185,10 @@ namespace UrbanChaosMapEditor.Services
             for (int i = 1; i < walkables.Length; i++)
             {
                 var w = walkables[i];
+                // Skip zeroed-out (soft-deleted) walkables
+                if (w.X1 == 0 && w.Z1 == 0 && w.X2 == 0 && w.Z2 == 0 && w.Building == 0)
+                    continue;
+
                 int minX = Math.Min(w.X1, w.X2);
                 int maxX = Math.Max(w.X1, w.X2);
                 int minZ = Math.Min(w.Z1, w.Z2);

@@ -246,6 +246,12 @@
                                 Style="{StaticResource ActionButton}"
                                 Click="BtnPaintFacet_Click"
                                 ToolTip="Open the texture painter to paint individual cells of this facet."/>
+                        <Button x:Name="BtnChangeStyle"
+                                Content="🎛️ Change Style..."
+                                Margin="0,8,0,0"
+                                Style="{StaticResource ActionButton}"
+                                Click="BtnChangeStyle_Click"
+                                ToolTip="Select a new raw TMA style for this facet."/>
                     </StackPanel>
                 </Border>
 

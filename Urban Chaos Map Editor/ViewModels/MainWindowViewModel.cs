@@ -189,10 +189,10 @@ namespace UrbanChaosMapEditor.ViewModels
                         svc.ComputeAndCacheBuildingRegion();
 
                         // Optional: diagnostic — find the header by pattern/heuristic and log it ONLY
-                       // int buildingHeaderOffset = BuildingOffsetFinder.FindHeader(snap, bytes);
-                   //     System.Diagnostics.Debug.WriteLine($"[Buildings] Header @ 0x{buildingHeaderOffset:X}");
-                       // System.Diagnostics.Debug.WriteLine(
-                       //     $"[Buildings] saveType={snap.SaveType}, objSize={snap.ObjectSectionSize}, objOff=0x{snap.ObjectOffset:X}");
+                        // int buildingHeaderOffset = BuildingOffsetFinder.FindHeader(snap, bytes);
+                        //     System.Diagnostics.Debug.WriteLine($"[Buildings] Header @ 0x{buildingHeaderOffset:X}");
+                        // System.Diagnostics.Debug.WriteLine(
+                        //     $"[Buildings] saveType={snap.SaveType}, objSize={snap.ObjectSectionSize}, objOff=0x{snap.ObjectOffset:X}");
 
                         // Kick a repaint; the layer will pull the region from MapDataService
                         var view = System.Windows.Application.Current.MainWindow as Views.MainWindow;
@@ -434,7 +434,7 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
                     }
                 }
 
-             
+
             }
             catch (Exception ex)
             {
@@ -707,7 +707,6 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
             finally { IsBusy = false; }
         }
         #endregion
-
 
         #region ====== Tools / Editing ======
         private async Task RandomizeHeightsAsync()

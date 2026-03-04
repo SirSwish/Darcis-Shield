@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using UrbanChaosMapEditor.Models;
+using UrbanChaosMapEditor.Services;
+using UrbanChaosMapEditor.Services.DataServices;
 
 namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
 {
@@ -42,9 +44,11 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
 
             TxtNext.Text = _walkable.Next.ToString(CultureInfo.InvariantCulture);
 
-            TxtOldStuff.Text =
-                $"StartPoint={_walkable.StartPoint}, EndPoint={_walkable.EndPoint}, " +
-                $"StartFace3={_walkable.StartFace3}, EndFace3={_walkable.EndFace3}";
+            // Populate editable legacy fields
+            TxtStartPoint.Text = _walkable.StartPoint.ToString(CultureInfo.InvariantCulture);
+            TxtEndPoint.Text = _walkable.EndPoint.ToString(CultureInfo.InvariantCulture);
+            TxtStartFace3.Text = _walkable.StartFace3.ToString(CultureInfo.InvariantCulture);
+            TxtEndFace3.Text = _walkable.EndFace3.ToString(CultureInfo.InvariantCulture);
 
             SeedRoofFacesSpan();
         }
@@ -110,6 +114,87 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
                 Owner = this
             };
             dlg.Show();
+        }
+
+        private void BtnApplyLegacy_Click(object sender, RoutedEventArgs e)
+        {
+            // Parse values
+            if (!ushort.TryParse(TxtStartPoint.Text.Trim(), out ushort startPoint))
+            {
+                TxtStatus.Text = "Invalid StartPoint value.";
+                return;
+            }
+            if (!ushort.TryParse(TxtEndPoint.Text.Trim(), out ushort endPoint))
+            {
+                TxtStatus.Text = "Invalid EndPoint value.";
+                return;
+            }
+            if (!ushort.TryParse(TxtStartFace3.Text.Trim(), out ushort startFace3))
+            {
+                TxtStatus.Text = "Invalid StartFace3 value.";
+                return;
+            }
+            if (!ushort.TryParse(TxtEndFace3.Text.Trim(), out ushort endFace3))
+            {
+                TxtStatus.Text = "Invalid EndFace3 value.";
+                return;
+            }
+
+            // Apply to map data
+            var svc = MapDataService.Instance;
+            if (!svc.IsLoaded)
+            {
+                TxtStatus.Text = "No map loaded.";
+                return;
+            }
+
+            var acc = new BuildingsAccessor(svc);
+            if (!acc.TryGetDWalkableOffset(_walkableId1, out int walkableOffset))
+            {
+                TxtStatus.Text = $"Could not find walkable #{_walkableId1} offset.";
+                return;
+            }
+
+            // DWalkable layout (22 bytes):
+            // +0:  StartPoint (ushort)
+            // +2:  EndPoint (ushort)
+            // +4:  StartFace3 (ushort)
+            // +6:  EndFace3 (ushort)
+            // +8:  StartFace4 (ushort)
+            // +10: EndFace4 (ushort)
+            // +12: X1, +13: Z1, +14: X2, +15: Z2
+            // +16: Y, +17: StoreyY
+            // +18: Next (ushort)
+            // +20: Building (ushort)
+
+            svc.Edit(bytes =>
+            {
+                // StartPoint at offset +0
+                bytes[walkableOffset + 0] = (byte)(startPoint & 0xFF);
+                bytes[walkableOffset + 1] = (byte)((startPoint >> 8) & 0xFF);
+
+                // EndPoint at offset +2
+                bytes[walkableOffset + 2] = (byte)(endPoint & 0xFF);
+                bytes[walkableOffset + 3] = (byte)((endPoint >> 8) & 0xFF);
+
+                // StartFace3 at offset +4
+                bytes[walkableOffset + 4] = (byte)(startFace3 & 0xFF);
+                bytes[walkableOffset + 5] = (byte)((startFace3 >> 8) & 0xFF);
+
+                // EndFace3 at offset +6
+                bytes[walkableOffset + 6] = (byte)(endFace3 & 0xFF);
+                bytes[walkableOffset + 7] = (byte)((endFace3 >> 8) & 0xFF);
+            });
+
+            Debug.WriteLine($"[WalkablePreviewWindow] Updated walkable #{_walkableId1}: " +
+                           $"StartPoint={startPoint}, EndPoint={endPoint}, " +
+                           $"StartFace3={startFace3}, EndFace3={endFace3}");
+
+            TxtStatus.Text = $"Applied: StartPoint={startPoint}, EndPoint={endPoint}, " +
+                            $"StartFace3={startFace3}, EndFace3={endFace3}. Save map to persist.";
+
+            // Notify change bus
+            BuildingsChangeBus.Instance.NotifyChanged();
         }
     }
 }

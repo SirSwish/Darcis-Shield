@@ -76,7 +76,12 @@
                     <ovl:AltitudeHoverLayer x:Name="AltitudeHoverLayer" 
                              DataContext="{Binding}"
                              Panel.ZIndex="50"/>
-
+                    <!-- After BuildingLayer or similar -->
+                    <ovl:RoofsLayer x:Name="RoofsOverlay" 
+                             Width="8192" Height="8192"
+                             Visibility="{Binding ShowRoofs, Converter={StaticResource BoolToVis}}"
+                             SelectedBuildingId="{Binding SelectedBuildingId}"
+                             Panel.ZIndex="51"/>
 
                     <!-- Ghost preview for texture painting -->
                     <ovl:GhostTexturePreviewLayer

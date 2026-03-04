@@ -21,15 +21,25 @@ namespace UrbanChaosMapEditor.Views
         private const double MaxZoom = 8.00;
         private bool _isSettingAltitude;      // For click-and-drag altitude painting
         private HashSet<(int, int)>? _altitudePaintedTiles; // Track painted tiles to avoid redundant writes
-                                                            // Walkable drawing state
+
+        // Walkable drawing state
         private bool _isDrawingWalkableRect;
 
+        // Texture painting state - HYBRID MODE
+        private bool _isTextureDragging;           // True when actively dragging for rectangle
+        private bool _isTextureStrokePainting;     // True when Shift+drag painting
+        private Point _textureMouseDownPos;        // Initial click position
+        private HashSet<(int, int)>? _texturePaintedTiles;  // Track painted tiles to avoid redundant writes
+        private const double TextureDragThreshold = 16.0;    // Pixels before rectangle mode activates
+
         private static bool IsCtrlDown()
-    => Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            => Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+        private static bool IsShiftDown()
+            => Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
 
         private readonly HeightsAccessor _heights = new HeightsAccessor(MapDataService.Instance);
         private AltitudeAccessor? _altitude = new AltitudeAccessor(MapDataService.Instance);
-
 
         // Level tool state
         private bool _isLeveling = false;
@@ -42,22 +52,20 @@ namespace UrbanChaosMapEditor.Views
         /// </summary>
         public event EventHandler? WalkableDrawingCompleted;
 
-
         public MapView()
         {
             InitializeComponent();
-            PreviewMouseMove += OnPreviewMouseMove;   // you already have this
-            MouseLeave += OnMouseLeave;         // optional
-            PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown; // NEW
-            PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;      // NEW
-            LostMouseCapture += OnLostMouseCapture;                      // NEW
-            PreviewMouseWheel += OnPreviewMouseWheel;  // NEW
-            PreviewMouseRightButtonDown += OnPreviewMouseRightButtonDown; // NEW
-                                                                          // ensure we can receive keyboard input
-            MouseEnter += (_, __) => Focus();                // give keyboard focus when hovering
-            PreviewMouseLeftButtonDown += (_, __) => Focus(); // also grab focus on click
+            PreviewMouseMove += OnPreviewMouseMove;
+            MouseLeave += OnMouseLeave;
+            PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
+            PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
+            LostMouseCapture += OnLostMouseCapture;
+            PreviewMouseWheel += OnPreviewMouseWheel;
+            PreviewMouseRightButtonDown += OnPreviewMouseRightButtonDown;
 
-
+            // Ensure we can receive keyboard input
+            MouseEnter += (_, __) => Focus();
+            PreviewMouseLeftButtonDown += (_, __) => Focus();
         }
 
         private static T? FindAncestor<T>(DependencyObject? d) where T : DependencyObject
@@ -78,8 +86,10 @@ namespace UrbanChaosMapEditor.Views
 
             if (DataContext is not MapViewModel vm || Surface == null) return;
 
-
             Point mouseDownPos = e.GetPosition(Surface);
+
+            // Get MainWindowViewModel once for status messages
+            var mainVm = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
 
             // === WALKABLE DRAWING MODE (check first, before other tools) ===
             if (vm.IsDrawingWalkable)
@@ -87,22 +97,22 @@ namespace UrbanChaosMapEditor.Views
                 int tx = (int)Math.Floor(mouseDownPos.X / MapConstants.TileSize);
                 int ty = (int)Math.Floor(mouseDownPos.Y / MapConstants.TileSize);
 
-                if (tx >= 0 && tx < MapConstants.TilesPerSide &&
-                    ty >= 0 && ty < MapConstants.TilesPerSide)
-                {
-                    vm.WalkableSelectionStartX = tx;
-                    vm.WalkableSelectionStartY = ty;
-                    vm.WalkableSelectionEndX = tx;
-                    vm.WalkableSelectionEndY = ty;
-                    _isDrawingWalkableRect = true;
-                    CaptureMouse();
+                tx = Math.Clamp(tx, 0, MapConstants.TilesPerSide - 1);
+                ty = Math.Clamp(ty, 0, MapConstants.TilesPerSide - 1);
 
-                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = "Drag to select walkable region...";
+                vm.WalkableSelectionStartX = tx;
+                vm.WalkableSelectionStartY = ty;
+                vm.WalkableSelectionEndX = tx;
+                vm.WalkableSelectionEndY = ty;
 
-                    e.Handled = true;
-                    return;
-                }
+                _isDrawingWalkableRect = true;
+                CaptureMouse();
+
+                if (mainVm != null)
+                    mainVm.StatusMessage = "Drag to select walkable region...";
+
+                e.Handled = true;
+                return;
             }
 
             // === FACET REDRAW MODE ===
@@ -115,10 +125,11 @@ namespace UrbanChaosMapEditor.Views
                 if (vm.HandleFacetRedrawClick(uiX, uiZ))
                 {
                     e.Handled = true;
-                    InvalidateVisual(); // Refresh to show/hide preview line
+                    InvalidateVisual();
                     return;
                 }
             }
+
             // === FACET MULTI-DRAW MODE ===
             if (vm.IsMultiDrawingFacets)
             {
@@ -147,20 +158,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // === DOOR PLACEMENT MODE ===
-            if (vm.IsPlacingDoor)
-            {
-                Point p = e.GetPosition(Surface);
-                int uiX = (int)Math.Clamp(p.X, 0, MapConstants.MapPixels);
-                int uiZ = (int)Math.Clamp(p.Y, 0, MapConstants.MapPixels);
-
-                if (vm.HandleDoorPlacementClick(uiX, uiZ))
-                {
-                    e.Handled = true;
-                    return;
-                }
-            }
-
             // === CABLE PLACEMENT MODE ===
             if (vm.IsPlacingCable)
             {
@@ -181,7 +178,6 @@ namespace UrbanChaosMapEditor.Views
                 int clampedX = Math.Clamp((int)mouseDownPos.X, 0, MapConstants.MapPixels - 1);
                 int clampedZ = Math.Clamp((int)mouseDownPos.Y, 0, MapConstants.MapPixels - 1);
 
-                // NEW: Ctrl → snap to nearest 64×64 vertex before converting
                 SnapUiToVertexIfCtrl(ref clampedX, ref clampedZ);
 
                 ObjectSpace.UiPixelsToGamePrim(clampedX, clampedZ, out int mapWhoIndex, out byte gameX, out byte gameZ);
@@ -189,27 +185,21 @@ namespace UrbanChaosMapEditor.Views
                 try
                 {
                     var acc = new ObjectsAccessor(MapDataService.Instance);
-
-                    // If PrimEntry is nested: ObjectsAccessor.PrimEntry
-                    // If PrimEntry is top-level (e.g., in Models), use that type instead.
                     var prim = new ObjectsAccessor.PrimEntry
                     {
                         PrimNumber = (byte)vm.PrimNumberToPlace,
                         MapWhoIndex = mapWhoIndex,
                         X = gameX,
                         Z = gameZ,
-                        Y = (short)0,   // default height
-                        Yaw = (byte)0,    // default yaw
-                        Flags = (byte)0,    // default flags
-                        InsideIndex = (byte)0     // default inside/outside
+                        Y = (short)0,
+                        Yaw = (byte)0,
+                        Flags = (byte)0,
+                        InsideIndex = (byte)0
                     };
 
-                    // Use your existing mutator
                     acc.AddPrim(prim);
-
                     vm.RefreshPrimsList();
 
-                    // Re-select the one we just added (match by cell, coords, and prim number)
                     var just = vm.Prims.LastOrDefault(p =>
                         p.MapWhoIndex == mapWhoIndex &&
                         p.X == gameX && p.Z == gameZ &&
@@ -217,322 +207,197 @@ namespace UrbanChaosMapEditor.Views
 
                     vm.SelectedPrim = just;
 
-                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Added {PrimCatalog.GetName(prim.PrimNumber)} ({prim.PrimNumber:000}) at cell r{just?.MapWhoRow},c{just?.MapWhoCol} ({gameX},{gameZ}).";
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Added {PrimCatalog.GetName(prim.PrimNumber)} ({prim.PrimNumber:000}) at cell r{just?.MapWhoRow},c{just?.MapWhoCol} ({gameX},{gameZ}).";
                 }
                 catch (Exception ex)
                 {
-                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Error: failed to add prim. {ex.Message}";
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Error: failed to add prim. {ex.Message}";
                 }
                 finally
                 {
-                    vm.CancelPlacePrim();  // clear placement mode + ghost
+                    vm.CancelPlacePrim();
                     e.Handled = true;
                 }
                 return;
             }
 
-            // ===== TEXTURE PAINT: tile-based with rectangle selection =====
+            // ===== TEXTURE PAINT: Hybrid mode =====
             if (vm.SelectedTool == EditorTool.PaintTexture)
             {
-                int tx = (int)Math.Floor(mouseDownPos.X / MapConstants.TileSize);
-                int ty = (int)Math.Floor(mouseDownPos.Y / MapConstants.TileSize);
-                if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide) return;
+                Point mousePos = e.GetPosition(Surface);
+                int tx = (int)Math.Floor(mousePos.X / MapConstants.TileSize);
+                int ty = (int)Math.Floor(mousePos.Y / MapConstants.TileSize);
 
-                // Start rectangle selection
+                if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide)
+                    return;
+
+                _textureMouseDownPos = mousePos;
+                _isTextureDragging = false;
+                _isTextureStrokePainting = false;
+
                 vm.IsPaintingTexture = true;
                 vm.TextureSelectionStartX = tx;
                 vm.TextureSelectionStartY = ty;
                 vm.TextureSelectionEndX = tx;
                 vm.TextureSelectionEndY = ty;
+
+                if (IsShiftDown())
+                {
+                    _isTextureStrokePainting = true;
+                    _texturePaintedTiles = new HashSet<(int, int)>();
+
+                    ApplyTextureBrush(tx, ty, vm);
+
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Stroke painting {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000} (brush {vm.BrushSize}×{vm.BrushSize})";
+                }
+                else
+                {
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Click to paint (brush {vm.BrushSize}×{vm.BrushSize}), drag for rectangle, Shift+drag for stroke";
+                }
+
                 CaptureMouse();
-
-                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                    shell.StatusMessage = $"Drag to select area for texture {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000}";
-
                 e.Handled = true;
                 return;
             }
 
-
-            // ===== ALTITUDE TOOLS: tile-based with rectangle selection =====
+            // ===== ALTITUDE TOOLS =====
             if (vm.SelectedTool == EditorTool.SetAltitude ||
                 vm.SelectedTool == EditorTool.SampleAltitude ||
                 vm.SelectedTool == EditorTool.ResetAltitude ||
                 vm.SelectedTool == EditorTool.DetectRoof)
             {
-                // Get tile coordinates from click position
                 int tx = (int)Math.Floor(mouseDownPos.X / MapConstants.TileSize);
                 int ty = (int)Math.Floor(mouseDownPos.Y / MapConstants.TileSize);
 
-                Debug.WriteLine($"[MapView] Altitude tool click at pixel ({mouseDownPos.X:F0}, {mouseDownPos.Y:F0})");
-                Debug.WriteLine($"[MapView] Calculated tile: tx={tx}, ty={ty}");
-                Debug.WriteLine($"[MapView] Selected tool: {vm.SelectedTool}, Target altitude: {vm.TargetAltitude}");
-
                 if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide)
-                {
-                    Debug.WriteLine("[MapView] Tile out of bounds, ignoring click");
                     return;
-                }
 
                 if (_altitude == null)
-                {
-                    Debug.WriteLine("[MapView] Initializing _altitude accessor");
                     _altitude = new AltitudeAccessor(MapDataService.Instance);
-                }
 
                 switch (vm.SelectedTool)
                 {
                     case EditorTool.SetAltitude:
-                        {
-                            // Start rectangle selection
-                            vm.IsSettingAltitude = true;
-                            vm.AltitudeSelectionStartX = tx;
-                            vm.AltitudeSelectionStartY = ty;
-                            vm.AltitudeSelectionEndX = tx;
-                            vm.AltitudeSelectionEndY = ty;
-                            CaptureMouse();
+                        vm.IsSettingAltitude = true;
+                        vm.AltitudeSelectionStartX = tx;
+                        vm.AltitudeSelectionStartY = ty;
+                        vm.AltitudeSelectionEndX = tx;
+                        vm.AltitudeSelectionEndY = ty;
+                        CaptureMouse();
 
-                            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                                shell.StatusMessage = $"Drag to select area for altitude {vm.TargetAltitude}";
+                        if (mainVm != null)
+                            mainVm.StatusMessage = $"Drag to select area for altitude {vm.TargetAltitude}";
 
-                            e.Handled = true;
-                            return;
-                        }
+                        e.Handled = true;
+                        return;
 
                     case EditorTool.SampleAltitude:
-                        {
-                            int sampledAlt = _altitude.ReadWorldAltitude(tx, ty);
-                            PapFlags flags = _altitude.ReadFlags(tx, ty);
-                            Debug.WriteLine($"[MapView] Sampled: altitude={sampledAlt}, flags=0x{(ushort)flags:X4} ({flags})");
-                            vm.TargetAltitude = sampledAlt;
+                        int sampledAlt = _altitude.ReadWorldAltitude(tx, ty);
+                        vm.TargetAltitude = sampledAlt;
 
-                            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                                shell.StatusMessage = $"Sampled altitude {sampledAlt} (raw: {sampledAlt >> 3}), flags: {flags}";
+                        if (mainVm != null)
+                            mainVm.StatusMessage = $"Sampled altitude {sampledAlt} (raw: {sampledAlt >> 3}) from cell [{tx},{ty}]";
 
-                            e.Handled = true;
-                            return;
-                        }
+                        e.Handled = true;
+                        return;
 
                     case EditorTool.ResetAltitude:
-                        {
-                            // Start rectangle selection for reset
-                            vm.IsSettingAltitude = true;
-                            vm.AltitudeSelectionStartX = tx;
-                            vm.AltitudeSelectionStartY = ty;
-                            vm.AltitudeSelectionEndX = tx;
-                            vm.AltitudeSelectionEndY = ty;
-                            CaptureMouse();
+                        vm.IsSettingAltitude = true;
+                        vm.AltitudeSelectionStartX = tx;
+                        vm.AltitudeSelectionStartY = ty;
+                        vm.AltitudeSelectionEndX = tx;
+                        vm.AltitudeSelectionEndY = ty;
+                        CaptureMouse();
 
-                            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                                shell.StatusMessage = $"Drag to select area to clear altitude";
+                        if (mainVm != null)
+                            mainVm.StatusMessage = $"Drag to select area to clear altitude";
 
-                            e.Handled = true;
-                            return;
-                        }
+                        e.Handled = true;
+                        return;
 
                     case EditorTool.DetectRoof:
-                        {
-                            Debug.WriteLine($"[MapView] DetectRoof at tile ({tx}, {ty})");
+                        if (mainVm != null)
+                            mainVm.StatusMessage = $"Detect roof at tile [{tx},{ty}] - implement HeightsTab.OnDetectRoofClick()";
 
-                            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                                shell.StatusMessage = $"Detect roof at tile [{tx},{ty}]";
-
-                            e.Handled = true;
-                            return;
-                        }
+                        e.Handled = true;
+                        return;
                 }
             }
 
-
             // ===== HEIGHT TOOLS: vertex-based =====
-            // Require a vertex hit; ignore if not near a vertex
             if (!TryGetVertexIndexFromHit(mouseDownPos, out int vx, out int vy))
                 return;
 
-            // For templates that index by tile from the vertex's lower-left
             int baseTx = vx - 1;
             int baseTy = vy - 1;
 
             switch (vm.SelectedTool)
             {
                 case EditorTool.LevelHeight:
-                    {
-                        _levelSource = _heights.ReadHeight(baseTx, baseTy);
-                        _isLeveling = true;
-                        _lastLeveledTile = null;
-                        CaptureMouse();
+                    _levelSource = _heights.ReadHeight(baseTx, baseTy);
+                    _isLeveling = true;
+                    _lastLeveledTile = null;
+                    CaptureMouse();
 
-                        // Apply to initial brush area
-                        ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) => ApplyHeightToTile(tx, ty, _levelSource));
+                    ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) => ApplyHeightToTile(tx, ty, _levelSource));
 
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell1)
-                            shell1.StatusMessage = $"Level: picked {_levelSource} at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Level: picked {_levelSource} at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
 
-                        e.Handled = true;
-                        return;
-                    }
+                    e.Handled = true;
+                    return;
 
                 case EditorTool.RaiseHeight:
                 case EditorTool.LowerHeight:
+                    int step = Math.Max(1, vm.HeightStep);
+                    bool isRaise = vm.SelectedTool == EditorTool.RaiseHeight;
+
+                    ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) =>
                     {
-                        int step = Math.Max(1, vm.HeightStep);
-                        bool isRaise = vm.SelectedTool == EditorTool.RaiseHeight;
+                        sbyte h = _heights.ReadHeight(tx, ty);
+                        int temp = isRaise ? h + step : h - step;
+                        temp = Math.Clamp(temp, sbyte.MinValue, sbyte.MaxValue);
+                        if (temp != h) _heights.WriteHeight(tx, ty, (sbyte)temp);
+                    });
 
-                        ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) =>
-                        {
-                            sbyte h = _heights.ReadHeight(tx, ty);
-                            int temp = isRaise ? h + step : h - step;
-                            temp = Math.Clamp(temp, sbyte.MinValue, sbyte.MaxValue);
-                            if (temp != h) _heights.WriteHeight(tx, ty, (sbyte)temp);
-                        });
+                    HeightsOverlay?.InvalidateVisual();
 
-                        HeightsOverlay?.InvalidateVisual();
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Height {(isRaise ? "+=" : "-=")} {step} at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
 
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell2)
-                            shell2.StatusMessage = $"Height {(isRaise ? "+=" : "-=")} {step} at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
-
-                        e.Handled = true;
-                        return;
-                    }
+                    e.Handled = true;
+                    return;
 
                 case EditorTool.FlattenHeight:
+                    ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) =>
                     {
-                        ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) =>
-                        {
-                            if (_heights.ReadHeight(tx, ty) != 0) _heights.WriteHeight(tx, ty, (sbyte)0);
-                        });
+                        if (_heights.ReadHeight(tx, ty) != 0) _heights.WriteHeight(tx, ty, (sbyte)0);
+                    });
 
-                        HeightsOverlay?.InvalidateVisual();
+                    HeightsOverlay?.InvalidateVisual();
 
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell3)
-                            shell3.StatusMessage = $"Flattened to 0 at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Flattened to 0 at vertex [{vx},{vy}] (brush {vm.BrushSize}×{vm.BrushSize})";
 
-                        e.Handled = true;
-                        return;
-                    }
+                    e.Handled = true;
+                    return;
 
                 case EditorTool.DitchTemplate:
-                    {
-                        ApplyDitchTemplate(baseTx, baseTy);
-                        e.Handled = true;
-                        return;
-                    }
-                case EditorTool.SetAltitude:
-                    {
-                        Debug.WriteLine($"[MapView] SetAltitude click at pixel ({e.GetPosition(Surface).X:F0}, {e.GetPosition(Surface).Y:F0})");
-                        Debug.WriteLine($"[MapView] Calculated tile: baseTx={baseTx}, baseTy={baseTy}, vx={vx}, vy={vy}");
-                        Debug.WriteLine($"[MapView] Target altitude: {vm.TargetAltitude}");
-
-                        if (_altitude == null)
-                        {
-                            Debug.WriteLine("[MapView] ERROR: _altitude is null! Initializing...");
-                            _altitude = new AltitudeAccessor(MapDataService.Instance);
-                        }
-
-                        int targetAlt = vm.TargetAltitude;
-                        int cellsModified = 0;
-
-                        // Use baseTx, baseTy for cell coordinates (not vertex)
-                        ForEachTileInBrushCentered(baseTx, baseTy, vm.BrushSize, (tx, ty) =>
-                        {
-                            Debug.WriteLine($"[MapView] Writing altitude {targetAlt} to cell ({tx}, {ty})");
-                            int oldAlt = _altitude.ReadWorldAltitude(tx, ty);
-                            _altitude.WriteWorldAltitude(tx, ty, targetAlt);
-                            int newAlt = _altitude.ReadWorldAltitude(tx, ty);
-                            Debug.WriteLine($"[MapView] Cell ({tx}, {ty}): old={oldAlt}, new={newAlt}");
-                            cellsModified++;
-                        });
-
-                        Debug.WriteLine($"[MapView] Modified {cellsModified} cells");
-
-                        // Refresh display
-                        HeightsOverlay?.InvalidateVisual();
-                        // Also invalidate altitude hover layer if you have one
-                        // AltitudeHoverLayer?.InvalidateVisual();
-
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                            shell.StatusMessage = $"Set altitude to {targetAlt} at cell [{baseTx},{baseTy}] (brush {vm.BrushSize}×{vm.BrushSize}, {cellsModified} cells)";
-
-                        e.Handled = true;
-                        return;
-                    }
-
-                case EditorTool.SampleAltitude:
-                    {
-                        Debug.WriteLine($"[MapView] SampleAltitude click at baseTx={baseTx}, baseTy={baseTy}");
-
-                        if (_altitude == null)
-                        {
-                            Debug.WriteLine("[MapView] ERROR: _altitude is null! Initializing...");
-                            _altitude = new AltitudeAccessor(MapDataService.Instance);
-                        }
-
-                        int sampledAlt = _altitude.ReadWorldAltitude(baseTx, baseTy);
-                        Debug.WriteLine($"[MapView] Sampled altitude: {sampledAlt} (raw: {sampledAlt >> 3})");
-
-                        vm.TargetAltitude = sampledAlt;
-
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                            shell.StatusMessage = $"Sampled altitude {sampledAlt} (raw: {sampledAlt >> 3}) from cell [{baseTx},{baseTy}]";
-
-                        e.Handled = true;
-                        return;
-                    }
-
-                case EditorTool.ResetAltitude:
-                    {
-                        Debug.WriteLine($"[MapView] ResetAltitude click at baseTx={baseTx}, baseTy={baseTy}");
-
-                        if (_altitude == null)
-                        {
-                            Debug.WriteLine("[MapView] ERROR: _altitude is null! Initializing...");
-                            _altitude = new AltitudeAccessor(MapDataService.Instance);
-                        }
-
-                        int cellsModified = 0;
-                        ForEachTileInBrushCentered(baseTx, baseTy, vm.BrushSize, (tx, ty) =>
-                        {
-                            Debug.WriteLine($"[MapView] Resetting altitude to 0 at cell ({tx}, {ty})");
-                            _altitude.WriteWorldAltitude(tx, ty, 0);
-                            cellsModified++;
-                        });
-
-                        Debug.WriteLine($"[MapView] Reset {cellsModified} cells to altitude 0");
-
-                        HeightsOverlay?.InvalidateVisual();
-
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                            shell.StatusMessage = $"Reset altitude to 0 at cell [{baseTx},{baseTy}] (brush {vm.BrushSize}×{vm.BrushSize})";
-
-                        e.Handled = true;
-                        return;
-                    }
-
-                case EditorTool.DetectRoof:
-                    {
-                        Debug.WriteLine($"[MapView] DetectRoof click at baseTx={baseTx}, baseTy={baseTy}");
-
-                        // Convert pixel position to block coordinates
-                        int blockX = baseTx;
-                        int blockZ = baseTy;
-
-                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                            shell.StatusMessage = $"Detect roof at block [{blockX},{blockZ}] - implement HeightsTab.OnDetectRoofClick()";
-
-                        e.Handled = true;
-                        return;
-                    }
+                    ApplyDitchTemplate(baseTx, baseTy);
+                    e.Handled = true;
+                    return;
 
                 default:
-                    // No active tool that reacts to left-click
                     return;
             }
         }
+
         private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // Only handle when Ctrl is held
             if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
                 return;
 
@@ -541,28 +406,21 @@ namespace UrbanChaosMapEditor.Views
 
             e.Handled = true;
 
-            // Current zoom and target zoom
             var current = vm.Zoom;
             var factor = e.Delta > 0 ? ZoomStep : 1.0 / ZoomStep;
             var target = Math.Max(MinZoom, Math.Min(MaxZoom, current * factor));
             if (Math.Abs(target - current) < 0.0001) return;
 
-            // Mouse position relative to content (unscaled 8192 space) and to viewport
             Point mouseOnContent = e.GetPosition(Surface);
             Point mouseOnViewport = e.GetPosition(Scroller);
 
-            // Apply zoom
             vm.Zoom = target;
 
-            // After layout updates with new zoom, set offsets so the content point under the cursor stays put
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                // Offsets are in (transformed) content pixels. With LayoutTransform,
-                // ScrollViewer measures scrolled positions in scaled coordinates.
                 double newOffsetX = mouseOnContent.X * target - mouseOnViewport.X;
                 double newOffsetY = mouseOnContent.Y * target - mouseOnViewport.Y;
 
-                // Clamp to scrollable range
                 newOffsetX = Clamp(newOffsetX, 0, Math.Max(0, Scroller.ExtentWidth - Scroller.ViewportWidth));
                 newOffsetY = Clamp(newOffsetY, 0, Math.Max(0, Scroller.ExtentHeight - Scroller.ViewportHeight));
 
@@ -571,10 +429,6 @@ namespace UrbanChaosMapEditor.Views
             }), System.Windows.Threading.DispatcherPriority.Render);
         }
 
-        /// <summary>
-        /// Iterate over all tiles in a brush area CENTERED on (centerTx, centerTy).
-        /// This is different from ForEachTileInBrush which uses origin-based iteration.
-        /// </summary>
         private static void ForEachTileInBrushCentered(int centerTx, int centerTy, int brushSize, Action<int, int> action)
         {
             if (brushSize < 1) brushSize = 1;
@@ -596,7 +450,6 @@ namespace UrbanChaosMapEditor.Views
 
         private static double Clamp(double v, double min, double max) => v < min ? min : (v > max ? max : v);
 
-        // Existing pointer inversion:
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (DataContext is not MapViewModel vm || Surface == null) return;
@@ -654,22 +507,21 @@ namespace UrbanChaosMapEditor.Views
                 vm.UpdateCablePlacementPreview(uiX, uiZ);
             }
 
+            // Height leveling drag
             if (_isLeveling && e.LeftButton == MouseButtonState.Pressed && Surface != null)
             {
                 if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
-                    return; // ignore drag over scrollbar to avoid painting
+                    return;
 
                 Point mouseMovePos = e.GetPosition(Surface);
                 if (!TryGetVertexIndexFromHit(mouseMovePos, out int vx2, out int vy2))
                     return;
 
-                // Paint the brush area with the sampled level height
                 ForEachVertexInBrush(vx2, vy2, (DataContext as MapViewModel)?.BrushSize ?? 1, (tx, ty) =>
                 {
                     ApplyHeightToTile(tx, ty, _levelSource);
                 });
 
-                // Status
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     shell.StatusMessage = $"Level: set #{_levelSource} at vertex [{vx2},{vy2}] (brush {(DataContext as MapViewModel)?.BrushSize ?? 1}×{(DataContext as MapViewModel)?.BrushSize ?? 1})";
             }
@@ -690,7 +542,6 @@ namespace UrbanChaosMapEditor.Views
                 vm.WalkableSelectionEndX = tx;
                 vm.WalkableSelectionEndY = ty;
 
-                // Calculate selection size for status
                 var rect = vm.GetWalkableSelectionRect();
                 if (rect.HasValue)
                 {
@@ -699,7 +550,7 @@ namespace UrbanChaosMapEditor.Views
                     int tileCount = width * height;
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Walkable region: {width}×{height} ({tileCount} tiles)";
+                        shell.StatusMessage = $"Walkable region: Max X = {rect.Value.MaxX} Min X = {rect.Value.MinX} | Max Y = {rect.Value.MaxY} Min Y = {rect.Value.MinY} | {width}×{height} ({tileCount} tiles)";
                 }
             }
 
@@ -713,15 +564,12 @@ namespace UrbanChaosMapEditor.Views
                 int tx = (int)Math.Floor(mouseMovePos.X / MapConstants.TileSize);
                 int ty = (int)Math.Floor(mouseMovePos.Y / MapConstants.TileSize);
 
-                // Clamp to valid range
                 tx = Math.Clamp(tx, 0, MapConstants.TilesPerSide - 1);
                 ty = Math.Clamp(ty, 0, MapConstants.TilesPerSide - 1);
 
-                // Update end corner (triggers overlay repaint via PropertyChanged)
                 vm.AltitudeSelectionEndX = tx;
                 vm.AltitudeSelectionEndY = ty;
 
-                // Calculate selection size for status
                 var rect = vm.GetAltitudeSelectionRect();
                 if (rect.HasValue)
                 {
@@ -738,7 +586,7 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // Texture paint rectangle selection - update end corner
+            // Texture paint - hybrid mode (rectangle OR stroke painting)
             if (vm.IsPaintingTexture && e.LeftButton == MouseButtonState.Pressed && Surface != null)
             {
                 if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
@@ -748,58 +596,80 @@ namespace UrbanChaosMapEditor.Views
                 int tx = (int)Math.Floor(mouseMovePos.X / MapConstants.TileSize);
                 int ty = (int)Math.Floor(mouseMovePos.Y / MapConstants.TileSize);
 
-                // Clamp to valid range
                 tx = Math.Clamp(tx, 0, MapConstants.TilesPerSide - 1);
                 ty = Math.Clamp(ty, 0, MapConstants.TilesPerSide - 1);
 
-                // Update end corner (triggers overlay repaint via PropertyChanged)
-                vm.TextureSelectionEndX = tx;
-                vm.TextureSelectionEndY = ty;
-
-                // Calculate selection size for status
-                var rect = vm.GetTextureSelectionRect();
-                if (rect.HasValue)
+                // STROKE PAINTING MODE (Shift held)
+                if (_isTextureStrokePainting)
                 {
-                    int width = rect.Value.MaxX - rect.Value.MinX + 1;
-                    int height = rect.Value.MaxY - rect.Value.MinY + 1;
-                    int tileCount = width * height;
+                    ApplyTextureBrush(tx, ty, vm);
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                        shell.StatusMessage = $"Stroke painting at [{tx},{ty}] (brush {vm.BrushSize}×{vm.BrushSize})";
+                    return;
+                }
+
+                // Check if we've moved enough to start rectangle dragging
+                if (!_isTextureDragging)
+                {
+                    double dx = mouseMovePos.X - _textureMouseDownPos.X;
+                    double dy = mouseMovePos.Y - _textureMouseDownPos.Y;
+                    double dist = Math.Sqrt(dx * dx + dy * dy);
+
+                    if (dist >= TextureDragThreshold)
                     {
-                        shell.StatusMessage = $"Paint {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000}: {width}×{height} ({tileCount} tiles)";
+                        _isTextureDragging = true;
+                    }
+                }
+
+                // RECTANGLE SELECTION MODE (only if dragging detected)
+                if (_isTextureDragging)
+                {
+                    vm.TextureSelectionEndX = tx;
+                    vm.TextureSelectionEndY = ty;
+
+                    var rect = vm.GetTextureSelectionRect();
+                    if (rect.HasValue)
+                    {
+                        int width = rect.Value.MaxX - rect.Value.MinX + 1;
+                        int height = rect.Value.MaxY - rect.Value.MinY + 1;
+                        int tileCount = width * height;
+
+                        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                        {
+                            shell.StatusMessage = $"Rectangle: {width}×{height} ({tileCount} tiles) with {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000}";
+                        }
                     }
                 }
             }
 
             UpdateGhostHover(e.GetPosition(Surface));
 
-            // ---- Prim placement ghost ----
+            // Prim placement ghost
             if (vm.IsPlacingPrim && Surface != null)
             {
                 Point pos = e.GetPosition(Surface);
                 int clampedX = Math.Clamp((int)pos.X, 0, MapConstants.MapPixels - 1);
                 int clampedZ = Math.Clamp((int)pos.Y, 0, MapConstants.MapPixels - 1);
 
-                // NEW: Ctrl → snap ghost to nearest 64×64 vertex (matches commit behaviour)
                 SnapUiToVertexIfCtrl(ref clampedX, ref clampedZ);
 
-                // Use different variable names to avoid shadowing gameX/gameZ above
                 ObjectSpace.UiPixelsToGamePrim(clampedX, clampedZ, out int mapWhoIndex, out byte cellX, out byte cellZ);
                 ObjectSpace.GamePrimToUiPixels(mapWhoIndex, cellX, cellZ, out int uiX, out int uiZ);
                 ObjectSpace.GameIndexToUiRowCol(mapWhoIndex, out int uiRow, out int uiCol);
 
                 vm.DragPreviewPrim = new PrimListItem
                 {
-                    Index = -1, // new
+                    Index = -1,
                     MapWhoIndex = mapWhoIndex,
                     MapWhoRow = uiRow,
                     MapWhoCol = uiCol,
                     PrimNumber = (byte)Math.Clamp(vm.PrimNumberToPlace, 0, 255),
                     Name = PrimCatalog.GetName(vm.PrimNumberToPlace),
-                    Y = 0,      // default height
-                    X = cellX,  // <— use cell-local coords (0..255)
-                    Z = cellZ,  // <— use cell-local coords (0..255)
-                    Yaw = 0,    // default yaw
+                    Y = 0,
+                    X = cellX,
+                    Z = cellZ,
+                    Yaw = 0,
                     Flags = 0,
                     InsideIndex = 0,
                     PixelX = uiX,
@@ -811,7 +681,7 @@ namespace UrbanChaosMapEditor.Views
         private void OnPreviewMouseLeftButtonUp(object? sender, MouseButtonEventArgs e)
         {
             if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
-                return; // nothing to finish if release on scrollbar
+                return;
 
             if (_isLeveling)
             {
@@ -826,10 +696,7 @@ namespace UrbanChaosMapEditor.Views
             {
                 _isDrawingWalkableRect = false;
                 ReleaseMouseCapture();
-
-                // Raise the event so BuildingsTab can show the dialog
                 WalkableDrawingCompleted?.Invoke(this, EventArgs.Empty);
-
                 e.Handled = true;
                 return;
             }
@@ -843,7 +710,6 @@ namespace UrbanChaosMapEditor.Views
                     bool isReset = vm.SelectedTool == EditorTool.ResetAltitude;
                     int tileCount = 0;
 
-                    // Apply to all tiles in the rectangle
                     for (int ty = rect.Value.MinY; ty <= rect.Value.MaxY; ty++)
                     {
                         for (int tx = rect.Value.MinX; tx <= rect.Value.MaxX; tx++)
@@ -869,17 +735,29 @@ namespace UrbanChaosMapEditor.Views
                 ReleaseMouseCapture();
                 e.Handled = true;
             }
-            // Handle texture rectangle selection completion
+
+            // Handle texture painting completion (hybrid: click=brush, drag=rectangle, shift+drag=stroke)
             if (DataContext is MapViewModel vmTex && vmTex.IsPaintingTexture)
             {
                 var rect = vmTex.GetTextureSelectionRect();
-                if (rect.HasValue)
+
+                if (_isTextureStrokePainting)
                 {
+                    // STROKE PAINTING - already applied during drag, just clean up
+                    int tilesCount = _texturePaintedTiles?.Count ?? 0;
+                    _texturePaintedTiles = null;
+                    _isTextureStrokePainting = false;
+
+                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                        shell.StatusMessage = $"Stroke painted {tilesCount} tiles with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                }
+                else if (_isTextureDragging && rect.HasValue)
+                {
+                    // RECTANGLE MODE - apply texture to all tiles in rectangle
                     var acc = new TexturesAccessor(MapDataService.Instance);
                     int world = vmTex.TextureWorld;
                     int tileCount = 0;
 
-                    // Apply texture to all tiles in the rectangle
                     for (int ty = rect.Value.MinY; ty <= rect.Value.MaxY; ty++)
                     {
                         for (int tx = rect.Value.MinX; tx <= rect.Value.MaxX; tx++)
@@ -889,23 +767,77 @@ namespace UrbanChaosMapEditor.Views
                         }
                     }
 
-                    // Redraw textures layer
                     TexturesChangeBus.Instance.NotifyChanged();
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     {
                         int width = rect.Value.MaxX - rect.Value.MinX + 1;
                         int height = rect.Value.MaxY - rect.Value.MinY + 1;
-                        shell.StatusMessage = $"Painted {width}×{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000} rot {vmTex.SelectedRotationIndex}";
+                        shell.StatusMessage = $"Rectangle painted {width}×{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                    }
+                }
+                else if (rect.HasValue)
+                {
+                    // SINGLE CLICK - apply brush at click location
+                    int centerTx = rect.Value.MinX;
+                    int centerTy = rect.Value.MinY;
+
+                    ApplyTextureBrush(centerTx, centerTy, vmTex);
+
+                    int brushSize = vmTex.BrushSize;
+                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                    {
+                        if (brushSize == 1)
+                            shell.StatusMessage = $"Painted tile [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                        else
+                            shell.StatusMessage = $"Brush painted {brushSize}×{brushSize} at [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                     }
                 }
 
+                // Clean up
+                _isTextureDragging = false;
                 vmTex.ClearTextureSelection();
                 ReleaseMouseCapture();
                 e.Handled = true;
             }
         }
 
+        /// <summary>
+        /// Apply texture using brush size centered on the given tile.
+        /// Respects BrushSize from ViewModel.
+        /// </summary>
+        private void ApplyTextureBrush(int centerTx, int centerTy, MapViewModel vm)
+        {
+            var acc = new TexturesAccessor(MapDataService.Instance);
+            int world = vm.TextureWorld;
+            int brushSize = Math.Max(1, vm.BrushSize);
+            int half = (brushSize - 1) / 2;
+
+            for (int dy = -half; dy <= half; dy++)
+            {
+                for (int dx = -half; dx <= half; dx++)
+                {
+                    int tx = centerTx + dx;
+                    int ty = centerTy + dy;
+
+                    if (tx >= 0 && tx < MapConstants.TilesPerSide &&
+                        ty >= 0 && ty < MapConstants.TilesPerSide)
+                    {
+                        // For stroke painting, skip already-painted tiles
+                        if (_texturePaintedTiles != null)
+                        {
+                            if (_texturePaintedTiles.Contains((tx, ty)))
+                                continue;
+                            _texturePaintedTiles.Add((tx, ty));
+                        }
+
+                        acc.WriteTileTexture(tx, ty, vm.SelectedTextureGroup, vm.SelectedTextureNumber, vm.SelectedRotationIndex, world);
+                    }
+                }
+            }
+
+            TexturesChangeBus.Instance.NotifyChanged();
+        }
 
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -926,7 +858,6 @@ namespace UrbanChaosMapEditor.Views
                 e.Handled = true;
                 return;
             }
-            // Escape cancels walkable drawing
             if (e.Key == Key.Escape && vm.IsDrawingWalkable)
             {
                 _isDrawingWalkableRect = false;
@@ -937,7 +868,6 @@ namespace UrbanChaosMapEditor.Views
                 e.Handled = true;
                 return;
             }
-            // Escape cancels facet redraw
             if (e.Key == Key.Escape && vm.IsRedrawingFacet)
             {
                 vm.CancelFacetRedraw();
@@ -946,7 +876,6 @@ namespace UrbanChaosMapEditor.Views
                 e.Handled = true;
                 return;
             }
-            // Escape cancels facet redraw
             if (e.Key == Key.Escape && vm.IsPlacingLadder)
             {
                 vm.CancelLadderPlacement();
@@ -955,16 +884,14 @@ namespace UrbanChaosMapEditor.Views
                 e.Handled = true;
                 return;
             }
-            // Escape cancels door placement
-            if (e.Key == Key.Escape && vm.IsPlacingDoor)
-            {
-                vm.CancelDoorPlacement();
-                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                    shell.StatusMessage = "Door placement cancelled.";
-                e.Handled = true;
-                return;
-            }
-                       // Escape cancels cable placement
+            //if (e.Key == Key.Escape && vm.IsPlacingDoor)
+            //{
+            //    vm.CancelDoorPlacement();
+            //    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+            //        shell.StatusMessage = "Door placement cancelled.";
+            //    e.Handled = true;
+            //    return;
+            //}
             if (e.Key == Key.Escape && vm.IsPlacingCable)
             {
                 vm.CancelCablePlacement();
@@ -973,13 +900,24 @@ namespace UrbanChaosMapEditor.Views
                 e.Handled = true;
                 return;
             }
-
-            // Escape cancels facet multi-draw
             if (e.Key == Key.Escape && vm.IsMultiDrawingFacets)
             {
                 vm.CancelFacetMultiDraw();
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     shell.StatusMessage = "Facet drawing cancelled.";
+                e.Handled = true;
+                return;
+            }
+            // Escape cancels texture painting
+            if (e.Key == Key.Escape && vm.IsPaintingTexture)
+            {
+                _isTextureDragging = false;
+                _isTextureStrokePainting = false;
+                _texturePaintedTiles = null;
+                vm.ClearTextureSelection();
+                ReleaseMouseCapture();
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                    shell.StatusMessage = "Texture painting cancelled.";
                 e.Handled = true;
                 return;
             }
@@ -989,18 +927,29 @@ namespace UrbanChaosMapEditor.Views
         {
             _isLeveling = false;
             _lastLeveledTile = null;
+
+            // Clean up texture painting state
+            _isTextureDragging = false;
+            _isTextureStrokePainting = false;
+            _texturePaintedTiles = null;
+
             if (_isDrawingWalkableRect)
             {
                 _isDrawingWalkableRect = false;
                 if (DataContext is MapViewModel vm)
                     vm.ClearWalkableSelection();
             }
+
+            // Also clear texture selection if painting was interrupted
+            if (DataContext is MapViewModel vmTex && vmTex.IsPaintingTexture)
+            {
+                vmTex.ClearTextureSelection();
+            }
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
             GhostLayer?.SetHoverTile(null, null);
-            // (keep your existing logic if any)
         }
 
         private void ApplyHeightToTile(int tx, int ty, sbyte value)
@@ -1016,10 +965,8 @@ namespace UrbanChaosMapEditor.Views
 
         private void OnPreviewMouseRightButtonDown(object? sender, MouseButtonEventArgs e)
         {
-            // ignore if right-clicking on scrollbar
             if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
                 return;
-
 
             // Right-click cancels walkable drawing
             if (DataContext is MapViewModel vmWalk && vmWalk.IsDrawingWalkable)
@@ -1033,7 +980,20 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // stop any leveling drag
+            // Right-click cancels texture painting
+            if (DataContext is MapViewModel vmTex && vmTex.IsPaintingTexture)
+            {
+                _isTextureDragging = false;
+                _isTextureStrokePainting = false;
+                _texturePaintedTiles = null;
+                vmTex.ClearTextureSelection();
+                ReleaseMouseCapture();
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                    shell.StatusMessage = "Texture painting cancelled.";
+                e.Handled = true;
+                return;
+            }
+
             if (_isLeveling)
             {
                 _isLeveling = false;
@@ -1041,7 +1001,6 @@ namespace UrbanChaosMapEditor.Views
                 if (IsMouseCaptured) ReleaseMouseCapture();
             }
 
-            // Cancel facet redraw mode
             if (DataContext is MapViewModel vmFacet && vmFacet.IsRedrawingFacet)
             {
                 vmFacet.CancelFacetRedraw();
@@ -1051,7 +1010,6 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // Finish/cancel facet multi-draw mode
             if (DataContext is MapViewModel vmMultiDraw && vmMultiDraw.IsMultiDrawingFacets)
             {
                 vmMultiDraw.FinishFacetMultiDraw();
@@ -1059,7 +1017,6 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // Cancel ladder placement mode
             if (DataContext is MapViewModel vmLadder && vmLadder.IsPlacingLadder)
             {
                 vmLadder.CancelLadderPlacement();
@@ -1069,17 +1026,15 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // Cancel door placement mode
-            if (DataContext is MapViewModel vmDoor && vmDoor.IsPlacingDoor)
-            {
-                vmDoor.CancelDoorPlacement();
-                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellDoor)
-                    shellDoor.StatusMessage = "Door placement cancelled.";
-                e.Handled = true;
-                return;
-            }
+            //if (DataContext is MapViewModel vmDoor && vmDoor.IsPlacingDoor)
+            //{
+            //    vmDoor.CancelDoorPlacement();
+            //    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellDoor)
+            //        shellDoor.StatusMessage = "Door placement cancelled.";
+            //    e.Handled = true;
+            //    return;
+            //}
 
-            // Cancel cable placement mode
             if (DataContext is MapViewModel vmCable && vmCable.IsPlacingCable)
             {
                 vmCable.CancelCablePlacement();
@@ -1098,11 +1053,9 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // clear the tool
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel vm)
             {
                 vm.Map.SelectedTool = EditorTool.None;
-                // NEW: clear any selection (prim or light)
                 bool cleared = false;
                 if (vm.Map.SelectedPrim != null) { vm.Map.SelectedPrim = null; cleared = true; }
 
@@ -1111,8 +1064,6 @@ namespace UrbanChaosMapEditor.Views
             e.Handled = true;
 
             GhostLayer?.SetHoverTile(null, null);
-
-            e.Handled = true;
         }
 
         private void ApplyDitchTemplate(int cx, int cy)
@@ -1127,7 +1078,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // 1) Core ditch body: 6 columns wide (dx = -4..+1), 9 rows tall (dy = -4..+4), all -32
             for (int dy = -4; dy <= 4; dy++)
             {
                 for (int dx = -4; dx <= 1; dx++)
@@ -1136,8 +1086,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // 2) Right-side 2-column ramp at dx = +2 and +3, only for dy in [-2..+2]
-            // dy → value: -2:-26, -1:-20, 0:-13, +1:-7, +2:0
             var ramp = new[]
             {
                 (-2, (sbyte)-26),
@@ -1153,7 +1101,6 @@ namespace UrbanChaosMapEditor.Views
                 SetIfInBounds(cx + 3, cy + dy, val);
             }
 
-            // repaint once
             HeightsOverlay?.InvalidateVisual();
 
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
@@ -1165,69 +1112,56 @@ namespace UrbanChaosMapEditor.Views
             if (Scroller == null || Surface == null) return;
             if (DataContext is not MapViewModel vm) return;
 
-            // Center of the tile in content (unscaled) pixels
             double cx = (tx + 0.5) * MapConstants.TileSize;
             double cy = (ty + 0.5) * MapConstants.TileSize;
 
             double z = vm.Zoom;
-            // Convert to scaled coordinates (ScrollViewer measures in scaled units because of LayoutTransform)
             double sx = cx * z;
             double sy = cy * z;
 
-            // Target offsets so that (sx, sy) is centered in the viewport
             double targetX = sx - Scroller.ViewportWidth / 2.0;
             double targetY = sy - Scroller.ViewportHeight / 2.0;
 
-            // Clamp to scrollable range
             targetX = Clamp(targetX, 0, System.Math.Max(0, Scroller.ExtentWidth - Scroller.ViewportWidth));
             targetY = Clamp(targetY, 0, System.Math.Max(0, Scroller.ExtentHeight - Scroller.ViewportHeight));
 
-            // Apply after layout has current zoom/extent
             Dispatcher.BeginInvoke(new System.Action(() =>
             {
                 Scroller.ScrollToHorizontalOffset(targetX);
                 Scroller.ScrollToVerticalOffset(targetY);
             }), System.Windows.Threading.DispatcherPriority.Render);
         }
-        private const double VertexHitRadius = 16.0; // px, slightly bigger than drawn 14px circle
 
-        /// <summary>
-        /// If the mouse is close to a height vertex circle, map it to the corresponding tile (tx,ty).
-        /// Circles are centered at (tx+1, ty+1)*64 for tx,ty in [0..127].
-        /// </summary>
+        private const double VertexHitRadius = 16.0;
+
         private static bool TryGetTileFromVertexHit(Point p, out int tx, out int ty)
         {
             tx = ty = -1;
 
-            // nearest vertex indices in grid space (1..128)
             int vx = (int)Math.Round(p.X / MapConstants.TileSize);
             int vy = (int)Math.Round(p.Y / MapConstants.TileSize);
 
             if (vx < 1 || vy < 1 || vx > MapConstants.TilesPerSide || vy > MapConstants.TilesPerSide)
                 return false;
 
-            // center of that vertex in pixels
             double cx = vx * MapConstants.TileSize;
             double cy = vy * MapConstants.TileSize;
 
-            // only accept if within circle-ish radius
             double dx = p.X - cx, dy = p.Y - cy;
             if ((dx * dx + dy * dy) > (VertexHitRadius * VertexHitRadius))
                 return false;
 
-            // this vertex belongs to tile (vx-1, vy-1)
             tx = vx - 1;
             ty = vy - 1;
             return true;
         }
 
-        // Returns true and (vx,vy) in the vertex grid (1..128) if near a vertex circle
         private static bool TryGetVertexIndexFromHit(Point p, out int vx, out int vy)
         {
             vx = vy = -1;
 
-            int candVx = (int)Math.Round(p.X / MapConstants.TileSize); // 1..128
-            int candVy = (int)Math.Round(p.Y / MapConstants.TileSize); // 1..128
+            int candVx = (int)Math.Round(p.X / MapConstants.TileSize);
+            int candVy = (int)Math.Round(p.Y / MapConstants.TileSize);
 
             if (candVx < 1 || candVy < 1 || candVx > MapConstants.TilesPerSide || candVy > MapConstants.TilesPerSide)
                 return false;
@@ -1246,10 +1180,8 @@ namespace UrbanChaosMapEditor.Views
 
         private static void ForEachVertexInBrush(int vx, int vy, int brushSize, Action<int, int> applyByTile)
         {
-            // vx,vy are vertex indices (1..128). The tile directly "under" this vertex is (vx-1, vy-1).
-            // Center an N×N brush around that tile.
             int size = Math.Clamp(brushSize, 1, 10);
-            int half = size / 2; // floor
+            int half = size / 2;
 
             int startTx = (vx - 1) - half;
             int startTy = (vy - 1) - half;
@@ -1270,9 +1202,6 @@ namespace UrbanChaosMapEditor.Views
             }
         }
 
-        /// <summary>
-        /// Iterate over all tiles in a brush area centered on (centerTx, centerTy).
-        /// </summary>
         private void ForEachTileInBrush(int centerTx, int centerTy, int brushSize, Action<int, int> action)
         {
             int half = (brushSize - 1) / 2;
@@ -1293,7 +1222,7 @@ namespace UrbanChaosMapEditor.Views
 
         private void UpdateGhostHover(Point p)
         {
-            if (GhostLayer == null) return; // x:Name your ghost overlay in XAML as GhostLayer
+            if (GhostLayer == null) return;
             if (DataContext is not MapViewModel vm) return;
 
             if (vm.SelectedTool != EditorTool.PaintTexture)
@@ -1325,13 +1254,13 @@ namespace UrbanChaosMapEditor.Views
             Scroller.ScrollToHorizontalOffset(targetX);
             Scroller.ScrollToVerticalOffset(targetY);
         }
+
         private static void SnapUiToVertexIfCtrl(ref int uiX, ref int uiZ)
         {
-            // Only snap when Ctrl is held
             if (!IsCtrlDown())
                 return;
 
-            int size = MapConstants.TileSize; // 64
+            int size = MapConstants.TileSize;
 
             uiX = (int)(Math.Round(uiX / (double)size) * size);
             uiZ = (int)(Math.Round(uiZ / (double)size) * size);

@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Add Door" 
-        Width="400" Height="480"
+        Width="400"
+        SizeToContent="Height"
         Background="#202225"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
@@ -10,27 +11,17 @@
     <Window.Resources>
         <SolidColorBrush x:Key="Fg" Color="White"/>
         <SolidColorBrush x:Key="Subtle" Color="#FFB0B0B0"/>
-        <SolidColorBrush x:Key="EditableBg" Color="#2A2D32"/>
-        <SolidColorBrush x:Key="EditableBorder" Color="#4A4D52"/>
 
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource Fg}"/>
         </Style>
 
-        <Style x:Key="EditableField" TargetType="TextBox">
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#2F3136"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="{StaticResource EditableBg}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource EditableBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,4"/>
-            <Setter Property="Width" Value="70"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        </Style>
-
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource Subtle}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Width" Value="110"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CaretBrush" Value="White"/>
         </Style>
 
         <Style x:Key="ActionButton" TargetType="Button">
@@ -38,9 +29,9 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#555"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="MinWidth" Value="80"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#4A4D52"/>
@@ -48,13 +39,19 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
-            <Setter Property="Background" Value="#2D4A5A"/>
+        <Style x:Key="DrawButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#5865F2"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#3D6A7A"/>
+                    <Setter Property="Background" Value="#6875F3"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Subtle}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
     </Window.Resources>
 
@@ -63,9 +60,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="12"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="12"/>
+            <RowDefinition Height="16"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -74,120 +71,41 @@
             <TextBlock Text="Add Door to Building" 
                        FontWeight="Bold" 
                        FontSize="16"/>
-            <TextBlock x:Name="TxtBuildingInfo" 
+            <TextBlock x:Name="TxtBuildingInfo"
+                       Text="Building #0"
                        Foreground="{StaticResource Subtle}"
+                       FontSize="12"
                        Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Properties -->
-        <Border Grid.Row="2" 
-                BorderBrush="#333" 
-                BorderThickness="1" 
-                CornerRadius="6" 
-                Padding="16">
-            <StackPanel>
-                <TextBlock Text="Door Properties" FontWeight="SemiBold" Margin="0,0,0,12"/>
-
-                <!-- Type (fixed) -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Type:" Style="{StaticResource FieldLabel}"/>
-                    <TextBlock Text="Door (18)" FontWeight="SemiBold"/>
-                </StackPanel>
-
-                <!-- Height (fixed at 1 storey) -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Height:" Style="{StaticResource FieldLabel}"/>
-                    <TextBlock Text="1 cell (fixed)" FontWeight="SemiBold"/>
-                </StackPanel>
-
-                <!-- Y0/Y1 (altitude) -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Ground Altitude:" Style="{StaticResource FieldLabel}"/>
-                    <TextBlock Text="Y0:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBox x:Name="TxtY0" 
-                             Style="{StaticResource EditableField}" 
-                             Width="60"
-                             Text="0"
-                             PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Y1:" VerticalAlignment="Center" Margin="12,0,4,0"/>
-                    <TextBox x:Name="TxtY1" 
-                             Style="{StaticResource EditableField}" 
-                             Width="60"
-                             Text="0"
-                             PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                </StackPanel>
-
-                <!-- BlockHeight -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Block Height:" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="TxtBlockHeight" 
-                             Style="{StaticResource EditableField}" 
-                             Text="16"
-                             PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                </StackPanel>
-
-                <!-- Flags (read-only display) -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
-                    <TextBlock Text="Flags:" Style="{StaticResource FieldLabel}"/>
-                    <TextBlock Text="TwoTextured + Unclimbable" 
-                               Foreground="{StaticResource Subtle}"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- Important Notes -->
-        <Border Grid.Row="4" 
-                BorderBrush="#335555" 
-                Background="#1A2A2A"
-                BorderThickness="1" 
-                CornerRadius="6" 
-                Padding="12">
-            <StackPanel>
-                <TextBlock Text="🚪 Door Behavior" FontWeight="SemiBold" Foreground="#66CCCC" Margin="0,0,0,8"/>
-                <TextBlock TextWrapping="Wrap" 
-                           Foreground="{StaticResource Subtle}"
-                           FontSize="11">
-                    - Doors are restricted to ONE cell width and ONE cell height
-                    <LineBreak/>
-                    - Used for entering buildings (FacetType 18)
-                    <LineBreak/>
-                    - Style is ignored - doors render as black rectangles
-                    <LineBreak/>
-                    - Ground altitude (Y0/Y1) sets the starting height
-                </TextBlock>
-            </StackPanel>
-        </Border>
-
-        <!-- Instructions -->
-        <Border Grid.Row="5" Margin="0,12,0,0">
-            <TextBlock TextWrapping="Wrap" 
+        <!-- Y Height -->
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="Base Y Height (world units):" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="TxtY0" Text="0" Width="100" HorizontalAlignment="Left"/>
+            <TextBlock Text="Set to match the floor level where the door sits"
                        Foreground="{StaticResource Subtle}"
-                       FontSize="11">
-                <Run FontWeight="SemiBold" Foreground="White">Placement:</Run>
-                <LineBreak/>
-                - Click "Draw on Map" to start drawing the door
-                <LineBreak/>
-                - First click = start point, Second click = end point
-                <LineBreak/>
-                - Both points must be exactly 1 cell apart (horizontal or vertical)
-                <LineBreak/>
-                - Right-click to cancel
-            </TextBlock>
-        </Border>
+                       FontSize="10"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Draw on Map -->
+        <StackPanel Grid.Row="4">
+            <TextBlock Text="Position:" Style="{StaticResource FieldLabel}"/>
+            <Button x:Name="BtnDrawOnMap"
+                    Content="Draw on Map"
+                    Style="{StaticResource DrawButton}"
+                    Click="BtnDrawOnMap_Click"
+                    HorizontalAlignment="Left"
+                    ToolTip="Click to draw the door segment on the map"/>
+        </StackPanel>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="6" 
                     Orientation="Horizontal" 
-                    HorizontalAlignment="Right"
-                    Margin="0,12,0,0">
+                    HorizontalAlignment="Right">
             <Button Content="Cancel" 
                     Style="{StaticResource ActionButton}"
-                    Click="BtnCancel_Click"
-                    Margin="0,0,8,0"/>
-            <Button x:Name="BtnPlace"
-                    Content="🚪 Draw on Map" 
-                    Style="{StaticResource PrimaryButton}"
-                    Click="BtnPlace_Click"/>
+                    Click="BtnCancel_Click"/>
         </StackPanel>
     </Grid>
 </Window>

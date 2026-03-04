@@ -413,6 +413,7 @@
                                     <GridViewColumn Header="Rect"
                         Width="Auto"
                         DisplayMemberBinding="{Binding Rect}"/>
+                                    <GridViewColumn Header="Points" Width="100" DisplayMemberBinding="{Binding PointSpan}"/>
                                 </GridView>
                             </ListView.View>
                         </ListView>
@@ -619,6 +620,7 @@
                                                     Background="Transparent"
                                                     BorderBrush="Transparent"
                                                     ToolTip="Add a gate to the selected building"
+                                                    Click="BtnAddGate_Click"
                                                     Margin="0,0,4,0"
                                                     HorizontalContentAlignment="Center"
                                                     VerticalContentAlignment="Center">
@@ -634,6 +636,7 @@
                                                        SnapsToDevicePixels="True"
                                                        RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                         </Button>
+
 
                         <!-- Add Walkable (visible when building selected) -->
 
@@ -734,6 +737,7 @@
                                 Background="#2D5A2D"
                                 BorderBrush="#4A8A4A"
                                 Foreground="#FF2ECC71"
+                                Click="BtnAddRoofFace4_Click"
                                 ToolTip="Add Roof Face 4 (placeholder)">
                             <Button.Visibility>
                                 <Binding Path="HasSelectedBuildingRec">
@@ -749,6 +753,9 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Button>
+                        <Button Content="Edit Points..." Click="BtnEditWalkablePoints_Click" 
+        Margin="4,2" Padding="8,2" ToolTip="Edit StartPoint/EndPoint for debugging"/>
+
                     </StackPanel>
 
                     <TextBlock Grid.Row="1" Grid.Column="1"
@@ -795,6 +802,7 @@
                                 Background="#5A2D2D"
                                 BorderBrush="#8A4A4A"
                                 Foreground="#FFE74C3C"
+                                Click="BtnDeleteRoofFace4_Click"
                                 ToolTip="Delete Roof Face 4 (placeholder)">
                             <Button.Visibility>
                                 <Binding Path="HasSelectedBuildingRec">

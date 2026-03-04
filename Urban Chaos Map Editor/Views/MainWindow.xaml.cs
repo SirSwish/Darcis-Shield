@@ -18,79 +18,110 @@ namespace UrbanChaosMapEditor.Views
     {
         private bool _heightHotkeyLatched;
         private PrimListItem? _copiedPrim;
-        private const double MinExpandedEditorWidth = 300;  // <-- your minimum when expanded
-        private const double CollapsedRailWidth = 28;       // width when collapsed
+        private const double MinExpandedEditorWidth = 300;
+        private const double CollapsedRailWidth = 28;
         private double _lastDrawerWidth = MinExpandedEditorWidth;
-
 
         public MainWindow()
         {
             InitializeComponent();
-      
 
+            // Apply dark title bar as early as possible
+            SourceInitialized += OnSourceInitialized;
             Loaded += OnLoaded;
+
             AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), handledEventsToo: true);
             AddHandler(Keyboard.PreviewKeyUpEvent, new KeyEventHandler(MainWindow_PreviewKeyUp), handledEventsToo: true);
         }
 
         private static readonly Regex _digits = new(@"^\d+$");
 
+        #region Dark Title Bar (Windows 10/11)
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        [DllImport("uxtheme.dll", EntryPoint = "#135", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern int SetPreferredAppMode(int preferredAppMode);
+
+        [DllImport("uxtheme.dll", EntryPoint = "#136", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern void FlushMenuThemes();
+
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        private const int DWMWA_CAPTION_COLOR = 35;
+        private const int DWMWA_TEXT_COLOR = 36;
+
+        /// <summary>
+        /// Called when window handle is available - best time to set DWM attributes
+        /// </summary>
+        private void OnSourceInitialized(object? sender, EventArgs e)
+        {
+            ApplyDarkTitleBar();
+        }
+
+        private void ApplyDarkTitleBar()
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+
+                int darkMode = 1;
+
+                // Try the Windows 11 / 10 20H1+ attribute first
+                int result = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+
+                // Fallback for older Windows 10 builds
+                if (result != 0)
+                {
+                    DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, ref darkMode, sizeof(int));
+                }
+
+                // On Windows 11, we can also set the caption color directly
+                // 0x001E1E1E = RGB(30, 30, 30) in COLORREF format (BGR)
+                int captionColor = 0x001E1E1E;
+                DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
+
+                // Set title text color to white
+                // 0x00FFFFFF = RGB(255, 255, 255) in COLORREF format
+                int textColor = 0x00FFFFFF;
+                DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, ref textColor, sizeof(int));
+            }
+            catch
+            {
+                // Silently fail on older Windows versions that don't support these attributes
+            }
+        }
+
+        #endregion
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            TryEnableDarkTitleBar();
+            // Ensure dark title bar is applied (backup call)
+            ApplyDarkTitleBar();
+
             var vm = DataContext as MainWindowViewModel;
             System.Diagnostics.Debug.WriteLine($"[Recent] VM? {(vm != null)}  Count={(vm?.RecentFiles?.Count ?? -1)}");
         }
 
-
         private void EditorExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            // Keep rail visible
             EditorRailCol.Width = new GridLength(CollapsedRailWidth);
-
-            // Restore drawer width
             EditorDrawerCol.MinWidth = MinExpandedEditorWidth;
             var target = Math.Max(_lastDrawerWidth, MinExpandedEditorWidth);
             EditorDrawerCol.Width = new GridLength(target);
         }
 
-
         private void EditorExpander_Collapsed(object sender, RoutedEventArgs e)
         {
-            // Remember last drawer width
             var w = EditorDrawerCol.ActualWidth;
             if (w > 0) _lastDrawerWidth = w;
 
-            // Collapse drawer fully
             EditorDrawerCol.MinWidth = 0;
             EditorDrawerCol.Width = new GridLength(0);
-
-            // Keep only the rail
             EditorRailCol.Width = new GridLength(CollapsedRailWidth);
         }
-
-        private void TryEnableDarkTitleBar()
-        {
-            var hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd == IntPtr.Zero) return;
-
-            // DWMWA_USE_IMMERSIVE_DARK_MODE has been 19 or 20 depending on Windows build.
-            const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
-            const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-
-            int trueValue = 1;
-
-            // Try newer attribute first, then fallback.
-            _ = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref trueValue, sizeof(int));
-            _ = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, ref trueValue, sizeof(int));
-        }
-
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(
-            IntPtr hwnd,
-            int dwAttribute,
-            ref int pvAttribute,
-            int cbAttribute);
 
         private void TextureThumb_Click(object sender, RoutedEventArgs e)
         {
@@ -98,15 +129,9 @@ namespace UrbanChaosMapEditor.Views
             if ((sender as FrameworkElement)?.Tag is not TextureThumb thumb) return;
 
             var map = shell.Map;
-
-            // Enter texture paint tool and set the chosen texture
             map.SelectedTool = EditorTool.PaintTexture;
             map.SelectedTextureGroup = thumb.Group;
             map.SelectedTextureNumber = thumb.Number;
-
-            // Optional: reset rotation for a fresh placement (keep or remove as you prefer)
-            // In your v1 scheme, SelectedRotationIndex 2 == 0 degrees. If you want straight 0deg, set to 2:
-            // map.SelectedRotationIndex = 2;
 
             shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) — click a tile to apply";
         }
@@ -120,11 +145,9 @@ namespace UrbanChaosMapEditor.Views
 
         private void GoToCell_Click(object sender, RoutedEventArgs e)
         {
-            // Optionally seed dialog with current cursor tile (0..127)
             int curTx = 0, curTy = 0;
             if (DataContext is MainWindowViewModel vm)
             {
-                // Map.CursorX/Y are pixels in game coords; convert to tile indices
                 curTx = System.Math.Clamp(vm.Map.CursorX / 64, 0, 127);
                 curTy = System.Math.Clamp(vm.Map.CursorZ / 64, 0, 127);
             }
@@ -132,18 +155,17 @@ namespace UrbanChaosMapEditor.Views
             var dlg = new GoToCellDialog(curTx, curTy) { Owner = this };
             if (dlg.ShowDialog() == true)
             {
-                // Scroll to the tile center
                 MapViewControl.GoToTileCenter(dlg.Tx, dlg.Ty);
-                // Optional: status toast
                 if (DataContext is MainWindowViewModel vm2)
                     vm2.StatusMessage = $"Jumped to cell [{dlg.Tx},{dlg.Ty}]";
             }
         }
+
         private void RotateLeft_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
-            map.SelectedRotationIndex = (map.SelectedRotationIndex + 3) % 4; // -1 mod 4
+            map.SelectedRotationIndex = (map.SelectedRotationIndex + 3) % 4;
             shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0→180°, 1→90°, 2→0°, 3→270°)";
         }
 
@@ -164,7 +186,6 @@ namespace UrbanChaosMapEditor.Views
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
-                // Ctrl+Double-click = properties (existing behavior)
                 if (shell.ShowPrimPropertiesCommand.CanExecute(null))
                     shell.ShowPrimPropertiesCommand.Execute(null);
                 e.Handled = true;
@@ -172,13 +193,11 @@ namespace UrbanChaosMapEditor.Views
             }
             else if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0)
             {
-                // Shift+Double-click = height dialog
                 PrimHeight_Click(sender!, new RoutedEventArgs());
                 e.Handled = true;
                 return;
             }
 
-            // Default: center viewport
             MapViewControl.CenterOnPixel(p.PixelX, p.PixelZ);
             shell.StatusMessage = $"Centered on {p.Name} at ({p.X},{p.Z},{p.Y})";
         }
@@ -192,7 +211,6 @@ namespace UrbanChaosMapEditor.Views
             }
             if ((e.Key == Key.LeftShift || e.Key == Key.RightShift))
             {
-                // Avoid popping while editing text
                 if (Keyboard.FocusedElement is System.Windows.Controls.TextBox) return;
 
                 if (DataContext is MainWindowViewModel vm && vm.Map.SelectedPrim is { } sel)
@@ -216,11 +234,9 @@ namespace UrbanChaosMapEditor.Views
 
             try
             {
-                // Remove from IAM
                 var acc = new ObjectsAccessor(MapDataService.Instance);
                 acc.DeletePrim(sel.Index);
 
-                // Rebuild the list from disk and clear selection
                 shell.Map.RefreshPrimsList();
                 shell.Map.SelectedPrim = null;
 
@@ -233,6 +249,7 @@ namespace UrbanChaosMapEditor.Views
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void PrimProperties_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel shell) return;
@@ -245,7 +262,6 @@ namespace UrbanChaosMapEditor.Views
 
             System.Diagnostics.Debug.WriteLine($"[PrimProps] Open for index={sel.Index}, flags=0x{sel.Flags:X2}, inside={sel.InsideIndex}");
 
-            // Open the dialog with the current values
             var dlg = new Views.PrimPropertiesDialog(sel.Flags, sel.InsideIndex) { Owner = this };
             if (dlg.ShowDialog() != true)
             {
@@ -257,7 +273,6 @@ namespace UrbanChaosMapEditor.Views
             byte newInside = dlg.InsideIndexValue;
             System.Diagnostics.Debug.WriteLine($"[PrimProps] OK -> flags=0x{newFlags:X2}, inside={newInside}");
 
-            // Write back to IAM
             var acc = new ObjectsAccessor(MapDataService.Instance);
             acc.EditPrim(sel.Index, prim =>
             {
@@ -266,15 +281,12 @@ namespace UrbanChaosMapEditor.Views
                 return prim;
             });
 
-            // Rebuild the VM list
             shell.Map.RefreshPrimsList();
 
-            // Try to reselect by original index first
             PrimListItem? toSelect = null;
             if (sel.Index >= 0 && sel.Index < shell.Map.Prims.Count)
             {
                 toSelect = shell.Map.Prims[sel.Index];
-                // sanity: ensure it's "the same" prim (same cell & coords & prim number)
                 if (toSelect.MapWhoIndex != sel.MapWhoIndex ||
                     toSelect.X != sel.X || toSelect.Z != sel.Z ||
                     toSelect.PrimNumber != sel.PrimNumber)
@@ -283,7 +295,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // If index mismatch (rare), find by tuple
             if (toSelect == null)
             {
                 toSelect = shell.Map.Prims.FirstOrDefault(p =>
@@ -294,7 +305,6 @@ namespace UrbanChaosMapEditor.Views
 
             shell.Map.SelectedPrim = toSelect;
 
-            // Status
             var flagsPretty = UrbanChaosMapEditor.Models.PrimFlags.FromByte(newFlags);
             var insideLabel = newInside == 0 ? "Outside" : $"Inside={newInside}";
             shell.StatusMessage = $"Updated {sel.Name} | Flags: [{flagsPretty}] | {insideLabel}";
@@ -311,27 +321,20 @@ namespace UrbanChaosMapEditor.Views
             shell.StatusMessage =
                 $"Add Prim: {pb.Title} ({pb.Number:000}). Click on the map to place. Right-click/Esc to cancel.";
 
-            // focus the map so the ghost shows immediately and Esc cancels placement
             MapViewControl.Focus();
         }
 
-        // Called by the prim palette buttons in the Prims tab (Tag is a PrimButton)
         private void PrimPalette_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel shell) return;
 
-            // PrimButton object is passed via Tag on the Button
             var primBtn = (sender as FrameworkElement)?.Tag as PrimButton;
             if (primBtn == null) return;
 
-            // Enter placing mode with this prim number
             shell.Map.PrimNumberToPlace = primBtn.Number;
             shell.Map.IsPlacingPrim = true;
-
-            // Clear any previous drag-ghost from move mode
             shell.Map.DragPreviewPrim = null;
 
-            // Nice status hint
             shell.StatusMessage =
                 $"Placing {primBtn.Number:D3} — {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
         }
@@ -375,7 +378,7 @@ namespace UrbanChaosMapEditor.Views
                 PixelZ = sel.PixelZ
             };
 
-            shell.StatusMessage = $"Copied “{sel.Name}” (#{sel.PrimNumber:000}).";
+            shell.StatusMessage = $"Copied \"{sel.Name}\" (#{sel.PrimNumber:000}).";
         }
 
         private void PastePrimAtCursor()
@@ -384,11 +387,9 @@ namespace UrbanChaosMapEditor.Views
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
 
-            // Use current cursor (game-space). Convert to UI pixels so we can reuse existing helpers.
             int uiX = MapConstants.MapPixels - map.CursorX;
             int uiY = MapConstants.MapPixels - map.CursorZ;
 
-            // NEW: if CTRL is held, snap to nearest 64×64 vertex
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 uiX = (int)(Math.Round(uiX / 64.0) * 64.0);
@@ -398,10 +399,8 @@ namespace UrbanChaosMapEditor.Views
                 uiY = Math.Clamp(uiY, 0, MapConstants.MapPixels - 1);
             }
 
-            // Convert to MapWho + cell-local 0..255 coords
             ObjectSpace.UiPixelsToGamePrim(uiX, uiY, out int mapWhoIndex, out byte gameX, out byte gameZ);
 
-            // Build a new prim entry with the copied properties
             var clip = _copiedPrim;
             var newEntry = new PrimEntry
             {
@@ -409,9 +408,9 @@ namespace UrbanChaosMapEditor.Views
                 MapWhoIndex = mapWhoIndex,
                 X = gameX,
                 Z = gameZ,
-                Y = clip.Y,       // duplicate height
-                Yaw = clip.Yaw,     // duplicate yaw
-                Flags = clip.Flags,   // duplicate flags
+                Y = clip.Y,
+                Yaw = clip.Yaw,
+                Flags = clip.Flags,
                 InsideIndex = clip.InsideIndex
             };
 
@@ -420,7 +419,6 @@ namespace UrbanChaosMapEditor.Views
                 var acc = new ObjectsAccessor(MapDataService.Instance);
                 acc.AddPrim(newEntry);
 
-                // Refresh and try select the newly-added instance
                 map.RefreshPrimsList();
 
                 var inserted = map.Prims.LastOrDefault(p =>
@@ -430,7 +428,7 @@ namespace UrbanChaosMapEditor.Views
 
                 map.SelectedPrim = inserted ?? map.SelectedPrim;
 
-                shell.StatusMessage = $"Pasted “{clip.Name}” (#{clip.PrimNumber:000}) at cell {mapWhoIndex} (X:{gameX}, Z:{gameZ}).";
+                shell.StatusMessage = $"Pasted \"{clip.Name}\" (#{clip.PrimNumber:000}) at cell {mapWhoIndex} (X:{gameX}, Z:{gameZ}).";
             }
             catch (System.Exception ex)
             {
@@ -442,19 +440,16 @@ namespace UrbanChaosMapEditor.Views
 
         private void MainWindow_PreviewKeyDown(object? sender, KeyEventArgs e)
         {
-            // Don’t trigger when typing in a TextBox
             if (Keyboard.FocusedElement is System.Windows.Controls.TextBox)
                 return;
 
-            // ==== Ctrl+ shortcuts ====
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
-                // --- Copy (prefer prims over lights) ---
                 if (e.Key == Key.C)
                 {
                     if (DataContext is not MainWindowViewModel shell || shell.Map == null)
                     {
-                        e.Handled = true; // swallow so Ctrl+C doesn’t bubble
+                        e.Handled = true;
                         return;
                     }
 
@@ -473,16 +468,14 @@ namespace UrbanChaosMapEditor.Views
                     return;
                 }
 
-                // --- Paste (prefer prim clipboard over light clipboard) ---
                 if (e.Key == Key.V)
                 {
                     if (DataContext is not MainWindowViewModel shell || shell.Map == null)
                     {
-                        e.Handled = true; // nothing to paste into
+                        e.Handled = true;
                         return;
                     }
 
-                    // Prefer prim paste if we have one; otherwise paste light; otherwise message
                     if (_copiedPrim != null)
                     {
                         PastePrimAtCursor();
@@ -497,7 +490,6 @@ namespace UrbanChaosMapEditor.Views
                 }
             }
 
-            // ==== Arrow keys: move selected prim by 1 pixel ====
             if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
             {
                 if (DataContext is not MainWindowViewModel shell || shell.Map == null)
@@ -508,7 +500,6 @@ namespace UrbanChaosMapEditor.Views
                 if (sel == null)
                     return;
 
-                // Don’t interfere with placement mode
                 if (map.IsPlacingPrim)
                     return;
 
@@ -521,11 +512,9 @@ namespace UrbanChaosMapEditor.Views
                     case Key.Down: dzUi = 1; break;
                 }
 
-                // Work in UI pixel space (0..8191), same as PixelX / PixelZ
                 int newUiX = Math.Clamp(sel.PixelX + dxUi, 0, MapConstants.MapPixels - 1);
                 int newUiZ = Math.Clamp(sel.PixelZ + dzUi, 0, MapConstants.MapPixels - 1);
 
-                // Convert back to game-space cell + local coords
                 ObjectSpace.UiPixelsToGamePrim(newUiX, newUiZ, out int mapWhoIndex, out byte gameX, out byte gameZ);
 
                 try
@@ -533,7 +522,6 @@ namespace UrbanChaosMapEditor.Views
                     var acc = new ObjectsAccessor(MapDataService.Instance);
                     acc.MovePrim(sel.Index, mapWhoIndex, gameX, gameZ);
 
-                    // Refresh list and re-select this prim by index
                     map.RefreshPrimsList();
 
                     PrimListItem? toSelect = null;
@@ -555,10 +543,8 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // ==== Delete key ====
             if (e.Key == Key.Delete)
             {
-                // existing prim delete path
                 if (DataContext is MainWindowViewModel vm2 && vm2.DeletePrimCommand.CanExecute(null))
                 {
                     vm2.DeletePrimCommand.Execute(null);
@@ -567,34 +553,31 @@ namespace UrbanChaosMapEditor.Views
                 return;
             }
 
-            // ==== SHIFT → open Height dialog once per press if a prim is selected ====
             if ((e.Key == Key.LeftShift || e.Key == Key.RightShift) && !_heightHotkeyLatched)
             {
-                // don’t pop while typing in a TextBox
                 if (Keyboard.FocusedElement is System.Windows.Controls.TextBox) return;
 
                 if (DataContext is MainWindowViewModel vm && vm.Map != null && vm.Map.SelectedPrim is { } sel)
                 {
-                    _heightHotkeyLatched = true;      // latch to avoid auto-repeat spam
-                    OpenPrimHeightDialog(sel);        // opens the window once
+                    _heightHotkeyLatched = true;
+                    OpenPrimHeightDialog(sel);
                     e.Handled = true;
                 }
             }
         }
 
-
         private void MainWindow_PreviewKeyUp(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-                _heightHotkeyLatched = false;        // release latch when SHIFT released
+                _heightHotkeyLatched = false;
         }
+
         private void PrimHeight_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel shell) return;
             var sel = shell.Map.SelectedPrim;
             if (sel == null) return;
 
-            // Open dialog with current height (Y)
             var dlg = new PrimHeightDialog(sel.Y) { Owner = this };
             if (dlg.ShowDialog() == true)
             {
@@ -607,7 +590,6 @@ namespace UrbanChaosMapEditor.Views
                     return prim;
                 });
 
-                // Refresh + try to keep the same prim selected
                 shell.Map.RefreshPrimsList();
 
                 PrimListItem? toSelect = null;
@@ -633,15 +615,14 @@ namespace UrbanChaosMapEditor.Views
                 shell.StatusMessage = $"Set height of {sel.Name} to {newY} px (storey={Math.Floor(newY / 256.0)}, offset={((newY % 256) + 256) % 256})";
             }
         }
+
         private void OpenPrimHeightDialog(PrimListItem sel)
         {
-            // Show dialog seeded with current height
             var dlg = new Views.PrimHeightDialog(sel.Y) { Owner = this };
             if (dlg.ShowDialog() != true) return;
 
             int newY = dlg.ResultHeight;
 
-            // Write back to IAM
             var acc = new ObjectsAccessor(MapDataService.Instance);
             acc.EditPrim(sel.Index, prim =>
             {
@@ -649,7 +630,6 @@ namespace UrbanChaosMapEditor.Views
                 return prim;
             });
 
-            // Refresh list and try to reselect the same prim by index
             if (DataContext is MainWindowViewModel vm)
             {
                 vm.Map.RefreshPrimsList();
@@ -659,20 +639,18 @@ namespace UrbanChaosMapEditor.Views
                 vm.StatusMessage = $"Set height of {sel.Name} to {newY} px";
             }
         }
-       
+
         private void OpenRecent_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel vm) return;
 
             var mi = sender as MenuItem;
-            // primary: Tag (as you had); fallback: DataContext (string)
             var path = (mi?.Tag as string) ?? (mi?.DataContext as string);
             if (string.IsNullOrWhiteSpace(path)) return;
 
             var ext = System.IO.Path.GetExtension(path);
             vm.OpenMapFromPath(path);
 
-            // keep MRU fresh
             UrbanChaosMapEditor.Services.RecentFilesService.Instance.Add(path);
         }
 
@@ -680,12 +658,12 @@ namespace UrbanChaosMapEditor.Views
         {
             RecentFilesService.Instance.Clear();
 
-            // keep your existing refresh
             if (DataContext is MainWindowViewModel vm)
                 vm.GetType()
                   .GetMethod("SyncRecentFiles", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                   ?.Invoke(vm, null);
         }
+
         private void Recent_SubmenuOpened(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel vm) return;
@@ -697,7 +675,7 @@ namespace UrbanChaosMapEditor.Views
             {
                 var mi = new MenuItem
                 {
-                    Header = path,      // <-- show FULL path
+                    Header = path,
                     Tag = path,
                     ToolTip = path
                 };
@@ -710,6 +688,6 @@ namespace UrbanChaosMapEditor.Views
             var clear = new MenuItem { Header = "_Clear Recent" };
             clear.Click += ClearRecent_Click;
             m.Items.Add(clear);
-        }      
+        }
     }
 }

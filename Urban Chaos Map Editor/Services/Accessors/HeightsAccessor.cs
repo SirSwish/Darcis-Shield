@@ -66,5 +66,46 @@ namespace UrbanChaosMapEditor.Services
             // NEW: notify listeners that this tile changed
             HeightsChangeBus.Instance.NotifyTile(tx, ty);
         }
+        public int WriteHeightRegion(int tx0, int ty0, int tx1, int ty1, sbyte value)
+        {
+            if (!_data.IsLoaded || _data.MapBytes is null)
+                throw new InvalidOperationException("No map loaded.");
+
+            // Clamp and normalize bounds
+            int x0 = Math.Max(0, Math.Min(tx0, tx1));
+            int x1 = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(tx0, tx1));
+            int y0 = Math.Max(0, Math.Min(ty0, ty1));
+            int y1 = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(ty0, ty1));
+
+            // Clamp value to file-safe range
+            if (value < -127) value = -127;
+            if (value > 127) value = 127;
+
+            int changed = 0;
+
+            // Bulk write (no per-tile NotifyTile spam)
+            for (int ty = y0; ty <= y1; ty++)
+            {
+                for (int tx = x0; tx <= x1; tx++)
+                {
+                    int offs = ByteOffsetForTile(tx, ty);
+                    byte b = unchecked((byte)value);
+
+                    if (_data.MapBytes[offs] != b)
+                    {
+                        _data.MapBytes[offs] = b;
+                        changed++;
+                    }
+                }
+            }
+
+            if (changed > 0)
+            {
+                _data.MarkDirty();
+                HeightsChangeBus.Instance.NotifyRegion(x0, y0, x1, y1);
+            }
+
+            return changed;
+        }
     }
 }

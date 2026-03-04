@@ -69,25 +69,23 @@
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="8">
             <StackPanel>
 
-                <!-- Night Flags -->
+                <!-- Night Flags - FIXED: Removed ChkDay (bit 0x08 doesn't exist in C++ format) -->
                 <GroupBox Header="Night Flags">
                     <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Night Mode = DAYTIME bit CLEAR (inverted logic)" 
+                                   FontSize="10" Foreground="#888" Margin="0,0,0,4"/>
                         <CheckBox x:Name="ChkNightEnabled"
-                  Style="{StaticResource WhiteTickCheckBox}"
-                  Content="Night Enabled"
-                  Margin="0,0,0,8"/>
+                                  Style="{StaticResource WhiteTickCheckBox}"
+                                  Content="Night Enabled (unchecked = Daytime)"
+                                  Margin="0,0,0,8"/>
                         <WrapPanel>
                             <CheckBox x:Name="ChkLampsOn"
-                      Style="{StaticResource WhiteTickCheckBox}"
-                      Content="Lamps On"
-                      Margin="0,0,16,0"/>
+                                      Style="{StaticResource WhiteTickCheckBox}"
+                                      Content="Lamps On"
+                                      Margin="0,0,16,0"/>
                             <CheckBox x:Name="ChkDarkenWalls"
-                      Style="{StaticResource WhiteTickCheckBox}"
-                      Content="Darken Walls"
-                      Margin="0,0,16,0"/>
-                            <CheckBox x:Name="ChkDay"
-                      Style="{StaticResource WhiteTickCheckBox}"
-                      Content="Day"/>
+                                      Style="{StaticResource WhiteTickCheckBox}"
+                                      Content="Darken Walls"/>
                         </WrapPanel>
                     </StackPanel>
                 </GroupBox>

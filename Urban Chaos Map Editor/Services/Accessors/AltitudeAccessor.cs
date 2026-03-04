@@ -228,7 +228,7 @@ namespace UrbanChaosMapEditor.Services
             WriteWorldAltitude(tx, ty, worldAltitude);
 
             // Set roof flags
-            SetFlags(tx, ty, PapFlags.RoofExists | PapFlags.FlatRoof);
+            SetFlags(tx, ty, PapFlags.RoofExists | PapFlags.Hidden);
 
             PapFlags newFlags = ReadFlags(tx, ty);
             Debug.WriteLine($"[AltitudeAccessor] Tile ({tx}, {ty}) flags after: 0x{(ushort)newFlags:X4} ({newFlags})");
@@ -244,8 +244,8 @@ namespace UrbanChaosMapEditor.Services
             // Reset altitude
             WriteAltRaw(tx, ty, 0);
 
-            // Clear roof flags
-            ClearFlags(tx, ty, PapFlags.RoofExists | PapFlags.FlatRoof);
+            // Clear roof flags including Hidden (which enables ledge grabbing)
+            ClearFlags(tx, ty, PapFlags.RoofExists | PapFlags.FlatRoof | PapFlags.Hidden);
         }
 
         /// <summary>

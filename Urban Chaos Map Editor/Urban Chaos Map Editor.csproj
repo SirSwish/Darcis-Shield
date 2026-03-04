@@ -31,9 +31,6 @@
 
   <!-- (Optional) Keep these folders visible in Solution Explorer -->
   <ItemGroup>
-    <Folder Include="Themes\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>

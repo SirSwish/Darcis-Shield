@@ -8,6 +8,7 @@ using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services;
 using UrbanChaosMapEditor.Services.DataServices;
 using UrbanChaosMapEditor.ViewModels;
+using UrbanChaosMapEditor.Views.Dialogs;
 using UrbanChaosMapEditor.Views.Dialogs.Buildings;
 
 namespace UrbanChaosMapEditor.Views.EditorTabs
@@ -31,19 +32,54 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
 
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.BuildingVM building)
             {
-                vm.HandleBuildingTreeSelection(building);
+                // DON'T overwrite facet selection just because building selection changed.
+                // Binding already set vm.SelectedBuilding.
 
-                // Auto-select first facet type if available
-                if (vm.SelectedBuildingFacetGroups?.Count > 0)
+                // Only do your "auto pick" behaviour if nothing is currently selected.
+                if (vm.SelectedFacet == null)
                 {
-                    vm.SelectedFacetTypeGroup = vm.SelectedBuildingFacetGroups[0];
+                    vm.HandleBuildingTreeSelection(building);
+
+                    if (vm.SelectedBuildingFacetGroups?.Count > 0 && vm.SelectedFacetTypeGroup == null)
+                        vm.SelectedFacetTypeGroup = vm.SelectedBuildingFacetGroups[0];
                 }
             }
 
-            // Clear walkable selection on building change
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-            {
                 shell.Map.SelectedWalkableId1 = 0;
+        }
+        private void BtnEditWalkablePoints_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = DataContext as BuildingsTabViewModel;
+            if (vm?.SelectedWalkable == null)
+            {
+                MessageBox.Show("Please select a walkable first.", "No Selection",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var walkable = vm.SelectedWalkable;
+
+            try
+            {
+                var dialog = new Views.Dialogs.EditWalkablePointsDialog(walkable.WalkableId1, walkable.BuildingId)
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // CORRECT: Use RefreshCommand (not RefreshDataCommand)
+                    vm.RefreshCommand?.Execute(null);
+                }
+            }
+            catch
+            {
+                // If dialog doesn't exist, show a simple message
+                MessageBox.Show($"Edit Walkable Points functionality requires EditWalkablePointsDialog.\n\n" +
+                    $"Selected Walkable #{walkable.WalkableId1}\n" +
+                    $"Use Diagnostics → Edit Walkable Points... instead.",
+                    "Not Available", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -88,14 +124,14 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
             if (DataContext is not BuildingsTabViewModel vm)
                 return;
 
-            if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.FacetTypeGroupVM typeGroup)
-            {
-                // Auto-select first facet in the group if available
-                if (typeGroup.Facets?.Count > 0)
-                {
-                    vm.SelectedFacet = typeGroup.Facets[0];
-                }
-            }
+            //if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.FacetTypeGroupVM typeGroup)
+            //{
+            //    // Auto-select first facet in the group if available
+            //    if (typeGroup.Facets?.Count > 0)
+            //    {
+            //        vm.SelectedFacet = typeGroup.Facets[0];
+            //    }
+            //}
         }
 
         #endregion
@@ -239,6 +275,140 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
 
         #endregion
 
+        #region RoofFace4 Handlers
+
+        private void BtnAddRoofFace4_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            // Check if a walkable is selected
+            if (WalkablesList.SelectedItem is not BuildingsTabViewModel.WalkableVM selectedWalkable)
+            {
+                MessageBox.Show("Please select a walkable region first.\n\n" +
+                               "RoofFace4 entries define roof geometry within a walkable region.",
+                    "Add Roof Face", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int walkableId1 = selectedWalkable.WalkableId1;
+            int buildingId1 = vm.SelectedBuildingId;
+
+            // Get the walkable data
+            if (!MapDataService.Instance.TryGetWalkables(out var walkables, out _))
+            {
+                MessageBox.Show("Cannot access walkable data.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (walkableId1 < 1 || walkableId1 >= walkables.Length)
+            {
+                MessageBox.Show("Invalid walkable selection.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var walkable = walkables[walkableId1];
+
+            // Open the dialog
+            var dialog = new AddRoofFace4Dialog(walkableId1, buildingId1, walkable)
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            if (dialog.ShowDialog() == true && dialog.WasConfirmed)
+            {
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+                {
+                    mainVm.StatusMessage = $"Added {dialog.AddedCount} roof face(s) to walkable #{walkableId1}";
+                }
+
+                vm.Refresh();
+            }
+        }
+
+        private void BtnDeleteRoofFace4_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            // Check if a RoofFace4 is selected
+            if (RoofFaces4List.SelectedItem is not BuildingsTabViewModel.RoofFace4VM selectedRf4)
+            {
+                MessageBox.Show("Please select a roof face to delete.",
+                    "Delete Roof Face", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int roofFace4Id = selectedRf4.Index;
+
+            // Confirm deletion
+            var confirmResult = MessageBox.Show(
+                $"Delete roof face #{roofFace4Id}?\n\n" +
+                $"Position: RX={selectedRf4.RX}, RZ={selectedRf4.RZ}\n" +
+                $"Altitude: Y={selectedRf4.Y}",
+                "Confirm Delete",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirmResult != MessageBoxResult.Yes)
+                return;
+
+            var adder = new RoofFace4Adder(MapDataService.Instance);
+            var result = adder.TryDeleteRoofFace4(roofFace4Id);
+
+            if (result.IsSuccess)
+            {
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+                {
+                    mainVm.StatusMessage = $"Deleted roof face #{roofFace4Id}";
+                }
+
+                vm.Refresh();
+            }
+            else
+            {
+                MessageBox.Show($"Failed to delete roof face:\n\n{result.ErrorMessage}",
+                    "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+
+        #region Gate Handler
+
+        private void BtnAddGate_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            int? buildingId = vm.SelectedBuildingId;
+            if (buildingId == null || buildingId <= 0)
+            {
+                MessageBox.Show("Please select a fence building first.", "Add Gate",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var addGateWindow = new AddGateWindow(buildingId.Value)
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            addGateWindow.Closed += (s, args) =>
+            {
+                if (!addGateWindow.WasCancelled && DataContext is BuildingsTabViewModel vmRefresh)
+                {
+                    vmRefresh.Refresh();
+                }
+            };
+
+            addGateWindow.Show();
+        }
+
+        #endregion
+
         #region Preview Window Helpers
 
         private void OpenFacetPreview(BuildingsTabViewModel.FacetVM fvm)
@@ -338,7 +508,13 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
                     if (DataContext is BuildingsTabViewModel vm)
                     {
                         vm.Refresh();
-                        vm.SelectedBuildingId = newBuildingId;
+
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            vm.SelectedBuildingId = newBuildingId;          // selects it via VM
+                            vm.Refresh(forceSelectBuildingId: newBuildingId);
+                            BuildingsList.ScrollIntoView(vm.SelectedBuilding);
+                        }), System.Windows.Threading.DispatcherPriority.Background);
                     }
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
@@ -531,8 +707,8 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
                 // Convert UI tile coordinates to game tile coordinates (flip both axes)
                 int gameX1 = (MapConstants.TilesPerSide - 1) - rect.Value.MaxX;
                 int gameZ1 = (MapConstants.TilesPerSide - 1) - rect.Value.MaxY;
-                int gameX2 = (MapConstants.TilesPerSide - 1) - rect.Value.MinX;
-                int gameZ2 = (MapConstants.TilesPerSide - 1) - rect.Value.MinY;
+                int gameX2 = (MapConstants.TilesPerSide - 1) - rect.Value.MinX + 1;
+                int gameZ2 = (MapConstants.TilesPerSide - 1) - rect.Value.MinY + 1;
 
                 var template = new WalkableTemplate
                 {
@@ -726,6 +902,15 @@ namespace UrbanChaosMapEditor.Views.EditorTabs
             };
 
             addCableWindow.Show();
+        }
+
+        private void BtnDiagnoseWalkables_Click(object sender, RoutedEventArgs e)
+        {
+            var report = Services.Diagnostics.WalkableDiagnostics.GenerateReport(MapDataService.Instance);
+
+            // Show in a message box (truncated) or save to file
+            System.IO.File.WriteAllText("walkable_diagnostics.txt", report);
+            System.Diagnostics.Process.Start("notepad.exe", "walkable_diagnostics.txt");
         }
 
         private void BtnDeleteBuilding_Click(object sender, RoutedEventArgs e)

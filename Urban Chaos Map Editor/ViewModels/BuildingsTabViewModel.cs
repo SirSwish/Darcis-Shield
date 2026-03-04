@@ -519,13 +519,20 @@ namespace UrbanChaosMapEditor.ViewModels
 
 
         // ---------- Refresh pipeline ----------
-
         public void Refresh()
+        {
+            Refresh(forceSelectBuildingId: null);
+        }
+
+        public void Refresh(int? forceSelectBuildingId = null)
         {
             Debug.WriteLine("=== [BuildingsTabVM] Refresh() ===");
 
             // --- Remember current selection so we can restore it after reload ---
-            int prevBuildingId = SelectedBuildingId;
+            // If forceSelectBuildingId is provided, we want THAT building selected after refresh,
+            // not the previous selection.
+            bool isForced = forceSelectBuildingId.HasValue;
+            int prevBuildingId = forceSelectBuildingId ?? SelectedBuildingId;
             int prevStoreyId = SelectedStoreyId;
             int? prevFacetId = SelectedFacet?.FacetId1;
 
@@ -550,9 +557,7 @@ namespace UrbanChaosMapEditor.ViewModels
                 _rawRoofFaces4 = Array.Empty<RoofFace4Rec>();
             }
 
-
             LoadWalkablesCacheFromService();
-
 
             Debug.WriteLine($"[BuildingsTabVM] region: start=0x{arrays.StartOffset:X} len=0x{arrays.Length:X}");
             Debug.WriteLine($"[BuildingsTabVM] counters: nextDBuilding={arrays.NextDBuilding} nextDFacet={arrays.NextDFacet} nextDStyle={arrays.NextDStyle} nextPaintMem={arrays.NextPaintMem} nextDStorey={arrays.NextDStorey} saveType={arrays.SaveType}");
@@ -603,9 +608,7 @@ namespace UrbanChaosMapEditor.ViewModels
             // This includes buildings with no facets
             var allBuildingIds = new HashSet<int>();
             for (int i = 0; i < arrays.Buildings.Length; i++)
-            {
                 allBuildingIds.Add(i + 1); // 1-based ID
-            }
 
             // Also get building IDs from facets (in case any facets reference buildings not in the array)
             var facetBuildingIds = nonCable
@@ -652,7 +655,6 @@ namespace UrbanChaosMapEditor.ViewModels
 
                             var styleDisplay = StyleDisplayFor(_styles, f.StyleIndex, DStoreysNext);
 
-                            // More robust: check anywhere in the string
                             bool isPainted =
                                 !string.IsNullOrEmpty(styleDisplay) &&
                                 styleDisplay.IndexOf("painted", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -678,7 +680,6 @@ namespace UrbanChaosMapEditor.ViewModels
                             });
                         }
 
-
                         gvm.Count = gvm.Facets.Count;
                         if (gvm.Count > 0)
                             svm.Groups.Add(gvm);
@@ -690,7 +691,6 @@ namespace UrbanChaosMapEditor.ViewModels
                 }
 
                 bvm.FacetCount = bvm.Storeys.SelectMany(st => st.Groups).Sum(g => g.Count);
-                // CHANGED: Always add the building, even if empty
                 _allBuildings.Add(bvm);
             }
 
@@ -711,7 +711,7 @@ namespace UrbanChaosMapEditor.ViewModels
                         Height = f.Height,
                         FHeight = f.FHeight,
                         Flags = $"0x{((ushort)f.Flags):X4}",
-                        BuildingId = 0, // cables don't map 1:1 to DBuilding
+                        BuildingId = 0,
                         StoreyId = 0,
                         Y0 = f.Y0,
                         Y1 = f.Y1,
@@ -766,56 +766,74 @@ namespace UrbanChaosMapEditor.ViewModels
             foreach (var c in _allCables)
                 CableFacets.Add(c);
 
+            // --- RESTORE / FORCE selection ---
             BuildingVM? restoredBuilding = null;
             if (prevBuildingId > 0)
                 restoredBuilding = Buildings.FirstOrDefault(b => b.Id == prevBuildingId);
 
             if (restoredBuilding != null)
             {
-                // This will also rebuild SelectedBuildingFacetGroups and sync to Map
+                // Selecting building rebuilds facet groups etc (via your setters)
                 SelectedBuilding = restoredBuilding;
                 RebuildSelectedBuildingWalkables();
 
-                // Try to restore storey if it still exists
-                var restoredStorey = restoredBuilding.Storeys
-                    .FirstOrDefault(s => s.StoreyId == prevStoreyId);
-
-                if (restoredStorey != null)
+                if (!isForced)
                 {
-                    SelectedStoreyId = restoredStorey.StoreyId;
-                }
-                else if (restoredBuilding.Storeys.Count > 0)
-                {
-                    // Fallback: first storey on that building
-                    SelectedStoreyId = restoredBuilding.Storeys
-                        .OrderBy(s => s.StoreyId)
-                        .First().StoreyId;
-                }
+                    // Try to restore storey if it still exists
+                    var restoredStorey = restoredBuilding.Storeys
+                        .FirstOrDefault(s => s.StoreyId == prevStoreyId);
 
-                // Try to restore the exact facet if it still exists
-                if (prevFacetId.HasValue)
-                {
-                    var restoredFacet = restoredBuilding.Storeys
-                        .SelectMany(st => st.Groups)
-                        .SelectMany(g => g.Facets)
-                        .FirstOrDefault(f => f.FacetId1 == prevFacetId.Value);
-
-                    if (restoredFacet != null)
+                    if (restoredStorey != null)
                     {
-                        SelectedFacet = restoredFacet;
+                        SelectedStoreyId = restoredStorey.StoreyId;
                     }
+                    else if (restoredBuilding.Storeys.Count > 0)
+                    {
+                        // Fallback: first storey on that building
+                        SelectedStoreyId = restoredBuilding.Storeys
+                            .OrderBy(s => s.StoreyId)
+                            .First().StoreyId;
+                    }
+
+                    // Try to restore the exact facet if it still exists
+                    if (prevFacetId.HasValue)
+                    {
+                        var restoredFacet = restoredBuilding.Storeys
+                            .SelectMany(st => st.Groups)
+                            .SelectMany(g => g.Facets)
+                            .FirstOrDefault(f => f.FacetId1 == prevFacetId.Value);
+
+                        if (restoredFacet != null)
+                            SelectedFacet = restoredFacet;
+                    }
+                }
+                else
+                {
+                    // Forced selection (e.g., newly added building):
+                    // Don’t restore previous facet/storey. Keep facet null; storey set if exists.
+                    if (restoredBuilding.Storeys.Count > 0)
+                    {
+                        SelectedStoreyId = restoredBuilding.Storeys
+                            .OrderBy(s => s.StoreyId)
+                            .First().StoreyId;
+                    }
+                    else
+                    {
+                        SelectedStoreyId = 0;
+                    }
+
+                    SelectedFacet = null;
                 }
             }
             else
             {
-                // Old building no longer exists: fall back to your old behaviour
+                // Requested/previous building no longer exists: fall back to old behaviour
                 SelectedBuilding =
                     Buildings.FirstOrDefault(b => !b.IsCablesBucket)
                     ?? Buildings.FirstOrDefault();
             }
 
             UpdateSelectedBuildingRec();
-
 
             OnPropertyChanged(nameof(StylesCount));
             OnPropertyChanged(nameof(PaintMemCount));
@@ -952,7 +970,7 @@ namespace UrbanChaosMapEditor.ViewModels
 
                             // Auto-pick a first facet in that storey for the details pane only
                             var firstFacet = preferred.Groups.SelectMany(g => g.Facets).FirstOrDefault();
-                            SelectedFacet = firstFacet;
+                            SelectedFacet = null;
                         }
                         else
                         {
@@ -1041,33 +1059,33 @@ namespace UrbanChaosMapEditor.ViewModels
         /// but keeps the map in whole-building/storey mode.
         /// </summary>
 
-        /// <summary>
-        /// Populates SelectedBuildingFacetGroups based on SelectedBuilding,
-        /// combining facets from ALL storeys into type groups,
-        /// then applies the Walls/Fences/Doors/Ladders filters.
-        /// </summary>
         private void RefreshSelectedBuildingFacetGroups()
         {
+            // Preserve current selection if possible
+            int? keepFacetId1 = SelectedFacet?.FacetId1;
+            var keepGroupType = SelectedFacetTypeGroup?.Type;
+
             SelectedBuildingFacetGroups.Clear();
             SelectedFacetTypeGroup = null;
 
             var b = SelectedBuilding;
-            if (b == null)
+            if (b == null || b.Storeys.Count == 0)
+            {
+                // No building => no facet selection
+                SelectedFacet = null;
+                SyncBuildingSelectionIntoMap();
                 return;
-
-            if (b.Storeys.Count == 0)
-                return;
+            }
 
             // Collect ALL facets from ALL storeys, grouped by type
             var allFacetsByType = b.Storeys
                 .SelectMany(s => s.Groups)
-                .SelectMany(g => g.Facets.Select(f => (Type: g.Type, TypeName: g.TypeName, Facet: f)))
+                .SelectMany(g => g.Facets.Select(f => (Type: g.Type, Facet: f)))
                 .GroupBy(x => x.Type)
                 .OrderBy(g => g.Key.ToString());
 
             foreach (var typeGroup in allFacetsByType)
             {
-                // Apply facet-type filters (Walls / Fences / Doors / Ladders)
                 if (AnyFacetFilterActive && !IsFacetTypeAllowedByFilter(typeGroup.Key))
                     continue;
 
@@ -1084,20 +1102,32 @@ namespace UrbanChaosMapEditor.ViewModels
                     SelectedBuildingFacetGroups.Add(gvm);
             }
 
-            // Auto-select first type group if available
-            if (SelectedBuildingFacetGroups.Count > 0)
-            {
-                SelectedFacetTypeGroup = SelectedBuildingFacetGroups[0];
+            // Restore type group if possible, else pick first group so the Facets list has content
+            if (keepGroupType.HasValue)
+                SelectedFacetTypeGroup = SelectedBuildingFacetGroups.FirstOrDefault(g => g.Type == keepGroupType.Value);
 
-                // Auto-select first facet in that group
-                if (SelectedFacetTypeGroup.Facets.Count > 0)
-                {
-                    SelectedFacet = SelectedFacetTypeGroup.Facets[0];
-                }
+            SelectedFacetTypeGroup ??= SelectedBuildingFacetGroups.FirstOrDefault();
+
+            // Restore facet selection ONLY if it was already selected before
+            if (keepFacetId1.HasValue)
+            {
+                var restoredFacet = SelectedBuildingFacetGroups
+                    .SelectMany(g => g.Facets)
+                    .FirstOrDefault(f => f.FacetId1 == keepFacetId1.Value);
+
+                SelectedFacet = restoredFacet; // could be null if filtered out / deleted
+            }
+            else
+            {
+                // If we didn't have a facet selected explicitly, keep it null (building highlight mode)
+                SelectedFacet = null;
             }
 
-            // Still whole-building highlight (all visible facets) – facet id null
-            SyncBuildingSelectionIntoMap();
+            // Push correct highlight mode into map
+            if (SelectedFacet != null)
+                SyncSelectionIntoMapVm();       // single facet
+            else
+                SyncBuildingSelectionIntoMap(); // whole building
         }
 
         private void RefreshSelectedBuildingWalkables()
@@ -1136,6 +1166,8 @@ namespace UrbanChaosMapEditor.ViewModels
 
                     StartFace4 = w.StartFace4,
                     EndFace4 = w.EndFace4,
+                    StartPoint = w.StartPoint,
+                    EndPoint = w.EndPoint,
                 });
 
             }
@@ -1249,7 +1281,9 @@ namespace UrbanChaosMapEditor.ViewModels
                     StartFace4 = w.StartFace4,
                     EndFace4 = w.EndFace4,
                     Next = w.Next,
-                    HasRoofFaces4 = hasFace4
+                    HasRoofFaces4 = hasFace4,
+                    StartPoint = w.StartPoint,
+                    EndPoint = w.EndPoint,
                 });
             }
 
@@ -1375,12 +1409,12 @@ namespace UrbanChaosMapEditor.ViewModels
             // Walls pill: treat "wall-ish" as Wall (you can expand this later)
             if (_filterWalls)
             {
-                if (type == FacetType.Wall || 
-                    type == FacetType.Inside || 
-                    type == FacetType.OInside || 
-                    type == FacetType.NormalFoundation || 
-                    type == FacetType.Inside || 
-                    type == FacetType.Normal || 
+                if (type == FacetType.Wall ||
+                    type == FacetType.Inside ||
+                    type == FacetType.OInside ||
+                    type == FacetType.NormalFoundation ||
+                    type == FacetType.Inside ||
+                    type == FacetType.Normal ||
                     type == FacetType.OInside)
                     return true;
             }
@@ -1557,14 +1591,26 @@ namespace UrbanChaosMapEditor.ViewModels
 
             public bool HasRoofFaces4 { get; set; }
 
+            public ushort StartPoint { get; set; }
+            public ushort EndPoint { get; set; }
+
             // For XAML columns
             public string Rect => $"({X1},{Z1}) → ({X2},{Z2})";
             public string Face4Span => $"{StartFace4}..{EndFace4}  (n={Math.Max(0, EndFace4 - StartFace4)})";
+            public string PointSpan => $"{StartPoint}..{EndPoint}  (n={Math.Max(0, EndPoint - StartPoint)})";
         }
 
         public sealed class RoofFace4VM
         {
             public int FaceId { get; set; }   // index into RoofFace4 array
+
+            // Compatibility alias used by some older XAML/code-behind.
+            // Treat it as the same as FaceId.
+            public int Index
+            {
+                get => FaceId;
+                set => FaceId = value;
+            }
 
             public short Y { get; set; }
             public sbyte DY0 { get; set; }

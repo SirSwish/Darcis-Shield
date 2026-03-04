@@ -1,21 +1,22 @@
 ﻿// /Services/TextureCacheService.cs
+// Updated to load textures from UrbanChaosEditor.Shared assembly
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace UrbanChaosLightEditor.Services
 {
     /// <summary>
     /// Caches texture images loaded from embedded resources.
-    /// Textures are linked from the Map Editor's Assets folder.
+    /// Textures are loaded from the UrbanChaosEditor.Shared assembly.
     /// </summary>
     public sealed class TextureCacheService
     {
@@ -38,27 +39,68 @@ namespace UrbanChaosLightEditor.Services
         /// <summary>Which texture set to use: "release" or "beta"</summary>
         public string ActiveSet { get; set; } = "release";
 
+        /// <summary>
+        /// The assembly name containing the textures.
+        /// Default: "UrbanChaosEditor.Shared"
+        /// </summary>
+        public string TextureAssemblyName { get; set; } = "UrbanChaosEditor.Shared";
+
         public async Task PreloadAllAsync(int decodeSize = 64)
         {
             Debug.WriteLine("[TextureCacheService.PreloadAllAsync] Starting...");
 
-            var asm = Application.ResourceAssembly ?? typeof(TextureCacheService).Assembly;
-            string? gResName = asm.GetManifestResourceNames()
-                                  .FirstOrDefault(n => n.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase));
+            // Try to load the Shared assembly containing textures
+            Assembly? asm = null;
+            string? gResName = null;
 
-            if (gResName is null)
+            // Try multiple assembly name formats
+            var assemblyNamesToTry = new[]
             {
-                Debug.WriteLine("[TextureCacheService] No .g.resources found");
+                TextureAssemblyName,
+                "Urban Chaos Editor.Shared",  // With spaces
+                "UrbanChaosEditor.Shared"
+            };
+
+            foreach (var asmName in assemblyNamesToTry)
+            {
+                try
+                {
+                    asm = Assembly.Load(asmName);
+                    if (asm != null)
+                    {
+                        gResName = asm.GetManifestResourceNames()
+                                      .FirstOrDefault(n => n.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase));
+
+                        if (gResName != null)
+                        {
+                            Debug.WriteLine($"[TextureCacheService] Found assembly '{asmName}' with resource: {gResName}");
+                            break;
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"[TextureCacheService] Assembly '{asmName}' loaded but no .g.resources found");
+                            Debug.WriteLine($"[TextureCacheService] Available resources: {string.Join(", ", asm.GetManifestResourceNames())}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[TextureCacheService] Could not load assembly '{asmName}': {ex.Message}");
+                }
+            }
+
+            if (asm == null || gResName == null)
+            {
+                Debug.WriteLine("[TextureCacheService] No assembly with .g.resources found - textures will not load");
                 Progress?.Invoke(this, new(0, 0));
                 Completed?.Invoke(this, EventArgs.Empty);
                 return;
             }
 
-            Debug.WriteLine($"[TextureCacheService] Found resource: {gResName}");
-
             using var resStream = asm.GetManifestResourceStream(gResName);
             if (resStream == null)
             {
+                Debug.WriteLine($"[TextureCacheService] Could not open resource stream for {gResName}");
                 Progress?.Invoke(this, new(0, 0));
                 Completed?.Invoke(this, EventArgs.Empty);
                 return;
@@ -82,7 +124,10 @@ namespace UrbanChaosLightEditor.Services
             int total = texKeys.Count;
             int done = 0;
 
-            Debug.WriteLine($"[TextureCacheService] Found {total} texture resources");
+            Debug.WriteLine($"[TextureCacheService] Found {total} texture resources in {asm.GetName().Name}");
+
+            // Store the assembly name for URI construction
+            var loadedAsmName = asm.GetName().Name;
 
             await Task.Run(() =>
             {
@@ -111,7 +156,8 @@ namespace UrbanChaosLightEditor.Services
 
                         var finalKey = $"{set}_{relativeKey}";
 
-                        var uri = new Uri("pack://application:,,,/" + resourceKey.Replace('\\', '/'), UriKind.Absolute);
+                        // Use the Shared assembly in the pack URI
+                        var uri = new Uri($"pack://application:,,,/{loadedAsmName};component/{resourceKey.Replace('\\', '/')}", UriKind.Absolute);
 
                         var bmp = new BitmapImage();
                         bmp.BeginInit();
@@ -123,7 +169,11 @@ namespace UrbanChaosLightEditor.Services
 
                         lock (_sync) { _byKey[finalKey] = bmp; }
                     }
-                    catch { /* skip bad */ }
+                    catch (Exception ex)
+                    {
+                        if (done < 5) // Only log first few errors
+                            Debug.WriteLine($"[TextureCacheService] Error loading texture: {ex.Message}");
+                    }
                     finally { done++; RaiseProgress(done, total); }
                 }
             });

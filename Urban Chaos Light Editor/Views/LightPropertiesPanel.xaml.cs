@@ -1,4 +1,12 @@
-﻿using System;
+﻿// /Views/LightPropertiesPanel.xaml.cs
+// FIXED: Correct night flag interpretation based on C++ source
+//
+// KEY FIX: The C++ code uses NIGHT_FLAG_DAYTIME (bit 0) as follows:
+//   - Bit SET (1) = Daytime
+//   - Bit CLEAR (0) = Night
+// This is the OPPOSITE of what the old code assumed!
+//
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,7 +28,6 @@ namespace UrbanChaosLightEditor.Views
             InitializeComponent();
             _acc = new LightsAccessor(LightsDataService.Instance);
 
-            // Subscribe to lights loaded event to refresh
             LightsDataService.Instance.LightsLoaded += (_, __) => Dispatcher.Invoke(LoadProperties);
             LightsDataService.Instance.LightsCleared += (_, __) => Dispatcher.Invoke(ClearUI);
 
@@ -35,7 +42,6 @@ namespace UrbanChaosLightEditor.Views
         {
             _isLoading = true;
 
-            // Reset all sliders to 0
             SliderD3DAlpha.Value = 0;
             SliderD3DRed.Value = 0;
             SliderD3DGreen.Value = 0;
@@ -55,11 +61,9 @@ namespace UrbanChaosLightEditor.Views
             SliderSkyGreen.Value = 0;
             SliderSkyBlue.Value = 0;
 
-            // Reset checkboxes
             ChkNightEnabled.IsChecked = false;
             ChkLampsOn.IsChecked = false;
             ChkDarkenWalls.IsChecked = false;
-            ChkDay.IsChecked = false;
 
             _isLoading = false;
         }
@@ -75,7 +79,7 @@ namespace UrbanChaosLightEditor.Views
                 _props = _acc.ReadProperties();
                 _nightColour = _acc.ReadNightColour();
 
-                Debug.WriteLine($"[LightPropertiesPanel.Load] D3D=0x{_props.NightAmbD3DColour:X8}, NightFlag=0x{_props.NightFlag:X8}");
+                Debug.WriteLine($"[LightPropertiesPanel.Load] NightFlag=0x{_props.NightFlag:X8}, D3D=0x{_props.NightAmbD3DColour:X8}");
 
                 // D3D Color
                 SliderD3DAlpha.Value = _props.D3DAlpha;
@@ -105,11 +109,16 @@ namespace UrbanChaosLightEditor.Views
                 SliderSkyGreen.Value = _nightColour.Green;
                 SliderSkyBlue.Value = _nightColour.Blue;
 
-                // Night flags (bits: 0=Night, 1=LampsOn, 2=DarkenWalls, 3=Day)
-                ChkNightEnabled.IsChecked = (_props.NightFlag & 0x01) != 0;
-                ChkLampsOn.IsChecked = (_props.NightFlag & 0x02) != 0;
-                ChkDarkenWalls.IsChecked = (_props.NightFlag & 0x04) != 0;
-                ChkDay.IsChecked = (_props.NightFlag & 0x08) != 0;
+                // === CRITICAL FIX: Night flag interpretation ===
+                // C++ NIGHT_FLAG_DAYTIME (0x01): If SET = daytime, if CLEAR = night
+                // So: Night = when bit 0 is CLEAR
+                bool isDaytime = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DAYTIME) != 0;
+                ChkNightEnabled.IsChecked = !isDaytime;  // Night = NOT daytime
+
+                ChkLampsOn.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS) != 0;
+                ChkDarkenWalls.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS) != 0;
+
+                Debug.WriteLine($"[LightPropertiesPanel.Load] Parsed: IsNight={!isDaytime}, LampsOn={ChkLampsOn.IsChecked}, DarkenWalls={ChkDarkenWalls.IsChecked}");
 
                 UpdateAllPreviews();
             }
@@ -145,7 +154,7 @@ namespace UrbanChaosLightEditor.Views
             byte specB = (byte)SliderSpecBlue.Value;
             SpecPreview.Fill = new SolidColorBrush(Color.FromArgb(specA, specR, specG, specB));
 
-            // Ambient Preview (shift for display)
+            // Ambient Preview
             byte ambR = (byte)Math.Clamp((int)SliderAmbRed.Value + 128, 0, 255);
             byte ambG = (byte)Math.Clamp((int)SliderAmbGreen.Value + 128, 0, 255);
             byte ambB = (byte)Math.Clamp((int)SliderAmbBlue.Value + 128, 0, 255);
@@ -183,14 +192,22 @@ namespace UrbanChaosLightEditor.Views
                                  ((uint)(byte)SliderSpecGreen.Value << 8) |
                                  (byte)SliderSpecBlue.Value;
 
-                // Build night flags from checkboxes
+                // === CRITICAL FIX: Build night flags correctly ===
+                // C++ logic: Night = CLEAR the DAYTIME bit, Day = SET the DAYTIME bit
                 uint nightFlag = 0;
-                if (ChkNightEnabled.IsChecked == true) nightFlag |= 0x01;
-                if (ChkLampsOn.IsChecked == true) nightFlag |= 0x02;
-                if (ChkDarkenWalls.IsChecked == true) nightFlag |= 0x04;
-                if (ChkDay.IsChecked == true) nightFlag |= 0x08;
 
-                Debug.WriteLine($"[LightPropertiesPanel.Apply] NightFlag=0x{nightFlag:X2}");
+                // If Night is NOT checked (meaning daytime), SET the DAYTIME flag
+                if (ChkNightEnabled.IsChecked != true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_DAYTIME;
+
+                // Lamps and darken walls work normally (set if checked)
+                if (ChkLampsOn.IsChecked == true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS;
+
+                if (ChkDarkenWalls.IsChecked == true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS;
+
+                Debug.WriteLine($"[LightPropertiesPanel.Apply] NightFlag=0x{nightFlag:X2} (Night={ChkNightEnabled.IsChecked}, Lamps={ChkLampsOn.IsChecked}, Darken={ChkDarkenWalls.IsChecked})");
 
                 var newProps = new LightProperties
                 {
@@ -218,7 +235,6 @@ namespace UrbanChaosLightEditor.Views
                 _acc.WriteProperties(newProps);
                 _acc.WriteNightColour(newNightColour);
 
-                // Refresh our cached copy
                 _props = newProps;
                 _nightColour = newNightColour;
 
