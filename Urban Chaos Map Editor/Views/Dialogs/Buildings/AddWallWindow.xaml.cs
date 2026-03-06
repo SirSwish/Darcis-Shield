@@ -355,28 +355,4 @@ namespace UrbanChaosMapEditor.Views.Dialogs.Buildings
             Close();
         }
     }
-
-    /// <summary>
-    /// Template for creating new facets during multi-draw mode.
-    /// </summary>
-    public sealed class FacetTemplate
-    {
-        public FacetType Type { get; init; }
-        public byte Height { get; init; }
-        public byte FHeight { get; init; }
-        public byte BlockHeight { get; init; }
-        public short Y0 { get; init; }
-        public short Y1 { get; init; }
-
-        /// <summary>
-        /// The Raw Style ID from the TMA (style.tma).
-        /// This is NOT an index into dstyles[] - BuildingAdder will allocate
-        /// dstyles[] entries and write this value into them.
-        /// </summary>
-        public ushort RawStyleId { get; init; }
-
-        public FacetFlags Flags { get; init; }
-        public int BuildingId1 { get; init; }
-        public int Storey { get; init; }
-    }
 }

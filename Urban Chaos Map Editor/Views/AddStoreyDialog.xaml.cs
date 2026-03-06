@@ -1,5 +1,6 @@
 ﻿// /Views/AddStoreyDialog.xaml.cs and EditStoreyDialog.xaml.cs
-// Combined in one file for simplicity - split if needed
+// Updated to use correct DStorey field names: Style, PaintIndex, Count, Padding
+// (was incorrectly using Height, Flags, Building which don't exist in the C struct)
 
 using System.Windows;
 using System.Windows.Controls;
@@ -8,17 +9,18 @@ using UrbanChaosMapEditor.Models;
 namespace UrbanChaosMapEditor.Views
 {
     /// <summary>
-    /// Dialog for adding a new DStorey entry
+    /// Dialog for adding a new DStorey entry.
+    /// DStorey fields: Style (U16), PaintIndex (U16), Count (S8), Padding (U8)
     /// </summary>
     public class AddStoreyDialog : Window
     {
         private TextBox _txtStyle;
-        private TextBox _txtHeight;
-        private TextBox _txtFlags;
+        private TextBox _txtPaintIndex;
+        private TextBox _txtCount;
 
         public ushort Style { get; private set; }
-        public byte StoreyHeight { get; private set; }
-        public byte Flags { get; private set; }
+        public ushort PaintIndex { get; private set; }
+        public sbyte Count { get; private set; }
 
         public AddStoreyDialog(int buildingId)
         {
@@ -47,38 +49,39 @@ namespace UrbanChaosMapEditor.Views
             Grid.SetColumn(_txtStyle, 1);
             grid.Children.Add(_txtStyle);
 
-            // Height
-            var lblHeight = new TextBlock { Text = "Height:", VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lblHeight, 1);
-            grid.Children.Add(lblHeight);
+            // PaintIndex
+            var lblPaintIndex = new TextBlock { Text = "Paint Idx:", VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetRow(lblPaintIndex, 1);
+            grid.Children.Add(lblPaintIndex);
 
-            _txtHeight = new TextBox { Text = "24", Margin = new Thickness(0, 5, 0, 5) };
-            Grid.SetRow(_txtHeight, 1);
-            Grid.SetColumn(_txtHeight, 1);
-            grid.Children.Add(_txtHeight);
+            _txtPaintIndex = new TextBox { Text = "0", Margin = new Thickness(0, 5, 0, 5) };
+            Grid.SetRow(_txtPaintIndex, 1);
+            Grid.SetColumn(_txtPaintIndex, 1);
+            grid.Children.Add(_txtPaintIndex);
 
-            // Flags
-            var lblFlags = new TextBlock { Text = "Flags:", VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lblFlags, 2);
-            grid.Children.Add(lblFlags);
+            // Count
+            var lblCount = new TextBlock { Text = "Count:", VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetRow(lblCount, 2);
+            grid.Children.Add(lblCount);
 
-            _txtFlags = new TextBox { Text = "5", Margin = new Thickness(0, 5, 0, 5) };
-            Grid.SetRow(_txtFlags, 2);
-            Grid.SetColumn(_txtFlags, 1);
-            grid.Children.Add(_txtFlags);
+            _txtCount = new TextBox { Text = "0", Margin = new Thickness(0, 5, 0, 5) };
+            Grid.SetRow(_txtCount, 2);
+            Grid.SetColumn(_txtCount, 1);
+            grid.Children.Add(_txtCount);
 
-            // Help text
-            var helpText = new TextBlock
+            // Info
+            var infoText = new TextBlock
             {
-                Text = "Height = WorldY / 32\nFlags: 0x05 is common for interiors",
+                Text = "Style = base TMA texture id (fallback)\n" +
+                       "Paint Idx = offset into paint_mem[]\n" +
+                       "Count = number of paint bytes",
                 FontSize = 10,
                 Foreground = System.Windows.Media.Brushes.DarkGray,
-                Margin = new Thickness(0, 10, 0, 10),
-                TextWrapping = TextWrapping.Wrap
+                Margin = new Thickness(0, 10, 0, 10)
             };
-            Grid.SetRow(helpText, 3);
-            Grid.SetColumnSpan(helpText, 2);
-            grid.Children.Add(helpText);
+            Grid.SetRow(infoText, 3);
+            Grid.SetColumnSpan(infoText, 2);
+            grid.Children.Add(infoText);
 
             // Buttons
             var buttonPanel = new StackPanel
@@ -94,12 +97,12 @@ namespace UrbanChaosMapEditor.Views
             btnOk.Click += (s, e) =>
             {
                 if (ushort.TryParse(_txtStyle.Text, out ushort style) &&
-                    byte.TryParse(_txtHeight.Text, out byte height) &&
-                    byte.TryParse(_txtFlags.Text, out byte flags))
+                    ushort.TryParse(_txtPaintIndex.Text, out ushort paintIndex) &&
+                    sbyte.TryParse(_txtCount.Text, out sbyte count))
                 {
                     Style = style;
-                    StoreyHeight = height;
-                    Flags = flags;
+                    PaintIndex = paintIndex;
+                    Count = count;
                     DialogResult = true;
                     Close();
                 }
@@ -119,25 +122,26 @@ namespace UrbanChaosMapEditor.Views
     }
 
     /// <summary>
-    /// Dialog for editing an existing DStorey entry
+    /// Dialog for editing an existing DStorey entry.
+    /// DStorey fields: Style (U16), PaintIndex (U16), Count (S8), Padding (U8)
     /// </summary>
     public class EditStoreyDialog : Window
     {
         private TextBox _txtStyle;
-        private TextBox _txtHeight;
-        private TextBox _txtFlags;
-        private TextBox _txtBuilding;
+        private TextBox _txtPaintIndex;
+        private TextBox _txtCount;
+        private TextBox _txtPadding;
 
         public ushort Style { get; private set; }
-        public byte StoreyHeight { get; private set; }
-        public byte Flags { get; private set; }
-        public ushort Building { get; private set; }
+        public ushort PaintIndex { get; private set; }
+        public sbyte Count { get; private set; }
+        public byte Padding { get; private set; }
 
         public EditStoreyDialog(DStoreyViewModel storey)
         {
             Title = $"Edit DStorey #{storey.Index}";
             Width = 300;
-            base.Height = 260;
+            base.Height = 280;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             Background = System.Windows.Media.Brushes.DarkGray;
 
@@ -161,40 +165,44 @@ namespace UrbanChaosMapEditor.Views
             Grid.SetColumn(_txtStyle, 1);
             grid.Children.Add(_txtStyle);
 
-            // Height
-            var lblHeight = new TextBlock { Text = "Height:", VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lblHeight, 1);
-            grid.Children.Add(lblHeight);
+            // PaintIndex
+            var lblPaintIndex = new TextBlock { Text = "Paint Idx:", VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetRow(lblPaintIndex, 1);
+            grid.Children.Add(lblPaintIndex);
 
-            _txtHeight = new TextBox { Text = storey.Height.ToString(), Margin = new Thickness(0, 5, 0, 5) };
-            Grid.SetRow(_txtHeight, 1);
-            Grid.SetColumn(_txtHeight, 1);
-            grid.Children.Add(_txtHeight);
+            _txtPaintIndex = new TextBox { Text = storey.PaintIndex.ToString(), Margin = new Thickness(0, 5, 0, 5) };
+            Grid.SetRow(_txtPaintIndex, 1);
+            Grid.SetColumn(_txtPaintIndex, 1);
+            grid.Children.Add(_txtPaintIndex);
 
-            // Flags
-            var lblFlags = new TextBlock { Text = "Flags:", VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lblFlags, 2);
-            grid.Children.Add(lblFlags);
+            // Count
+            var lblCount = new TextBlock { Text = "Count:", VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetRow(lblCount, 2);
+            grid.Children.Add(lblCount);
 
-            _txtFlags = new TextBox { Text = storey.Flags.ToString(), Margin = new Thickness(0, 5, 0, 5) };
-            Grid.SetRow(_txtFlags, 2);
-            Grid.SetColumn(_txtFlags, 1);
-            grid.Children.Add(_txtFlags);
+            _txtCount = new TextBox { Text = storey.Count.ToString(), Margin = new Thickness(0, 5, 0, 5) };
+            Grid.SetRow(_txtCount, 2);
+            Grid.SetColumn(_txtCount, 1);
+            grid.Children.Add(_txtCount);
 
-            // Building
-            var lblBuilding = new TextBlock { Text = "Building:", VerticalAlignment = VerticalAlignment.Center };
-            Grid.SetRow(lblBuilding, 3);
-            grid.Children.Add(lblBuilding);
+            // Padding
+            var lblPadding = new TextBlock { Text = "Padding:", VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetRow(lblPadding, 3);
+            grid.Children.Add(lblPadding);
 
-            _txtBuilding = new TextBox { Text = storey.Building.ToString(), Margin = new Thickness(0, 5, 0, 5) };
-            Grid.SetRow(_txtBuilding, 3);
-            Grid.SetColumn(_txtBuilding, 1);
-            grid.Children.Add(_txtBuilding);
+            _txtPadding = new TextBox { Text = storey.Padding.ToString(), Margin = new Thickness(0, 5, 0, 5) };
+            Grid.SetRow(_txtPadding, 3);
+            Grid.SetColumn(_txtPadding, 1);
+            grid.Children.Add(_txtPadding);
 
             // Info
             var infoText = new TextBlock
             {
-                Text = $"Referenced by {storey.ReferencedByDStyles.Count} dstyles entries\nUsed by {storey.UsedByFacets.Count} facets",
+                Text = $"Referenced by {storey.ReferencedByDStyles.Count} dstyles entries\n" +
+                       $"Used by {storey.UsedByFacets.Count} facets\n" +
+                       (storey.PaintBytes.Length > 0
+                           ? $"Paint: [{storey.PaintHex}]"
+                           : "No paint data"),
                 FontSize = 10,
                 Foreground = System.Windows.Media.Brushes.DarkGray,
                 Margin = new Thickness(0, 10, 0, 10)
@@ -217,14 +225,14 @@ namespace UrbanChaosMapEditor.Views
             btnOk.Click += (s, e) =>
             {
                 if (ushort.TryParse(_txtStyle.Text, out ushort style) &&
-                    byte.TryParse(_txtHeight.Text, out byte height) &&
-                    byte.TryParse(_txtFlags.Text, out byte flags) &&
-                    ushort.TryParse(_txtBuilding.Text, out ushort building))
+                    ushort.TryParse(_txtPaintIndex.Text, out ushort paintIndex) &&
+                    sbyte.TryParse(_txtCount.Text, out sbyte count) &&
+                    byte.TryParse(_txtPadding.Text, out byte padding))
                 {
                     Style = style;
-                    StoreyHeight = height;
-                    Flags = flags;
-                    Building = building;
+                    PaintIndex = paintIndex;
+                    Count = count;
+                    Padding = padding;
                     DialogResult = true;
                     Close();
                 }

@@ -1,8 +1,28 @@
 ﻿// /Services/FacetPainter.cs
-// Service for applying paint data to facets
+// Service for applying paint data to existing facets by updating dstyles[], DStorey[], and paint_mem[].
+//
+// This handles painting for both regular and warehouse buildings.
+//
+// For regular buildings:
+//   - Each band's dstyle is at: styleStart + band * entriesPerBand
+//   - entriesPerBand is 1 (normal) or 2 (2-sided/2-textured)
+//
+// For warehouse buildings (interleaved outside/inside dstyles):
+//   - Each band's outside dstyle is at: styleStart + band * (entriesPerBand + 1)
+//   - The inside dstyle is at: styleStart + band * (entriesPerBand + 1) + entriesPerBand
+//   - In practice, warehouses are single-band (Height=4), so there's no multi-band stepping.
+//
+// Painting converts a positive dstyle (raw TMA style) into a negative DStorey reference:
+//   dstyles[idx] = -storeyIndex
+//   DStorey { Style = baseStyle, PaintIndex = offset, Count = columns }
+//   paint_mem[offset..offset+Count] = per-column texture tile bytes
+//
+// File layout: Header(48) → Buildings[] → Pad(14) → Facets[] → dstyles[] → paint_mem[] → dstoreys[] → ...
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services.DataServices;
@@ -18,8 +38,8 @@ namespace UrbanChaosMapEditor.Services
         private const int DBuildingSize = 24;
         private const int AfterBuildingsPad = 14;
         private const int DFacetSize = 26;
-        private const int DStyleSize = 2;      // short
-        private const int DStoreySize = 6;     // U16 Style; U16 PaintIndex; SBYTE Count; UBYTE pad
+        private const int DStyleSize = 2;
+        private const int DStoreySize = 6;    // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
 
         private readonly MapDataService _svc;
 
@@ -32,10 +52,10 @@ namespace UrbanChaosMapEditor.Services
         /// Applies paint data to a facet.
         /// </summary>
         /// <param name="facetIndex1">1-based facet index</param>
-        /// <param name="columnsCount">Number of columns in the facet</param>
+        /// <param name="columnsCount">Number of columns (paint bytes per band)</param>
         /// <param name="bandsCount">Number of vertical bands</param>
         /// <param name="paintData">Paint bytes per band (key=band index 0=bottom, value=byte[] per column)</param>
-        /// <param name="baseStyles">Base style per band (fallback when paint byte is 0)</param>
+        /// <param name="baseStyles">Base TMA style per band (fallback when paint byte is 0)</param>
         public FacetPaintResult ApplyPaint(
             int facetIndex1,
             int columnsCount,
@@ -72,49 +92,70 @@ namespace UrbanChaosMapEditor.Services
             ushort nextPaintMem = ReadU16(bytes, blockStart + 8);
             ushort nextStorey = ReadU16(bytes, blockStart + 10);
 
-            Debug.WriteLine($"[FacetPainter] Header counters BEFORE:");
-            Debug.WriteLine($"[FacetPainter]   NextBuilding={nextBuilding}, NextFacet={nextFacet}");
-            Debug.WriteLine($"[FacetPainter]   NextStyle={nextStyle}, NextPaintMem={nextPaintMem}, NextStorey={nextStorey}");
+            Debug.WriteLine($"[FacetPainter] Header: NextStyle={nextStyle}, NextPaintMem={nextPaintMem}, NextStorey={nextStorey}");
 
-            // Calculate offsets in the file
-            // File layout: Header → Buildings → Pad → Facets → dstyles → paint_mem → dstoreys → indoors → ...
-            // NOTE: dstyles uses indices 0..(nextStyle-1), so size is nextStyle * 2 (file includes all entries)
-            // NOTE: paint_mem includes slot 0 (unused), so size is nextPaintMem bytes
-            // NOTE: dstoreys includes slot 0 (unused), so size is nextStorey * 6 bytes
+            // Calculate file offsets
+            // IMPORTANT: dstyles has nextStyle entries (including slot 0) = nextStyle * 2 bytes
             int buildingsOff = blockStart + HeaderSize;
             int padOff = buildingsOff + (nextBuilding - 1) * DBuildingSize;
             int facetsOff = padOff + AfterBuildingsPad;
             int stylesOff = facetsOff + (nextFacet - 1) * DFacetSize;
-            int paintMemOff = stylesOff + nextStyle * DStyleSize;               // dstyles has nextStyle entries
-            int storeysOff = paintMemOff + nextPaintMem;                        // storeys is AFTER paint_mem (full size including slot 0)
+            int paintMemOff = stylesOff + nextStyle * DStyleSize;
+            int storeysOff = paintMemOff + nextPaintMem;
 
-            Debug.WriteLine($"[FacetPainter] File offsets:");
-            Debug.WriteLine($"[FacetPainter]   stylesOff=0x{stylesOff:X}, paintMemOff=0x{paintMemOff:X}, storeysOff=0x{storeysOff:X}");
+            Debug.WriteLine($"[FacetPainter] Offsets: styles=0x{stylesOff:X}, paint=0x{paintMemOff:X}, storeys=0x{storeysOff:X}");
 
-            // Dump current dstyles for this facet
-            Debug.WriteLine($"[FacetPainter] Current dstyles values for facet:");
+            // Determine band stepping
             bool twoTextured = (facet.Flags & FacetFlags.TwoTextured) != 0;
             bool twoSided = (facet.Flags & FacetFlags.TwoSided) != 0;
             bool hugFloor = (facet.Flags & FacetFlags.HugFloor) != 0;
-            int styleIndexStep = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+            bool isInside = (facet.Flags & FacetFlags.Inside) != 0;
+
+            int entriesPerBand = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+
+            // Detect warehouse: check if the building type is Warehouse
+            // For warehouse walls, dstyles are interleaved: [outside, inside, outside, inside, ...]
+            // So the step between outside bands is (entriesPerBand + 1) instead of entriesPerBand.
+            // In practice, warehouses are always Height=4 (single band), so step doesn't matter.
+            bool isWarehouseBuilding = false;
+            if (facet.Building >= 1 && snap.Buildings != null && facet.Building <= snap.Buildings.Length)
+            {
+                isWarehouseBuilding = snap.Buildings[facet.Building - 1].BuildingType == BuildingType.Warehouse;
+            }
+
+            int styleIndexStep;
+            if (isWarehouseBuilding && !isInside)
+            {
+                // Warehouse outside face: step over the interleaved inside dstyle
+                styleIndexStep = entriesPerBand + 1;
+            }
+            else if (isWarehouseBuilding && isInside)
+            {
+                // Warehouse inside face: same step (skip the interleaved outside dstyle)
+                styleIndexStep = entriesPerBand + 1;
+            }
+            else
+            {
+                // Regular building: step by entriesPerBand
+                styleIndexStep = entriesPerBand;
+            }
+
+            // Calculate the starting dstyle index for band 0
             int facetStyleStart = facet.StyleIndex;
             if (twoTextured) facetStyleStart--;
 
-            Debug.WriteLine($"[FacetPainter]   twoTextured={twoTextured}, twoSided={twoSided}, hugFloor={hugFloor}");
-            Debug.WriteLine($"[FacetPainter]   styleIndexStep={styleIndexStep}, facetStyleStart={facetStyleStart}");
+            Debug.WriteLine($"[FacetPainter] twoTextured={twoTextured}, isWarehouse={isWarehouseBuilding}, isInside={isInside}");
+            Debug.WriteLine($"[FacetPainter] styleIndexStep={styleIndexStep}, facetStyleStart={facetStyleStart}");
 
+            // Dump current dstyle values
             for (int band = 0; band < bandsCount; band++)
             {
                 int dstyleIdx = facetStyleStart + band * styleIndexStep;
-                if (dstyleIdx >= 0 && dstyleIdx < nextStyle - 1)
+                if (dstyleIdx >= 0 && dstyleIdx < nextStyle)
                 {
                     int fileOff = stylesOff + dstyleIdx * DStyleSize;
                     short val = (short)(bytes[fileOff] | (bytes[fileOff + 1] << 8));
-                    Debug.WriteLine($"[FacetPainter]   Band {band}: dstyles[{dstyleIdx}] = {val} (at file offset 0x{fileOff:X})");
-                }
-                else
-                {
-                    Debug.WriteLine($"[FacetPainter]   Band {band}: dstyles[{dstyleIdx}] = OUT OF RANGE (nextStyle-1={nextStyle - 1})");
+                    Debug.WriteLine($"[FacetPainter]   Band {band}: dstyles[{dstyleIdx}] = {val}");
                 }
             }
 
@@ -125,7 +166,6 @@ namespace UrbanChaosMapEditor.Services
                 if (paintData.ContainsKey(band) && paintData[band].Any(b => (b & 0x7F) != 0))
                 {
                     bandsToPaint.Add(band);
-                    Debug.WriteLine($"[FacetPainter] Band {band} needs painting: [{string.Join(",", paintData[band].Select(b => $"0x{b:X2}"))}]");
                 }
             }
 
@@ -135,33 +175,27 @@ namespace UrbanChaosMapEditor.Services
                 return FacetPaintResult.Success(0, 0);
             }
 
-            // Calculate how much new data we need
+            // Calculate new data sizes
             int newStoreysCount = bandsToPaint.Count;
             int newPaintBytesCount = bandsToPaint.Count * columnsCount;
 
             Debug.WriteLine($"[FacetPainter] Will allocate {newStoreysCount} DStoreys, {newPaintBytesCount} paint bytes");
 
-            // We need to update the dstyles entries for painted bands to point to DStorey
-            // And write new DStorey entries + paint_mem bytes
-
-            // Build new data structures
+            // Build new DStorey entries and paint_mem bytes
             var newStoreys = new List<byte[]>();
             var newPaintBytes = new List<byte>();
             var dstylesUpdates = new Dictionary<int, short>(); // dstyles index -> new value
 
-            ushort currentStoreyId = nextStorey; // 1-based
-            ushort currentPaintMemIndex = nextPaintMem; // 1-based (but used as 0-based offset)
+            ushort currentStoreyId = nextStorey;
+            ushort currentPaintMemIndex = nextPaintMem;
 
             foreach (int band in bandsToPaint)
             {
-                // Calculate which dstyles index this band uses
                 int dstyleIndex = facetStyleStart + band * styleIndexStep;
 
-                Debug.WriteLine($"[FacetPainter] Processing band {band}:");
-                Debug.WriteLine($"[FacetPainter]   dstyleIndex = {facetStyleStart} + {band} * {styleIndexStep} = {dstyleIndex}");
-                Debug.WriteLine($"[FacetPainter]   Valid range: 0 to {nextStyle - 2} (nextStyle-1 = {nextStyle - 1})");
+                Debug.WriteLine($"[FacetPainter] Band {band}: dstyleIndex={dstyleIndex}");
 
-                if (dstyleIndex < 0 || dstyleIndex >= nextStyle - 1)
+                if (dstyleIndex < 0 || dstyleIndex >= nextStyle)
                 {
                     Debug.WriteLine($"[FacetPainter]   WARNING: dstyleIndex {dstyleIndex} out of range, skipping");
                     continue;
@@ -170,20 +204,17 @@ namespace UrbanChaosMapEditor.Services
                 // Get base style for this band
                 short baseStyle = baseStyles.ContainsKey(band) ? baseStyles[band] : (short)1;
 
-                // Create DStorey entry (6 bytes: U16 Style, U16 PaintIndex, SBYTE Count, UBYTE pad)
-                // NOTE: PaintIndex is 1-based in the original engine (starts at next_paint_mem=1)
+                // Create DStorey entry (6 bytes)
                 var storeyBytes = new byte[DStoreySize];
-                WriteU16(storeyBytes, 0, (ushort)baseStyle);                   // Style (base style id)
-                WriteU16(storeyBytes, 2, (ushort)currentPaintMemIndex);        // PaintIndex (1-based index into paint_mem)
-                storeyBytes[4] = (byte)columnsCount;                            // Count (as SBYTE, but we use positive values)
-                storeyBytes[5] = 0;                                             // pad
+                WriteU16(storeyBytes, 0, (ushort)baseStyle);           // Style (base/fallback)
+                WriteU16(storeyBytes, 2, currentPaintMemIndex);        // PaintIndex
+                storeyBytes[4] = unchecked((byte)(sbyte)columnsCount); // Count
+                storeyBytes[5] = 0;                                     // Padding
                 newStoreys.Add(storeyBytes);
 
                 Debug.WriteLine($"[FacetPainter]   DStorey #{currentStoreyId}: Style={baseStyle}, PaintIndex={currentPaintMemIndex}, Count={columnsCount}");
 
-                // Get paint bytes for this band - REVERSE ORDER
-                // The UI stores paint bytes in visual left-to-right order, but the game engine
-                // expects them in the opposite order (facet direction dependent)
+                // Write paint bytes (reversed order: UI left-to-right → engine right-to-left)
                 var bandPaintBytes = paintData[band];
                 for (int col = columnsCount - 1; col >= 0; col--)
                 {
@@ -194,14 +225,14 @@ namespace UrbanChaosMapEditor.Services
                 // Update dstyles to point to this DStorey (negative value)
                 dstylesUpdates[dstyleIndex] = (short)(-currentStoreyId);
 
-                Debug.WriteLine($"[FacetPainter]   Will update dstyles[{dstyleIndex}] = -{currentStoreyId}");
+                Debug.WriteLine($"[FacetPainter]   Will set dstyles[{dstyleIndex}] = -{currentStoreyId}");
 
                 currentStoreyId++;
                 currentPaintMemIndex += (ushort)columnsCount;
             }
 
-            // Now build the new file
-            using var ms = new System.IO.MemoryStream();
+            // === Build new file ===
+            using var ms = new MemoryStream();
 
             // 1. Copy everything up to building block header
             ms.Write(bytes, 0, blockStart);
@@ -209,8 +240,8 @@ namespace UrbanChaosMapEditor.Services
             // 2. Write updated header
             var header = new byte[HeaderSize];
             Buffer.BlockCopy(bytes, blockStart, header, 0, HeaderSize);
-            WriteU16(header, 8, (ushort)(nextPaintMem + newPaintBytesCount));   // Update NextPaintMem
-            WriteU16(header, 10, (ushort)(nextStorey + newStoreysCount));       // Update NextStorey
+            WriteU16(header, 8, (ushort)(nextPaintMem + newPaintBytesCount));
+            WriteU16(header, 10, (ushort)(nextStorey + newStoreysCount));
             ms.Write(header, 0, HeaderSize);
 
             // 3. Copy buildings
@@ -221,18 +252,16 @@ namespace UrbanChaosMapEditor.Services
             // 4. Copy padding
             ms.Write(bytes, padOff, AfterBuildingsPad);
 
-            // 5. Copy facets
+            // 5. Copy facets (unchanged)
             int facetsSize = (nextFacet - 1) * DFacetSize;
             if (facetsSize > 0)
                 ms.Write(bytes, facetsOff, facetsSize);
 
-            // 6. Write updated dstyles (copy existing, but update the painted ones)
-            // NOTE: dstyles uses all indices 0..(nextStyle-1), so we copy nextStyle entries
+            // 6. Write dstyles with in-place updates for painted bands
             int stylesSize = nextStyle * DStyleSize;
             var stylesData = new byte[stylesSize];
             Buffer.BlockCopy(bytes, stylesOff, stylesData, 0, stylesSize);
 
-            // Apply updates
             foreach (var kvp in dstylesUpdates)
             {
                 int index = kvp.Key;
@@ -245,27 +274,25 @@ namespace UrbanChaosMapEditor.Services
             }
             ms.Write(stylesData, 0, stylesSize);
 
-            // 7. Copy existing paint_mem (paint_mem comes BEFORE storeys in file layout!)
-            // NOTE: The file includes slot 0 (unused), so we copy nextPaintMem bytes, not nextPaintMem-1
-            // However, if nextPaintMem=1, there's just the unused slot 0, so we copy that 1 byte
-            int existingPaintMemSize = nextPaintMem; // Copy all existing bytes including slot 0
+            // 7. Copy existing paint_mem (includes slot 0)
+            int existingPaintMemSize = nextPaintMem;
             if (existingPaintMemSize > 0)
                 ms.Write(bytes, paintMemOff, existingPaintMemSize);
 
-            // 8. Write new paint bytes (these go at position nextPaintMem onwards)
-            ms.Write(newPaintBytes.ToArray(), 0, newPaintBytes.Count);
+            // 8. Write new paint bytes
+            if (newPaintBytes.Count > 0)
+                ms.Write(newPaintBytes.ToArray(), 0, newPaintBytes.Count);
 
-            // 9. Copy existing DStoreys (storeys come AFTER paint_mem)
-            // NOTE: The file includes slot 0 (unused), so we copy nextStorey entries, not nextStorey-1
-            int existingStoreysSize = nextStorey * DStoreySize; // Copy all existing entries including slot 0
+            // 9. Copy existing DStoreys (includes slot 0)
+            int existingStoreysSize = nextStorey * DStoreySize;
             if (existingStoreysSize > 0)
                 ms.Write(bytes, storeysOff, existingStoreysSize);
 
-            // 10. Write new DStoreys (these go at position nextStorey onwards)
+            // 10. Write new DStoreys
             foreach (var storeyBytes in newStoreys)
                 ms.Write(storeyBytes, 0, DStoreySize);
 
-            // 11. Copy everything after storeys (indoors, walkables, objects, etc.)
+            // 11. Copy everything after storeys (indoors, walkables, objects, tail)
             int afterStoreysOff = storeysOff + existingStoreysSize;
             int tailSize = bytes.Length - afterStoreysOff;
             if (tailSize > 0)
@@ -276,7 +303,7 @@ namespace UrbanChaosMapEditor.Services
             int expectedGrowth = (newStoreysCount * DStoreySize) + newPaintBytesCount;
             int actualGrowth = newBytes.Length - bytes.Length;
 
-            Debug.WriteLine($"[FacetPainter] File size: {bytes.Length} -> {newBytes.Length} (expected growth: {expectedGrowth}, actual: {actualGrowth})");
+            Debug.WriteLine($"[FacetPainter] File: {bytes.Length} -> {newBytes.Length} (growth: expected={expectedGrowth}, actual={actualGrowth})");
 
             if (actualGrowth != expectedGrowth)
             {
@@ -285,31 +312,19 @@ namespace UrbanChaosMapEditor.Services
 
             _svc.ReplaceBytes(newBytes);
 
-            // Verify what was written by re-reading
+            // Verification
             Debug.WriteLine($"[FacetPainter] ===== VERIFICATION =====");
             var verifyBytes = _svc.GetBytesCopy();
+            ushort vNextStyle = ReadU16(verifyBytes, blockStart + 6);
+            ushort vNextPaint = ReadU16(verifyBytes, blockStart + 8);
+            ushort vNextStorey = ReadU16(verifyBytes, blockStart + 10);
+            Debug.WriteLine($"[FacetPainter] Header AFTER: NextStyle={vNextStyle}, NextPaintMem={vNextPaint}, NextStorey={vNextStorey}");
 
-            // Check header
-            ushort verifyNextStyle = ReadU16(verifyBytes, blockStart + 6);
-            ushort verifyNextPaintMem = ReadU16(verifyBytes, blockStart + 8);
-            ushort verifyNextStorey = ReadU16(verifyBytes, blockStart + 10);
-            Debug.WriteLine($"[FacetPainter] Header AFTER: NextStyle={verifyNextStyle}, NextPaintMem={verifyNextPaintMem}, NextStorey={verifyNextStorey}");
-
-            // Recalculate offsets for the NEW file structure
-            // Layout: styles → paint_mem → storeys
-            // NOTE: dstyles has verifyNextStyle entries (uses index 0)
-            // NOTE: paint_mem includes slot 0, so size is verifyNextPaintMem
-            // NOTE: storeys includes slot 0, so we read from index 1 onwards
-            int newPaintMemOff = stylesOff + verifyNextStyle * DStyleSize;
-            int newStoreysOff = newPaintMemOff + verifyNextPaintMem;  // Full paint_mem size including slot 0
-            Debug.WriteLine($"[FacetPainter] New offsets: paintMemOff=0x{newPaintMemOff:X}, storeysOff=0x{newStoreysOff:X}");
-
-            // Check dstyles values
-            Debug.WriteLine($"[FacetPainter] dstyles values AFTER:");
+            // Verify dstyle values
             for (int band = 0; band < bandsCount; band++)
             {
                 int dstyleIdx = facetStyleStart + band * styleIndexStep;
-                if (dstyleIdx >= 0 && dstyleIdx < verifyNextStyle - 1)
+                if (dstyleIdx >= 0 && dstyleIdx < vNextStyle)
                 {
                     int fileOff = stylesOff + dstyleIdx * DStyleSize;
                     short val = (short)(verifyBytes[fileOff] | (verifyBytes[fileOff + 1] << 8));
@@ -317,26 +332,18 @@ namespace UrbanChaosMapEditor.Services
                 }
             }
 
-            // Check DStorey entries (6 bytes each: U16 Style, U16 PaintIndex, SBYTE Count, pad)
-            // Note: Storeys are 1-based, so DStorey[1] is at offset newStoreysOff + 1*DStoreySize
-            Debug.WriteLine($"[FacetPainter] DStorey entries AFTER:");
-            for (int i = 1; i < verifyNextStorey; i++)  // Start from 1 (slot 0 is unused)
+            // Verify new DStoreys
+            int newStoreysOff = stylesOff + vNextStyle * DStyleSize + vNextPaint;
+            for (int i = 1; i < vNextStorey; i++)
             {
-                int storeyOff = newStoreysOff + i * DStoreySize;
-                ushort style = (ushort)(verifyBytes[storeyOff] | (verifyBytes[storeyOff + 1] << 8));
-                ushort paintIndex = (ushort)(verifyBytes[storeyOff + 2] | (verifyBytes[storeyOff + 3] << 8));
-                sbyte count = (sbyte)verifyBytes[storeyOff + 4];
-                Debug.WriteLine($"[FacetPainter]   DStorey[{i}]: Style={style}, PaintIndex={paintIndex}, Count={count}");
-            }
-
-            // Check paint_mem bytes (starting from index 1, slot 0 is unused)
-            Debug.WriteLine($"[FacetPainter] paint_mem bytes AFTER:");
-            int pmSize = verifyNextPaintMem - 1;  // Actual used bytes (excluding slot 0)
-            if (pmSize > 0 && pmSize <= 64) // Limit output
-            {
-                var pmBytes = new byte[pmSize];
-                Buffer.BlockCopy(verifyBytes, newPaintMemOff + 1, pmBytes, 0, pmSize);  // Skip slot 0
-                Debug.WriteLine($"[FacetPainter]   paint_mem[1..{verifyNextPaintMem - 1}]: [{string.Join(",", pmBytes.Select(b => $"0x{b:X2}"))}]");
+                int sOff = newStoreysOff + i * DStoreySize;
+                if (sOff + DStoreySize <= verifyBytes.Length)
+                {
+                    ushort style = (ushort)(verifyBytes[sOff] | (verifyBytes[sOff + 1] << 8));
+                    ushort pidx = (ushort)(verifyBytes[sOff + 2] | (verifyBytes[sOff + 3] << 8));
+                    sbyte cnt = (sbyte)verifyBytes[sOff + 4];
+                    Debug.WriteLine($"[FacetPainter]   DStorey[{i}]: Style={style}, PaintIndex={pidx}, Count={cnt}");
+                }
             }
 
             Debug.WriteLine($"[FacetPainter] ===== ApplyPaint COMPLETE =====");
@@ -362,14 +369,6 @@ namespace UrbanChaosMapEditor.Services
         {
             b[off] = (byte)(val & 0xFF);
             b[off + 1] = (byte)((val >> 8) & 0xFF);
-        }
-
-        private static void WriteS32(byte[] b, int off, int val)
-        {
-            b[off] = (byte)(val & 0xFF);
-            b[off + 1] = (byte)((val >> 8) & 0xFF);
-            b[off + 2] = (byte)((val >> 16) & 0xFF);
-            b[off + 3] = (byte)((val >> 24) & 0xFF);
         }
 
         #endregion

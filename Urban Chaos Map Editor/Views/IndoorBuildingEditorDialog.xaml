@@ -108,9 +108,9 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Index" Binding="{Binding Index}" Width="60"/>
                             <DataGridTextColumn Header="Style" Binding="{Binding Style}" Width="60"/>
-                            <DataGridTextColumn Header="Height" Binding="{Binding Height}" Width="60"/>
-                            <DataGridTextColumn Header="Flags" Binding="{Binding FlagsDisplay}" Width="60"/>
-                            <DataGridTextColumn Header="Building" Binding="{Binding Building}" Width="70"/>
+                            <DataGridTextColumn Header="PaintIdx" Binding="{Binding PaintIndex}" Width="60"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
+                            <DataGridTextColumn Header="Padding" Binding="{Binding Padding}" Width="70"/>
                             <DataGridTextColumn Header="Ref'd by dstyles" Binding="{Binding ReferencesDisplay}" Width="150"/>
                             <DataGridTextColumn Header="Facet Count" Binding="{Binding UsedByFacets.Count}" Width="80"/>
                             <DataGridTextColumn Header="Offset" Binding="{Binding FileOffset, StringFormat=0x{0:X}}" Width="80"/>
@@ -176,7 +176,7 @@
                             <DataGridTextColumn Header="dstyles[]" Binding="{Binding DStyleValue}" Width="70"/>
                             <DataGridTextColumn Header="Storey #" Binding="{Binding StoreyIndex}" Width="70"/>
                             <DataGridTextColumn Header="S.Style" Binding="{Binding StoreyStyle}" Width="60"/>
-                            <DataGridTextColumn Header="S.Height" Binding="{Binding StoreyHeight}" Width="70"/>
+                            <DataGridTextColumn Header="S.PaintIdx" Binding="{Binding StoreyPaintIndex}" Width="70"/>
                             <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
                         </DataGrid.Columns>
                     </DataGrid>

@@ -1,8 +1,25 @@
 ﻿// /Services/BuildingAdder.cs
-// Helper class for adding buildings and facets to the map
+// Helper class for adding buildings and facets to the map.
+//
+// KEY CHANGES from previous version:
+// 1. Fixed dstyles size calculation: nextStyle * 2 (was (nextStyle-1) * 2, off by 2 bytes)
+// 2. Support painted textures at creation time via DStorey + paint_mem
+// 3. Warehouse buildings auto-create interior facets (reversed, FACET_FLAG_INSIDE)
+//    with dual dstyle entries per wall (outside + inside), matching the C engine
+// 4. Correctly inserts into all three arrays: dstyles, paint_mem, dstoreys
+//
+// File layout within buildings block:
+//   Header(48) → Buildings[] → Pad(14) → Facets[] → dstyles[] → paint_mem[] → dstoreys[] → ...
+//
+// Array sizes in file (each includes unused slot 0):
+//   dstyles:   nextStyle   entries × 2 bytes
+//   paint_mem: nextPaintMem bytes
+//   dstoreys:  nextStorey  entries × 6 bytes
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using UrbanChaosMapEditor.Models;
 using UrbanChaosMapEditor.Services.DataServices;
 using UrbanChaosMapEditor.Views.Dialogs.Buildings;
@@ -18,7 +35,8 @@ namespace UrbanChaosMapEditor.Services
         private const int DBuildingSize = 24;
         private const int AfterBuildingsPad = 14;
         private const int DFacetSize = 26;
-        private const int DStyleSize = 2; // Each dstyles entry is a short (2 bytes)
+        private const int DStyleSize = 2;       // Each dstyles entry is a signed short
+        private const int DStoreySize = 6;      // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
 
         private readonly MapDataService _svc;
 
@@ -26,6 +44,8 @@ namespace UrbanChaosMapEditor.Services
         {
             _svc = svc ?? throw new ArgumentNullException(nameof(svc));
         }
+
+        #region Add Building
 
         /// <summary>
         /// Adds a new empty building to the map.
@@ -44,7 +64,6 @@ namespace UrbanChaosMapEditor.Services
 
             var bytes = _svc.GetBytesCopy();
             int blockStart = snap.StartOffset;
-            int saveType = BitConverter.ToInt32(bytes, 0);
 
             // Read current header counters
             ushort oldNextBuilding = ReadU16(bytes, blockStart + 2);
@@ -54,32 +73,21 @@ namespace UrbanChaosMapEditor.Services
             int buildingsOff = blockStart + HeaderSize;
             int oldBuildingsEnd = buildingsOff + (oldNextBuilding - 1) * DBuildingSize;
             int padOff = oldBuildingsEnd;
-            int facetsOff = padOff + AfterBuildingsPad;
 
             // The new building ID (1-based)
             int newBuildingId1 = oldNextBuilding;
 
             // Create new building record (24 bytes)
-            // StartFacet = EndFacet = NextDFacet (empty range)
             var newBuilding = new byte[DBuildingSize];
-            WriteU16(newBuilding, 0, oldNextFacet);  // StartFacet
-            WriteU16(newBuilding, 2, oldNextFacet);  // EndFacet (same = empty)
-            // WorldX at +4-7 = 0 (already zero)
-            // WorldY at +8-10 = 0 (already zero)
-            newBuilding[11] = (byte)type;             // Type (IMPORTANT: offset 11, not 21!)
-            // WorldZ at +12-15 = 0 (already zero)
-            WriteU16(newBuilding, 16, 0);            // Walkable = none
-            newBuilding[18] = 0;                      // Counter0
-            newBuilding[19] = 0;                      // Counter1
-            // Bytes 20-21 are padding/unknown
-            newBuilding[22] = 0;                      // Ware
-            // Byte 23 is padding
+            WriteU16(newBuilding, 0, oldNextFacet);   // StartFacet
+            WriteU16(newBuilding, 2, oldNextFacet);   // EndFacet (same = empty)
+            newBuilding[11] = (byte)type;              // Type
+            WriteU16(newBuilding, 16, 0);              // Walkable = none
 
             // Everything from the pad onwards stays the same, just shifted
             int afterBuildingsLen = bytes.Length - padOff;
 
-            // Build new file
-            using var ms = new System.IO.MemoryStream();
+            using var ms = new MemoryStream();
 
             // 1. Copy file header + tiles (everything up to building block header)
             ms.Write(bytes, 0, blockStart);
@@ -87,7 +95,7 @@ namespace UrbanChaosMapEditor.Services
             // 2. Write building block header with updated NextDBuilding
             var header = new byte[HeaderSize];
             Buffer.BlockCopy(bytes, blockStart, header, 0, HeaderSize);
-            WriteU16(header, 2, (ushort)(oldNextBuilding + 1)); // Increment NextDBuilding
+            WriteU16(header, 2, (ushort)(oldNextBuilding + 1));
             ms.Write(header, 0, HeaderSize);
 
             // 3. Write existing buildings
@@ -97,14 +105,13 @@ namespace UrbanChaosMapEditor.Services
             // 4. Write new building
             ms.Write(newBuilding, 0, DBuildingSize);
 
-            // 5. Copy everything from pad onwards (pad, facets, styles, paint, storeys, indoors, walkables, objects, tail)
+            // 5. Copy everything from pad onwards
             ms.Write(bytes, padOff, afterBuildingsLen);
 
             var newBytes = ms.ToArray();
 
-            Debug.WriteLine($"[BuildingAdder] Added building #{newBuildingId1} type={type} (byte value {(byte)type} at offset 11). " +
-                           $"Old file: {bytes.Length} bytes, new file: {newBytes.Length} bytes " +
-                           $"(should be +{DBuildingSize} bytes)");
+            Debug.WriteLine($"[BuildingAdder] Added building #{newBuildingId1} type={type}. " +
+                           $"Old: {bytes.Length} bytes, new: {newBytes.Length} bytes (+{DBuildingSize})");
 
             if (newBytes.Length != bytes.Length + DBuildingSize)
             {
@@ -119,29 +126,28 @@ namespace UrbanChaosMapEditor.Services
             return newBuildingId1;
         }
 
+        #endregion
+
+        #region Add Facets
+
         /// <summary>
         /// Calculates how many vertical bands (storey levels) a facet has.
         /// Each band consumes dstyles entries.
-        /// We add +1 because the game's rendering loop increments style_index
-        /// before the first draw, effectively needing one extra entry.
+        /// From the C code: while (height >= 0) { height -= 4; }
+        /// For Height=4: needs entries at [base] and [base+1]
         /// </summary>
         private static int CalculateBands(byte height)
         {
-            // From the C code: while (height >= 0) { height -= 4; }
-            // The loop increments style_index on every iteration including the first (hf=0) no-draw pass
-            // So for Height=4: 2 iterations = needs entries at [base] and [base+1] but draws 1 band
-            // For Height=8: 3 iterations = needs entries at [base], [base+1], [base+2] but draws 2 bands
-            // We need (height / 4) + 1 entries, or equivalently ceil((height+4)/4)
             if (height == 0) return 1;
             return (height / 4) + 1;
         }
 
         /// <summary>
         /// Calculates how many dstyles entries per band based on facet flags.
+        /// If 2TEXTURED or 2SIDED (and not HUG_FLOOR), use 2 entries per band.
         /// </summary>
         private static int CalculateEntriesPerBand(FacetFlags flags)
         {
-            // If 2TEXTURED or 2SIDED (and not HUG_FLOOR), use 2 entries per band
             bool has2Textured = (flags & FacetFlags.TwoTextured) != 0;
             bool has2Sided = (flags & FacetFlags.TwoSided) != 0;
             bool hasHugFloor = (flags & FacetFlags.HugFloor) != 0;
@@ -153,7 +159,8 @@ namespace UrbanChaosMapEditor.Services
 
         /// <summary>
         /// Adds multiple facets to a building.
-        /// Now correctly allocates dstyles[] entries for each facet.
+        /// Correctly allocates dstyles[], DStorey[], and paint_mem[] entries.
+        /// For warehouse buildings, automatically creates reversed interior facets.
         /// </summary>
         public AddFacetsResult TryAddFacets(int buildingId1, List<(byte x0, byte z0, byte x1, byte z1)> coords, FacetTemplate template)
         {
@@ -177,119 +184,308 @@ namespace UrbanChaosMapEditor.Services
             ushort oldNextBuilding = ReadU16(bytes, blockStart + 2);
             ushort oldNextFacet = ReadU16(bytes, blockStart + 4);
             ushort oldNextStyle = ReadU16(bytes, blockStart + 6);
-            ushort oldNextPaintMem = (saveType >= 17) ? ReadU16(bytes, blockStart + 8) : (ushort)0;
-            ushort oldNextStorey = (saveType >= 17) ? ReadU16(bytes, blockStart + 10) : (ushort)0;
+            ushort oldNextPaintMem = (saveType >= 17) ? ReadU16(bytes, blockStart + 8) : (ushort)1;
+            ushort oldNextStorey = (saveType >= 17) ? ReadU16(bytes, blockStart + 10) : (ushort)1;
 
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] buildingId1={buildingId1}, coords.Count={coords.Count}");
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] template: Type={template.Type}, Height={template.Height}, RawStyleId={template.RawStyleId}, Flags={template.Flags}");
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Header counters: NextBuilding={oldNextBuilding}, NextFacet={oldNextFacet}, NextStyle={oldNextStyle}");
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] blockStart=0x{blockStart:X}, saveType={saveType}");
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] buildingId1={buildingId1}, coords={coords.Count}");
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] template: Type={template.Type}, Height={template.Height}, RawStyleId={template.RawStyleId}");
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Header: NextBuilding={oldNextBuilding}, NextFacet={oldNextFacet}, NextStyle={oldNextStyle}, NextPaintMem={oldNextPaintMem}, NextStorey={oldNextStorey}");
 
-            // Calculate how many dstyles entries each facet needs
+            // Determine if this is a warehouse building
+            int bldRecOff = blockStart + HeaderSize + (buildingId1 - 1) * DBuildingSize;
+            byte buildingType = bytes[bldRecOff + 11];
+            bool isWarehouse = (buildingType == (byte)BuildingType.Warehouse);
+
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] BuildingType={buildingType} isWarehouse={isWarehouse}");
+
+            // Calculate bands and entries per facet
             int bandsPerFacet = CalculateBands(template.Height);
             int entriesPerBand = CalculateEntriesPerBand(template.Flags);
             int dstylesPerFacet = bandsPerFacet * entriesPerBand;
-            int totalNewDStyles = coords.Count * dstylesPerFacet;
 
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] bands={bandsPerFacet}, entriesPerBand={entriesPerBand}, dstylesPerFacet={dstylesPerFacet}, totalNewDStyles={totalNewDStyles}");
+            // For warehouses: each wall gets +1 extra dstyle for interior face per band
+            // (the C code does: dstyles[next_dstyle++] = TextureStyle2 for each wall of a warehouse)
+            int warehouseExtraDStylesPerFacet = isWarehouse ? bandsPerFacet : 0;
+            int totalDStylesPerWall = dstylesPerFacet + warehouseExtraDStylesPerFacet;
 
-            // Calculate offsets
+            // Determine if we're creating painted textures
+            bool hasPaint = template.PaintBytes != null && template.PaintBytes.Length > 0;
+            bool hasInteriorPaint = isWarehouse && template.InteriorPaintBytes != null && template.InteriorPaintBytes.Length > 0;
+
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] bands={bandsPerFacet}, entriesPerBand={entriesPerBand}, " +
+                           $"dstylesPerFacet={dstylesPerFacet}, warehouseExtra={warehouseExtraDStylesPerFacet}, " +
+                           $"hasPaint={hasPaint}, hasInteriorPaint={hasInteriorPaint}");
+
+            int facetCount = coords.Count;
+            int interiorFacetCount = isWarehouse ? facetCount : 0;
+            int totalNewFacets = facetCount + interiorFacetCount;
+            int totalNewDStyles = coords.Count * totalDStylesPerWall;
+
+            // Calculate how many DStorey + paint_mem entries we need
+            // Each painted band needs one DStorey entry + N paint bytes (N = columns per facet)
+            int paintBandsPerFacet = hasPaint ? bandsPerFacet : 0;
+            int interiorPaintBandsPerFacet = hasInteriorPaint ? bandsPerFacet : 0;
+            int totalNewStoreys = coords.Count * (paintBandsPerFacet + interiorPaintBandsPerFacet);
+
+            // For paint_mem, each painted band stores one byte per column
+            // Columns = wall width in grid units + 1 (from the C code: count = panelsAcross + 1)
+            // We'll use the paint bytes as provided in the template
+            int paintBytesPerBand = hasPaint ? template.PaintBytes!.Length : 0;
+            int interiorPaintBytesPerBand = hasInteriorPaint ? template.InteriorPaintBytes!.Length : 0;
+            int totalNewPaintBytes = coords.Count * (paintBandsPerFacet * paintBytesPerBand + interiorPaintBandsPerFacet * interiorPaintBytesPerBand);
+
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] totalNewFacets={totalNewFacets}, totalNewDStyles={totalNewDStyles}, totalNewStoreys={totalNewStoreys}, totalNewPaintBytes={totalNewPaintBytes}");
+
+            // Calculate file offsets
+            // IMPORTANT: dstyles size = nextStyle * 2 (includes slot 0)
             int buildingsOff = blockStart + HeaderSize;
             int padOff = buildingsOff + (oldNextBuilding - 1) * DBuildingSize;
             int facetsOff = padOff + AfterBuildingsPad;
             int stylesOff = facetsOff + (oldNextFacet - 1) * DFacetSize;
-            int oldStylesSize = (oldNextStyle - 1) * DStyleSize;
-            int afterStylesOff = stylesOff + oldStylesSize;
+            int existingStylesSize = oldNextStyle * DStyleSize;
+            int paintMemOff = stylesOff + existingStylesSize;
+            int existingPaintSize = oldNextPaintMem;
+            int storeysOff = paintMemOff + existingPaintSize;
+            int existingStoreysSize = oldNextStorey * DStoreySize;
+            int afterStoreysOff = storeysOff + existingStoreysSize;
 
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] buildingsOff=0x{buildingsOff:X}, padOff=0x{padOff:X}, facetsOff=0x{facetsOff:X}, stylesOff=0x{stylesOff:X}");
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] oldStylesSize={oldStylesSize}, afterStylesOff=0x{afterStylesOff:X}");
+            Debug.WriteLine($"[BuildingAdder.TryAddFacets] stylesOff=0x{stylesOff:X}, paintMemOff=0x{paintMemOff:X}, storeysOff=0x{storeysOff:X}, afterStoreysOff=0x{afterStoreysOff:X}");
 
             // Get the target building's current facet range
-            int buildingRecOff = buildingsOff + (buildingId1 - 1) * DBuildingSize;
-            ushort oldStartFacet = ReadU16(bytes, buildingRecOff);
-            ushort oldEndFacet = ReadU16(bytes, buildingRecOff + 2);
+            ushort oldStartFacet = ReadU16(bytes, bldRecOff);
+            ushort oldEndFacet = ReadU16(bytes, bldRecOff + 2);
+            int insertPosition = oldEndFacet; // 1-based position where new facets start
 
             Debug.WriteLine($"[BuildingAdder.TryAddFacets] Building #{buildingId1}: StartFacet={oldStartFacet}, EndFacet={oldEndFacet}");
 
-            // New facets will be inserted at the end of this building's range
-            int insertPosition = oldEndFacet; // 1-based position where new facets start
-            int facetCount = coords.Count;
+            // Track allocation cursors
+            ushort nextStyleCursor = oldNextStyle;         // next available dstyles index
+            ushort nextPaintMemCursor = oldNextPaintMem;   // next available paint_mem offset
+            ushort nextStoreyCursor = oldNextStorey;       // next available DStorey index
 
-            // Track which dstyles index each new facet will use
-            // New dstyles are appended at the end of the existing dstyles array
-            // nextStyleIndex tracks the 1-based "next available" slot
-            ushort nextStyleIndex = oldNextStyle;
-
-            // Create new facet records
-            var newFacets = new List<byte[]>();
-            var facetStyleIndices = new List<ushort>(); // Track the StyleIndex for each facet
+            // Build new data: facets, dstyles, paint_mem, dstoreys
+            var newFacetList = new List<byte[]>();
+            var newDStyleValues = new List<short>();         // in order, appended after existing
+            var newPaintMemBytes = new List<byte>();         // in order, appended after existing
+            var newStoreyEntries = new List<byte[]>();       // in order, appended after existing
 
             for (int i = 0; i < coords.Count; i++)
             {
                 var (x0, z0, x1, z1) = coords[i];
-                var facetBytes = new byte[DFacetSize];
 
-                // This facet's StyleIndex points to where its dstyles entries start
-                // IMPORTANT: StyleIndex in DFacet is 1-based (same as NextDStyle convention)
-                // But we write to 0-based array position (nextStyleIndex - 1)
-                // The facet stores the 1-based index, which the game converts to 0-based when reading
-                ushort thisStyleIndex = nextStyleIndex;
-                facetStyleIndices.Add(thisStyleIndex);
+                // --- Allocate dstyles for this facet's outside face ---
+                ushort outsideStyleIndex = nextStyleCursor;
 
-                facetBytes[0] = (byte)template.Type;     // FacetType
-                facetBytes[1] = template.Height;          // Height
-                facetBytes[2] = x0;                       // X0
-                facetBytes[3] = x1;                       // X1
-                WriteS16(facetBytes, 4, template.Y0);     // Y0
-                WriteS16(facetBytes, 6, template.Y1);     // Y1
-                facetBytes[8] = z0;                       // Z0
-                facetBytes[9] = z1;                       // Z1
-                WriteU16(facetBytes, 10, (ushort)template.Flags); // Flags
-                WriteU16(facetBytes, 12, thisStyleIndex);         // StyleIndex - points into dstyles[]
-                WriteU16(facetBytes, 14, (ushort)buildingId1);    // Building
-                WriteU16(facetBytes, 16, (ushort)template.Storey); // DStorey
-                facetBytes[18] = template.FHeight;        // FHeight
-                facetBytes[19] = template.BlockHeight;    // BlockHeight
-                facetBytes[20] = 0;                       // Open
-                facetBytes[21] = 0;                       // Dfcache
-                facetBytes[22] = 0;                       // Shake
-                facetBytes[23] = 0;                       // CutHole
-                facetBytes[24] = 0;                       // Counter0
-                facetBytes[25] = 0;                       // Counter1
+                for (int band = 0; band < bandsPerFacet; band++)
+                {
+                    short dstyleValue;
 
-                newFacets.Add(facetBytes);
+                    if (hasPaint)
+                    {
+                        // Create DStorey + paint_mem for this band
+                        ushort paintIndex = nextPaintMemCursor;
+                        int storeyId = nextStoreyCursor;
 
-                // Advance nextStyleIndex for the next facet
-                nextStyleIndex += (ushort)dstylesPerFacet;
+                        // Write paint bytes for this band
+                        for (int col = 0; col < paintBytesPerBand; col++)
+                            newPaintMemBytes.Add(template.PaintBytes![col]);
+                        nextPaintMemCursor += (ushort)paintBytesPerBand;
 
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] Created facet {i}: ({x0},{z0})->({x1},{z1}) StyleIndex={thisStyleIndex}");
+                        // Write DStorey entry
+                        var storey = new byte[DStoreySize];
+                        WriteU16(storey, 0, template.RawStyleId);           // Style (base/fallback)
+                        WriteU16(storey, 2, paintIndex);                     // PaintIndex
+                        storey[4] = unchecked((byte)(sbyte)paintBytesPerBand); // Count
+                        storey[5] = 0;                                        // Padding
+                        newStoreyEntries.Add(storey);
+                        nextStoreyCursor++;
+
+                        // dstyle = negative storey reference
+                        dstyleValue = (short)(-storeyId);
+                    }
+                    else
+                    {
+                        // Positive raw style
+                        dstyleValue = (short)template.RawStyleId;
+                    }
+
+                    newDStyleValues.Add(dstyleValue);
+
+                    // If 2-sided/2-textured, add the second entry per band
+                    for (int extra = 1; extra < entriesPerBand; extra++)
+                    {
+                        newDStyleValues.Add(dstyleValue); // same style for second side
+                    }
+                }
+
+                // --- For warehouses: allocate interior dstyles ---
+                ushort interiorStyleIndex = 0;
+                if (isWarehouse)
+                {
+                    interiorStyleIndex = nextStyleCursor;
+                    // The interior style is at outsideStyleIndex + 1 for each band
+                    // But we've already allocated the outside styles above.
+                    // Actually, for the C code pattern: outside and inside are consecutive:
+                    //   dstyles[next_dstyle++] = TextureStyle;    // outside
+                    //   dstyles[next_dstyle++] = TextureStyle2;   // inside (warehouse only)
+                    // And the interior facet uses style_index+1.
+                    //
+                    // We already added outside styles. Now add interior styles.
+                    interiorStyleIndex = (ushort)(outsideStyleIndex + entriesPerBand);
+                    // Wait - the C pattern interleaves them per band. Let me reconsider.
+                    //
+                    // Actually looking at the C code more carefully:
+                    // For each wall segment, the pattern is:
+                    //   style_index = next_dstyle;
+                    //   dstyles[next_dstyle++] = TextureStyle;    // outside (index = style_index)
+                    //   if warehouse: dstyles[next_dstyle++] = TextureStyle2;  // inside (index = style_index+1)
+                    //   facet outside uses: style_index
+                    //   facet inside uses: style_index+1
+                    //
+                    // But for multi-band walls with connect_wall, each connect adds more dstyles.
+                    // For a simple single-storey wall (no connect), it's just:
+                    //   [outside_style, inside_style] then facets ref [style_index, style_index+1]
+                    //
+                    // However, we already wrote all outside band styles above.
+                    // For the warehouse pattern, the interior dstyle needs to be at
+                    // outsideStyleIndex + 1 (for the first band).
+                    // But we wrote bandsPerFacet * entriesPerBand outside entries...
+                    //
+                    // Let me re-think the allocation order to match the C pattern.
+                    // The C code doesn't have multi-band walls in the same way we do.
+                    // In the C code, connect_wall stacks multiple storeys vertically,
+                    // each with its own style_index pair.
+                    //
+                    // For our simplified approach: we'll add the interior dstyles right after
+                    // each outside dstyle, making pairs [outside, inside] per band.
+
+                    // PROBLEM: We already pushed outside entries. Let me redo the approach.
+                }
+
+                // OK, let me restart the dstyle allocation with the correct interleaving.
+                // For cleanliness, I'll clear what we just did and redo it properly.
+                // Actually, let me restructure this loop to handle it correctly from the start.
+
+                // ---- Actually, we need to rethink. Let me break and redo. ----
+                // The issue is that for warehouses, the dstyles pattern is:
+                //   [outside_band0, inside_band0, outside_band1, inside_band1, ...]
+                // And the outside facet references style_index (the first entry),
+                // while the inside facet references style_index+1.
+                //
+                // But for non-warehouses, it's just:
+                //   [band0, band1, band2, ...]
+                //
+                // So I need to build the dstyle list differently.
+                // Let me just restart this method with a cleaner approach.
+                break; // Will redo below
             }
 
-            // Create new dstyles entries
-            // Each entry is a short containing the Raw Style ID
-            var newDStyles = new byte[totalNewDStyles * DStyleSize];
-            for (int i = 0; i < totalNewDStyles; i++)
+            // --- CLEAN REDO of facet + dstyle allocation ---
+            newFacetList.Clear();
+            newDStyleValues.Clear();
+            newPaintMemBytes.Clear();
+            newStoreyEntries.Clear();
+            nextStyleCursor = oldNextStyle;
+            nextPaintMemCursor = oldNextPaintMem;
+            nextStoreyCursor = oldNextStorey;
+
+            for (int i = 0; i < coords.Count; i++)
             {
-                // Write the Raw Style ID (positive value = direct TMA style)
-                WriteS16(newDStyles, i * DStyleSize, (short)template.RawStyleId);
+                var (x0, z0, x1, z1) = coords[i];
+
+                // The StyleIndex that the outside facet will reference
+                ushort outsideStyleIndex = nextStyleCursor;
+
+                // Build dstyles for this wall segment (interleaved for warehouses)
+                for (int band = 0; band < bandsPerFacet; band++)
+                {
+                    // --- Outside dstyle entry ---
+                    short outsideDStyleValue = AllocateDStyleValue(
+                        template.RawStyleId, hasPaint, template.PaintBytes,
+                        ref nextPaintMemCursor, ref nextStoreyCursor,
+                        newPaintMemBytes, newStoreyEntries);
+                    newDStyleValues.Add(outsideDStyleValue);
+
+                    // If 2-sided/2-textured, add second entry per band for outside
+                    for (int extra = 1; extra < entriesPerBand; extra++)
+                        newDStyleValues.Add(outsideDStyleValue);
+
+                    // --- Warehouse interior dstyle entry ---
+                    if (isWarehouse)
+                    {
+                        ushort interiorRawStyle = template.InteriorStyleId > 0
+                            ? template.InteriorStyleId
+                            : template.RawStyleId;
+
+                        short insideDStyleValue = AllocateDStyleValue(
+                            interiorRawStyle, hasInteriorPaint, template.InteriorPaintBytes,
+                            ref nextPaintMemCursor, ref nextStoreyCursor,
+                            newPaintMemBytes, newStoreyEntries);
+                        newDStyleValues.Add(insideDStyleValue);
+                    }
+
+                    nextStyleCursor = (ushort)(oldNextStyle + newDStyleValues.Count);
+                }
+
+                // Create outside facet
+                var outsideFacet = MakeFacetBytes(x0, z0, x1, z1, template, outsideStyleIndex, (ushort)buildingId1);
+                newFacetList.Add(outsideFacet);
+
+                Debug.WriteLine($"[BuildingAdder] Facet {i} outside: ({x0},{z0})->({x1},{z1}) StyleIndex={outsideStyleIndex}");
+
+                // For warehouses: create reversed interior facet
+                if (isWarehouse)
+                {
+                    // Interior style is at outsideStyleIndex + entriesPerBand (after the outside entries for band 0)
+                    ushort interiorStyleIndex = (ushort)(outsideStyleIndex + entriesPerBand);
+
+                    // Reversed coordinates, with FACET_FLAG_INSIDE
+                    var interiorTemplate = new FacetTemplate
+                    {
+                        Type = template.Type,
+                        Height = template.Height,
+                        FHeight = template.FHeight,
+                        BlockHeight = template.BlockHeight,
+                        Y0 = template.Y0,
+                        Y1 = template.Y1,
+                        RawStyleId = template.InteriorStyleId > 0 ? template.InteriorStyleId : template.RawStyleId,
+                        Flags = template.Flags | FacetFlags.Inside,
+                        BuildingId1 = template.BuildingId1,
+                        Storey = template.Storey,
+                    };
+
+                    var interiorFacet = MakeFacetBytes(x1, z1, x0, z0, interiorTemplate, interiorStyleIndex, (ushort)buildingId1);
+                    newFacetList.Add(interiorFacet);
+
+                    Debug.WriteLine($"[BuildingAdder] Facet {i} interior: ({x1},{z1})->({x0},{z0}) StyleIndex={interiorStyleIndex}");
+                }
             }
 
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Created {totalNewDStyles} dstyles entries, each with RawStyleId={template.RawStyleId}");
+            // Recalculate totals based on what we actually allocated
+            totalNewFacets = newFacetList.Count;
+            totalNewDStyles = newDStyleValues.Count;
+            totalNewPaintBytes = newPaintMemBytes.Count;
+            int totalNewStoreysCount = newStoreyEntries.Count;
 
-            // Build new file with inserted facets AND dstyles
-            using var ms = new System.IO.MemoryStream();
+            Debug.WriteLine($"[BuildingAdder] FINAL: {totalNewFacets} facets, {totalNewDStyles} dstyles, {totalNewStoreysCount} storeys, {totalNewPaintBytes} paint bytes");
 
-            // 1. Copy everything up to building block header (file header + tiles)
-            ms.Write(bytes, 0, blockStart);
+            // === Build new file ===
+            using var ms2 = new MemoryStream();
 
-            // 2. Write building block header with updated counters
-            var header = new byte[HeaderSize];
-            Buffer.BlockCopy(bytes, blockStart, header, 0, HeaderSize);
-            WriteU16(header, 4, (ushort)(oldNextFacet + facetCount));      // Increment NextDFacet
-            WriteU16(header, 6, (ushort)(oldNextStyle + totalNewDStyles)); // Increment NextDStyle
-            ms.Write(header, 0, HeaderSize);
+            // 1. Copy everything up to building block header
+            ms2.Write(bytes, 0, blockStart);
 
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Updated header: NextDFacet {oldNextFacet} -> {oldNextFacet + facetCount}, NextDStyle {oldNextStyle} -> {oldNextStyle + totalNewDStyles}");
+            // 2. Write updated header
+            var hdr = new byte[HeaderSize];
+            Buffer.BlockCopy(bytes, blockStart, hdr, 0, HeaderSize);
+            WriteU16(hdr, 4, (ushort)(oldNextFacet + totalNewFacets));
+            WriteU16(hdr, 6, (ushort)(oldNextStyle + totalNewDStyles));
+            if (saveType >= 17)
+            {
+                WriteU16(hdr, 8, (ushort)(oldNextPaintMem + totalNewPaintBytes));
+                WriteU16(hdr, 10, (ushort)(oldNextStorey + totalNewStoreysCount));
+            }
+            ms2.Write(hdr, 0, HeaderSize);
 
             // 3. Write buildings with updated facet ranges
             for (int bldIdx = 0; bldIdx < oldNextBuilding - 1; bldIdx++)
@@ -304,74 +500,78 @@ namespace UrbanChaosMapEditor.Services
 
                 if (bldId1 == buildingId1)
                 {
-                    // This is our target building - expand its range
-                    WriteU16(bldBytes, 2, (ushort)(end + facetCount));
-                    Debug.WriteLine($"[BuildingAdder.TryAddFacets] Building #{bldId1} (target): EndFacet {end} -> {end + facetCount}");
+                    WriteU16(bldBytes, 2, (ushort)(end + totalNewFacets));
+                    Debug.WriteLine($"[BuildingAdder] Building #{bldId1} (target): EndFacet {end} -> {end + totalNewFacets}");
                 }
                 else if (start >= insertPosition)
                 {
-                    // Building comes after insertion point - shift its range
-                    WriteU16(bldBytes, 0, (ushort)(start + facetCount));
-                    WriteU16(bldBytes, 2, (ushort)(end + facetCount));
-                    Debug.WriteLine($"[BuildingAdder.TryAddFacets] Building #{bldId1} (after): range ({start},{end}) -> ({start + facetCount},{end + facetCount})");
+                    WriteU16(bldBytes, 0, (ushort)(start + totalNewFacets));
+                    WriteU16(bldBytes, 2, (ushort)(end + totalNewFacets));
                 }
 
-                ms.Write(bldBytes, 0, DBuildingSize);
+                ms2.Write(bldBytes, 0, DBuildingSize);
             }
 
             // 4. Write pad
-            ms.Write(bytes, padOff, AfterBuildingsPad);
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Copied {AfterBuildingsPad} padding bytes from offset 0x{padOff:X}");
+            ms2.Write(bytes, padOff, AfterBuildingsPad);
 
-            // 5. Write facets with insertions
+            // 5. Write facets (before + new + after)
             int facetsBefore = insertPosition - 1;
             if (facetsBefore > 0)
-            {
-                ms.Write(bytes, facetsOff, facetsBefore * DFacetSize);
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] Wrote {facetsBefore} facets before insertion point");
-            }
+                ms2.Write(bytes, facetsOff, facetsBefore * DFacetSize);
 
-            // New facets
-            foreach (var fb in newFacets)
-                ms.Write(fb, 0, DFacetSize);
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Wrote {newFacets.Count} new facets");
+            foreach (var fb in newFacetList)
+                ms2.Write(fb, 0, DFacetSize);
 
-            // Facets after insertion point
             int facetsAfter = oldNextFacet - 1 - facetsBefore;
             if (facetsAfter > 0)
+                ms2.Write(bytes, facetsOff + facetsBefore * DFacetSize, facetsAfter * DFacetSize);
+
+            // 6. Write existing dstyles (CORRECT: nextStyle * 2 bytes, not (nextStyle-1) * 2)
+            if (existingStylesSize > 0)
+                ms2.Write(bytes, stylesOff, existingStylesSize);
+
+            // 7. Write new dstyles (appended at end)
+            foreach (short val in newDStyleValues)
             {
-                int afterSrcOff = facetsOff + facetsBefore * DFacetSize;
-                ms.Write(bytes, afterSrcOff, facetsAfter * DFacetSize);
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] Wrote {facetsAfter} facets after insertion point");
+                ms2.WriteByte((byte)(val & 0xFF));
+                ms2.WriteByte((byte)((val >> 8) & 0xFF));
             }
 
-            // 6. Write existing dstyles
-            if (oldStylesSize > 0)
-            {
-                ms.Write(bytes, stylesOff, oldStylesSize);
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] Wrote {oldStylesSize} bytes of existing dstyles");
-            }
+            // 8. Write existing paint_mem
+            if (existingPaintSize > 0)
+                ms2.Write(bytes, paintMemOff, existingPaintSize);
 
-            // 7. Write new dstyles (appended at the end)
-            ms.Write(newDStyles, 0, newDStyles.Length);
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Wrote {newDStyles.Length} bytes of new dstyles");
+            // 9. Write new paint_mem bytes
+            if (newPaintMemBytes.Count > 0)
+                ms2.Write(newPaintMemBytes.ToArray(), 0, newPaintMemBytes.Count);
 
-            // 8. Copy everything after dstyles (paint, storeys, indoors, walkables, objects, tail)
-            int afterDStylesLen = bytes.Length - afterStylesOff;
-            if (afterDStylesLen > 0)
-            {
-                ms.Write(bytes, afterStylesOff, afterDStylesLen);
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] Copied {afterDStylesLen} bytes after dstyles (paint, storeys, etc.)");
-            }
+            // 10. Write existing DStoreys
+            if (existingStoreysSize > 0)
+                ms2.Write(bytes, storeysOff, existingStoreysSize);
 
-            var newBytes = ms.ToArray();
+            // 11. Write new DStorey entries
+            foreach (var se in newStoreyEntries)
+                ms2.Write(se, 0, DStoreySize);
 
-            int expectedSize = bytes.Length + (facetCount * DFacetSize) + (totalNewDStyles * DStyleSize);
-            Debug.WriteLine($"[BuildingAdder.TryAddFacets] Old file: {bytes.Length} bytes, new file: {newBytes.Length} bytes, expected: {expectedSize}");
+            // 12. Copy everything after storeys (indoors, walkables, objects, tail)
+            int tailSize = bytes.Length - afterStoreysOff;
+            if (tailSize > 0)
+                ms2.Write(bytes, afterStoreysOff, tailSize);
+
+            var newBytes = ms2.ToArray();
+
+            int expectedSize = bytes.Length
+                + totalNewFacets * DFacetSize
+                + totalNewDStyles * DStyleSize
+                + totalNewPaintBytes
+                + totalNewStoreysCount * DStoreySize;
+
+            Debug.WriteLine($"[BuildingAdder] File: {bytes.Length} -> {newBytes.Length} (expected {expectedSize})");
 
             if (newBytes.Length != expectedSize)
             {
-                Debug.WriteLine($"[BuildingAdder.TryAddFacets] ERROR: Size mismatch! Expected {expectedSize}, got {newBytes.Length}");
+                Debug.WriteLine($"[BuildingAdder] ERROR: Size mismatch!");
                 return AddFacetsResult.Fail($"File size mismatch: expected {expectedSize}, got {newBytes.Length}");
             }
 
@@ -380,10 +580,82 @@ namespace UrbanChaosMapEditor.Services
             BuildingsChangeBus.Instance.NotifyBuildingChanged(buildingId1, BuildingChangeType.Modified);
             BuildingsChangeBus.Instance.NotifyChanged();
 
-            Debug.WriteLine($"[BuildingAdder] Successfully added {facetCount} facets (with {totalNewDStyles} dstyles entries) to building #{buildingId1}");
+            Debug.WriteLine($"[BuildingAdder] Successfully added {totalNewFacets} facets to building #{buildingId1}");
 
-            return AddFacetsResult.Success(facetCount);
+            return AddFacetsResult.Success(totalNewFacets);
         }
+
+        /// <summary>
+        /// Allocates a dstyle value for a single band.
+        /// If painted, creates a DStorey entry + paint_mem bytes and returns the negative storey reference.
+        /// If not painted, returns the positive raw style id.
+        /// </summary>
+        private static short AllocateDStyleValue(
+            ushort rawStyleId,
+            bool hasPaint,
+            byte[]? paintBytes,
+            ref ushort nextPaintMemCursor,
+            ref ushort nextStoreyCursor,
+            List<byte> newPaintMemBytes,
+            List<byte[]> newStoreyEntries)
+        {
+            if (!hasPaint || paintBytes == null || paintBytes.Length == 0)
+            {
+                // Positive raw style — no DStorey needed
+                return (short)rawStyleId;
+            }
+
+            // Create painted texture entry
+            ushort paintIndex = nextPaintMemCursor;
+            int storeyId = nextStoreyCursor;
+            int count = paintBytes.Length;
+
+            // Append paint bytes
+            for (int c = 0; c < count; c++)
+                newPaintMemBytes.Add(paintBytes[c]);
+            nextPaintMemCursor += (ushort)count;
+
+            // Create DStorey entry (6 bytes)
+            var storey = new byte[DStoreySize];
+            WriteU16(storey, 0, rawStyleId);                        // Style (fallback)
+            WriteU16(storey, 2, paintIndex);                         // PaintIndex
+            storey[4] = unchecked((byte)(sbyte)count);               // Count
+            storey[5] = 0;                                            // Padding
+            newStoreyEntries.Add(storey);
+            nextStoreyCursor++;
+
+            // Return negative storey reference
+            return (short)(-storeyId);
+        }
+
+        /// <summary>
+        /// Builds a 26-byte DFacet record.
+        /// </summary>
+        private static byte[] MakeFacetBytes(byte x0, byte z0, byte x1, byte z1,
+            FacetTemplate template, ushort styleIndex, ushort buildingId)
+        {
+            var fb = new byte[DFacetSize];
+            fb[0] = (byte)template.Type;
+            fb[1] = template.Height;
+            fb[2] = x0;
+            fb[3] = x1;
+            WriteS16(fb, 4, template.Y0);
+            WriteS16(fb, 6, template.Y1);
+            fb[8] = z0;
+            fb[9] = z1;
+            WriteU16(fb, 10, (ushort)template.Flags);
+            WriteU16(fb, 12, styleIndex);
+            WriteU16(fb, 14, buildingId);
+            WriteU16(fb, 16, (ushort)template.Storey);
+            fb[18] = template.FHeight;
+            fb[19] = template.BlockHeight;
+            // bytes 20-25: Open, Dfcache, Shake, CutHole, Counter0, Counter1 = 0
+            return fb;
+        }
+
+        #endregion
+
+        #region Byte Helpers
 
         private static ushort ReadU16(byte[] b, int off) =>
             (ushort)(b[off] | (b[off + 1] << 8));
@@ -400,13 +672,19 @@ namespace UrbanChaosMapEditor.Services
             b[off + 1] = (byte)((val >> 8) & 0xFF);
         }
 
-        private static void WriteU16ToStream(System.IO.Stream s, ushort val)
+        // Kept for backward compatibility — not used in new code
+        private static void WriteU16(Span<byte> b, int off, ushort val)
         {
-            s.WriteByte((byte)(val & 0xFF));
-            s.WriteByte((byte)((val >> 8) & 0xFF));
+            b[off] = (byte)(val & 0xFF);
+            b[off + 1] = (byte)((val >> 8) & 0xFF);
         }
+
+        #endregion
     }
 
+    /// <summary>
+    /// Result of adding facets to a building.
+    /// </summary>
     public sealed class AddFacetsResult
     {
         public bool IsSuccess { get; }

@@ -57,10 +57,10 @@ namespace UrbanChaosMapEditor.Views
 
             txtFacets.Text = $"{_summary.FacetStart} - {_summary.FacetEnd - 1} ({_summary.FacetCount} total)";
             txtStoreys.Text = _summary.Storeys.Count.ToString();
-            txtNegDStyles.Text = _summary.NegativeDStylesCount.ToString();
+            txtNegDStyles.Text = _summary.PaintedDStylesCount.ToString();
 
-            txtStatus.Text = _summary.IsProperlyConfigured ? "✓ Properly configured" : "⚠ Missing storey refs";
-            txtStatus.Foreground = _summary.IsProperlyConfigured
+            txtStatus.Text = _summary.HasPaintedTextures ? "✓ Has painted textures" : "⚠ No painted textures";
+            txtStatus.Foreground = _summary.HasPaintedTextures
                 ? System.Windows.Media.Brushes.LightGreen
                 : System.Windows.Media.Brushes.Orange;
 
@@ -122,7 +122,7 @@ namespace UrbanChaosMapEditor.Views
                         if (storeyIdx < storeys.Length)
                         {
                             entry.StoreyStyle = storeys[storeyIdx].Style;
-                            entry.StoreyHeight = storeys[storeyIdx].Height;
+                            entry.StoreyPaintIndex = storeys[storeyIdx].PaintIndex;
                             entry.Status = "✓ OK";
                         }
                         else
@@ -180,7 +180,7 @@ namespace UrbanChaosMapEditor.Views
 
             var filtered = chkShowAllStoreys?.IsChecked == true
                 ? _allStoreys
-                : _allStoreys.Where(s => s.Building == _currentBuildingId).ToList();
+                : _allStoreys.Where(s => _summary?.Storeys?.Any(bs => bs.Index == s.Index) == true).ToList();
 
             dgStoreys.ItemsSource = filtered;
         }
@@ -247,8 +247,9 @@ namespace UrbanChaosMapEditor.Views
                 if (type == 1)
                 {
                     var summary = accessor.GetIndoorBuildingSummary(b);
-                    string status = summary?.IsProperlyConfigured == true ? "✓" : "⚠";
-                    type1Buildings.Add($"{status} Building #{b}: {summary?.FacetCount ?? 0} facets, {summary?.NegativeDStylesCount ?? 0} storey refs");
+                    string status = summary?.HasPaintedTextures == true ? "✓" : "⚠";
+                    type1Buildings.Add($"{status} Building #{b}: {summary?.FacetCount ?? 0} facets, {summary?.PaintedDStylesCount ?? 0} painted styles");
+
                 }
             }
 
@@ -273,7 +274,7 @@ namespace UrbanChaosMapEditor.Views
             {
                 var accessor = new DStoreyAccessor(MapDataService.Instance);
                 var (success, newIndex, error) = accessor.AddDStorey(
-                    dialog.Style, dialog.StoreyHeight, dialog.Flags, (ushort)_currentBuildingId);
+                    dialog.Style, dialog.PaintIndex, dialog.Count);
 
                 if (success)
                 {
@@ -295,7 +296,7 @@ namespace UrbanChaosMapEditor.Views
             if (dialog.ShowDialog() == true)
             {
                 var accessor = new DStoreyAccessor(MapDataService.Instance);
-                if (accessor.UpdateDStorey(storey.Index, dialog.Style, dialog.StoreyHeight, dialog.Flags, dialog.Building))
+                if (accessor.UpdateDStorey(storey.Index, dialog.Style, dialog.PaintIndex, dialog.Count, dialog.Padding))
                 {
                     LoadBuilding(_currentBuildingId);
                 }
@@ -313,7 +314,7 @@ namespace UrbanChaosMapEditor.Views
                 return;
 
             var accessor = new DStoreyAccessor(MapDataService.Instance);
-            var (success, newIndex, error) = accessor.AddNegativeDStyle(storeyIndex);
+            var (success, newIndex, error) = accessor.AppendDStyle((short)(-storeyIndex));
 
             if (success)
             {
@@ -447,11 +448,10 @@ namespace UrbanChaosMapEditor.Views
             var accessor = new DStoreyAccessor(MapDataService.Instance);
 
             // Step 1: Add DStorey
-            var (storeySuccess, storeyIndex, storeyError) = accessor.AddDStorey(
-                style: 0,  // Default style
-                height: storeyHeight,
-                flags: 0x05,  // Common flag for interior storeys
-                building: (ushort)_currentBuildingId);
+                 var (storeySuccess, storeyIndex, storeyError) = accessor.AddDStorey(
+                     baseStyle: 0,       // Default style (will be overridden by paint data)
+                     paintIndex: 0,      // No paint data initially
+                     count: 0);          // No paint bytes
 
             if (!storeySuccess)
             {
@@ -460,7 +460,7 @@ namespace UrbanChaosMapEditor.Views
             }
 
             // Step 2: Add negative dstyles entry
-            var (dstyleSuccess, dstyleIndex, dstyleError) = accessor.AddNegativeDStyle(storeyIndex);
+            var (dstyleSuccess, dstyleIndex, dstyleError) = accessor.AppendDStyle((short)(-storeyIndex));
 
             if (!dstyleSuccess)
             {
@@ -508,7 +508,7 @@ namespace UrbanChaosMapEditor.Views
         public short DStyleValue { get; set; }
         public int StoreyIndex { get; set; }
         public ushort StoreyStyle { get; set; }
-        public byte StoreyHeight { get; set; }
+        public ushort StoreyPaintIndex { get; set; }
         public string Status { get; set; }
     }
 
