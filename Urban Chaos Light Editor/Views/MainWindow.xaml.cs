@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Windows;
-using Microsoft.Win32;
+﻿using System.Windows;
 using UrbanChaosLightEditor.ViewModels;
 
 namespace UrbanChaosLightEditor

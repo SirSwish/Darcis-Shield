@@ -1,8 +1,6 @@
 ﻿// /Services/DataServices/StyleDataService.cs
-using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using UrbanChaosEditor.Shared.Models.Styles;
 
 namespace UrbanChaosEditor.Shared.Services.DataServices

@@ -1,10 +1,7 @@
 ﻿// /Services/LightsDataService.cs
 // FIXED: Correct layout based on C++ source code analysis
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using UrbanChaosLightEditor.Models;
 

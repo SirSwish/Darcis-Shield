@@ -3,9 +3,6 @@
 // ============================================================
 // Interface for map data access - implemented by each editor's data service
 
-using System;
-using System.Collections.Generic;
-
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;
 
 /// <summary>

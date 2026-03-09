@@ -1,9 +1,9 @@
-ï»¿// /App.xaml.cs
+// /App.xaml.cs
 using System.Windows;
-using UrbanChaosMapEditor.Services;
 using UrbanChaosEditor.Shared.Services.Textures;
-using UrbanChaosMapEditor.ViewModels;
-using UrbanChaosMapEditor.Views;
+using UrbanChaosMapEditor.Services.Core;
+using UrbanChaosMapEditor.ViewModels.Core;
+using UrbanChaosMapEditor.Views.Core;
 
 namespace UrbanChaosMapEditor
 {
@@ -28,7 +28,7 @@ namespace UrbanChaosMapEditor
                 // marshal to UI to update status bar
                 Dispatcher.Invoke(() =>
                 {
-                    vm.StatusMessage = $"Caching texturesâ€¦ {args.Done}/{args.Total} ({args.Percent:0}%)";
+                    vm.StatusMessage = $"Caching textures… {args.Done}/{args.Total} ({args.Percent:0}%)";
                 });
             };
 
@@ -41,7 +41,7 @@ namespace UrbanChaosMapEditor
                 });
             };
 
-            // Donâ€™t block UI â€” fire and forget
+            // Don’t block UI — fire and forget
             vm.IsBusy = true;
             _ = TextureCacheService.Instance.PreloadAllAsync(decodeSize: 64);
         }

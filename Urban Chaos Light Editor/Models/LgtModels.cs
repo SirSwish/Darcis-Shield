@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UrbanChaosLightEditor.Models
+﻿namespace UrbanChaosLightEditor.Models
 {
     public class LightHeader
     {

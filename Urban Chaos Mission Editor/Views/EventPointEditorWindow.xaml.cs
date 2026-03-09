@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using UrbanChaosMissionEditor.ViewModels;
 
 namespace UrbanChaosMissionEditor.Views;
 

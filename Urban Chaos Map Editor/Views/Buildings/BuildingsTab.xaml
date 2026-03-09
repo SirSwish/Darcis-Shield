@@ -1,0 +1,660 @@
+<UserControl x:Class="UrbanChaosMapEditor.Views.Buildings.BuildingsTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:UrbanChaosMapEditor.ViewModels.Buildings"
+             xmlns:conv="clr-namespace:UrbanChaosMapEditor.Views.Converters"
+             xmlns:m="clr-namespace:UrbanChaosMapEditor.Models.Buildings"
+             Foreground="White">
+
+    <UserControl.DataContext>
+        <vm:BuildingsTabViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <!-- Fluorescent overlay colours -->
+        <SolidColorBrush x:Key="FacetWallBrush"   Color="#00FF00"/>
+        <SolidColorBrush x:Key="FacetFenceBrush"  Color="#FFFF00"/>
+        <SolidColorBrush x:Key="FacetCableBrush"  Color="#FF0000"/>
+        <SolidColorBrush x:Key="FacetDoorBrush"   Color="#A020F0"/>
+        <SolidColorBrush x:Key="FacetLadderBrush" Color="#FFA500"/>
+        <SolidColorBrush x:Key="FacetOtherBrush"  Color="#7FD4FF"/>
+
+        <!-- Global text colour for this tab -->
+        <SolidColorBrush x:Key="ListForegroundBrush" Color="White"/>
+        <SolidColorBrush x:Key="LegendTextBrush" Color="#FF303030"/>
+
+        <!-- Make ALL TextBlocks white by default -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource ListForegroundBrush}"/>
+        </Style>
+
+        <!-- ListBox item style -->
+        <Style x:Key="SelectableListBoxItem" TargetType="ListBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource ListForegroundBrush}"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3A5A8A"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2A3A5A"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Background" Value="#4A6A9A"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pill-style ToggleButton -->
+        <Style x:Key="LegendTogglePill" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="{StaticResource LegendTextBrush}"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="MinWidth" Value="70"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="pill"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="2,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="pill" Property="BorderBrush" Value="White"/>
+                                <Setter TargetName="pill" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LegendTogglePillCompact" TargetType="ToggleButton" BasedOn="{StaticResource LegendTogglePill}">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="Margin" Value="2,0,2,0"/>
+        </Style>
+
+        <Style x:Key="LegendPillTextStyleCompact" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource LegendTextBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <!-- Compact action button style -->
+        <Style x:Key="CompactActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- Make Grid headers (Walkables, RoofFace4, Cables) white on dark -->
+        <Style TargetType="GridViewColumnHeader">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#444"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Facet color converter -->
+        <conv:FacetTypeToBrushConverter x:Key="FacetTypeToBrush"/>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Toolbar: Filter toggles + Action buttons -->
+        <Grid DockPanel.Dock="Top" Margin="8,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Filter toggles (left) -->
+            <WrapPanel Grid.Column="0" VerticalAlignment="Center" Orientation="Horizontal">
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetWallBrush}"
+                              IsChecked="{Binding FilterWalls}">
+                    <TextBlock Text="Walls" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetFenceBrush}"
+                              IsChecked="{Binding FilterFences}">
+                    <TextBlock Text="Fences" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetDoorBrush}"
+                              IsChecked="{Binding FilterDoors}">
+                    <TextBlock Text="Doors" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetLadderBrush}"
+                              IsChecked="{Binding FilterLadders}">
+                    <TextBlock Text="Ladders" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetCableBrush}"
+                              IsChecked="{Binding ShowCablesList}">
+                    <TextBlock Text="Cables" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+            </WrapPanel>
+
+        </Grid>
+
+        <!-- Main content area -->
+        <Grid Margin="8">
+            <Grid.RowDefinitions>
+                <!-- Give top row more weight and make middle row star-sized so it can't grow unbounded -->
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="6" />
+                <RowDefinition Height="*" MinHeight="120" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- TOP ROW: Three-column layout (Buildings | Facet Types | Facets) OR Cables list -->
+            <Grid Grid.Row="0">
+                <!-- Three-column Facets view -->
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowCablesList}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Grid.ColumnDefinitions>
+                        <!-- Narrower buildings/types columns so text wraps -->
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Column 1: Buildings list -->
+                    <Border Grid.Column="0" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" 
+                                       Text="Buildings" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="10"
+                                       Padding="4,2"
+                                       Background="#2A2D32"/>
+                            <ListBox x:Name="BuildingsList"
+                                     ItemsSource="{Binding Buildings}"
+                                     SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
+                                     SelectionChanged="BuildingsList_SelectionChanged"
+                                     MouseDoubleClick="BuildingsList_MouseDoubleClick"
+                                     PreviewMouseRightButtonDown="BuildingsList_PreviewMouseRightButtonDown"
+                                     ItemContainerStyle="{StaticResource SelectableListBoxItem}"
+                                     Background="Transparent"
+                                     BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:BuildingVM}">
+                                        <TextBlock Text="{Binding ShortDisplayName}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Column 2: Facet Types list -->
+                    <Border Grid.Column="2" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" 
+                                       Text="Types" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="10"
+                                       Padding="4,2"
+                                       Background="#2A2D32"/>
+                            <ListBox x:Name="FacetTypesList"
+                                     ItemsSource="{Binding SelectedBuildingFacetGroups}"
+                                     SelectedItem="{Binding SelectedFacetTypeGroup, Mode=TwoWay}"
+                                     SelectionChanged="FacetTypesList_SelectionChanged"
+                                     ItemContainerStyle="{StaticResource SelectableListBoxItem}"
+                                     Background="Transparent"
+                                     BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:FacetTypeGroupVM}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Width="8" Height="8" Margin="0,0,4,0">
+                                                <Ellipse.Fill>
+                                                    <MultiBinding Converter="{StaticResource FacetTypeToBrush}">
+                                                        <Binding Path="Type"/>
+                                                        <Binding Source="{StaticResource FacetWallBrush}"/>
+                                                        <Binding Source="{StaticResource FacetFenceBrush}"/>
+                                                        <Binding Source="{StaticResource FacetCableBrush}"/>
+                                                        <Binding Source="{StaticResource FacetDoorBrush}"/>
+                                                        <Binding Source="{StaticResource FacetLadderBrush}"/>
+                                                        <Binding Source="{StaticResource FacetOtherBrush}"/>
+                                                    </MultiBinding>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding TypeName}"
+                                                       FontSize="11"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Column 3: Facets list -->
+                    <Border Grid.Column="4" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" 
+                                       Text="Facets" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="10"
+                                       Padding="4,2"
+                                       Background="#2A2D32"/>
+                            <ListBox x:Name="FacetsList"
+                                     ItemsSource="{Binding SelectedFacetTypeGroup.Facets}"
+                                     SelectedItem="{Binding SelectedFacet, Mode=TwoWay}"
+                                     SelectionChanged="FacetsList_SelectionChanged"
+                                     MouseDoubleClick="FacetsList_MouseDoubleClick"
+                                     ItemContainerStyle="{StaticResource SelectableListBoxItem}"
+                                     Background="Transparent"
+                                     BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:FacetVM}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="#" FontSize="11"/>
+                                            <TextBlock Text="{Binding FacetId1}" FontWeight="Bold" FontSize="11" Margin="1,0,4,0"/>
+                                            <TextBlock Text="{Binding Coords}" FontSize="11" Opacity="0.8"/>
+                                            <TextBlock Text=" Alt:" FontSize="11" Opacity="0.6"/>
+                                            <TextBlock Text="{Binding Y0}" FontSize="11"/>
+                                            <!-- Painted marker -->
+                                            <TextBlock Text=" ??" FontSize="10">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsPainted}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Cables list (shown when ShowCablesList is true) -->
+                <Border BorderBrush="#333" BorderThickness="1" CornerRadius="4">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowCablesList}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" 
+                                   Text="Cables (All Buildings)" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="10"
+                                   Padding="4,2"
+                                   Background="#2A2D32"/>
+                        <ListView x:Name="CableList"
+                                  ItemsSource="{Binding CableFacets}"
+                                  SelectionChanged="CableList_OnSelectionChanged"
+                                  MouseDoubleClick="CableList_OnMouseDoubleClick"
+                                  Background="Transparent"
+                                  BorderThickness="0">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="#" Width="50"
+                                                    DisplayMemberBinding="{Binding FacetId1}"/>
+                                    <GridViewColumn Header="Coords" Width="200"
+                                                    DisplayMemberBinding="{Binding Coords}"/>
+                                    <GridViewColumn Header="Segments" Width="70"
+                                                    DisplayMemberBinding="{Binding Height}"/>
+                                    <GridViewColumn Header="Y0" Width="60"
+                                                    DisplayMemberBinding="{Binding Y0}"/>
+                                    <GridViewColumn Header="Y1" Width="60"
+                                                    DisplayMemberBinding="{Binding Y1}"/>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- Splitter between facets and walkables -->
+            <GridSplitter Grid.Row="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
+                          Height="6"
+                          Background="#22000000"
+                          ShowsPreview="True"/>
+            <!-- CABLES LIST (permanent home) -->
+            <Border Grid.Row="2" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" 
+                               Text="Cables" 
+                               FontWeight="SemiBold" FontSize="10"
+                               Padding="4,2" Background="#2A2D32"/>
+                    <ListView x:Name="CableListPermanent"
+                              ItemsSource="{Binding CableFacets}"
+                              SelectionChanged="CableList_OnSelectionChanged"
+                              MouseDoubleClick="CableList_OnMouseDoubleClick"
+                              Background="Transparent" Foreground="White"
+                              BorderThickness="0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="#" Width="45"
+                                                DisplayMemberBinding="{Binding FacetId1}"/>
+                                <GridViewColumn Header="Coords" Width="140"
+                                                DisplayMemberBinding="{Binding Coords}"/>
+                                <GridViewColumn Header="Seg" Width="40"
+                                                DisplayMemberBinding="{Binding Height}"/>
+                                <GridViewColumn Header="Y0" Width="45"
+                                                DisplayMemberBinding="{Binding Y0}"/>
+                                <GridViewColumn Header="Y1" Width="45"
+                                                DisplayMemberBinding="{Binding Y1}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </Border>
+            <!-- BOTTOM ROW: Action Buttons -->
+            <Border Grid.Row="3" 
+                    BorderBrush="#333" 
+                    BorderThickness="1" 
+                    CornerRadius="6" 
+                    Padding="8"
+                    Margin="0,8,0,0"
+                    Background="#1A1D20">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Stretch"
+                                                   Width="1"
+                                                   Fill="#444"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,2,0,2"/>
+
+                    <UniformGrid Grid.Row="0" Grid.Column="0"
+                                                     Rows="2"
+                                                     Columns="4"
+                                                     HorizontalAlignment="Left">
+
+                        <!-- Add Building -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add a new empty building to the map"
+                                                    Click="BtnAddBuilding_Click"
+                                                    Margin="0,0,4,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Image Source="/Assets/Icons/addbuilding.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Walls (visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add wall to the selected building by drawing on the map"
+                                                    Click="BtnAddWall_Click"
+                                                    Margin="0,0,4,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/addfacet.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Ladder (visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add a ladder to the selected building (1 cell width)"
+                                                    Click="BtnAddLadder_Click"
+                                                    Margin="0,0,4,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/addladder.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Door (visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add a door to the selected building (1 cell width and height)"
+                                                    Click="BtnAddDoor_Click"
+                                                    Margin="0,0,4,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/adddoor.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Cable (always visible) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add a new cable between two points"
+                                                    Click="BtnAddCable_Click"
+                                                    Margin="0,0,4,0"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Image Source="/Assets/Icons/addcable.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Fences (opens AddFenceWindow visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                            Width="30" Height="30"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            ToolTip="Add fences to the selected building"
+                            Margin="0,0,4,0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Click="BtnAddFence_Click">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/addfence.ico"
+                               Width="30" Height="30"
+                               SnapsToDevicePixels="True"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Add Gate (placeholder - visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Add a gate to the selected building"
+                                                    Click="BtnAddGate_Click"
+                                                    Margin="0,0,4,0"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/addgate.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+
+                    </UniformGrid>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2"
+                                                    Orientation="Vertical"
+                                                    HorizontalAlignment="Right">
+
+                        <!-- Delete Building (visible when building selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Delete the selected building and all its facets, walkables, and roof faces"
+                                                    Click="BtnDeleteBuilding_Click"
+                                                    Margin="0,0,0,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedBuildingRec" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/deletebuilding.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+
+                        <!-- Delete Facet (visible when facet selected) -->
+                        <Button Style="{StaticResource CompactActionButton}"
+                                                    Width="30" Height="30"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    ToolTip="Delete the selected facet"
+                                                    Click="BtnDeleteFacet_Click"
+                                                    Margin="0,0,0,4"
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center">
+                            <Button.Visibility>
+                                <Binding Path="HasSelectedFacet" Mode="OneWay">
+                                    <Binding.Converter>
+                                        <BooleanToVisibilityConverter/>
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                            <Image Source="/Assets/Icons/deletefacet.ico"
+                                                       Width="30" Height="30"
+                                                       SnapsToDevicePixels="True"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

@@ -1,14 +1,9 @@
 ﻿// /Services/Textures/TextureCacheService.cs
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Resources;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media.Imaging;
 
 

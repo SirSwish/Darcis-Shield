@@ -1,9 +1,6 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using UrbanChaosMissionEditor.Constants;
-using UrbanChaosMissionEditor.Models;
 using UrbanChaosMissionEditor.ViewModels;
 using UrbanChaosMissionEditor.Views.MapOverlays;
 

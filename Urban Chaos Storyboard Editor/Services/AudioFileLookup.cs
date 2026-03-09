@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UrbanChaosStoryboardEditor.Services
+﻿namespace UrbanChaosStoryboardEditor.Services
 {
     /// <summary>
     /// Maps mission IDs to their briefing audio filenames.

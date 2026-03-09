@@ -1,7 +1,5 @@
-Ôªø// Models/BuildingData.cs
-using System;
-
-namespace UrbanChaosMapEditor.Models
+// Models/BuildingData.cs
+namespace UrbanChaosMapEditor.Models.Buildings
 {
     // ----- DBuilding (what we actually use right now) -----
     // Stored 1-based facet range: [StartFacet .. EndFacet) for the building.
@@ -33,12 +31,12 @@ namespace UrbanChaosMapEditor.Models
 
         public string TypeDisplay => BuildingType switch
         {
-            Models.BuildingType.House => "House",
-            Models.BuildingType.Warehouse => "Warehouse",
-            Models.BuildingType.Office => "Office",
-            Models.BuildingType.Apartment => "Apartment",
-            Models.BuildingType.CrateIn => "Crate (In)",
-            Models.BuildingType.CrateOut => "Crate (Out)",
+            BuildingType.House => "House",
+            BuildingType.Warehouse => "Warehouse",
+            BuildingType.Office => "Office",
+            BuildingType.Apartment => "Apartment",
+            BuildingType.CrateIn => "Crate (In)",
+            BuildingType.CrateOut => "Crate (Out)",
             _ => $"Unknown ({Type})"
         };
 
@@ -141,11 +139,11 @@ namespace UrbanChaosMapEditor.Models
     //   UBYTE Shake; UBYTE CutHole; UBYTE Counter[2];
     // }
     //
-    // IMPORTANT (CABLE SPECIAL-CASE ‚Äî from create_cable_dfacet):
+    // IMPORTANT (CABLE SPECIAL-CASE ó from create_cable_dfacet):
     //   Height     = segment count along the cable
     //   StyleIndex = step_angle1  (SWORD)  -> treat as *signed* when Type==Cable
     //   Building   = step_angle2  (SWORD)  -> treat as *signed* when Type==Cable
-    //   FHeight    = second ‚Äúmode‚Äù value (TextureStyle2 for the source wall)
+    //   FHeight    = second ìmodeî value (TextureStyle2 for the source wall)
     // For non-cable facets, StyleIndex is the index into dstyles[], and Building is 1-based building id.
     public readonly struct DFacetRec
     {
@@ -165,7 +163,7 @@ namespace UrbanChaosMapEditor.Models
         public readonly ushort StyleIndex;
 
         // For most facets: 1-based building id.
-        // For cables: holds step_angle2 (written as SWORD in the game) ‚Äî NOT a building id.
+        // For cables: holds step_angle2 (written as SWORD in the game) ó NOT a building id.
         public readonly ushort Building;  // see cable helpers below
 
         // 1-based storey id (DStorey) when applicable; not meaningful for cables.
@@ -255,7 +253,7 @@ namespace UrbanChaosMapEditor.Models
     {
         public int FacetIndex { get; init; }
 
-        // Endpoints in world coords (same units as DFacet ‚Üí engine uses)
+        // Endpoints in world coords (same units as DFacet ? engine uses)
         public int WorldX1 { get; init; }
         public int WorldY1 { get; init; }
         public int WorldZ1 { get; init; }
@@ -330,7 +328,7 @@ namespace UrbanChaosMapEditor.Models
         public InsideStoreyRec[] InsideStoreys { get; init; } = Array.Empty<InsideStoreyRec>();
         public StaircaseRec[] InsideStairs { get; init; } = Array.Empty<StaircaseRec>();
 
-        // Alias / canonical name for ‚Äúwhere walkables start‚Äù
+        // Alias / canonical name for ìwhere walkables startî
         public int WalkablesOffset { get; init; }  // keep WalkablesStart too if you lik
 
         public byte[] InsideStoreysRaw { get; init; } = Array.Empty<byte>();
@@ -354,7 +352,7 @@ namespace UrbanChaosMapEditor.Models
         public DBuildingRec[] Buildings { get; init; } = Array.Empty<DBuildingRec>();
         public DFacetRec[] Facets { get; init; } = Array.Empty<DFacetRec>();
 
-        // Style table and ‚Äúpaint_mem‚Äù blob (as stored in file).
+        // Style table and ìpaint_memî blob (as stored in file).
         // NOTE: dstyles is a SIGNED table in the game; keep as short[] here.
         public short[] Styles { get; init; } = Array.Empty<short>();
         public byte[] PaintMem { get; init; } = Array.Empty<byte>();

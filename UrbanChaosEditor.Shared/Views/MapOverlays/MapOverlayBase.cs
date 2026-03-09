@@ -4,7 +4,6 @@
 // Base class for all map overlay layers
 
 using System.Windows;
-using System.Windows.Media;
 using UrbanChaosEditor.Shared.Models;
 
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;

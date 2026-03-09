@@ -1,15 +1,11 @@
 ﻿// /Services/TextureCacheService.cs
 // Updated to load textures from UrbanChaosEditor.Shared assembly
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace UrbanChaosLightEditor.Services

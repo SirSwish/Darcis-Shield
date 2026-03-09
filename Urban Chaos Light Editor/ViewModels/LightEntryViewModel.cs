@@ -1,10 +1,8 @@
 ﻿// /ViewModels/LightEntryViewModel.cs
-using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Diagnostics;
-using UrbanChaosLightEditor.Models;
+using System.Runtime.CompilerServices;
 using UrbanChaosEditor.Shared.ViewModels;
+using UrbanChaosLightEditor.Models;
 
 namespace UrbanChaosLightEditor.ViewModels
 {

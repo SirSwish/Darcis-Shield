@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using UrbanChaosLightEditor.Models;
+﻿using System.Diagnostics;
 
 namespace UrbanChaosLightEditor.Services
 {

@@ -3,14 +3,10 @@
 // ============================================================
 // Shared prim/object graphics rendering layer
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using UrbanChaosEditor.Shared.Models;
 
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;
 

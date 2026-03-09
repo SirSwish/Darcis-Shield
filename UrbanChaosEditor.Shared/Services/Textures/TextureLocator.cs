@@ -1,6 +1,4 @@
 ﻿// Services/Textures/TextureLocator.cs
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;

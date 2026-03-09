@@ -6,7 +6,6 @@
 //   - Bit CLEAR (0) = Night
 // This is the OPPOSITE of what the old code assumed!
 //
-using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;

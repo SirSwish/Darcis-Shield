@@ -3,8 +3,6 @@
 // ============================================================
 // Shared light display layer (read-only)
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;

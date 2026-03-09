@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
-using UrbanChaosLightEditor.Services;
 using UrbanChaosLightEditor.Models;
+using UrbanChaosLightEditor.Services;
 
 namespace UrbanChaosLightEditor.ViewModels
 {

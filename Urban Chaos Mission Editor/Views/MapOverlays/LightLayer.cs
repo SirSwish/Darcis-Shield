@@ -1,10 +1,8 @@
 ﻿// ============================================================
 // MissionEditor/Views/MapOverlays/LightLayer.cs
 // ============================================================
-using System;
-using System.Collections.Generic;
-using UrbanChaosMissionEditor.Services;
 using UrbanChaosEditor.Shared.Views.MapOverlays;
+using UrbanChaosMissionEditor.Services;
 // Use alias to disambiguate from any local LightDisplayInfo
 using SharedLightDisplayInfo = UrbanChaosEditor.Shared.Views.MapOverlays.LightDisplayInfo;
 

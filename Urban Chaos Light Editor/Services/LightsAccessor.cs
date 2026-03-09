@@ -1,7 +1,5 @@
 ﻿// /Services/LightsAccessor.cs
 // FIXED: Correct layout and night flag interpretation based on C++ source code
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using UrbanChaosLightEditor.Models;
 

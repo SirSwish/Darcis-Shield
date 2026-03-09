@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using UrbanChaosMissionEditor.ViewModels;
-using UrbanChaosMissionEditor.Views.Dialogs;
 
 namespace UrbanChaosMissionEditor.Views;
 

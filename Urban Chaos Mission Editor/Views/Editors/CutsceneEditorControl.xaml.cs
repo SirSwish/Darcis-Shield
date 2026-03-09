@@ -1,8 +1,6 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using UrbanChaosMissionEditor.Controls;
 using UrbanChaosMissionEditor.Models;
 using UrbanChaosMissionEditor.Services;
 using UrbanChaosMissionEditor.ViewModels;

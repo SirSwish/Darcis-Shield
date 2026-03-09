@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
 using UrbanChaosStoryboardEditor.Services;
 
 namespace UrbanChaosStoryboardEditor.ViewModels

@@ -1,5 +1,5 @@
-﻿// /Models/Buildings/WallSegment.cs
-namespace UrbanChaosMapEditor.Models
+// /Models/Buildings/WallSegment.cs
+namespace UrbanChaosMapEditor.Models.Buildings
 {
     public enum WallKind
     {

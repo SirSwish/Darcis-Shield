@@ -1,10 +1,8 @@
 ﻿// ============================================================
 // LightEditor/Views/MapOverlays/PrimGraphicsLayer.cs
 // ============================================================
-using System;
-using System.Collections.Generic;
-using UrbanChaosLightEditor.Services;
 using UrbanChaosEditor.Shared.Views.MapOverlays;
+using UrbanChaosLightEditor.Services;
 // CRITICAL: Use alias to disambiguate from local UrbanChaosLightEditor.Services.PrimDisplayInfo
 using SharedPrimDisplayInfo = UrbanChaosEditor.Shared.Views.MapOverlays.PrimDisplayInfo;
 

@@ -1,6 +1,4 @@
 ﻿// /Models/Objects/PrimFlags.cs
-using System;
-
 namespace UrbanChaosEditor.Shared.Models
 {
     public readonly struct PrimFlags

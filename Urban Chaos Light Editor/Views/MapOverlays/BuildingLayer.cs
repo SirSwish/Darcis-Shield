@@ -1,9 +1,8 @@
 ﻿// ============================================================
 // LightEditor/Views/MapOverlays/BuildingLayer.cs
 // ============================================================
-using System;
-using UrbanChaosLightEditor.Services;
 using UrbanChaosEditor.Shared.Views.MapOverlays;
+using UrbanChaosLightEditor.Services;
 
 namespace UrbanChaosLightEditor.Views.MapOverlays
 {

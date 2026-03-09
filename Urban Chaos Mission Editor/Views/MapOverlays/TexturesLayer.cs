@@ -1,9 +1,8 @@
 ﻿// ============================================================
 // MissionEditor/Views/MapOverlays/TexturesLayer.cs
 // ============================================================
-using System;
-using UrbanChaosMissionEditor.Services;
 using UrbanChaosEditor.Shared.Views.MapOverlays;
+using UrbanChaosMissionEditor.Services;
 
 namespace UrbanChaosMissionEditor.Views.MapOverlays
 {

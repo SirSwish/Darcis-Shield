@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace UrbanChaosMissionEditor.Constants;
 

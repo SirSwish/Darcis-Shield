@@ -9,14 +9,12 @@
 // rendering portion while keeping the interactive Canvas behavior.
 // ============================================================
 
-using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using UrbanChaosLightEditor.Models;
 using UrbanChaosLightEditor.Services;
 using UrbanChaosLightEditor.ViewModels;
 

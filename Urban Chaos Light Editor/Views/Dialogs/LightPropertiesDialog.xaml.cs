@@ -1,9 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using UrbanChaosLightEditor.Models;
 using UrbanChaosLightEditor.Services;
 

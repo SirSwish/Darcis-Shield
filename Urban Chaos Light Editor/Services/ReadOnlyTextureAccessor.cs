@@ -1,5 +1,4 @@
 ﻿// /Services/ReadOnlyTexturesAccessor.cs
-using System;
 using UrbanChaosLightEditor.Models;
 
 namespace UrbanChaosLightEditor.Services

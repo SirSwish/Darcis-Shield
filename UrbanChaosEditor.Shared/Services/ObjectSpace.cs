@@ -1,7 +1,5 @@
 ﻿// /Services/ObjectSpace.cs
 // File: Models/ObjectSpace.cs
-using System;
-
 namespace UrbanChaosEditor.Shared.Models
 {
     public static class ObjectSpace

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UrbanChaosMissionEditor.Services;
+﻿namespace UrbanChaosMissionEditor.Services;
 
 /// <summary>
 /// Provides animation name lookups for cutscene editing.

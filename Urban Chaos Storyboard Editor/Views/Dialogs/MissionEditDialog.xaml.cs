@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
+using System.Windows;
 using UrbanChaosStoryboardEditor.Models;
 
 namespace UrbanChaosStoryboardEditor.Views.Dialogs

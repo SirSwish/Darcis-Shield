@@ -6,7 +6,6 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
-using UrbanChaosEditor.Shared.Models;
 
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;
 

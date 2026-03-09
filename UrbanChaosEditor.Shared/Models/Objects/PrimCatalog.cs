@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UrbanChaosEditor.Shared.Models
+﻿namespace UrbanChaosEditor.Shared.Models
 {
     public static class PrimCatalog
     {
