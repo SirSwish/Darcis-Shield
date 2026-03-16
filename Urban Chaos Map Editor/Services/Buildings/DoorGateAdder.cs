@@ -6,39 +6,7 @@ using UrbanChaosMapEditor.Services.Core;
 
 namespace UrbanChaosMapEditor.Services.Buildings
 {
-    /// <summary>
-    /// Specialized service for adding doors and gates.
-    /// 
-    /// KEY CONCEPTS:
-    /// =============
-    /// 
-    /// DOOR TYPES (FacetType enum values):
-    /// - Door (18): Building entrance, SOLID collision until opened via script
-    /// - InsideDoor (19): Interior door, AI-passable (no player collision)
-    /// - OInside (20): Open interior space, no collision at all
-    /// - OutsideDoor (21): Fence gate, SOLID collision
-    /// 
-    /// COMMON MISTAKE: Using InsideDoor (19) when you want a solid door.
-    /// InsideDoor is for AI pathfinding through interior spaces.
-    /// Use Door (18) for actual blocking doors!
-    /// 
-    /// DOOR VS GATE HEIGHT:
-    /// - Doors: Height=4 (~256 world units = 1 storey)
-    /// - Gates: Height=2 (~128 world units = fence height)
-    /// - Must match adjacent wall/fence height to look correct!
-    /// 
-    /// CRITICAL FLAGS:
-    /// - TwoSided (0x0080): REQUIRED or door only visible from one side
-    /// - OnBuilding (0x0200): Usually set for proper rendering
-    /// - Electrified (0x0040): For electric fence gates
-    /// - BarbTop (0x0400): Barbed wire on top
-    /// 
-    /// WHY DOORS MAY NOT WORK:
-    /// 1. Missing TwoSided flag = invisible from one side
-    /// 2. Wrong FacetType = no collision or AI walks through
-    /// 3. StyleIndex invalid = renders as pink/missing texture
-    /// 4. Not added to a building = won't render at all
-    /// </summary>
+
     public sealed class DoorGateAdder
     {
         private readonly BuildingAdder _buildingAdder;

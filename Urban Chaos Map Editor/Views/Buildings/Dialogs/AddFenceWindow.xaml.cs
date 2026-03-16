@@ -1,4 +1,3 @@
-// /Views/Dialogs/Buildings/AddFenceWindow.xaml.cs
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,15 +21,14 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         public bool WasCancelled { get; private set; } = true;
 
-        // Properties for the facet template
         public FacetType SelectedFacetType { get; private set; } = FacetType.FenceFlat;
         public byte Height { get; private set; } = 4;
         public byte FHeight { get; private set; } = 0;
         public byte BlockHeight { get; private set; } = 16;
         public short Y0 { get; private set; } = 0;
         public short Y1 { get; private set; } = 0;
-        public ushort RawStyleId { get; private set; } = 1;  // Raw Style ID from TMA (NOT an index into dstyles[])
-        public FacetFlags Flags { get; private set; } = FacetFlags.Unclimbable;
+        public ushort RawStyleId { get; private set; } = 1;
+        public FacetFlags Flags { get; private set; } = 0;
 
         public AddFenceWindow(int buildingId1)
         {
@@ -40,7 +38,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             TxtBuildingInfo.Text = $"Building #{buildingId1}";
             PopulateFenceTypes();
 
-            // Hook up flag checkbox events
             ChkInvisible.Checked += OnFlagChanged;
             ChkInvisible.Unchecked += OnFlagChanged;
             ChkInside.Checked += OnFlagChanged;
@@ -71,8 +68,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             ChkFenceCut.Unchecked += OnFlagChanged;
 
             UpdateFlagsDisplay();
-
-            // Initialize style preview with default value
             UpdateStylePreview();
         }
 
@@ -95,24 +90,26 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 });
             }
 
-            // Prefer FenceFlat if present; otherwise first
             int idx = fenceTypes.IndexOf(FacetType.FenceFlat);
             CmbFenceType.SelectedIndex = idx >= 0 ? idx : (fenceTypes.Count > 0 ? 0 : -1);
         }
 
         private static string ToDisplayName(FacetType ft)
         {
-            // e.g. FenceFlat -> "Fence Flat"
             string s = ft.ToString();
             if (s.Length <= 1) return s;
+
             var chars = new System.Collections.Generic.List<char>(s.Length + 4);
             chars.Add(s[0]);
+
             for (int i = 1; i < s.Length; i++)
             {
                 char c = s[i];
-                if (char.IsUpper(c) && !char.IsUpper(s[i - 1])) chars.Add(' ');
+                if (char.IsUpper(c) && !char.IsUpper(s[i - 1]))
+                    chars.Add(' ');
                 chars.Add(c);
             }
+
             return new string(chars.ToArray());
         }
 
@@ -125,7 +122,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         {
             var textBox = sender as TextBox;
             string newText = textBox?.Text.Insert(textBox.SelectionStart, e.Text) ?? e.Text;
-            // Allow empty, "-", or valid signed number
             e.Handled = !string.IsNullOrEmpty(newText) &&
                         newText != "-" &&
                         !_signedDigitsOnly.IsMatch(newText);
@@ -138,7 +134,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private void UpdateFlagsDisplay()
         {
-            // Build flags from checkboxes
             FacetFlags flags = 0;
 
             if (ChkInvisible?.IsChecked == true) flags |= FacetFlags.Invisible;
@@ -169,12 +164,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private void BtnPickStyle_Click(object sender, RoutedEventArgs e)
         {
-            // Get current raw style id
             int currentStyle = 1;
             if (ushort.TryParse(TxtStyleIndex.Text, out ushort parsed))
                 currentStyle = parsed;
 
-            // Open the style picker
             var picker = new StylePickerWindow(currentStyle)
             {
                 Owner = this
@@ -182,19 +175,15 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             if (picker.ShowDialog() == true && picker.WasConfirmed)
             {
-                // Update the style textbox with the selected Raw Style ID
                 TxtStyleIndex.Text = picker.SelectedStyleIndex.ToString();
-                // Preview will update via TextChanged event
             }
         }
 
         private void UpdateStylePreview()
         {
-            // Guard: controls not yet initialized during InitializeComponent
             if (StyleThumb0 == null || TxtStyleName == null || TxtStyleInfo == null)
                 return;
 
-            // Clear existing thumbnails
             StyleThumb0.Source = null;
             StyleThumb1.Source = null;
             StyleThumb2.Source = null;
@@ -215,7 +204,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Map to TMA index (0 and 1 both map to row 1)
             int tmaIndex = StyleDataService.MapRawStyleIdToTmaIndex(rawStyleId);
 
             if (tmaIndex < 0 || tmaIndex >= tma.TextureStyles.Count)
@@ -226,13 +214,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             var style = tma.TextureStyles[tmaIndex];
 
-            // Update style name label
             string styleName = string.IsNullOrWhiteSpace(style.Name)
                 ? $"Style #{rawStyleId}"
                 : style.Name;
             TxtStyleName.Text = styleName;
 
-            // Build info string
             var entries = style.Entries;
             if (entries == null || entries.Count == 0)
             {
@@ -240,7 +226,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Load thumbnails for each entry
             var thumbImages = new Image[] { StyleThumb0, StyleThumb1, StyleThumb2, StyleThumb3, StyleThumb4 };
             var cache = TextureCacheService.Instance;
             int world = GetCurrentWorld();
@@ -263,16 +248,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private BitmapSource? GetTextureForEntry(Models.Styles.TextureEntry entry, int world, TextureCacheService cache)
         {
-            // Convert page/tx/ty to texture index
-            // index = page * 64 + (ty * 8 + tx)
             int indexInPage = entry.Ty * 8 + entry.Tx;
             int totalIndex = entry.Page * 64 + indexInPage;
 
-            // Determine folder based on page
             string relKey;
             if (entry.Page <= 3)
             {
-                // World textures
                 relKey = $"world{world}_{totalIndex:000}";
             }
             else if (entry.Page <= 7)
@@ -281,7 +262,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             }
             else
             {
-                // Page 8+ = insides or prims
                 relKey = $"shared_prims_{totalIndex:000}";
             }
 
@@ -301,40 +281,33 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     return acc.ReadTextureWorld();
                 }
             }
-            catch { }
+            catch
+            {
+            }
 
-            return 20; // Default fallback
+            return 20;
         }
 
         private bool ParseAndValidate()
         {
-            // Selected fence type
             if (CmbFenceType.SelectedItem is ComboBoxItem cbi && cbi.Tag is FacetType ft)
                 SelectedFacetType = ft;
             else
                 SelectedFacetType = FacetType.Fence;
 
-            // Parse height fields
             if (!byte.TryParse(TxtHeight.Text, out byte height)) height = 4;
             Height = height;
-
-            if (!byte.TryParse(TxtFHeight.Text, out byte fheight)) fheight = 0;
-            FHeight = fheight;
 
             if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeight)) blockHeight = 16;
             BlockHeight = blockHeight;
 
             if (!short.TryParse(TxtY0.Text, out short y0)) y0 = 0;
             Y0 = y0;
+            Y1 = y0;   // mirror Y0 into Y1
 
-            if (!short.TryParse(TxtY1.Text, out short y1)) y1 = 0;
-            Y1 = y1;
-
-            // Parse Raw Style ID (this is the TMA style, NOT an index into dstyles[])
             if (!ushort.TryParse(TxtStyleIndex.Text, out ushort rawStyleId)) rawStyleId = 1;
             RawStyleId = rawStyleId;
 
-            // Flags already updated via checkboxes
             return true;
         }
 
@@ -349,11 +322,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!ParseAndValidate())
                 return;
 
-            // Start multi-draw mode
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
             {
-                // Create the facet template
-                // NOTE: We pass RawStyleId here - BuildingAdder will allocate dstyles[] entries
                 var template = new FacetTemplate
                 {
                     Type = SelectedFacetType,
@@ -362,16 +332,14 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     BlockHeight = BlockHeight,
                     Y0 = Y0,
                     Y1 = Y1,
-                    RawStyleId = RawStyleId,  // Raw Style ID from TMA, NOT dstyles index
+                    RawStyleId = RawStyleId,
                     Flags = Flags,
                     BuildingId1 = _buildingId1,
                     Storey = 0
                 };
 
-                // Begin drawing mode
                 mainVm.Map.BeginFacetMultiDraw(this, template);
 
-                // Hide this window
                 Hide();
 
                 mainVm.StatusMessage = $"Drawing facets for Building #{_buildingId1}. Click start then end point. Right-click to finish.";
@@ -380,18 +348,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             WasCancelled = false;
         }
 
-        /// <summary>
-        /// Called when drawing is cancelled (right-click with no facets drawn).
-        /// </summary>
         public void OnDrawCancelled()
         {
             WasCancelled = true;
             Close();
         }
 
-        /// <summary>
-        /// Called when drawing is completed (right-click after drawing facets).
-        /// </summary>
         public void OnDrawCompleted(int facetsAdded)
         {
             WasCancelled = false;

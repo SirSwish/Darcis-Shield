@@ -7,66 +7,7 @@ using UrbanChaosMapEditor.Services.Buildings;
 
 namespace UrbanChaosMapEditor.Services.Roofs
 {
-    /// <summary>
-    /// Service for adding and deleting RoofFace4 entries.
-    /// 
-    /// PURPOSE OF ROOFFACE4:
-    /// =====================
-    /// RoofFace4 entries define the geometry of individual roof tiles within a DWalkable region.
-    /// They control:
-    ///   - Whether the roof is flat or pitched
-    ///   - The altitude of each tile
-    ///   - Which tiles the player can walk/grab onto
-    /// 
-    /// Without RoofFace4 entries, a DWalkable just defines a bounding box for ledge-grabbing.
-    /// With RoofFace4 entries, you get actual rendered roof geometry.
-    /// 
-    /// FILE LAYOUT (from BuildingDeleter):
-    /// ===================================
-    /// [walkablesHeaderOff]:
-    ///   NextWalkable   (2 bytes) - count including sentinel at [0]
-    ///   NextRoofFace4  (2 bytes) - count including sentinel at [0]
-    /// [walkablesDataOff = walkablesHeaderOff + 4]:
-    ///   DWalkable[0..NextWalkable-1]  (22 bytes each)
-    /// [roofFacesDataOff]:
-    ///   RoofFace4[0..NextRoofFace4-1] (10 bytes each)
-    /// 
-    /// DWALKABLE STRUCTURE (22 bytes):
-    /// +0:  StartPoint (2)   - unused legacy
-    /// +2:  EndPoint (2)     - unused legacy
-    /// +4:  StartFace3 (2)   - unused legacy
-    /// +6:  EndFace3 (2)     - unused legacy
-    /// +8:  StartFace4 (2)   - FIRST RoofFace4 index for this walkable
-    /// +10: EndFace4 (2)     - END of RoofFace4 range (exclusive)
-    /// +12: X1, Z1, X2, Z2 (4 bytes) - bounding box in block coords
-    /// +16: Y (1)            - altitude / 32
-    /// +17: StoreyY (1)      - storey altitude offset
-    /// +18: Next (2)         - linked list to next walkable for same building
-    /// +20: Building (2)     - owning building ID (1-based)
-    /// 
-    /// ROOFFACE4 STRUCTURE (10 bytes):
-    /// +0: Y (2, short)      - base altitude of this tile
-    /// +2: DY0 (1, sbyte)    - corner 0 (NW) height delta
-    /// +3: DY1 (1, sbyte)    - corner 1 (NE) height delta
-    /// +4: DY2 (1, sbyte)    - corner 2 (SE) height delta
-    /// +5: DrawFlags (1)     - 0x08 = walkable surface
-    /// +6: RX (1)            - ABSOLUTE tile X coordinate
-    /// +7: RZ (1)            - ABSOLUTE tile Z coordinate + 128
-    /// +8: Next (2, short)   - linked list (usually 0 in IAM)
-    /// 
-    /// CORNER LAYOUT:
-    ///   0 (NW) ------- 1 (NE)
-    ///      ¦             ¦
-    ///      ¦    TILE     ¦
-    ///      ¦             ¦
-    ///   3 (SW) ------- 2 (SE)
-    /// 
-    /// Corner 3 (SW) is always at base Y (implicit, no delta field).
-    /// DY0, DY1, DY2 are signed offsets from Y for corners 0, 1, 2.
-    /// 
-    /// FLAT ROOF:   DY0=0, DY1=0, DY2=0  (all corners at same height)
-    /// PITCHED:     Varying DY values create slopes
-    /// </summary>
+
     public sealed class RoofFace4Adder
     {
         private const int HeaderSize = 48;

@@ -1,4 +1,4 @@
-// MainWindow.Diagnostics.cs
+﻿// MainWindow.Diagnostics.cs
 // Partial class containing diagnostic menu handlers
 using System.IO;
 using System.Text;
@@ -616,6 +616,882 @@ namespace UrbanChaosMapEditor.Views.Core
             {
                 MessageBox.Show("Failed to write changes.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void DumpIndoorData_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show("No map loaded.", "Dump Indoor Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var report = GenerateIndoorDataDump();
+                var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "indoor_data_dump.txt");
+                System.IO.File.WriteAllText(path, report);
+                System.Diagnostics.Process.Start("notepad.exe", path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Dump Indoor Data",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private string GenerateIndoorDataDump()
+        {
+            var sb = new System.Text.StringBuilder();
+            var acc = new BuildingsAccessor(MapDataService.Instance);
+            var snap = acc.ReadSnapshot();
+
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("  INDOOR DATA DUMP — All InsideStorey, Staircase, and InsideBlock");
+            sb.AppendLine($"  Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine($"  Map: {MapDataService.Instance.CurrentPath}");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+
+            // ---- Header counters ----
+            sb.AppendLine("HEADER COUNTERS:");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            sb.AppendLine($"  NextInsideStorey : {snap.NextInsideStorey}");
+            sb.AppendLine($"  NextInsideStair  : {snap.NextInsideStair}");
+            sb.AppendLine($"  NextInsideBlock  : {snap.NextInsideBlock}");
+            sb.AppendLine($"  IndoorsStart     : 0x{snap.IndoorsStart:X8}");
+            sb.AppendLine();
+
+            if (snap.NextInsideStorey == 0 && snap.NextInsideStair == 0 && snap.NextInsideBlock == 0)
+            {
+                sb.AppendLine("*** NO INDOOR DATA IN THIS MAP ***");
+                sb.AppendLine();
+                sb.AppendLine("This map has no InsideStorey/Staircase/InsideBlock entries.");
+                sb.AppendLine("Type=1 (Warehouse/Indoor) buildings require this data for");
+                sb.AppendLine("interior floor/ceiling rendering and door transitions.");
+                return sb.ToString();
+            }
+
+            // ---- InsideStorey entries ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine($"  INSIDESTOREY ENTRIES ({snap.InsideStoreys.Length} total)");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+            sb.AppendLine("C struct InsideStorey (22 bytes):");
+            sb.AppendLine("  +0:  MinX (U8)        +1:  MinZ (U8)");
+            sb.AppendLine("  +2:  MaxX (U8)        +3:  MaxZ (U8)");
+            sb.AppendLine("  +4:  InsideBlock (U16) — index into inside_block[] byte array");
+            sb.AppendLine("  +6:  StairCaseHead (U16) — linked list head into Staircase[]");
+            sb.AppendLine("  +8:  TexType (U16)    — floor texture type");
+            sb.AppendLine("  +10: FacetStart (U16) — first DFacet belonging to this interior");
+            sb.AppendLine("  +12: FacetEnd (U16)   — last+1 DFacet");
+            sb.AppendLine("  +14: StoreyY (S16)    — floor Y in world units (used directly by renderer)");
+            sb.AppendLine("  +16: Building (U16)   — owning building ID");
+            sb.AppendLine("  +18: Dummy0 (U16)     +20: Dummy1 (U16)");
+            sb.AppendLine();
+
+            for (int i = 0; i < snap.InsideStoreys.Length; i++)
+            {
+                var ist = snap.InsideStoreys[i];
+
+                // Check if it's an empty/sentinel entry
+                bool isEmpty = ist.MinX == 0 && ist.MinZ == 0 && ist.MaxX == 0 && ist.MaxZ == 0
+                               && ist.StoreyY == 0 && ist.Building == 0;
+
+                sb.AppendLine($"  InsideStorey #{i}{(isEmpty ? " (EMPTY/SENTINEL)" : "")}:");
+                sb.AppendLine($"    Bounds     : ({ist.MinX},{ist.MinZ}) → ({ist.MaxX},{ist.MaxZ})  [{ist.MaxX - ist.MinX}×{ist.MaxZ - ist.MinZ} tiles]");
+                sb.AppendLine($"    InsideBlock: {ist.InsideBlock}");
+                sb.AppendLine($"    StairHead  : {ist.StairCaseHead}");
+                sb.AppendLine($"    TexType    : {ist.TexType}");
+                sb.AppendLine($"    Facets     : [{ist.FacetStart}..{ist.FacetEnd}) = {ist.FacetEnd - ist.FacetStart} facets");
+                sb.AppendLine($"    StoreyY    : {ist.StoreyY}  (world = {ist.StoreyY}, roof = {ist.StoreyY + 256})");
+                sb.AppendLine($"    Building   : {ist.Building}");
+                sb.AppendLine($"    Dummy0/1   : {ist.Dummy0}, {ist.Dummy1}");
+
+                // Raw bytes
+                if (snap.InsideStoreysRaw.Length >= (i + 1) * 22)
+                {
+                    int off = i * 22;
+                    sb.Append("    Raw bytes  : ");
+                    for (int b = 0; b < 22; b++)
+                    {
+                        sb.Append($"{snap.InsideStoreysRaw[off + b]:X2} ");
+                        if (b == 3 || b == 9 || b == 13 || b == 17) sb.Append(" ");
+                    }
+                    sb.AppendLine();
+                }
+                sb.AppendLine();
+            }
+
+            // ---- Staircase entries ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine($"  STAIRCASE ENTRIES ({snap.InsideStairs.Length} total)");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+            sb.AppendLine("C struct Staircase (10 bytes):");
+            sb.AppendLine("  +0: X (U8)           +1: Z (U8)");
+            sb.AppendLine("  +2: Flags (U8)       +3: Id (U8)");
+            sb.AppendLine("  +4: NextStairs (S16) — linked list next pointer");
+            sb.AppendLine("  +6: DownInside (S16) — InsideStorey index for floor below");
+            sb.AppendLine("  +8: UpInside (S16)   — InsideStorey index for floor above");
+            sb.AppendLine();
+
+            if (snap.InsideStairs.Length == 0)
+            {
+                sb.AppendLine("  (no staircase entries)");
+                sb.AppendLine();
+            }
+            else
+            {
+                for (int i = 0; i < snap.InsideStairs.Length; i++)
+                {
+                    var stair = snap.InsideStairs[i];
+                    bool isEmpty = stair.X == 0 && stair.Z == 0 && stair.NextStairs == 0;
+
+                    sb.AppendLine($"  Staircase #{i}{(isEmpty ? " (EMPTY/SENTINEL)" : "")}:");
+                    sb.AppendLine($"    Position   : ({stair.X},{stair.Z})");
+                    sb.AppendLine($"    Flags      : 0x{stair.Flags:X2}");
+                    sb.AppendLine($"    Id         : {stair.Id}");
+                    sb.AppendLine($"    NextStairs : {stair.NextStairs}");
+                    sb.AppendLine($"    DownInside : {stair.DownInside}");
+                    sb.AppendLine($"    UpInside   : {stair.UpInside}");
+
+                    // Raw bytes
+                    if (snap.InsideStairsRaw.Length >= (i + 1) * 10)
+                    {
+                        int off = i * 10;
+                        sb.Append("    Raw bytes  : ");
+                        for (int b = 0; b < 10; b++)
+                            sb.Append($"{snap.InsideStairsRaw[off + b]:X2} ");
+                        sb.AppendLine();
+                    }
+                    sb.AppendLine();
+                }
+            }
+
+            // ---- InsideBlock data ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine($"  INSIDE BLOCK DATA ({snap.InsideBlock.Length} bytes)");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+            sb.AppendLine("Each byte encodes room info for one tile within an InsideStorey:");
+            sb.AppendLine("  Bits 0-3: Room ID (0 = no room, 1-15 = room number)");
+            sb.AppendLine("  Bits 4-5: Direction");
+            sb.AppendLine("  Bits 6-7: Type (0x40 = door?, 0x80 = ?)");
+            sb.AppendLine();
+
+            if (snap.InsideBlock.Length == 0)
+            {
+                sb.AppendLine("  (no inside block data)");
+                sb.AppendLine();
+            }
+            else
+            {
+                // Show which InsideStorey entries reference which block ranges
+                sb.AppendLine("  BLOCK RANGES PER INSIDESTOREY:");
+                for (int i = 0; i < snap.InsideStoreys.Length; i++)
+                {
+                    var ist = snap.InsideStoreys[i];
+                    if (ist.MinX == 0 && ist.MaxX == 0) continue;
+
+                    int width = ist.MaxX - ist.MinX;
+                    int depth = ist.MaxZ - ist.MinZ;
+                    int blockSize = width * depth;
+                    int blockStart = ist.InsideBlock;
+                    int blockEnd = blockStart + blockSize;
+
+                    sb.AppendLine($"    InsideStorey #{i}: InsideBlock[{blockStart}..{blockEnd}) = {blockSize} bytes ({width}×{depth} tiles)");
+
+                    // Dump as grid
+                    if (blockEnd <= snap.InsideBlock.Length && blockSize > 0 && blockSize <= 4096)
+                    {
+                        sb.AppendLine($"      Grid ({width} cols × {depth} rows), each cell = room byte:");
+                        for (int dz = 0; dz < depth; dz++)
+                        {
+                            sb.Append("        ");
+                            for (int dx = 0; dx < width; dx++)
+                            {
+                                byte val = snap.InsideBlock[blockStart + dx + dz * width];
+                                int roomId = val & 0x0F;
+                                int direction = (val >> 4) & 0x03;
+                                int type = (val >> 6) & 0x03;
+
+                                if (val == 0)
+                                    sb.Append(" ·· ");
+                                else
+                                    sb.Append($" {val:X2} ");
+                            }
+                            sb.AppendLine();
+                        }
+                        sb.AppendLine();
+
+                        // Interpret non-zero entries
+                        bool anyNonZero = false;
+                        for (int idx = blockStart; idx < blockEnd && idx < snap.InsideBlock.Length; idx++)
+                        {
+                            byte val = snap.InsideBlock[idx];
+                            if (val != 0)
+                            {
+                                if (!anyNonZero)
+                                {
+                                    sb.AppendLine("      Non-zero entries:");
+                                    anyNonZero = true;
+                                }
+                                int relIdx = idx - blockStart;
+                                int dx = relIdx % width;
+                                int dz = relIdx / width;
+                                int roomId = val & 0x0F;
+                                int direction = (val >> 4) & 0x03;
+                                int type = (val >> 6) & 0x03;
+                                sb.AppendLine($"        [{idx}] tile({ist.MinX + dx},{ist.MinZ + dz}) = 0x{val:X2}: room={roomId} dir={direction} type={type}");
+                            }
+                        }
+                        if (!anyNonZero)
+                            sb.AppendLine("      (all zeros — empty interior)");
+                        sb.AppendLine();
+                    }
+                }
+
+                // Raw hex dump (first 256 bytes or all if smaller)
+                int dumpLen = Math.Min(snap.InsideBlock.Length, 512);
+                sb.AppendLine($"  RAW HEX (first {dumpLen} of {snap.InsideBlock.Length} bytes):");
+                for (int row = 0; row < dumpLen; row += 16)
+                {
+                    sb.Append($"    {row:X4}: ");
+                    for (int col = 0; col < 16 && row + col < dumpLen; col++)
+                        sb.Append($"{snap.InsideBlock[row + col]:X2} ");
+                    sb.AppendLine();
+                }
+                sb.AppendLine();
+            }
+
+            // ---- Cross-reference: DFacets with non-zero DStorey ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("  FACETS WITH NON-ZERO DSTOREY (indoor door references)");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+
+            int doorFacetCount = 0;
+            if (snap.Facets != null)
+            {
+                for (int i = 0; i < snap.Facets.Length; i++)
+                {
+                    var f = snap.Facets[i];
+                    if (f.Storey != 0)
+                    {
+                        doorFacetCount++;
+                        sb.AppendLine($"  Facet #{i + 1}:");
+                        sb.AppendLine($"    Type: {f.Type}  Building: {f.Building}  DStorey: {f.Storey}");
+                        sb.AppendLine($"    Coords: ({f.X0},{f.Z0})→({f.X1},{f.Z1})  Y: {f.Y0},{f.Y1}");
+                        sb.AppendLine($"    → Points to InsideStorey[{f.Storey}]");
+
+                        // Cross-reference
+                        if (f.Storey < snap.InsideStoreys.Length)
+                        {
+                            var ist = snap.InsideStoreys[f.Storey];
+                            sb.AppendLine($"       InsideStorey #{f.Storey}: bounds ({ist.MinX},{ist.MinZ})→({ist.MaxX},{ist.MaxZ}) StoreyY={ist.StoreyY} Bld={ist.Building}");
+                        }
+                        else
+                        {
+                            sb.AppendLine($"       ⚠️ DStorey index {f.Storey} is OUT OF RANGE (max={snap.InsideStoreys.Length - 1})");
+                        }
+                        sb.AppendLine();
+                    }
+                }
+            }
+
+            if (doorFacetCount == 0)
+                sb.AppendLine("  (no facets have DStorey set — no indoor door transitions)");
+
+            sb.AppendLine();
+
+            // ---- Summary ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("  SUMMARY");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine($"  InsideStorey entries : {snap.InsideStoreys.Length}");
+            sb.AppendLine($"  Staircase entries    : {snap.InsideStairs.Length}");
+            sb.AppendLine($"  InsideBlock bytes    : {snap.InsideBlock.Length}");
+            sb.AppendLine($"  Facets with DStorey  : {doorFacetCount}");
+            sb.AppendLine();
+            sb.AppendLine("  FILE LAYOUT (building region):");
+            sb.AppendLine($"    Buildings start  : 0x{snap.StartOffset + 48:X8}");
+            sb.AppendLine($"    Indoors start    : 0x{snap.IndoorsStart:X8}");
+            sb.AppendLine($"    Walkables start  : 0x{snap.WalkablesStart:X8}");
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        private byte[]? _buildingBlockSnapshot;
+        private string? _snapshotLabel;
+
+        private void SnapshotBuildingBlock_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show("No map loaded.", "Snapshot", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var acc = new BuildingsAccessor(MapDataService.Instance);
+            var snap = acc.ReadSnapshot();
+            var bytes = MapDataService.Instance.GetBytesCopy();
+
+            if (_buildingBlockSnapshot == null)
+            {
+                // First click — capture BEFORE
+                _buildingBlockSnapshot = bytes;
+                _snapshotLabel = $"BEFORE — {DateTime.Now:HH:mm:ss}";
+                MessageBox.Show(
+                    $"BEFORE snapshot captured ({bytes.Length} bytes).\n\n" +
+                    "Now perform the operation (e.g. delete a building),\n" +
+                    "then click this again to generate the diff report.",
+                    "Snapshot Captured", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Second click — capture AFTER and generate diff
+            var beforeBytes = _buildingBlockSnapshot;
+            var afterBytes = bytes;
+            var beforeLabel = _snapshotLabel ?? "BEFORE";
+            var afterLabel = $"AFTER — {DateTime.Now:HH:mm:ss}";
+
+            // Clear for next use
+            _buildingBlockSnapshot = null;
+            _snapshotLabel = null;
+
+            try
+            {
+                var report = GenerateBuildingBlockDiff(beforeBytes, afterBytes, beforeLabel, afterLabel);
+                var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "building_block_diff.txt");
+                System.IO.File.WriteAllText(path, report);
+                System.Diagnostics.Process.Start("notepad.exe", path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Diff Failed",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private string GenerateBuildingBlockDiff(byte[] beforeBytes, byte[] afterBytes,
+            string beforeLabel, string afterLabel)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("  BUILDING BLOCK BINARY DIFF");
+            sb.AppendLine($"  {beforeLabel}  ({beforeBytes.Length} bytes)");
+            sb.AppendLine($"  {afterLabel}  ({afterBytes.Length} bytes)");
+            sb.AppendLine($"  Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine($"  Map: {MapDataService.Instance.CurrentPath}");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+
+            // Parse both snapshots
+            var accBefore = new BuildingsAccessor(MapDataService.Instance);
+            // We need to parse from raw bytes — use a helper
+            var snapBefore = ParseSnapshotFromBytes(beforeBytes);
+            var snapAfter = ParseSnapshotFromBytes(afterBytes);
+
+            if (snapBefore == null || snapAfter == null)
+            {
+                sb.AppendLine("ERROR: Could not parse one or both snapshots.");
+                return sb.ToString();
+            }
+
+            // ---- File size ----
+            sb.AppendLine($"FILE SIZE: {beforeBytes.Length} → {afterBytes.Length} (delta: {afterBytes.Length - beforeBytes.Length})");
+            sb.AppendLine();
+
+            // ---- Header comparison ----
+            sb.AppendLine("BUILDING BLOCK HEADER (at block start):");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            int bs = snapBefore.BlockStart;
+            int as2 = snapAfter.BlockStart;
+            DumpHeaderComparison(sb, beforeBytes, afterBytes, bs, as2);
+            sb.AppendLine();
+
+            // ---- Region offsets ----
+            sb.AppendLine("REGION OFFSETS:");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            sb.AppendLine($"  {"Region",-25} {"BEFORE",-15} {"AFTER",-15} {"Delta",-10}");
+            CompareOffset(sb, "Block Start", snapBefore.BlockStart, snapAfter.BlockStart);
+            CompareOffset(sb, "Buildings", snapBefore.BuildingsOff, snapAfter.BuildingsOff);
+            CompareOffset(sb, "Padding (14B)", snapBefore.PadOff, snapAfter.PadOff);
+            CompareOffset(sb, "Facets", snapBefore.FacetsOff, snapAfter.FacetsOff);
+            CompareOffset(sb, "DStyles", snapBefore.StylesOff, snapAfter.StylesOff);
+            CompareOffset(sb, "PaintMem", snapBefore.PaintOff, snapAfter.PaintOff);
+            CompareOffset(sb, "DStoreys", snapBefore.StoreysOff, snapAfter.StoreysOff);
+            CompareOffset(sb, "Indoors", snapBefore.IndoorsOff, snapAfter.IndoorsOff);
+            CompareOffset(sb, "Walkables", snapBefore.WalkablesOff, snapAfter.WalkablesOff);
+            CompareOffset(sb, "Block End", snapBefore.BlockEnd, snapAfter.BlockEnd);
+            sb.AppendLine();
+
+            // ---- Padding bytes ----
+            sb.AppendLine("PADDING BYTES (14 bytes between buildings and facets):");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            sb.Append("  BEFORE: ");
+            for (int i = 0; i < 14 && snapBefore.PadOff + i < beforeBytes.Length; i++)
+                sb.Append($"{beforeBytes[snapBefore.PadOff + i]:X2} ");
+            sb.AppendLine();
+            sb.Append("  AFTER:  ");
+            for (int i = 0; i < 14 && snapAfter.PadOff + i < afterBytes.Length; i++)
+                sb.Append($"{afterBytes[snapAfter.PadOff + i]:X2} ");
+            sb.AppendLine();
+            bool padChanged = false;
+            for (int i = 0; i < 14; i++)
+            {
+                if (snapBefore.PadOff + i < beforeBytes.Length && snapAfter.PadOff + i < afterBytes.Length)
+                    if (beforeBytes[snapBefore.PadOff + i] != afterBytes[snapAfter.PadOff + i])
+                        padChanged = true;
+            }
+            sb.AppendLine(padChanged ? "  ⚠️ PADDING CHANGED!" : "  ✓ Padding unchanged.");
+            sb.AppendLine();
+
+            // ---- Building #49 specific ----
+            sb.AppendLine("BUILDING #49 RAW BYTES (24 bytes):");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            DumpBuildingRaw(sb, "BEFORE", beforeBytes, snapBefore.BuildingsOff, 49, snapBefore.NextBuilding);
+            DumpBuildingRaw(sb, "AFTER", afterBytes, snapAfter.BuildingsOff, 49, snapAfter.NextBuilding);
+            sb.AppendLine();
+
+            // ---- Walkables for building 49 ----
+            sb.AppendLine("WALKABLES HEADER:");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            if (snapBefore.WalkablesOff + 4 <= beforeBytes.Length)
+            {
+                ushort bNextW = ReadU16(beforeBytes, snapBefore.WalkablesOff);
+                ushort bNextR = ReadU16(beforeBytes, snapBefore.WalkablesOff + 2);
+                sb.AppendLine($"  BEFORE: nextWalkable={bNextW} nextRF4={bNextR}");
+            }
+            if (snapAfter.WalkablesOff + 4 <= afterBytes.Length)
+            {
+                ushort aNextW = ReadU16(afterBytes, snapAfter.WalkablesOff);
+                ushort aNextR = ReadU16(afterBytes, snapAfter.WalkablesOff + 2);
+                sb.AppendLine($"  AFTER:  nextWalkable={aNextW} nextRF4={aNextR}");
+            }
+            sb.AppendLine();
+
+            // ---- Dump walkable #124 raw bytes (building 49's main walkable) ----
+            sb.AppendLine("WALKABLE #124 RAW BYTES (22 bytes):");
+            sb.AppendLine("───────────────────────────────────────────────────────────────────");
+            DumpWalkableRaw(sb, "BEFORE", beforeBytes, snapBefore.WalkablesOff, 124);
+            DumpWalkableRaw(sb, "AFTER", afterBytes, snapAfter.WalkablesOff, 124);
+            sb.AppendLine();
+
+            // ---- Dump walkables 125-128 ----
+            for (int wid = 125; wid <= 128; wid++)
+            {
+                sb.AppendLine($"WALKABLE #{wid} RAW BYTES:");
+                DumpWalkableRaw(sb, "BEFORE", beforeBytes, snapBefore.WalkablesOff, wid);
+                DumpWalkableRaw(sb, "AFTER", afterBytes, snapAfter.WalkablesOff, wid);
+                sb.AppendLine();
+            }
+
+            // ---- Full byte-level diff of entire file ----
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine("  BYTE-LEVEL CHANGES (first 500 differences)");
+            sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+            sb.AppendLine();
+
+            int minLen = Math.Min(beforeBytes.Length, afterBytes.Length);
+            int diffCount = 0;
+            int maxDiffs = 500;
+
+            // Group consecutive changes into ranges
+            int rangeStart = -1;
+            for (int i = 0; i <= minLen; i++)
+            {
+                bool isDiff = (i < minLen) && (beforeBytes[i] != afterBytes[i]);
+                if (isDiff && rangeStart < 0)
+                    rangeStart = i;
+                else if (!isDiff && rangeStart >= 0)
+                {
+                    // End of a changed range
+                    int rangeLen = i - rangeStart;
+                    if (diffCount < maxDiffs)
+                    {
+                        string region = IdentifyRegion(rangeStart, snapBefore, snapAfter);
+                        sb.AppendLine($"  CHANGED @ 0x{rangeStart:X6}..0x{i - 1:X6} ({rangeLen} bytes) [{region}]");
+
+                        // Show up to 32 bytes
+                        int showLen = Math.Min(rangeLen, 32);
+                        sb.Append("    BEFORE: ");
+                        for (int j = 0; j < showLen; j++)
+                            sb.Append($"{beforeBytes[rangeStart + j]:X2} ");
+                        if (rangeLen > 32) sb.Append("...");
+                        sb.AppendLine();
+
+                        sb.Append("    AFTER:  ");
+                        for (int j = 0; j < showLen; j++)
+                            sb.Append($"{afterBytes[rangeStart + j]:X2} ");
+                        if (rangeLen > 32) sb.Append("...");
+                        sb.AppendLine();
+                        sb.AppendLine();
+                    }
+                    diffCount++;
+                    rangeStart = -1;
+                }
+            }
+
+            if (afterBytes.Length != beforeBytes.Length)
+            {
+                sb.AppendLine($"  FILE SIZE CHANGED: {beforeBytes.Length} → {afterBytes.Length}");
+                sb.AppendLine($"  Tail difference: {afterBytes.Length - beforeBytes.Length} bytes");
+            }
+
+            sb.AppendLine($"  Total changed ranges: {diffCount}");
+
+            return sb.ToString();
+        }
+
+        // ---- Helper types and methods for the diff ----
+
+        private sealed class BlockOffsets
+        {
+            public int BlockStart;
+            public int BuildingsOff;
+            public int PadOff;
+            public int FacetsOff;
+            public int StylesOff;
+            public int PaintOff;
+            public int StoreysOff;
+            public int IndoorsOff;
+            public int WalkablesOff;
+            public int BlockEnd;
+            public ushort NextBuilding;
+            public ushort NextFacet;
+            public ushort NextStyle;
+            public ushort NextPaintMem;
+            public ushort NextStorey;
+        }
+
+        // ====================================================================
+        // ADD TO MainWindow_Diagnostics.cs
+        // Menu: <MenuItem Header="Dump All Buildings Raw..." Click="DumpAllBuildingsRaw_Click"/>
+        // ====================================================================
+
+        private void DumpAllBuildingsRaw_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show("No map loaded.", "Dump Buildings", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var bytes = MapDataService.Instance.GetBytesCopy();
+                int saveType = BitConverter.ToInt32(bytes, 0);
+                int blockStart = 8 + 128 * 128 * 6;
+                ushort nextBuilding = ReadU16(bytes, blockStart + 2);
+
+                int buildingsOff = blockStart + 48;
+
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                sb.AppendLine("  ALL BUILDINGS — DUAL LAYOUT INTERPRETATION");
+                sb.AppendLine($"  Map: {MapDataService.Instance.CurrentPath}");
+                sb.AppendLine($"  NextDBuilding: {nextBuilding}  (buildings: {nextBuilding - 1})");
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                sb.AppendLine();
+                sb.AppendLine("LAYOUT A (our current interpretation):");
+                sb.AppendLine("  +0: StartFacet(U16) +2: EndFacet(U16) +4: X(S32)");
+                sb.AppendLine("  +8: Y(S24) +11: Type(U8) +12: Z(S32) +16: Walkable(U16)");
+                sb.AppendLine("  +18: Counter[2] +20: Padding(U16) +22: Ware(U8) +23: unused");
+                sb.AppendLine();
+                sb.AppendLine("LAYOUT B (C struct order from supermap.h):");
+                sb.AppendLine("  +0: X(S32) +4: Y(S32) +8: Z(S32) +12: StartFacet(U16)");
+                sb.AppendLine("  +14: EndFacet(U16) +16: Walkable(U16) +18: Counter[2]");
+                sb.AppendLine("  +20: Padding(U16) +22: Ware(U8) +23: Type(U8)");
+                sb.AppendLine();
+
+                // Also read walkables to cross-reference
+                var acc = new BuildingsAccessor(MapDataService.Instance);
+                var snap = acc.ReadSnapshot();
+
+                for (int i = 0; i < nextBuilding - 1; i++)
+                {
+                    int off = buildingsOff + i * 24;
+                    int bldId = i + 1;
+
+                    sb.AppendLine($"───── BUILDING #{bldId} @ 0x{off:X6} ─────");
+                    sb.Append("  Raw: ");
+                    for (int b = 0; b < 24; b++) sb.Append($"{bytes[off + b]:X2} ");
+                    sb.AppendLine();
+
+                    // Layout A (our current)
+                    ushort aStartFacet = ReadU16(bytes, off + 0);
+                    ushort aEndFacet = ReadU16(bytes, off + 2);
+                    int aX = BitConverter.ToInt32(bytes, off + 4);
+                    byte aType = bytes[off + 11];
+                    int aZ = BitConverter.ToInt32(bytes, off + 12);
+                    ushort aWalkable = ReadU16(bytes, off + 16);
+                    byte aWare = bytes[off + 22];
+
+                    sb.AppendLine($"  [A] SF={aStartFacet} EF={aEndFacet} X={aX} Type={aType} Z={aZ} Walk={aWalkable} Ware={aWare}");
+
+                    // Layout B (C struct)
+                    int bX = BitConverter.ToInt32(bytes, off + 0);
+                    int bY = BitConverter.ToInt32(bytes, off + 4);
+                    int bZ = BitConverter.ToInt32(bytes, off + 8);
+                    ushort bStartFacet = ReadU16(bytes, off + 12);
+                    ushort bEndFacet = ReadU16(bytes, off + 14);
+                    ushort bWalkable = ReadU16(bytes, off + 16);
+                    byte bWare = bytes[off + 22];
+                    byte bType = bytes[off + 23];
+
+                    sb.AppendLine($"  [B] X={bX} Y={bY} Z={bZ} SF={bStartFacet} EF={bEndFacet} Walk={bWalkable} Ware={bWare} Type={bType}");
+
+                    // Find walkables that reference this building
+                    if (snap.Walkables != null)
+                    {
+                        int wCount = 0;
+                        int wHead = 0;
+                        for (int w = 1; w < snap.Walkables.Length; w++)
+                        {
+                            if (snap.Walkables[w].Building == bldId)
+                            {
+                                wCount++;
+                                // Find chain head (the one with highest index in chain)
+                                if (w > wHead) wHead = w;
+                            }
+                        }
+                        if (wCount > 0)
+                            sb.AppendLine($"  [W] {wCount} walkable(s) with Building={bldId}, highest index={wHead}");
+                    }
+
+                    sb.AppendLine();
+                }
+
+                // Summary: focus on warehouses
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                sb.AppendLine("  WAREHOUSE BUILDINGS ONLY (Type=1 in Layout A, or Type=1 in Layout B)");
+                sb.AppendLine("═══════════════════════════════════════════════════════════════════");
+                sb.AppendLine();
+
+                for (int i = 0; i < nextBuilding - 1; i++)
+                {
+                    int off = buildingsOff + i * 24;
+                    byte aType = bytes[off + 11];
+                    byte bType = bytes[off + 23];
+
+                    if (aType != 1 && bType != 1) continue;
+
+                    int bldId = i + 1;
+                    sb.AppendLine($"  Building #{bldId}:");
+
+                    ushort aWalkable = ReadU16(bytes, off + 16);
+                    int aX = BitConverter.ToInt32(bytes, off + 4);
+
+                    int bY = BitConverter.ToInt32(bytes, off + 4);
+                    ushort bWalkable = ReadU16(bytes, off + 16);
+
+                    sb.AppendLine($"    Layout A: Type={aType} Walkable@+16={aWalkable} X@+4={aX}");
+                    sb.AppendLine($"    Layout B: Type={bType} Walkable@+16={bWalkable} Y@+4={bY}");
+
+                    // Check: does any byte pair match a known walkable chain head?
+                    sb.Append("    Possible walkable refs: ");
+                    if (snap.Walkables != null)
+                    {
+                        for (int boff = 0; boff < 22; boff += 2)
+                        {
+                            ushort val = ReadU16(bytes, off + boff);
+                            if (val > 0 && val < snap.Walkables.Length)
+                            {
+                                if (snap.Walkables[val].Building == bldId)
+                                    sb.Append($"+{boff}={val}(✓bld match) ");
+                            }
+                        }
+                    }
+                    sb.AppendLine();
+                    sb.AppendLine();
+                }
+
+                var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "all_buildings_raw_dump.txt");
+                System.IO.File.WriteAllText(path, sb.ToString());
+                System.Diagnostics.Process.Start("notepad.exe", path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Dump Failed",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static ushort ReadU16(byte[] b, int off)
+            => (ushort)(b[off] | (b[off + 1] << 8));
+
+        private BlockOffsets? ParseSnapshotFromBytes(byte[] bytes)
+        {
+            try
+            {
+                int saveType = BitConverter.ToInt32(bytes, 0);
+
+                // PAP_HI = 8 + 128*128*6 = 98312, building block starts after
+                int blockStart = 8 + 128 * 128 * 6;
+
+                ushort nextBuilding = ReadU16(bytes, blockStart + 2);
+                ushort nextFacet = ReadU16(bytes, blockStart + 4);
+                ushort nextStyle = ReadU16(bytes, blockStart + 6);
+                ushort nextPaintMem = (saveType >= 17) ? ReadU16(bytes, blockStart + 8) : (ushort)0;
+                ushort nextStorey = (saveType >= 17) ? ReadU16(bytes, blockStart + 10) : (ushort)0;
+
+                int buildingsOff = blockStart + 48; // HeaderSize
+                int padOff = buildingsOff + (nextBuilding - 1) * 24; // DBuildingSize
+                int facetsOff = padOff + 14; // AfterBuildingsPad
+                int stylesOff = facetsOff + (nextFacet - 1) * 26; // DFacetSize
+                int paintOff = stylesOff + nextStyle * 2;
+                int storeysOff = paintOff + ((saveType >= 17) ? nextPaintMem : 0);
+                int indoorsOff = storeysOff + ((saveType >= 17) ? nextStorey * 6 : 0);
+
+                int indoorsLen = 0;
+                if (saveType >= 21 && indoorsOff + 8 <= bytes.Length)
+                {
+                    ushort nextIS = ReadU16(bytes, indoorsOff);
+                    ushort nextISt = ReadU16(bytes, indoorsOff + 2);
+                    ushort nextIB = ReadU16(bytes, indoorsOff + 4);
+                    indoorsLen = 8 + nextIS * 22 + nextISt * 10 + nextIB;
+                }
+
+                int walkablesOff = indoorsOff + indoorsLen;
+                ushort nextWalkable = ReadU16(bytes, walkablesOff);
+                ushort nextRF4 = ReadU16(bytes, walkablesOff + 2);
+                int blockEnd = walkablesOff + 4 + nextWalkable * 22 + nextRF4 * 10;
+
+                return new BlockOffsets
+                {
+                    BlockStart = blockStart,
+                    BuildingsOff = buildingsOff,
+                    PadOff = padOff,
+                    FacetsOff = facetsOff,
+                    StylesOff = stylesOff,
+                    PaintOff = paintOff,
+                    StoreysOff = storeysOff,
+                    IndoorsOff = indoorsOff,
+                    WalkablesOff = walkablesOff,
+                    BlockEnd = blockEnd,
+                    NextBuilding = nextBuilding,
+                    NextFacet = nextFacet,
+                    NextStyle = nextStyle,
+                    NextPaintMem = nextPaintMem,
+                    NextStorey = nextStorey,
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void DumpHeaderComparison(System.Text.StringBuilder sb, byte[] before, byte[] after, int bOff, int aOff)
+        {
+            string[] fields = { "SaveType(4B)", "NextDBuilding", "NextDFacet", "NextDStyle", "NextPaintMem", "NextDStorey" };
+            int[] offsets = { 0, 2, 4, 6, 8, 10 };
+            int[] sizes = { 4, 2, 2, 2, 2, 2 };
+
+            for (int i = 0; i < fields.Length; i++)
+            {
+                int bVal, aVal;
+                if (sizes[i] == 4)
+                {
+                    bVal = BitConverter.ToInt32(before, bOff + offsets[i]);
+                    aVal = BitConverter.ToInt32(after, aOff + offsets[i]);
+                }
+                else
+                {
+                    bVal = ReadU16(before, bOff + offsets[i]);
+                    aVal = ReadU16(after, aOff + offsets[i]);
+                }
+                string marker = bVal != aVal ? " ← CHANGED" : "";
+                sb.AppendLine($"  {fields[i],-20}: {bVal,6} → {aVal,6}{marker}");
+            }
+        }
+
+        private void CompareOffset(System.Text.StringBuilder sb, string name, int before, int after)
+        {
+            int delta = after - before;
+            string marker = delta != 0 ? $"  ← SHIFTED {(delta > 0 ? "+" : "")}{delta}" : "";
+            sb.AppendLine($"  {name,-25} 0x{before:X8}    0x{after:X8}    {delta,6}{marker}");
+        }
+
+        private void DumpBuildingRaw(System.Text.StringBuilder sb, string label, byte[] bytes, int buildingsOff, int buildingId1, ushort nextBuilding)
+        {
+            int idx0 = buildingId1 - 1;
+            if (idx0 < 0 || idx0 >= nextBuilding - 1)
+            {
+                sb.AppendLine($"  {label}: Building #{buildingId1} not present (nextBuilding={nextBuilding})");
+                return;
+            }
+            int off = buildingsOff + idx0 * 24;
+            if (off + 24 > bytes.Length)
+            {
+                sb.AppendLine($"  {label}: offset 0x{off:X} out of range");
+                return;
+            }
+            sb.Append($"  {label} @ 0x{off:X6}: ");
+            for (int i = 0; i < 24; i++) sb.Append($"{bytes[off + i]:X2} ");
+            sb.AppendLine();
+
+            // Interpret key fields
+            ushort startFacet = ReadU16(bytes, off + 0);
+            ushort endFacet = ReadU16(bytes, off + 2);
+            int x = BitConverter.ToInt32(bytes, off + 4);
+            ushort walkable = ReadU16(bytes, off + 16);
+            byte type = bytes[off + 11];
+            byte ware = bytes[off + 22];
+            sb.AppendLine($"          StartFacet={startFacet} EndFacet={endFacet} X={x} Type={type} Walkable={walkable} Ware={ware}");
+        }
+
+        private void DumpWalkableRaw(System.Text.StringBuilder sb, string label, byte[] bytes, int walkablesOff, int walkableId)
+        {
+            if (walkablesOff + 4 > bytes.Length) return;
+            ushort nextW = ReadU16(bytes, walkablesOff);
+            if (walkableId >= nextW)
+            {
+                sb.AppendLine($"  {label}: Walkable #{walkableId} not present (nextWalkable={nextW})");
+                return;
+            }
+            int dataOff = walkablesOff + 4;
+            int off = dataOff + walkableId * 22;
+            if (off + 22 > bytes.Length)
+            {
+                sb.AppendLine($"  {label}: offset 0x{off:X} out of range");
+                return;
+            }
+            sb.Append($"  {label} @ 0x{off:X6}: ");
+            for (int i = 0; i < 22; i++) sb.Append($"{bytes[off + i]:X2} ");
+            sb.AppendLine();
+
+            // Interpret
+            ushort startF4 = ReadU16(bytes, off + 8);
+            ushort endF4 = ReadU16(bytes, off + 10);
+            byte y = bytes[off + 16];
+            byte storeyY = bytes[off + 17];
+            ushort next = ReadU16(bytes, off + 18);
+            ushort building = ReadU16(bytes, off + 20);
+            sb.AppendLine($"          StartF4={startF4} EndF4={endF4} Y={y} StoreyY={storeyY} Next={next} Building={building}");
+        }
+
+        private string IdentifyRegion(int offset, BlockOffsets? before, BlockOffsets? after)
+        {
+            // Use BEFORE offsets for identification
+            var s = before ?? after;
+            if (s == null) return "unknown";
+
+            if (offset < 8) return "FILE HEADER";
+            if (offset < s.BlockStart) return "PAP TILES";
+            if (offset < s.BlockStart + 48) return "BLOCK HEADER";
+            if (offset < s.PadOff) return "BUILDINGS";
+            if (offset < s.FacetsOff) return "PADDING(14B)";
+            if (offset < s.StylesOff) return "FACETS";
+            if (offset < s.PaintOff) return "DSTYLES";
+            if (offset < s.StoreysOff) return "PAINT_MEM";
+            if (offset < s.IndoorsOff) return "DSTOREYS";
+            if (offset < s.WalkablesOff) return "INDOORS";
+            if (offset < s.BlockEnd) return "WALKABLES+RF4";
+            return "OBJECTS/TAIL";
         }
 
         private void SetRF4DrawFlags_Click(object sender, RoutedEventArgs e)

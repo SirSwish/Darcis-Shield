@@ -233,10 +233,15 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
             Pen pen = isSelected ? PenSelectedWhite : GetPenForFacet(facetType);
             dc.DrawLine(pen, p1, p2);
 
-            // Draw direction arrow for ladders (type 12)
-            if (facetType == 12)
+            // Draw direction arrow for ladders (type 12) and doors (type 18)
+            // Draw direction arrow for ladders and doors
+            if (facetType == 12) // Ladder
             {
-                DrawLadderArrow(dc, p1, p2);
+                DrawDirectionArrow(dc, p1, p2, PenLadderArrow);
+            }
+            else if (facetType == 18) // Door
+            {
+                DrawDirectionArrow(dc, p1, p2, PenDoorPurple);
             }
         }
 

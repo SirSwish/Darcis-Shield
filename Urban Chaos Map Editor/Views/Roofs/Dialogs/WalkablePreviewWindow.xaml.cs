@@ -43,10 +43,9 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             TxtNext.Text = _walkable.Next.ToString(CultureInfo.InvariantCulture);
 
             // Populate editable legacy fields
-            TxtStartPoint.Text = _walkable.StartPoint.ToString(CultureInfo.InvariantCulture);
-            TxtEndPoint.Text = _walkable.EndPoint.ToString(CultureInfo.InvariantCulture);
-            TxtStartFace3.Text = _walkable.StartFace3.ToString(CultureInfo.InvariantCulture);
-            TxtEndFace3.Text = _walkable.EndFace3.ToString(CultureInfo.InvariantCulture);
+            // Populate editable height fields
+            TxtEditY.Text = _walkable.Y.ToString(CultureInfo.InvariantCulture);
+            TxtEditStoreyY.Text = _walkable.StoreyY.ToString(CultureInfo.InvariantCulture);
 
             SeedRoofFacesSpan();
         }
@@ -114,31 +113,19 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             dlg.Show();
         }
 
-        private void BtnApplyLegacy_Click(object sender, RoutedEventArgs e)
+        private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            // Parse values
-            if (!ushort.TryParse(TxtStartPoint.Text.Trim(), out ushort startPoint))
+            if (!byte.TryParse(TxtEditY.Text.Trim(), out byte newY))
             {
-                TxtStatus.Text = "Invalid StartPoint value.";
+                TxtStatus.Text = "Invalid Y value (0-255).";
                 return;
             }
-            if (!ushort.TryParse(TxtEndPoint.Text.Trim(), out ushort endPoint))
+            if (!byte.TryParse(TxtEditStoreyY.Text.Trim(), out byte newStoreyY))
             {
-                TxtStatus.Text = "Invalid EndPoint value.";
-                return;
-            }
-            if (!ushort.TryParse(TxtStartFace3.Text.Trim(), out ushort startFace3))
-            {
-                TxtStatus.Text = "Invalid StartFace3 value.";
-                return;
-            }
-            if (!ushort.TryParse(TxtEndFace3.Text.Trim(), out ushort endFace3))
-            {
-                TxtStatus.Text = "Invalid EndFace3 value.";
+                TxtStatus.Text = "Invalid StoreyY value (0-255).";
                 return;
             }
 
-            // Apply to map data
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded)
             {
@@ -154,45 +141,25 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             }
 
             // DWalkable layout (22 bytes):
-            // +0:  StartPoint (ushort)
-            // +2:  EndPoint (ushort)
-            // +4:  StartFace3 (ushort)
-            // +6:  EndFace3 (ushort)
-            // +8:  StartFace4 (ushort)
-            // +10: EndFace4 (ushort)
-            // +12: X1, +13: Z1, +14: X2, +15: Z2
-            // +16: Y, +17: StoreyY
-            // +18: Next (ushort)
-            // +20: Building (ushort)
+            // +16: Y (UBYTE)
+            // +17: StoreyY (UBYTE)
 
             svc.Edit(bytes =>
             {
-                // StartPoint at offset +0
-                bytes[walkableOffset + 0] = (byte)(startPoint & 0xFF);
-                bytes[walkableOffset + 1] = (byte)((startPoint >> 8) & 0xFF);
-
-                // EndPoint at offset +2
-                bytes[walkableOffset + 2] = (byte)(endPoint & 0xFF);
-                bytes[walkableOffset + 3] = (byte)((endPoint >> 8) & 0xFF);
-
-                // StartFace3 at offset +4
-                bytes[walkableOffset + 4] = (byte)(startFace3 & 0xFF);
-                bytes[walkableOffset + 5] = (byte)((startFace3 >> 8) & 0xFF);
-
-                // EndFace3 at offset +6
-                bytes[walkableOffset + 6] = (byte)(endFace3 & 0xFF);
-                bytes[walkableOffset + 7] = (byte)((endFace3 >> 8) & 0xFF);
+                bytes[walkableOffset + 16] = newY;
+                bytes[walkableOffset + 17] = newStoreyY;
             });
 
-            Debug.WriteLine($"[WalkablePreviewWindow] Updated walkable #{_walkableId1}: " +
-                           $"StartPoint={startPoint}, EndPoint={endPoint}, " +
-                           $"StartFace3={startFace3}, EndFace3={endFace3}");
+            Debug.WriteLine($"[WalkablePreview] Updated walkable #{_walkableId1}: Y={newY} (world={newY * 32}), StoreyY={newStoreyY} (world={newStoreyY * 64})");
 
-            TxtStatus.Text = $"Applied: StartPoint={startPoint}, EndPoint={endPoint}, " +
-                            $"StartFace3={startFace3}, EndFace3={endFace3}. Save map to persist.";
+            TxtStatus.Text = $"Applied: Y={newY} (world {newY * 32}), StoreyY={newStoreyY} (world {newStoreyY * 64}). Save map to persist.";
 
-            // Notify change bus
+            // Update the read-only display too
+            TxtY.Text = newY.ToString(CultureInfo.InvariantCulture);
+            TxtStoreyY.Text = newStoreyY.ToString(CultureInfo.InvariantCulture);
+
             BuildingsChangeBus.Instance.NotifyChanged();
+            Services.Roofs.RoofsChangeBus.Instance.NotifyChanged();
         }
     }
 }

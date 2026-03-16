@@ -22,12 +22,13 @@
         </Style>
 
         <Style x:Key="CompactActionButton" TargetType="Button">
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="MinWidth" Value="72"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
         </Style>
 
         <Style x:Key="GreenButton" TargetType="Button" BasedOn="{StaticResource CompactActionButton}">
@@ -39,11 +40,34 @@
             <Setter Property="Background" Value="#5A2D2D"/>
             <Setter Property="BorderBrush" Value="#8A4A4A"/>
         </Style>
+
+        <Style x:Key="SectionTitleText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CFCFCF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
     </UserControl.Resources>
 
-    <DockPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Walkables list -->
+            <RowDefinition Height="6"/>
+            <!-- Splitter -->
+            <RowDefinition Height="*"/>
+            <!-- RF4 list -->
+            <RowDefinition Height="Auto"/>
+            <!-- Action buttons -->
+            <RowDefinition Height="Auto"/>
+            <!-- Altitude tools -->
+        </Grid.RowDefinitions>
+
         <!-- Header with building filter -->
-        <Border DockPanel.Dock="Top" Background="#2A2D32" Padding="8,6">
+        <Border Grid.Row="0" Background="#2A2D32" Padding="8,6">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -52,175 +76,263 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Text="Building:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBox Grid.Column="1" x:Name="TxtBuildingFilter" Width="60"
+                <TextBlock Grid.Column="0"
+                           Text="Building:"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0"/>
+
+                <TextBox Grid.Column="1"
+                         x:Name="TxtBuildingFilter"
+                         Width="60"
                          Text="{Binding SelectedBuildingId, UpdateSourceTrigger=PropertyChanged}"
-                         Background="#333" Foreground="White" BorderBrush="#555"
-                         VerticalContentAlignment="Center" Padding="4,2"
+                         Background="#333"
+                         Foreground="White"
+                         BorderBrush="#555"
+                         VerticalContentAlignment="Center"
+                         Padding="4,2"
                          ToolTip="Enter building ID to filter walkables (0 = show all)"/>
 
-                <TextBlock Grid.Column="2" 
-                           Text="{Binding StatusText}" 
-                           VerticalAlignment="Center" Margin="12,0,0,0"
-                           Foreground="#AAA" FontSize="11"/>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding StatusText}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"
+                           Foreground="#AAA"
+                           FontSize="11"/>
 
-                <Button Grid.Column="3" Content="Refresh" Padding="8,2"
-                        Click="BtnRefresh_Click" ToolTip="Reload walkable and RF4 data"/>
+                <Button Grid.Column="3"
+                        Content="Refresh"
+                        Padding="8,2"
+                        Click="BtnRefresh_Click"
+                        ToolTip="Reload walkable and RF4 data"/>
             </Grid>
         </Border>
 
-        <!-- Main content -->
-        <Grid Margin="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <!-- Walkables + RF4 -->
-                <RowDefinition Height="6"/>
-                <!-- Splitter -->
-                <RowDefinition Height="Auto"/>
-                <!-- Action buttons -->
-                <RowDefinition Height="Auto"/>
-                <!-- Cell altitude section -->
-            </Grid.RowDefinitions>
+        <!-- Walkables List -->
+        <Border Grid.Row="1"
+                BorderBrush="#333"
+                BorderThickness="1"
+                CornerRadius="4"
+                Margin="8,4,8,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- TOP: Walkables (left) + RoofFace4 (right) -->
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="6"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0"
+                           Text="Walkable Regions"
+                           FontWeight="SemiBold"
+                           FontSize="11"
+                           Padding="6,4"
+                           Background="#2A2D32"/>
 
-                <!-- Walkables List -->
-                <Border Grid.Column="0" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" 
-                                   Text="Walkable Regions" 
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Padding="6,4" Background="#2A2D32"/>
-                        <ListView x:Name="WalkablesList"
-                                  ItemsSource="{Binding Walkables}"
-                                  SelectedItem="{Binding SelectedWalkable, Mode=TwoWay}"
-                                  SelectionChanged="WalkablesList_OnSelectionChanged"
-                                  MouseDoubleClick="WalkablesList_OnMouseDoubleClick"
-                                  Background="Transparent" Foreground="White"
-                                  BorderThickness="0">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="#" Width="40"
-                                                    DisplayMemberBinding="{Binding WalkableId1}"/>
-                                    <GridViewColumn Header="Bld" Width="35"
-                                                    DisplayMemberBinding="{Binding BuildingId}"/>
-                                    <GridViewColumn Header="Rect" Width="110"
-                                                    DisplayMemberBinding="{Binding Rect}"/>
-                                    <GridViewColumn Header="Y" Width="35"
-                                                    DisplayMemberBinding="{Binding Y}"/>
-                                    <GridViewColumn Header="RF4" Width="90"
-                                                    DisplayMemberBinding="{Binding Face4Span}"/>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </DockPanel>
-                </Border>
-
-                <!-- Splitter -->
-                <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch"
-                              Background="#22000000" ShowsPreview="True"/>
-
-                <!-- RoofFace4 List -->
-                <Border Grid.Column="2" BorderBrush="#333" BorderThickness="1" CornerRadius="4">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" 
-                                   Text="Roof Face 4 Entries" 
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Padding="6,4" Background="#2A2D32"/>
-                        <ListView x:Name="RoofFaces4List"
-                                  ItemsSource="{Binding RoofFaces4}"
-                                  SelectedItem="{Binding SelectedRoofFace4, Mode=TwoWay}"
-                                  MouseDoubleClick="RoofFaces4List_OnMouseDoubleClick"
-                                  Background="Transparent" Foreground="White"
-                                  BorderThickness="0">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="#" Width="40"
-                                                    DisplayMemberBinding="{Binding FaceId}"/>
-                                    <GridViewColumn Header="Y" Width="50"
-                                                    DisplayMemberBinding="{Binding Y}"/>
-                                    <GridViewColumn Header="DY" Width="80"
-                                                    DisplayMemberBinding="{Binding DY}"/>
-                                    <GridViewColumn Header="RX" Width="35"
-                                                    DisplayMemberBinding="{Binding RX}"/>
-                                    <GridViewColumn Header="RZ" Width="35"
-                                                    DisplayMemberBinding="{Binding RZ}"/>
-                                    <GridViewColumn Header="Flags" Width="50"
-                                                    DisplayMemberBinding="{Binding DrawFlags}"/>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </DockPanel>
-                </Border>
+                <ListView Grid.Row="1"
+                          x:Name="WalkablesList"
+                          ItemsSource="{Binding Walkables}"
+                          SelectedItem="{Binding SelectedWalkable, Mode=TwoWay}"
+                          SelectionChanged="WalkablesList_OnSelectionChanged"
+                          MouseDoubleClick="WalkablesList_OnMouseDoubleClick"
+                          Background="Transparent"
+                          Foreground="White"
+                          BorderThickness="0">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="#" Width="40"
+                                            DisplayMemberBinding="{Binding WalkableId1}"/>
+                            <GridViewColumn Header="Bld" Width="35"
+                                            DisplayMemberBinding="{Binding BuildingId}"/>
+                            <GridViewColumn Header="Rect" Width="110"
+                                            DisplayMemberBinding="{Binding Rect}"/>
+                            <GridViewColumn Header="Y" Width="35"
+                                            DisplayMemberBinding="{Binding Y}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </Grid>
+        </Border>
 
-            <!-- Splitter -->
-            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                          Height="6" Background="#22000000" ShowsPreview="True"/>
+        <!-- Splitter -->
+        <GridSplitter Grid.Row="2"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Height="6"
+                      Margin="8,0"
+                      Background="#22000000"
+                      ShowsPreview="True"/>
 
-            <!-- Action Buttons -->
-            <Border Grid.Row="2" BorderBrush="#333" BorderThickness="1" CornerRadius="6"
-                    Padding="8" Margin="0,4,0,0" Background="#1A1D20">
-                <WrapPanel Orientation="Horizontal">
-                    <!-- Walkable actions -->
-                    <Button Style="{StaticResource GreenButton}" Margin="0,0,4,0"
-                            Click="BtnAddWalkable_Click" ToolTip="Add walkable region (draw on map)">
-                        <TextBlock Text="W+" FontWeight="Bold" FontSize="11" Foreground="#90EE90"/>
-                    </Button>
-                    <Button Style="{StaticResource RedButton}" Margin="0,0,12,0"
-                            Click="BtnDeleteWalkable_Click" ToolTip="Delete selected walkable">
-                        <TextBlock Text="W-" FontWeight="Bold" FontSize="11" Foreground="#FF6B6B"/>
-                    </Button>
+        <!-- RoofFace4 List -->
+        <Border Grid.Row="3"
+                BorderBrush="#333"
+                BorderThickness="1"
+                CornerRadius="4"
+                Margin="8,0,8,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <!-- RF4 actions -->
-                    <Button Style="{StaticResource GreenButton}" Margin="0,0,4,0"
-                            Click="BtnAddRoofFace4_Click" ToolTip="Add RoofFace4 to selected walkable">
-                        <TextBlock Text="R4+" FontWeight="Bold" FontSize="11" Foreground="#90EE90"/>
-                    </Button>
-                    <Button Style="{StaticResource RedButton}" Margin="0,0,12,0"
-                            Click="BtnDeleteRoofFace4_Click" ToolTip="Delete selected RoofFace4">
-                        <TextBlock Text="R4-" FontWeight="Bold" FontSize="11" Foreground="#FF6B6B"/>
-                    </Button>
+                <TextBlock Grid.Row="0"
+                           Text="Roof Face 4 Entries"
+                           FontWeight="SemiBold"
+                           FontSize="11"
+                           Padding="6,4"
+                           Background="#2A2D32"/>
 
-                    <!-- Edit walkable points -->
-                    <Button Content="Edit Points..." Padding="8,2" Margin="0,0,8,0"
-                            Click="BtnEditWalkablePoints_Click"
-                            ToolTip="Edit StartPoint/EndPoint for debugging"/>
+                <ListView Grid.Row="1"
+                          x:Name="RoofFaces4List"
+                          ItemsSource="{Binding RoofFaces4}"
+                          SelectedItem="{Binding SelectedRoofFace4, Mode=TwoWay}"
+                          MouseDoubleClick="RoofFaces4List_OnMouseDoubleClick"
+                          Background="Transparent"
+                          Foreground="White"
+                          BorderThickness="0">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="#" Width="40"
+                                            DisplayMemberBinding="{Binding FaceId}"/>
+                            <GridViewColumn Header="Y" Width="50"
+                                            DisplayMemberBinding="{Binding Y}"/>
+                            <GridViewColumn Header="DY" Width="80"
+                                            DisplayMemberBinding="{Binding DY}"/>
+                            <GridViewColumn Header="Tile" Width="70"
+                                            DisplayMemberBinding="{Binding TileDisplay}"/>
+                            <GridViewColumn Header="Flags" Width="50"
+                                            DisplayMemberBinding="{Binding DrawFlagsHex}"/>
+                            <GridViewColumn Header="Next" Width="45"
+                                            DisplayMemberBinding="{Binding Next}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Border>
 
-                    <!-- Separator -->
-                    <Rectangle Width="1" Fill="#444" Margin="4,2" VerticalAlignment="Stretch"/>
+        <!-- Action Buttons -->
+        <Border Grid.Row="4"
+                BorderBrush="#333"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="10,8"
+                Margin="8,4,8,0"
+                Background="#1A1D20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <!-- Cell altitude editor -->
-                    <Button Content="Cell Editor..." Padding="8,2" Margin="8,0,0,0"
-                            Click="BtnCellEditor_Click"
-                            ToolTip="Open PAP_HI cell altitude/flags editor"/>
-                </WrapPanel>
-            </Border>
+                <!-- Walkables row -->
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Walkables"
+                               Style="{StaticResource SectionTitleText}"
+                               Width="70"/>
 
-            <!-- Cell Altitude Quick Info -->
-            <Border Grid.Row="3" BorderBrush="#333" BorderThickness="1" CornerRadius="6"
-                    Padding="8" Margin="0,4,0,0" Background="#1A1D20">
-                <StackPanel>
-                    <TextBlock Text="Cell Altitudes (PAP_HI)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,4"/>
-                    <TextBlock Foreground="#AAA" FontSize="10" TextWrapping="Wrap"
-                               Text="Cell altitudes define roof heights for each map tile. Use the Cell Editor to view and modify PAP_HI flags (Hidden, RoofExists, FlatRoof, etc.) and altitude values."/>
-                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <TextBlock Text="Quick: " Foreground="#888" VerticalAlignment="Center"/>
-                        <Button Content="Set Hidden+Roof for Building" Padding="6,2" Margin="0,0,4,0"
-                                Click="BtnQuickSetRoofFlags_Click"
-                                ToolTip="Set PAP_FLAG_HIDDEN | PAP_FLAG_ROOF_EXISTS on all cells within the selected building's walkable regions"/>
-                        <Button Content="Clear Roof Flags" Padding="6,2"
-                                Click="BtnQuickClearRoofFlags_Click"
-                                ToolTip="Clear Hidden and RoofExists flags for all cells in the selected building's walkable regions"/>
-                    </StackPanel>
+                    <Button Style="{StaticResource GreenButton}"
+                            Click="BtnAddWalkable_Click"
+                            ToolTip="Add walkable region (draw on map)"
+                            Content="Add"/>
+
+                    <Button Style="{StaticResource RedButton}"
+                            Margin="0"
+                            Click="BtnDeleteWalkable_Click"
+                            ToolTip="Delete selected walkable"
+                            Content="Remove"/>
                 </StackPanel>
-            </Border>
-        </Grid>
-    </DockPanel>
+
+                <!-- RoofFace4 row -->
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Roof Tiles"
+                               Style="{StaticResource SectionTitleText}"
+                               Width="70"/>
+
+                    <Button Style="{StaticResource GreenButton}"
+                            Click="BtnAddRoofFace4_Click"
+                            ToolTip="Add RoofFace4 to selected walkable"
+                            Content="Add"/>
+
+                    <Button Style="{StaticResource RedButton}"
+                            Margin="0"
+                            Click="BtnDeleteRoofFace4_Click"
+                            ToolTip="Delete selected RoofFace4"
+                            Content="Remove"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Cell Altitude Tools -->
+        <Border Grid.Row="5"
+                BorderBrush="#333"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="10,8"
+                Margin="8,4,8,8"
+                Background="#1A1D20">
+            <StackPanel>
+                <TextBlock Text="Cell Altitude (Floor Level)" FontWeight="SemiBold" FontSize="11"
+                           Foreground="#CFCFCF" Margin="0,0,0,6"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+                    <TextBlock Text="Altitude:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBox x:Name="AltitudeInput" Width="64"
+                             Text="{Binding AltitudeValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=0}"
+                             Background="#333" Foreground="White" BorderBrush="#555"
+                             HorizontalContentAlignment="Right"
+                             Padding="4,2"
+                             PreviewTextInput="Altitude_PreviewTextInput"
+                             ToolTip="World altitude value (stored as value / 8)"/>
+                    <TextBlock Text="  (raw:" VerticalAlignment="Center" Margin="8,0,2,0" Foreground="#888"/>
+                    <TextBlock x:Name="RawAltitudeDisplay"
+                               Text="{Binding AltitudeValueRaw, FallbackValue=0}"
+                               VerticalAlignment="Center" Foreground="#888"/>
+                    <TextBlock Text=")" VerticalAlignment="Center" Foreground="#888"/>
+                </StackPanel>
+
+                <WrapPanel>
+                    <Button Margin="0,0,6,0" Padding="8,6"
+                            ToolTip="Set Altitude: click cells on the map to set their floor altitude"
+                            Click="SetAltitude_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="18" Height="18" Margin="0,0,4,0">
+                                <Rectangle Fill="#4488CC" RadiusX="2" RadiusY="2"/>
+                                <TextBlock Text="A" FontWeight="Bold" FontSize="10"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                            <TextBlock Text="Set Alt" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Margin="0,0,6,0" Padding="8,6"
+                            ToolTip="Sample Altitude: click a cell on the map to read its altitude"
+                            Click="SampleAltitude_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="18" Height="18" Margin="0,0,4,0">
+                                <Rectangle Fill="#44CC88" RadiusX="2" RadiusY="2"/>
+                                <TextBlock Text="?" FontWeight="Bold" FontSize="10"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                            <TextBlock Text="Sample" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Margin="0,0,0,0" Padding="8,6"
+                            ToolTip="Reset Altitude: click cells on the map to set their altitude back to 0"
+                            Click="ResetAltitude_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="18" Height="18" Margin="0,0,4,0">
+                                <Rectangle Fill="#CC4444" RadiusX="2" RadiusY="2"/>
+                                <TextBlock Text="0" FontWeight="Bold" FontSize="10"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                            <TextBlock Text="Reset" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

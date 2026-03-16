@@ -1,4 +1,6 @@
 ﻿// Views/Roofs/RoofsTab.xaml.cs
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,6 +20,7 @@ namespace UrbanChaosMapEditor.Views.Roofs
 {
     public partial class RoofsTab : UserControl
     {
+        private static readonly Regex _signedDigits = new(@"^-?[0-9]*$");
         private bool _isWaitingForWalkableDrawing;
 
         public RoofsTab()
@@ -28,7 +31,6 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 var vm = DataContext as RoofsTabViewModel;
                 if (vm == null) return;
 
-                // Wire MapViewModel reference
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
                     vm.MapViewModel = mainVm.Map;
 
@@ -57,7 +59,6 @@ namespace UrbanChaosMapEditor.Views.Roofs
 
             vm.HandleWalkableSelection(lv.SelectedItem);
 
-            // Sync to map overlay
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
             {
                 shell.Map.SelectedWalkableId1 =
@@ -99,7 +100,10 @@ namespace UrbanChaosMapEditor.Views.Roofs
             int idx = rrow.FaceId;
             if (idx < 0 || idx >= roofFaces4.Length) return;
 
-            var dlg = new RoofFace4PreviewWindow(idx, roofFaces4[idx])
+            // Pass the walkable ID for "Apply to All" support
+            int walkableId1 = vm.SelectedWalkable?.WalkableId1 ?? 0;
+
+            var dlg = new RoofFace4PreviewWindow(idx, roofFaces4[idx], walkableId1)
             {
                 Owner = Application.Current.MainWindow
             };
@@ -130,7 +134,6 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 return;
             }
 
-            // Enter walkable drawing mode
             mainVm.Map.IsDrawingWalkable = true;
             _isWaitingForWalkableDrawing = true;
 
@@ -175,7 +178,6 @@ namespace UrbanChaosMapEditor.Views.Roofs
 
             if (dialog.ShowDialog() == true)
             {
-                // Convert UI tile coordinates to game tile coordinates (flip both axes)
                 int gameX1 = (MapConstants.TilesPerSide - 1) - rect.Value.MaxX;
                 int gameZ1 = (MapConstants.TilesPerSide - 1) - rect.Value.MaxY;
                 int gameX2 = (MapConstants.TilesPerSide - 1) - rect.Value.MinX + 1;
@@ -356,140 +358,41 @@ namespace UrbanChaosMapEditor.Views.Roofs
         }
 
         // ====================================================================
-        // Edit Walkable Points
+        // Altitude Tool Handlers
         // ====================================================================
 
-        private void BtnEditWalkablePoints_Click(object sender, RoutedEventArgs e)
+        private void Altitude_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            var vm = DataContext as RoofsTabViewModel;
-            if (vm?.SelectedWalkable == null)
-            {
-                MessageBox.Show("Please select a walkable first.", "No Selection",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            var walkable = vm.SelectedWalkable;
-
-            try
-            {
-                var dialog = new EditWalkablePointsDialog(walkable.WalkableId1, walkable.BuildingId)
-                {
-                    Owner = Window.GetWindow(this)
-                };
-
-                if (dialog.ShowDialog() == true)
-                    vm.Refresh();
-            }
-            catch
-            {
-                MessageBox.Show($"Edit Walkable Points dialog not available.\n\n" +
-                    $"Selected Walkable #{walkable.WalkableId1}",
-                    "Not Available", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            var textBox = sender as TextBox;
+            var newText = textBox?.Text.Insert(textBox.SelectionStart, e.Text) ?? e.Text;
+            e.Handled = !_signedDigits.IsMatch(newText);
         }
 
-        // ====================================================================
-        // Cell Altitude Editor
-        // ====================================================================
-
-        private void BtnCellEditor_Click(object sender, RoutedEventArgs e)
+        private void SetAltitude_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new PapHiCellEditorDialog
-            {
-                Owner = Window.GetWindow(this)
-            };
-
-            // If a walkable is selected, pre-fill coordinates from its region
-            var vm = DataContext as RoofsTabViewModel;
-            if (vm?.SelectedWalkable != null)
-            {
-                var w = vm.SelectedWalkable;
-                dlg.PresetCoordinates(w.X1, w.Z1);
-            }
-
-            dlg.Show();
-        }
-
-        // ====================================================================
-        // Quick Roof Flag Operations
-        // ====================================================================
-
-        private void BtnQuickSetRoofFlags_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is not RoofsTabViewModel vm) return;
-
-            if (vm.SelectedBuildingId <= 0)
-            {
-                MessageBox.Show("Enter a building ID first.", "No Building",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (vm.Walkables.Count == 0)
-            {
-                MessageBox.Show("No walkables found for this building.", "No Walkables",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Set PAP_FLAG_HIDDEN (0x0010) | PAP_FLAG_ROOF_EXISTS (0x0200) on all cells
-            // within all walkable regions for this building
-            const ushort flagsToSet = 0x0010 | 0x0200;
-            var accessor = new AltitudeAccessor(MapDataService.Instance);
-            int totalCells = 0;
-
-            foreach (var w in vm.Walkables)
-            {
-                for (int gx = w.X1; gx < w.X2; gx++)
-                {
-                    for (int gz = w.Z1; gz < w.Z2; gz++)
-                    {
-                        var current = accessor.ReadFlags(gx, gz);
-                        accessor.WriteFlags(gx, gz, current | (PapFlags)flagsToSet);
-                        totalCells++;
-                    }
-                }
-            }
-
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-                mainVm.StatusMessage = $"Set Hidden+RoofExists on {totalCells} cells across {vm.Walkables.Count} walkable(s)";
-
-            MapDataService.Instance.MarkDirty();
+            {
+                mainVm.Map.SelectedTool = EditorTool.SetAltitude;
+                Debug.WriteLine("[RoofsTab] Set Altitude tool selected");
+            }
         }
 
-        private void BtnQuickClearRoofFlags_Click(object sender, RoutedEventArgs e)
+        private void SampleAltitude_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is not RoofsTabViewModel vm) return;
-
-            if (vm.SelectedBuildingId <= 0 || vm.Walkables.Count == 0)
-            {
-                MessageBox.Show("Enter a building ID with walkables first.", "No Data",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            const ushort flagsToClear = 0x0010 | 0x0200;
-            var accessor = new AltitudeAccessor(MapDataService.Instance);
-            int totalCells = 0;
-
-            foreach (var w in vm.Walkables)
-            {
-                for (int gx = w.X1; gx < w.X2; gx++)
-                {
-                    for (int gz = w.Z1; gz < w.Z2; gz++)
-                    {
-                        var current = accessor.ReadFlags(gx, gz);
-                        accessor.WriteFlags(gx, gz, current & unchecked((PapFlags)(ushort)~flagsToClear));
-                        totalCells++;
-                    }
-                }
-            }
-
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-                mainVm.StatusMessage = $"Cleared Hidden+RoofExists on {totalCells} cells across {vm.Walkables.Count} walkable(s)";
+            {
+                mainVm.Map.SelectedTool = EditorTool.SampleAltitude;
+                Debug.WriteLine("[RoofsTab] Sample Altitude tool selected");
+            }
+        }
 
-            MapDataService.Instance.MarkDirty();
+        private void ResetAltitude_Click(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+            {
+                mainVm.Map.SelectedTool = EditorTool.ResetAltitude;
+                Debug.WriteLine("[RoofsTab] Reset Altitude tool selected");
+            }
         }
 
         // ====================================================================

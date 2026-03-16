@@ -1,6 +1,4 @@
-// /Views/Dialogs/Buildings/AddRoofFace4Dialog.xaml.cs
 using System.Windows;
-using System.Windows.Controls;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Roofs;
@@ -24,39 +22,28 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             _buildingId1 = buildingId1;
             _walkable = walkable;
 
-            // Update info text
             int width = walkable.X2 - walkable.X1;
             int depth = walkable.Z2 - walkable.Z1;
             TxtWalkableInfo.Text = $"Walkable #{walkableId1} (Building #{buildingId1}) - {width}x{depth} tiles";
 
-            // Set default altitude from walkable
             TxtAltitude.Text = (walkable.Y * 32).ToString();
+
+            RoofType_Changed(this, new RoutedEventArgs());
         }
 
         private void RoofType_Changed(object sender, RoutedEventArgs e)
         {
-            if (PnlPitchDirection == null || PnlPitchedSettings == null || PnlSingleTileSettings == null)
+            if (PnlSingleTileSettings == null)
                 return;
 
-            bool isPitched = RbPitchedRoof.IsChecked == true;
             bool isSingle = RbSingleTile.IsChecked == true;
-
-            PnlPitchDirection.Visibility = isPitched ? Visibility.Visible : Visibility.Collapsed;
-            PnlPitchedSettings.Visibility = isPitched ? Visibility.Visible : Visibility.Collapsed;
             PnlSingleTileSettings.Visibility = isSingle ? Visibility.Visible : Visibility.Collapsed;
 
-            // Update button text
             if (RbFlatRoof.IsChecked == true)
             {
                 int width = _walkable.X2 - _walkable.X1;
                 int depth = _walkable.Z2 - _walkable.Z1;
                 BtnAdd.Content = $"Add Flat Roof ({width * depth} tiles)";
-            }
-            else if (isPitched)
-            {
-                int width = _walkable.X2 - _walkable.X1;
-                int depth = _walkable.Z2 - _walkable.Z1;
-                BtnAdd.Content = $"Add Pitched Roof ({width * depth} tiles)";
             }
             else
             {
@@ -73,7 +60,6 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            // Parse altitude
             if (!short.TryParse(TxtAltitude.Text, out short altitude))
             {
                 MessageBox.Show("Invalid altitude value.", "Error",
@@ -86,34 +72,10 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             if (RbFlatRoof.IsChecked == true)
             {
-                // Create flat roof
                 result = adder.TryCreateFlatRoof(_walkableId1, altitude);
             }
-            else if (RbPitchedRoof.IsChecked == true)
+            else
             {
-                // Parse pitch settings
-                if (!sbyte.TryParse(TxtPitchPerTile.Text, out sbyte pitchPerTile))
-                {
-                    MessageBox.Show("Invalid pitch per tile value.", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Get direction
-                PitchDirection direction = PitchDirection.SlopesNorth;
-                if (CmbPitchDirection.SelectedItem is ComboBoxItem item && item.Tag is string tagStr)
-                {
-                    if (int.TryParse(tagStr, out int dirVal))
-                    {
-                        direction = (PitchDirection)dirVal;
-                    }
-                }
-
-                result = adder.TryCreatePitchedRoof(_walkableId1, altitude, pitchPerTile, direction);
-            }
-            else // Single tile
-            {
-                // Parse single tile settings
                 if (!byte.TryParse(TxtRX.Text, out byte rx) ||
                     !byte.TryParse(TxtRZ.Text, out byte rz) ||
                     !sbyte.TryParse(TxtDY0.Text, out sbyte dy0) ||

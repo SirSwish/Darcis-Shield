@@ -33,10 +33,10 @@ namespace UrbanChaosEditor.Shared.Models
         {
             Models.BuildingType.House => "House",
             Models.BuildingType.Warehouse => "Warehouse",
-            Models.BuildingType.Office => "Office",
-            Models.BuildingType.Apartment => "Apartment",
-            Models.BuildingType.CrateIn => "Crate (In)",
-            Models.BuildingType.CrateOut => "Crate (Out)",
+            Models.BuildingType.Office => "Office (Legacy - Unused)",
+            Models.BuildingType.Apartment => "Apartment (Legacy - Unused)",
+            Models.BuildingType.CrateIn => "Crate (In) (Legacy - Unused)",
+            Models.BuildingType.CrateOut => "Crate (Out) (Legacy - Unused)",
             _ => $"Unknown ({Type})"
         };
 

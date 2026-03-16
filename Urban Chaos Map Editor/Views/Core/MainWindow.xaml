@@ -188,10 +188,16 @@
             <MenuItem Header="_Diagnostics">
                 <MenuItem Header="Diagnose _Walkables..." Click="DiagnoseWalkables_Click"/>
                 <Separator/>
+                <MenuItem Header="Dump _Indoor Data..." Click="DumpIndoorData_Click"
+          ToolTip="Dump all InsideStorey, Staircase, and InsideBlock data"/>
+                <Separator/>
                 <MenuItem Header="?? _Indoor Building Editor..."
                           Click="IndoorBuildingEditor_Click"
                           ToolTip="View and edit DStorey, dstyles, and other indoor building components"/>
                 <Separator/>
+                <MenuItem Header="Snapshot Building Block..." Click="SnapshotBuildingBlock_Click"/>
+                <Separator/>
+                <MenuItem Header="Dump All Buildings Raw..." Click="DumpAllBuildingsRaw_Click"/>
                 <MenuItem Header="Dump Selected _Building Raw Bytes..." Click="DumpBuildingBytes_Click"/>
                 <MenuItem Header="Dump Selected _Facet Raw Bytes..." Click="DumpFacetBytes_Click"/>
                 <MenuItem Header="Dump Building _Walkables + RoofFace4..." Click="DumpBuildingWalkables_Click"/>
@@ -277,6 +283,16 @@
                     <Rectangle Width="1" Fill="#555" Margin="10,4" VerticalAlignment="Stretch"/>
 
                     <StackPanel Orientation="Vertical" Margin="4,0">
+                        <TextBlock Text="Buildings" Foreground="#888" HorizontalAlignment="Center" Margin="0,0,0,4" FontSize="10"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings"
+                                          IsChecked="{Binding Map.ShowBuildings}" ToolTip="Ctrl+B"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Rectangle Width="1" Fill="#555" Margin="10,4" VerticalAlignment="Stretch"/>
+
+                    <StackPanel Orientation="Vertical" Margin="4,0">
                         <TextBlock Text="Roofs" Foreground="#888" HorizontalAlignment="Center" Margin="0,0,0,4" FontSize="10"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Walkables"
@@ -287,17 +303,6 @@
                                           IsChecked="{Binding Map.ShowRoofAltitudes}" ToolTip="Show cell altitudes for walkable regions"/>
                         </StackPanel>
                     </StackPanel>
-
-                    <Rectangle Width="1" Fill="#555" Margin="10,4" VerticalAlignment="Stretch"/>
-
-                    <StackPanel Orientation="Vertical" Margin="4,0">
-                        <TextBlock Text="Buildings" Foreground="#888" HorizontalAlignment="Center" Margin="0,0,0,4" FontSize="10"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Buildings"
-                                          IsChecked="{Binding Map.ShowBuildings}" ToolTip="Ctrl+B"/>
-                        </StackPanel>
-                    </StackPanel>
-
                 </StackPanel>
             </ScrollViewer>
         </Border>

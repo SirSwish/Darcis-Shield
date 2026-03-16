@@ -330,7 +330,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
             for (int i = 1; i < buildingCount; i++)
             {
-                int off = buildingsOff + (i - 1) * DBuildingSize + 16; // Walkable field at offset 16
+                int off = buildingsOff + (i - 1) * DBuildingSize + 4; // Walkable field at offset 4
+
                 ushort oldWalkable = ReadU16(bytes, off);
 
                 if (walkableIdMap.TryGetValue(oldWalkable, out var newWalkable))

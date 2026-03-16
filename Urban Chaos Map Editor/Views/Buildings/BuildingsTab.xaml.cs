@@ -37,10 +37,8 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.BuildingVM building)
             {
-                // DON'T overwrite facet selection just because building selection changed.
-                // Binding already set vm.SelectedBuilding.
-
-                // Only do your "auto pick" behaviour if nothing is currently selected.
+                // Building selection should ONLY affect building/facet selection state.
+                // It must NOT imply any walkable selection/highlight.
                 if (vm.SelectedFacet == null)
                 {
                     vm.HandleBuildingTreeSelection(building);
@@ -50,6 +48,7 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 }
             }
 
+            // Explicitly clear walkable highlight whenever Buildings tab selection changes.
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                 shell.Map.SelectedWalkableId1 = 0;
         }
@@ -68,7 +67,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         private void BuildingsList_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Deselect building on right-click
             if (DataContext is BuildingsTabViewModel vm)
             {
                 vm.SelectedBuilding = null;
@@ -77,11 +75,12 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 vm.SelectedFacet = null;
             }
 
-            // Clear the ListBox selection
             if (sender is ListBox lb)
-            {
                 lb.SelectedItem = null;
-            }
+
+            // Also clear any walkable highlight owned by the Roofs tab selection.
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.Map.SelectedWalkableId1 = 0;
 
             e.Handled = true;
         }
@@ -118,6 +117,10 @@ namespace UrbanChaosMapEditor.Views.Buildings
             {
                 vm.HandleTreeSelection(facet);
             }
+
+            // Buildings tab should never own walkable highlighting.
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.Map.SelectedWalkableId1 = 0;
         }
 
         private void FacetsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -157,15 +160,17 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             if (sender is ListView lv && lv.SelectedItem is BuildingsTabViewModel.FacetVM fvm)
             {
-                // Set SelectedFacet so the delete button becomes visible
                 vm.SelectedFacet = fvm;
                 vm.HandleTreeSelection(fvm);
             }
             else if (sender is ListView lv2 && lv2.SelectedItem == null)
             {
-                // Clear selection when nothing is selected
                 vm.SelectedFacet = null;
             }
+
+            // Cables/facets selection must not drive walkable highlighting.
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.Map.SelectedWalkableId1 = 0;
         }
 
         private void CableList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -519,22 +524,26 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         private void BtnAddCable_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is BuildingsTabViewModel vm)
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            int buildingId = vm.SelectedBuildingId;
+            if (buildingId <= 0)
             {
-                // Auto-select Cables pill so the cable list becomes visible
-                vm.ShowCablesList = true;
+                MessageBox.Show("Please select a building first. Cables must belong to a building.",
+                    "Add Cable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            var addCableWindow = new AddCableWindow
+            vm.ShowCablesList = true;
+
+            var addCableWindow = new AddCableWindow(buildingId)
             {
                 Owner = Window.GetWindow(this)
             };
 
-            // Use Show() instead of ShowDialog() to allow interaction with the main window
-            // This is necessary for the "Draw on Map" feature to work
             addCableWindow.Closed += (s, args) =>
             {
-                // Refresh after the window is closed (whether cancelled or not)
                 if (!addCableWindow.WasCancelled && DataContext is BuildingsTabViewModel vmRefresh)
                 {
                     vmRefresh.Refresh();

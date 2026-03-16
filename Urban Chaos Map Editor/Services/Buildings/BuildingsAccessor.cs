@@ -116,22 +116,17 @@ namespace UrbanChaosMapEditor.Services.Buildings
             for (int i = 0; i < totalBuildings; i++)
             {
                 int off = buildingsOff + i * DBuildingSize;
-
                 Debug.WriteLine($"[BuildingsAccessor] DBuilding#{i + 1} raw @ 0x{off:X}: {DumpHex(bytes, off, DBuildingSize)}");
-
                 ushort startFacet = ReadU16(bytes, off + 0);
                 ushort endFacet = ReadU16(bytes, off + 2);
-
-                int worldX = BitConverter.ToInt32(bytes, off + 4);
-                int worldY = ReadS24(bytes, off + 8);
+                ushort walkable = ReadU16(bytes, off + 4);
+                byte counter0 = bytes[off + 6];
+                byte counter1 = bytes[off + 7];
+                int worldX = BitConverter.ToInt32(bytes, off + 8);
                 byte type = bytes[off + 11];
+                int worldY = 0;  // not yet identified in on-disk layout
                 int worldZ = BitConverter.ToInt32(bytes, off + 12);
-
-                ushort walkable = ReadU16(bytes, off + 16);
-                byte counter0 = bytes[off + 18];
-                byte counter1 = bytes[off + 19];
                 byte ware = bytes[off + 22];
-
                 buildings[i] = new DBuildingRec(
                     worldX, worldY, worldZ,
                     startFacet, endFacet,

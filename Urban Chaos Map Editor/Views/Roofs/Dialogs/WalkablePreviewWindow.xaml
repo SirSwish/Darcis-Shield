@@ -88,11 +88,11 @@
                         <TextBlock Grid.Row="7" Grid.Column="1" x:Name="TxtNext" VerticalAlignment="Center"/>
                     </Grid>
 
-                    <!-- Editable Legacy Fields -->
+                    <!-- Editable Height Fields -->
                     <Border BorderBrush="#666" BorderThickness="1" CornerRadius="4" Margin="0,12,0,0" Padding="8" Background="#1a1a1a">
                         <StackPanel>
-                            <TextBlock Text="Legacy Prim References (Editable)" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,8"/>
-                            <TextBlock Text="These fields reference prim geometry used for ledge grabbing." 
+                            <TextBlock Text="Height / Storey (Editable)" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,8"/>
+                            <TextBlock Text="Y = roof surface height (raw byte, world = Y * 32).&#x0a;StoreyY = floor altitude in quarter-storey units (world = StoreyY * 64)." 
                                        Opacity="0.6" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
                             <Grid>
@@ -103,29 +103,19 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="StartPoint:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtStartPoint" 
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Y:" VerticalAlignment="Center" Margin="0,2"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtEditY" 
                                          Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="EndPoint:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtEndPoint" 
-                                         Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="StartFace3:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" x:Name="TxtStartFace3" 
-                                         Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
-
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="EndFace3:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" x:Name="TxtEndFace3" 
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="StoreyY:" VerticalAlignment="Center" Margin="0,2"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtEditStoreyY" 
                                          Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
                             </Grid>
 
-                            <Button x:Name="BtnApplyLegacy" Content="Apply Changes" 
-                                    Click="BtnApplyLegacy_Click"
+                            <Button x:Name="BtnApply" Content="Apply Changes" 
+                                    Click="BtnApply_Click"
                                     Margin="0,10,0,0" Padding="8,4"
                                     Background="#4a7c4a" Foreground="White"/>
                         </StackPanel>

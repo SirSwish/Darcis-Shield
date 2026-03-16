@@ -1,4 +1,4 @@
-// /Views/Dialogs/Buildings/AddCableWindow.xaml.cs
+﻿// /Views/Dialogs/Buildings/AddCableWindow.xaml.cs
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,10 +30,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private short _y0, _y1;
         private byte _segments;
         private short _stepAngle1, _stepAngle2;
+        private readonly int _buildingId1;
 
-        public AddCableWindow()
+        public AddCableWindow(int buildingId1)
         {
             InitializeComponent();
+            _buildingId1 = buildingId1;
             Loaded += (_, __) =>
             {
                 _isInitialized = true;
@@ -132,11 +134,17 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Get fHeight (default to 2)
-            byte fHeight = 2;
+            if (_buildingId1 <= 0)
+            {
+                MessageBox.Show("No building selected. Cables must belong to a building.",
+                    "No Building", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            // Create the cable facet using the static method
+            byte fHeight = 0; // working cables use 0 or 4, not 2
+
             var (success, newFacetId, error) = CableAdder.TryAddCable(
+                _buildingId1,
                 _x0, _z0, _y0,
                 _x1, _z1, _y1,
                 _segments,
@@ -148,12 +156,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             {
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
                 {
-                    mainVm.StatusMessage = $"Cable #{newFacetId} added: ({_x0},{_z0}) ? ({_x1},{_z1}), {_segments} segments.";
+                    mainVm.StatusMessage = $"Cable #{newFacetId} added to Building #{_buildingId1}: ({_x0},{_z0}) → ({_x1},{_z1}), {_segments} segments.";
                 }
 
-                // Refresh buildings tab
                 RefreshBuildingsTab();
-
                 WasCancelled = false;
                 Close();
             }
@@ -424,7 +430,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         /// <summary>
         /// Called by MapViewModel when the user has finished selecting the cable endpoints on the map.
-        /// Coordinates are in tile space (0�127).
+        /// Coordinates are in tile space (0–127).
         /// </summary>
         public void OnPlacementCompleted(byte x0, byte z0, byte x1, byte z1)
         {
@@ -450,7 +456,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             // Restore the window (it was hidden during placement)
             Show();
             Activate();
-            // Nothing else to do � user keeps their existing values.
+            // Nothing else to do – user keeps their existing values.
         }
 
         #endregion

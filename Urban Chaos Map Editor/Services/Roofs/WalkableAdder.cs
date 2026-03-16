@@ -99,7 +99,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
             // Get the building's current walkable head (for chaining)
             int buildingOff = snap.StartOffset + HeaderSize + (template.BuildingId1 - 1) * DBuildingSize;
-            ushort oldWalkableHead = ReadU16(bytes, buildingOff + 16);
+            ushort oldWalkableHead = ReadU16(bytes, buildingOff + 4);
 
             // Calculate Y value: worldY >> 5
             byte walkableY = (byte)Math.Clamp(template.WorldY >> 5, 0, 255);
@@ -151,7 +151,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
             WriteU16(newBytes, walkablesHeaderOff, (ushort)(oldNextWalkable + 1));
 
             // Update building's Walkable pointer to new walkable
-            WriteU16(newBytes, buildingOff + 16, (ushort)newWalkableId1);
+            WriteU16(newBytes, buildingOff + 4, (ushort)newWalkableId1);
 
             // Apply changes
             _svc.ReplaceBytes(newBytes);

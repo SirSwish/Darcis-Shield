@@ -28,27 +28,28 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private DFacetRec _facet;
         private readonly int _facetIndex1;
 
-        // Snapshot tables for style resolution
         private short[] _dstyles = Array.Empty<short>();
         private BuildingArrays.DStoreyRec[] _storeys = Array.Empty<BuildingArrays.DStoreyRec>();
         private byte[] _paintMem = Array.Empty<byte>();
 
-        // Texture location hints
         private string? _variant;
         private int _worldNumber;
 
         private ObservableCollection<FlagItem>? _flagItems;
 
-        // Runtime-built editors (XAML only has CoordPanel/HeightPanel placeholders)
         private TextBox? _txtX0, _txtZ0, _txtX1, _txtZ1;
         private TextBox? _txtHeight, _txtY0, _txtBlockHeight;
 
-        // Regex for input validation
         private static readonly Regex _digitsOnly = new Regex(@"^[0-9]+$");
         private static readonly Regex _signedDigitsOnly = new Regex(@"^-?[0-9]+$");
 
         private static int NormalizeStyleId(int id) => id <= 0 ? 1 : id;
 
+        private static bool IsProceduralDoor(FacetType t) =>
+            t == FacetType.Door || t == FacetType.InsideDoor;
+
+        private static bool IsStyledOutsideDoor(FacetType t) =>
+            t == FacetType.OutsideDoor;
 
         private static Brush GetFacetIdentityBrush(FacetType type)
         {
@@ -130,11 +131,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         #endregion
 
-        #region Coordinate / Height Editors (built into CoordPanel + HeightPanel)
+        #region Coordinate / Height Editors
 
         private void BuildCoordAndHeightEditors()
         {
-            // -------- COORDS --------
             CoordPanel.Children.Clear();
 
             var coordRow1 = new StackPanel { Orientation = Orientation.Horizontal };
@@ -168,7 +168,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             CoordPanel.Children.Add(coordRow1);
             CoordPanel.Children.Add(coordRow2);
 
-            // -------- HEIGHTS --------
             HeightPanel.Children.Clear();
 
             var hRow1 = new StackPanel { Orientation = Orientation.Horizontal };
@@ -262,7 +261,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _txtZ0.Text = _facet.Z0.ToString();
             _txtX1.Text = _facet.X1.ToString();
             _txtZ1.Text = _facet.Z1.ToString();
-
         }
 
         private static DFacetRec CopyFacetWithCoords(DFacetRec f, byte x0, byte z0, byte x1, byte z1)
@@ -272,10 +270,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 f.BlockHeight, f.Open, f.Dfcache, f.Shake, f.CutHole, f.Counter0, f.Counter1);
         }
 
-        /// <summary>
-        /// Called from MapView when the user finishes drawing (two clicks).
-        /// Updates the facet coordinates and refreshes the UI.
-        /// </summary>
         public void ApplyRedrawCoords(byte x0, byte z0, byte x1, byte z1)
         {
             var acc = new BuildingsAccessor(MapDataService.Instance);
@@ -344,7 +338,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _txtHeight.Text = _facet.Height.ToString();
             _txtY0.Text = _facet.Y0.ToString();
             _txtBlockHeight.Text = _facet.BlockHeight.ToString();
-
         }
 
         private static DFacetRec CopyFacetWithHeights(DFacetRec f, byte height, byte fheight, short y0, short y1, byte blockHeight)
@@ -356,7 +349,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         #endregion
 
-        #region Redraw on Map (optional - handler may be wired elsewhere)
+        #region Redraw / Delete
 
         private void BtnRedraw_Click(object sender, RoutedEventArgs e)
         {
@@ -365,6 +358,39 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 mainVm.Map.BeginFacetRedraw(this, _facetIndex1);
                 Hide();
                 mainVm.StatusMessage = "Click start point (X0,Z0), then end point (X1,Z1). Right-click to cancel.";
+            }
+        }
+
+        private void BtnApplyDStorey_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ushort.TryParse(TxtDStorey.Text.Trim(), out ushort newStorey))
+            {
+                MessageBox.Show("Invalid DStorey value (0-65535).", "Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var acc = new BuildingsAccessor(MapDataService.Instance);
+            if (acc.TryUpdateFacetStorey(_facetIndex1, newStorey))
+            {
+                _facet = new DFacetRec(
+                                    _facet.Type, _facet.X0, _facet.Z0, _facet.X1, _facet.Z1,
+                                    _facet.Height, _facet.FHeight, _facet.StyleIndex, _facet.Building, newStorey, _facet.Flags,
+                                    _facet.Y0, _facet.Y1, _facet.BlockHeight, _facet.Open,
+                                    _facet.Dfcache, _facet.Shake, _facet.CutHole,
+                                    _facet.Counter0, _facet.Counter1);
+
+                FacetFlagsText.Text = $"Flags: 0x{((ushort)_facet.Flags):X4}   Building={_facet.Building} Storey={newStorey} StyleIndex={_facet.StyleIndex}";
+
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+                    mainVm.StatusMessage = $"Facet #{_facetIndex1} DStorey set to {newStorey}.";
+
+                BuildingsChangeBus.Instance.NotifyChanged();
+            }
+            else
+            {
+                MessageBox.Show("Failed to update DStorey.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -426,7 +452,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _facet = CopyFacetWithFlags(_facet, newMask);
             FacetFlagsText.Text = $"Resulting Flags: 0x{((ushort)newMask):X4}";
 
-            // Toggling TwoTextured/TwoSided changes layout — refresh everything
             SummarizeStyleAndRecipe(_facet);
             DrawPreview(_facet);
         }
@@ -452,7 +477,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private async Task BuildUIAsync()
         {
-            // Build the editors into CoordPanel/HeightPanel (XAML has placeholders)
             BuildCoordAndHeightEditors();
 
             var arrays = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
@@ -465,6 +489,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             RefreshHeightDisplay();
 
             FacetFlagsText.Text = $"Resulting Flags: 0x{((ushort)_facet.Flags):X4}";
+            TxtDStorey.Text = _facet.Storey.ToString();
             _flagItems = new ObservableCollection<FlagItem>(BuildFlagItemsEx(_facet.Flags));
             FlagsList.ItemsSource = _flagItems;
             HookFlagEvents();
@@ -478,10 +503,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             DrawPreview(_facet);
         }
 
-        /// <summary>
-        /// Returns true if this facet has a dual-face dstyle layout (TwoTextured or TwoSided, and not HugFloor).
-        /// Layout: [A_band0, B_band0, A_band1, B_band1, ...]
-        /// </summary>
         private static bool HasDualFace(DFacetRec f)
         {
             bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
@@ -499,55 +520,17 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 ? (twoTextured ? "Style — Face A (Outside)" : "Style — Face A (Front)")
                 : "Style";
 
-            // Ladders don't use style.tma textures - procedural
-            if (f.Type == FacetType.Ladder)
-            {
-                StyleModeText.Text = "Mode: LADDER (procedural)";
-                RawStyleText.Text = $"StyleIndex={f.StyleIndex} (ignored for ladders)";
-                RecipeText.Text = "Ladders use a procedurally generated texture with white rungs and rails.";
-                RawStylePanel.Visibility = Visibility.Visible;
-                PaintedPanel.Visibility = Visibility.Collapsed;
-                SecondFacePanel.Visibility = Visibility.Collapsed;
-                return;
-            }
+            SummarizeSingleFaceToNewLayout(
+                dstyleIndex: f.StyleIndex,
+                modeText: StyleModeText,
+                baseStyleText: BaseStyleText,
+                dstoreyText: AdvancedDStoreyText,
+                dstyleText: AdvancedDStyleText,
+                paintIndexText: AdvancedPaintMemIndexText,
+                paintCountText: AdvancedPaintMemCountText,
+                isLadder: f.Type == FacetType.Ladder,
+                isDoor: IsProceduralDoor(f.Type));
 
-            // Doors don't use style.tma textures - black rectangles
-            if (f.Type == FacetType.Door || f.Type == FacetType.InsideDoor || f.Type == FacetType.OutsideDoor)
-            {
-                string doorTypeName = f.Type switch
-                {
-                    FacetType.Door => "DOOR",
-                    FacetType.InsideDoor => "INSIDE DOOR",
-                    FacetType.OutsideDoor => "OUTSIDE DOOR",
-                    _ => "DOOR"
-                };
-                StyleModeText.Text = $"Mode: {doorTypeName} (procedural)";
-                RawStyleText.Text = $"StyleIndex={f.StyleIndex} (ignored for doors)";
-                RecipeText.Text = "Doors render as black rectangles. Style is ignored by the engine.";
-                RawStylePanel.Visibility = Visibility.Visible;
-                PaintedPanel.Visibility = Visibility.Collapsed;
-                SecondFacePanel.Visibility = Visibility.Collapsed;
-                return;
-            }
-
-            if (_dstyles.Length == 0 || f.StyleIndex < 0 || f.StyleIndex >= _dstyles.Length)
-            {
-                StyleModeText.Text = "Mode: (unknown - missing dstyles)";
-                RawStyleText.Text = $"StyleIndex={f.StyleIndex}";
-                RecipeText.Text = "";
-                RawStylePanel.Visibility = Visibility.Visible;
-                PaintedPanel.Visibility = Visibility.Collapsed;
-                SecondFacePanel.Visibility = Visibility.Collapsed;
-                return;
-            }
-
-            // ---- Face A ----
-            SummarizeSingleFace(f.StyleIndex,
-                StyleModeText, RawStyleText, RecipeText,
-                RawStylePanel, PaintedPanel,
-                PaintedSummaryText, PaintBytesHexText, PaintBytesGrid);
-
-            // ---- Face B ----
             if (dualFace)
             {
                 int faceBIndex = f.StyleIndex + 1;
@@ -556,21 +539,16 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     ? "Face B Style (Interior)"
                     : "Face B Style (Back)";
 
-                if (faceBIndex >= 0 && faceBIndex < _dstyles.Length)
-                {
-                    SummarizeSingleFace(faceBIndex,
-                        SecondFaceStyleModeText, SecondFaceRawStyleText, SecondFaceRecipeText,
-                        SecondFaceRawPanel, SecondFacePaintedPanel,
-                        SecondFacePaintedSummaryText, SecondFacePaintHexText, null);
-                }
-                else
-                {
-                    SecondFaceStyleModeText.Text = $"Face B: dstyles[{faceBIndex}] out of range ({_dstyles.Length} entries)";
-                    SecondFaceRawStyleText.Text = "";
-                    SecondFaceRecipeText.Text = "";
-                    SecondFaceRawPanel.Visibility = Visibility.Visible;
-                    SecondFacePaintedPanel.Visibility = Visibility.Collapsed;
-                }
+                SummarizeSingleFaceToNewLayout(
+                    dstyleIndex: faceBIndex,
+                    modeText: SecondFaceStyleModeText,
+                    baseStyleText: SecondFaceBaseStyleText,
+                    dstoreyText: SecondFaceAdvancedDStoreyText,
+                    dstyleText: SecondFaceAdvancedDStyleText,
+                    paintIndexText: SecondFaceAdvancedPaintMemIndexText,
+                    paintCountText: SecondFaceAdvancedPaintMemCountText,
+                    isLadder: false,
+                    isDoor: false);
 
                 SecondFacePanel.Visibility = Visibility.Visible;
             }
@@ -580,75 +558,81 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             }
         }
 
-        /// <summary>
-        /// Summarizes a single face's dstyle value into the given UI elements.
-        /// </summary>
-        private void SummarizeSingleFace(
+        private void SummarizeSingleFaceToNewLayout(
             int dstyleIndex,
-            TextBlock modeText, TextBlock rawText, TextBlock recipeText,
-            StackPanel rawPanel, StackPanel paintedPanel,
-            TextBlock? paintedSummaryText, TextBlock? paintHexText,
-            DataGrid? paintGrid)
+            TextBlock modeText,
+            TextBlock baseStyleText,
+            TextBlock dstoreyText,
+            TextBlock dstyleText,
+            TextBlock paintIndexText,
+            TextBlock paintCountText,
+            bool isLadder,
+            bool isDoor)
         {
+            if (isLadder)
+            {
+                modeText.Text = "Mode: Styled";
+                baseStyleText.Text = "Base Style: (procedural ladder)";
+                dstoreyText.Text = "DStorey: (n/a)";
+                dstyleText.Text = $"DStyle: {dstyleIndex}";
+                paintIndexText.Text = "PaintMem Index: (n/a)";
+                paintCountText.Text = "PaintMem Count: (n/a)";
+                return;
+            }
+
+            if (isDoor)
+            {
+                modeText.Text = "Mode: Styled";
+                baseStyleText.Text = "Base Style: (procedural door)";
+                dstoreyText.Text = "DStorey: (n/a)";
+                dstyleText.Text = $"DStyle: {dstyleIndex}";
+                paintIndexText.Text = "PaintMem Index: (n/a)";
+                paintCountText.Text = "PaintMem Count: (n/a)";
+                return;
+            }
+
+            if (_dstyles.Length == 0 || dstyleIndex < 0 || dstyleIndex >= _dstyles.Length)
+            {
+                modeText.Text = "Mode: Styled";
+                baseStyleText.Text = $"Base Style: {dstyleIndex}";
+                dstoreyText.Text = "DStorey: (unknown)";
+                dstyleText.Text = $"DStyle: {dstyleIndex}";
+                paintIndexText.Text = "PaintMem Index: (n/a)";
+                paintCountText.Text = "PaintMem Count: (n/a)";
+                return;
+            }
+
             short val = _dstyles[dstyleIndex];
             if (val >= 0)
             {
-                modeText.Text = $"Mode: RAW style (dstyles[{dstyleIndex}] = {val})";
-                rawText.Text = $"Raw style id (style.tma): {val}";
-                recipeText.Text = BuildRawRecipeString(val);
-                rawPanel.Visibility = Visibility.Visible;
-                paintedPanel.Visibility = Visibility.Collapsed;
+                modeText.Text = "Mode: Styled";
+                baseStyleText.Text = $"Base Style: {NormalizeStyleId(val)}";
+                dstoreyText.Text = "DStorey: (none)";
+                dstyleText.Text = $"DStyle: {dstyleIndex}";
+                paintIndexText.Text = "PaintMem Index: (n/a)";
+                paintCountText.Text = "PaintMem Count: (n/a)";
                 return;
             }
 
             int sid = -val;
-            modeText.Text = $"Mode: PAINTED (dstyles[{dstyleIndex}] = {val} ? DStorey {sid})";
+            modeText.Text = "Mode: Painted";
 
-            // storeys array includes slot 0, so index directly by sid
             if (sid < 1 || sid >= _storeys.Length)
             {
-                if (paintedSummaryText != null)
-                    paintedSummaryText.Text = $"Invalid DStorey id: {sid}";
-                if (paintHexText != null)
-                    paintHexText.Text = "(none)";
-                if (paintGrid != null)
-                    paintGrid.ItemsSource = null;
-
-                recipeText.Text = "";
-                rawPanel.Visibility = Visibility.Collapsed;
-                paintedPanel.Visibility = Visibility.Visible;
+                baseStyleText.Text = "Base Style: (invalid)";
+                dstoreyText.Text = $"DStorey: {sid}";
+                dstyleText.Text = $"DStyle: {dstyleIndex}";
+                paintIndexText.Text = "PaintMem Index: (invalid)";
+                paintCountText.Text = "PaintMem Count: (invalid)";
                 return;
             }
 
             var ds = _storeys[sid];
-            if (paintedSummaryText != null)
-                paintedSummaryText.Text = $"Base style: {ds.StyleIndex}   PaintMem: Index={ds.PaintIndex} Count={ds.Count}";
-            recipeText.Text = BuildRawRecipeString(ds.StyleIndex);
-
-            var bytes = GetPaintBytes(ref ds);
-
-            if (paintHexText != null)
-                paintHexText.Text = ToHexLine(bytes);
-
-            if (paintGrid != null)
-            {
-                var rows = new ObservableCollection<PaintByteVM>();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    byte b = bytes[i];
-                    rows.Add(new PaintByteVM
-                    {
-                        Index = i,
-                        ByteHex = b.ToString("X2"),
-                        Page = b & 0x7F,
-                        Flag = (b & 0x80) != 0 ? "1" : "0"
-                    });
-                }
-                paintGrid.ItemsSource = rows;
-            }
-
-            rawPanel.Visibility = Visibility.Collapsed;
-            paintedPanel.Visibility = Visibility.Visible;
+            baseStyleText.Text = $"Base Style: {NormalizeStyleId(ds.StyleIndex)}";
+            dstoreyText.Text = $"DStorey: {sid}";
+            dstyleText.Text = $"DStyle: {dstyleIndex}";
+            paintIndexText.Text = $"PaintMem Index: {ds.PaintIndex}";
+            paintCountText.Text = $"PaintMem Count: {ds.Count}";
         }
 
         private static bool UsesVerticalUnitsAsPanels(FacetType t) =>
@@ -709,7 +693,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private static bool UsesFenceStretchPreview(FacetType t) =>
             t == FacetType.Fence ||
             t == FacetType.FenceBrick ||
-            t == FacetType.FenceFlat;
+            t == FacetType.FenceFlat ||
+            t == FacetType.OutsideDoor;
 
         private static bool UsesBlockHeightPreview(FacetType t) =>
             t == FacetType.Normal ||
@@ -787,7 +772,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             int bh = NormalizeBlockHeightUnits(f.BlockHeight);
             BitmapSource sourceForScaling = bmp;
 
-            // For shorter-than-normal blocks, use only the top fraction of the texture.
             if (bh < 16)
             {
                 int srcHeight = bmp.PixelHeight;
@@ -800,11 +784,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 }
             }
 
-            // Important distinction:
-            // - full blocks use the block-height-derived source (cropped if bh < 16, full if bh >= 16)
-            // - partial blocks DO NOT crop further; they scale the full-block representation down.
-            double scale = (double)targetPx / Math.Max(1, sourceForScaling.PixelHeight);
-            var transformed = new TransformedBitmap(sourceForScaling, new ScaleTransform(scale, scale));
+            double scaleX = (double)PanelPx / Math.Max(1, sourceForScaling.PixelWidth);
+            double scaleY = (double)targetPx / Math.Max(1, sourceForScaling.PixelHeight);
+            var transformed = new TransformedBitmap(sourceForScaling, new ScaleTransform(scaleX, scaleY));
             transformed.Freeze();
             return transformed;
         }
@@ -818,8 +800,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             int bh = NormalizeBlockHeightUnits(f.BlockHeight);
             BitmapSource sourceForScaling = bmp;
 
-            // Fences always stretch vertically rather than stack, but shorter-than-normal block heights
-            // still mean "use only the top fraction of the base tile" before scaling.
             if (bh < 16)
             {
                 int srcHeight = bmp.PixelHeight;
@@ -832,7 +812,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 }
             }
 
-            // IMPORTANT: fences stay 64px wide; only the HEIGHT stretches.
             double scaleX = (double)PanelPx / Math.Max(1, sourceForScaling.PixelWidth);
             double scaleY = (double)targetHeightPx / Math.Max(1, sourceForScaling.PixelHeight);
 
@@ -840,27 +819,44 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             transformed.Freeze();
             return transformed;
         }
-
+        private static bool HasExplicitSideB(DFacetRec f)
+        {
+            return (f.Flags & FacetFlags.TwoTextured) != 0 ||
+                   (f.Flags & FacetFlags.TwoSided) != 0;
+        }
 
         private void DrawPreview(DFacetRec f)
         {
-            // Ladder preview
+            bool hasSideB = HasExplicitSideB(f);
+            bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
+
+            FaceALabel.Text = "Side A";
+            FaceBLabel.Text = "Side B";
+
             if (f.Type == FacetType.Ladder)
             {
                 DrawLadderPreview(f);
-                FaceALabel.Visibility = Visibility.Collapsed;
-                FaceBLabel.Visibility = Visibility.Collapsed;
-                FaceBPreviewGrid.Visibility = Visibility.Collapsed;
+
+                ClearSideBPreview();
+                if (hasSideB)
+                {
+                    // Still keep side B area, but ladder has no alternate rendering implemented.
+                    // Leave it blank unless a real second-face path is ever needed.
+                }
+
                 return;
             }
 
-            // Door preview
-            if (f.Type == FacetType.Door || f.Type == FacetType.InsideDoor || f.Type == FacetType.OutsideDoor)
+            if (IsProceduralDoor(f.Type))
             {
                 DrawDoorPreview(f);
-                FaceALabel.Visibility = Visibility.Collapsed;
-                FaceBLabel.Visibility = Visibility.Collapsed;
-                FaceBPreviewGrid.Visibility = Visibility.Collapsed;
+
+                ClearSideBPreview();
+                if (hasSideB)
+                {
+                    // Same rule: keep the space, render nothing unless/ until a true side-B procedural variant exists.
+                }
+
                 return;
             }
 
@@ -891,7 +887,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             GridCanvas.Width = width;
             GridCanvas.Height = height;
 
-            // Face A tiles
             double yCursor = 0;
             for (int rowFromTop = 0; rowFromTop < panelsDown; rowFromTop++)
             {
@@ -916,10 +911,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                         if (TryLoadTileBitmap(page, tx, ty, flip, out var bmp))
                         {
                             BitmapSource displayBmp = useFenceStretchPreview
-                                ? BuildPreviewBitmapForFenceStretch(bmp, f)
+                                ? BuildPreviewBitmapForFenceStretch(bmp!, f)
                                 : useBlockHeightPreview
-                                    ? BuildPreviewBitmapForWallLikeFacet(bmp, f, isPartialBlock)
-                                    : bmp;
+                                    ? BuildPreviewBitmapForWallLikeFacet(bmp!, f, isPartialBlock)
+                                    : bmp!;
 
                             var img = new Image
                             {
@@ -957,35 +952,46 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 Fill = Brushes.Transparent
             });
 
-            // Face B (dual-face)
-            bool dualFace = HasDualFace(f);
-            bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
-
-            if (dualFace)
+            if (hasSideB)
             {
-                FaceALabel.Text = twoTextured ? "→ Face A (Outside)" : "→ Face A (Front)";
-                FaceBLabel.Text = twoTextured ? "→ Face B (Interior)" : "→ Face B (Back)";
-                FaceALabel.Visibility = Visibility.Visible;
-                FaceBLabel.Visibility = Visibility.Visible;
-                FaceBPreviewGrid.Visibility = Visibility.Visible;
-
-                DrawFaceBPreview(f, panelsAcross, panelsDown, panelWidthPx, fullBlockPreviewPx, partialBlockPreviewPx, fullBlocksDown, useBlockHeightPreview, useFenceStretchPreview);
+                DrawFaceBPreview(
+                    f,
+                    panelsAcross,
+                    panelsDown,
+                    panelWidthPx,
+                    fullBlockPreviewPx,
+                    partialBlockPreviewPx,
+                    fullBlocksDown,
+                    useBlockHeightPreview,
+                    useFenceStretchPreview);
             }
             else
             {
-                FaceALabel.Visibility = Visibility.Collapsed;
-                FaceBLabel.Visibility = Visibility.Collapsed;
-                FaceBPreviewGrid.Visibility = Visibility.Collapsed;
+                ClearSideBPreview();
             }
-            CenterPreviewPair(PanelCanvas, GridCanvas, PreviewScroll);
-            CenterPreviewPair(FaceBPanelCanvas, FaceBGridCanvas, PreviewScroll);
         }
 
-        /// <summary>
-        /// Draws the Face B preview for TwoTextured/TwoSided facets.
-        /// Face B slots are at odd dstyle positions: StyleIndex+1, StyleIndex+3, ...
-        /// </summary>
-        private void DrawFaceBPreview(DFacetRec f, int panelsAcross, int panelsDown, int panelWidthPx, int fullBlockPreviewPx, int partialBlockPreviewPx, int fullBlocksDown, bool useBlockHeightPreview, bool useFenceStretchPreview)
+        private void ClearSideBPreview()
+        {
+            FaceBPanelCanvas.Children.Clear();
+            FaceBGridCanvas.Children.Clear();
+
+            FaceBPanelCanvas.Width = 0;
+            FaceBPanelCanvas.Height = 0;
+            FaceBGridCanvas.Width = 0;
+            FaceBGridCanvas.Height = 0;
+        }
+
+        private void DrawFaceBPreview(
+    DFacetRec f,
+    int panelsAcross,
+    int panelsDown,
+    int panelWidthPx,
+    int fullBlockPreviewPx,
+    int partialBlockPreviewPx,
+    int fullBlocksDown,
+    bool useBlockHeightPreview,
+    bool useFenceStretchPreview)
         {
             int width = panelsAcross * panelWidthPx;
             int height = useFenceStretchPreview
@@ -1021,16 +1027,16 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     {
                         int tileId = page * 64 + ty * 8 + tx;
                         string tooltipText = useBlockHeightPreview
-                            ? $"Face B: tex{tileId:D3}hi (block {f.BlockHeight} => {fullBlockPreviewPx}px, row {rowFromBottom}{(isPartialBlock ? ", partial" : "")})"
-                            : $"Face B: tex{tileId:D3}hi";
+                            ? $"Side B: tex{tileId:D3}hi (block {f.BlockHeight} => {fullBlockPreviewPx}px, row {rowFromBottom}{(isPartialBlock ? ", partial" : "")})"
+                            : $"Side B: tex{tileId:D3}hi";
 
                         if (TryLoadTileBitmap(page, tx, ty, flip, out var bmp))
                         {
                             BitmapSource displayBmp = useFenceStretchPreview
-                                ? BuildPreviewBitmapForFenceStretch(bmp, f)
+                                ? BuildPreviewBitmapForFenceStretch(bmp!, f)
                                 : useBlockHeightPreview
-                                    ? BuildPreviewBitmapForWallLikeFacet(bmp, f, isPartialBlock)
-                                    : bmp;
+                                    ? BuildPreviewBitmapForWallLikeFacet(bmp!, f, isPartialBlock)
+                                    : bmp!;
 
                             var img = new Image
                             {
@@ -1052,7 +1058,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     }
                     else
                     {
-                        AddPlaceholderRectTo(FaceBPanelCanvas, col, yCursor, "(no tile - Face B)",
+                        AddPlaceholderRectTo(FaceBPanelCanvas, col, yCursor, "(no tile - Side B)",
                             Color.FromRgb(0x30, 0x20, 0x20), panelWidthPx, rowHeightPx);
                     }
                 }
@@ -1095,7 +1101,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             PanelCanvas.Children.Add(new Rectangle { Width = scaledWidth, Height = height, Fill = Brushes.Black });
 
-            // Side rails
             var leftRail = new Rectangle { Width = RailWidth, Height = height, Fill = Brushes.White };
             Canvas.SetLeft(leftRail, 0);
             PanelCanvas.Children.Add(leftRail);
@@ -1104,7 +1109,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             Canvas.SetLeft(rightRail, scaledWidth - RailWidth);
             PanelCanvas.Children.Add(rightRail);
 
-            // Rungs
             for (int seg = 0; seg < panelsDown; seg++)
             {
                 for (int r = 0; r < RungsPerSegment; r++)
@@ -1287,7 +1291,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             var entries = tma.TextureStyles[idx].Entries;
             if (entries == null || entries.Count == 0) return false;
 
-            int pieceIndex = pos == 0 ? 0 : (pos == count - 2 ? 1 : 2);
+            int pieceIndex = pos == 0 ? 2 : (pos == count - 2 ? 0 : 1);
             if (pieceIndex >= entries.Count) pieceIndex = entries.Count - 1;
 
             var e = entries[pieceIndex];
@@ -1426,7 +1430,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         #endregion
 
-        #region Paint Facet
+        #region Paint / Change Style
 
         private void BtnPaintFacet_Click(object sender, RoutedEventArgs e)
         {
@@ -1437,9 +1441,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            if (_facet.Type == FacetType.Door || _facet.Type == FacetType.InsideDoor || _facet.Type == FacetType.OutsideDoor)
+            if (IsProceduralDoor(_facet.Type))
             {
-                MessageBox.Show("Doors cannot be painted - they render as solid black.",
+                MessageBox.Show("Door and InsideDoor facets cannot be painted - they render procedurally.",
                     "Cannot Paint", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -1456,17 +1460,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     _paintMem = arrays.PaintMem ?? Array.Empty<byte>();
                     _storeys = arrays.Storeys ?? Array.Empty<BuildingArrays.DStoreyRec>();
 
-                    // NOTE: facet object itself might be updated elsewhere; if you also want to re-pull facet here,
-                    // do it via accessor (not shown).
                     SummarizeStyleAndRecipe(_facet);
                     DrawPreview(_facet);
                 }
             }
         }
-
-        #endregion
-
-        #region Change Style (Face A / Face B)
 
         private async void BtnChangeStyle_Click(object sender, RoutedEventArgs e)
         {
@@ -1477,9 +1475,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            if (_facet.Type == FacetType.Door || _facet.Type == FacetType.InsideDoor || _facet.Type == FacetType.OutsideDoor)
+            if (IsProceduralDoor(_facet.Type))
             {
-                MessageBox.Show("Doors ignore style textures (procedural black).",
+                MessageBox.Show("Door and InsideDoor facets ignore style textures (procedural).",
                     "Cannot Change Style", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -1607,43 +1605,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             DrawPreview(_facet);
         }
 
-        private void CenterPreview(Canvas panelCanvas)
-        {
-            if (panelCanvas.Parent is not FrameworkElement container)
-                return;
-
-            panelCanvas.UpdateLayout();
-            container.UpdateLayout();
-
-            double canvasWidth = double.IsNaN(panelCanvas.Width) || panelCanvas.Width <= 0
-                ? panelCanvas.ActualWidth
-                : panelCanvas.Width;
-
-            double canvasHeight = double.IsNaN(panelCanvas.Height) || panelCanvas.Height <= 0
-                ? panelCanvas.ActualHeight
-                : panelCanvas.Height;
-
-            double containerWidth = container.ActualWidth;
-            double containerHeight = container.ActualHeight;
-
-            if (double.IsNaN(canvasWidth) || double.IsInfinity(canvasWidth) || canvasWidth < 0)
-                canvasWidth = 0;
-
-            if (double.IsNaN(canvasHeight) || double.IsInfinity(canvasHeight) || canvasHeight < 0)
-                canvasHeight = 0;
-
-            if (double.IsNaN(containerWidth) || double.IsInfinity(containerWidth) || containerWidth < 0)
-                containerWidth = 0;
-
-            if (double.IsNaN(containerHeight) || double.IsInfinity(containerHeight) || containerHeight < 0)
-                containerHeight = 0;
-
-            double offsetX = Math.Max(0, (containerWidth - canvasWidth) / 2.0);
-            double offsetY = Math.Max(0, (containerHeight - canvasHeight) / 2.0);
-
-            panelCanvas.Margin = new Thickness(offsetX, offsetY, 0, 0);
-        }
-
         private void CenterPreviewPair(Canvas panelCanvas, Canvas gridCanvas, ScrollViewer previewScroll)
         {
             panelCanvas.UpdateLayout();
@@ -1687,6 +1648,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             panelCanvas.RenderTransform = new TranslateTransform(offsetX, offsetY);
             gridCanvas.RenderTransform = new TranslateTransform(offsetX, offsetY);
         }
+
         #endregion
     }
 }

@@ -1,17 +1,3 @@
-// Updated FacetTemplate class.
-// This replaces the existing FacetTemplate definition in AddWallWindow_xaml.cs (line ~362).
-//
-// NEW FIELDS:
-//   PaintBytes          — per-column paint bytes for the outside face (enables DStorey creation)
-//   InteriorStyleId     — TMA style for warehouse interior face (0 = same as RawStyleId)
-//   InteriorPaintBytes  — per-column paint bytes for warehouse interior face
-//
-// When PaintBytes is non-null and non-empty, BuildingAdder will:
-//   1. Create a DStorey entry with RawStyleId as the base style
-//   2. Write PaintBytes into paint_mem
-//   3. Set the dstyle entry to -storeyIndex (negative = painted reference)
-//
-// When PaintBytes is null or empty, BuildingAdder writes a positive raw style id.
 
 namespace UrbanChaosMapEditor.Models.Buildings
 {

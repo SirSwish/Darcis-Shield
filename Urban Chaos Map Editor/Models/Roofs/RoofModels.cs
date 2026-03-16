@@ -42,13 +42,7 @@ namespace UrbanChaosMapEditor.Models.Roofs
     public sealed class RoofFace4VM
     {
         public int FaceId { get; set; }
-
-        // Compatibility alias used by some older XAML/code-behind.
-        public int Index
-        {
-            get => FaceId;
-            set => FaceId = value;
-        }
+        public int Index { get => FaceId; set => FaceId = value; }
 
         public short Y { get; set; }
         public sbyte DY0 { get; set; }
@@ -60,8 +54,14 @@ namespace UrbanChaosMapEditor.Models.Roofs
         public byte RZ { get; set; }
         public short Next { get; set; }
 
-        // XAML display
+        // Display: masked tile coordinates
+        public int TileX => RX & 0x7F;
+        public int TileZ => RZ - 128;
+        public bool RXFlagSet => (RX & 0x80) != 0;
+
         public string DY => $"{DY0},{DY1},{DY2}";
+        public string TileDisplay => $"({TileX},{TileZ}){(RXFlagSet ? "*" : "")}";
+        public string DrawFlagsHex => $"0x{DrawFlags:X2}";
     }
 
     /// <summary>

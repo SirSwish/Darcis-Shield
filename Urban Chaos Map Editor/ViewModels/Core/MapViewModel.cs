@@ -776,6 +776,13 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             }
         }
 
+        private int _selectedRf4Id;
+        public int SelectedRf4Id
+        {
+            get => _selectedRf4Id;
+            set { if (_selectedRf4Id != value) { _selectedRf4Id = value; OnPropertyChanged(); } }
+        }
+
         private int? _selectedStoreyId;
         public int? SelectedStoreyId
         {
@@ -1292,6 +1299,10 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             _facetMultiDrawWindow = window;
             _facetTemplate = template;
             IsMultiDrawingFacets = true;
+
+            // Use dedicated preview for doors
+            if (template.Type == FacetType.Door)
+                IsPlacingDoor = true;
         }
 
         /// <summary>
@@ -1317,7 +1328,10 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             {
                 // First click - store start point (X0, Z0)
                 _multiDrawFirstPoint = (tileX, tileZ);
-                MultiDrawPreviewLine = (snappedUiX, snappedUiZ, snappedUiX, snappedUiZ);
+                if (_facetTemplate.Type == FacetType.Door)
+                    DoorPreviewLine = (snappedUiX, snappedUiZ, snappedUiX, snappedUiZ);
+                else
+                    MultiDrawPreviewLine = (snappedUiX, snappedUiZ, snappedUiX, snappedUiZ);
                 return true;
             }
             else
@@ -1376,6 +1390,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 // Reset for next facet
                 _multiDrawFirstPoint = null;
                 MultiDrawPreviewLine = null;
+                DoorPreviewLine = null;
 
                 return true;
             }
@@ -1399,7 +1414,10 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             int firstUiX = (128 - _multiDrawFirstPoint.Value.x) * 64;
             int firstUiZ = (128 - _multiDrawFirstPoint.Value.z) * 64;
 
-            MultiDrawPreviewLine = (firstUiX, firstUiZ, snappedUiX, snappedUiZ);
+            if (_facetTemplate?.Type == FacetType.Door)
+                DoorPreviewLine = (firstUiX, firstUiZ, snappedUiX, snappedUiZ);
+            else
+                MultiDrawPreviewLine = (firstUiX, firstUiZ, snappedUiX, snappedUiZ);
         }
 
         /// <summary>
@@ -1445,6 +1463,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         private void EndFacetMultiDraw(int facetsAdded)
         {
             IsMultiDrawingFacets = false;
+            IsPlacingDoor = false;
             MultiDrawPreviewLine = null;
             _multiDrawFirstPoint = null;
 
@@ -1638,141 +1657,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             _addCableWindow = null;
         }
 
-        /// <summary>
-        /// Begins door placement mode. Called by AddDoorWindow when user clicks "Draw on Map".
-        /// </summary>
-        //public void BeginDoorPlacement(AddDoorWindow window, DoorTemplate template)
-        //{
-        //    _addDoorWindow = window;
-        //    _doorTemplate = template;
-        //    _doorFirstPoint = null;
-        //    DoorPreviewLine = null;
-        //    IsPlacingDoor = true;
-        //}
-
-        /// <summary>
-        /// Called by MapView when user clicks during door placement mode.
-        /// Two clicks required: first = start, second = end (must be within 1 cell).
-        /// Returns true if the click was handled.
-        /// </summary>
-        //public bool HandleDoorPlacementClick(int uiX, int uiZ)
-        //{
-        //    if (!IsPlacingDoor || _doorTemplate == null)
-        //        return false;
-
-        //    // Snap to nearest vertex (64px grid)
-        //    int snappedUiX = ((uiX + 32) / 64) * 64;
-        //    int snappedUiZ = ((uiZ + 32) / 64) * 64;
-        //    snappedUiX = Math.Clamp(snappedUiX, 0, 8192);
-        //    snappedUiZ = Math.Clamp(snappedUiZ, 0, 8192);
-
-        //    // Convert to tile coords (game uses bottom-right origin)
-        //    byte tileX = (byte)Math.Clamp(128 - (snappedUiX / 64), 0, 127);
-        //    byte tileZ = (byte)Math.Clamp(128 - (snappedUiZ / 64), 0, 127);
-
-        //    if (_doorFirstPoint == null)
-        //    {
-        //        // First click - store start point
-        //        _doorFirstPoint = (tileX, tileZ);
-        //        DoorPreviewLine = (snappedUiX, snappedUiZ, snappedUiX, snappedUiZ);
-
-        //        if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-        //        {
-        //            mainVm.StatusMessage = $"Door start: ({tileX},{tileZ}). Click end point (must be within 1 cell). Right-click to cancel.";
-        //        }
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        // Second click - validate distance and complete
-        //        byte x0 = _doorFirstPoint.Value.x;
-        //        byte z0 = _doorFirstPoint.Value.z;
-        //        byte x1 = tileX;
-        //        byte z1 = tileZ;
-
-        //        // Calculate distance in cells
-        //        int deltaX = Math.Abs((int)x1 - (int)x0);
-        //        int deltaZ = Math.Abs((int)z1 - (int)z0);
-
-        //        // Doors must be exactly 1 cell in ONE direction and 0 in the other
-        //        // Valid: (1,0) or (0,1) - i.e., horizontal or vertical, 1 cell long
-        //        bool isValid = (deltaX == 1 && deltaZ == 0) || (deltaX == 0 && deltaZ == 1);
-
-        //        if (!isValid)
-        //        {
-        //            // Invalid - show error but don't cancel, let them try again
-        //            string errorMsg;
-        //            if (deltaX == 0 && deltaZ == 0)
-        //            {
-        //                errorMsg = "Start and end points are the same. Door must be 1 cell long.";
-        //            }
-        //            else if (deltaX > 1 || deltaZ > 1)
-        //            {
-        //                errorMsg = $"Door is {Math.Max(deltaX, deltaZ)} cells long. Maximum is 1 cell.";
-        //            }
-        //            else
-        //            {
-        //                errorMsg = $"Door must be horizontal OR vertical, not diagonal. Distance: ({deltaX},{deltaZ})";
-        //            }
-
-        //            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-        //            {
-        //                mainVm.StatusMessage = $"?? {errorMsg} Try again.";
-        //            }
-
-        //            // Reset first point so they can start over
-        //            _doorFirstPoint = null;
-        //            DoorPreviewLine = null;
-        //            return true;
-        //        }
-
-        //        // Valid door - create it
-        //        // Door: Height = 4 (1 storey), FHeight = 0, Flags = TwoTextured | Unclimbable
-        //        var facetTemplate = new FacetTemplate
-        //        {
-        //            Type = FacetType.Door,
-        //            Height = 4,           // 1 storey = 4 height units
-        //            FHeight = 0,
-        //            BlockHeight = _doorTemplate.BlockHeight,
-        //            Y0 = _doorTemplate.Y0,
-        //            Y1 = _doorTemplate.Y1,
-        //            Flags = FacetFlags.TwoTextured | FacetFlags.Unclimbable,
-        //            BuildingId1 = _doorTemplate.BuildingId1,
-        //            Storey = _doorTemplate.Storey
-        //        };
-
-        //        // Commit the door
-        //        var adder = new BuildingAdder(MapDataService.Instance);
-        //        var coords = new List<(byte, byte, byte, byte)> { (x0, z0, x1, z1) };
-        //        var result = adder.TryAddFacets(_doorTemplate.BuildingId1, coords, facetTemplate);
-
-        //        if (result.IsSuccess)
-        //        {
-        //            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-        //            {
-        //                mainVm.StatusMessage = $"Door added at ({x0},{z0})->({x1},{z1}) to Building #{_doorTemplate.BuildingId1}.";
-        //            }
-
-        //            MessageBox.Show($"Door added successfully to Building #{_doorTemplate.BuildingId1}.\n\n" +
-        //                $"Position: ({x0},{z0}) ? ({x1},{z1})",
-        //                "Door Added", MessageBoxButton.OK, MessageBoxImage.Information);
-
-        //            EndDoorPlacement(true);
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show($"Failed to add door:\n\n{result.ErrorMessage}",
-        //                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-        //            // Reset to let them try again
-        //            _doorFirstPoint = null;
-        //            DoorPreviewLine = null;
-        //        }
-
-        //        return true;
-        //    }
-        //}
-
+     
         /// <summary>
         /// Updates the preview line endpoint as mouse moves during door placement.
         /// </summary>
@@ -1794,39 +1679,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             DoorPreviewLine = (firstUiX, firstUiZ, snappedUiX, snappedUiZ);
         }
 
-        /// <summary>
-        /// Cancels door placement mode (right-click or escape).
-        /// </summary>
-        //public void CancelDoorPlacement()
-        //{
-        //    if (!IsPlacingDoor)
-        //        return;
-
-        //    EndDoorPlacement(false);
-
-        //    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-        //    {
-        //        mainVm.StatusMessage = "Door placement cancelled.";
-        //    }
-        //}
-
-        //private void EndDoorPlacement(bool success)
-        //{
-        //    IsPlacingDoor = false;
-        //    DoorPreviewLine = null;
-        //    _doorFirstPoint = null;
-
-        //    if (_addDoorWindow != null)
-        //    {
-        //        if (success)
-        //            _addDoorWindow.OnPlacementCompleted();
-        //        else
-        //            _addDoorWindow.OnPlacementCancelled();
-        //    }
-
-        //    _addDoorWindow = null;
-        //    _doorTemplate = null;
-        //}
+   
 
         /// <summary>
         /// Get currently selected facet IDs from the Buildings tab.

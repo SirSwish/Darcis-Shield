@@ -126,7 +126,8 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowRoofs, Converter={StaticResource BoolToVis}}"
-                        SelectedBuildingId="{Binding SelectedBuildingId}"
+                        SelectedWalkableId1="{Binding SelectedWalkableId1}"
+                        SelectedRf4Id="{Binding SelectedRf4Id}"
                         Panel.ZIndex="51"/>
 
                     <rfOvl:RoofAltitudesLayer

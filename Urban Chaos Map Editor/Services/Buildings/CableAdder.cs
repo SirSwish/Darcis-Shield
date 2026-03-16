@@ -1,4 +1,11 @@
-// /Services/CableAdder.cs
+// Services/Buildings/CableAdder.cs
+// Adds cable facets to the map. Cables MUST be inserted within a building's
+// [StartFacet..EndFacet) range — orphan cables are silently ignored by the engine.
+//
+// Unlike regular facets, cables do NOT use dstyles: the StyleIndex and Building
+// fields are repurposed for step_angle1 and step_angle2 (cable curve parameters).
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using UrbanChaosMapEditor.Models.Buildings;
@@ -6,13 +13,6 @@ using UrbanChaosMapEditor.Services.Core;
 
 namespace UrbanChaosMapEditor.Services.Buildings
 {
-    /// <summary>
-    /// Service for adding new cable facets to the map.
-    /// Based on the original create_cable_dfacet() logic.
-    /// 
-    /// IMPORTANT: Cables are added at the END of the facets array (after all building facets).
-    /// This requires rebuilding the file to insert the new facet bytes and shift everything after.
-    /// </summary>
     public static class CableAdder
     {
         // DFacet byte offsets (26 bytes total)
@@ -33,40 +33,50 @@ namespace UrbanChaosMapEditor.Services.Buildings
         private const int DFACET_SIZE = 26;
         private const int HEADER_SIZE = 48;
         private const int DBUILDING_SIZE = 24;
+        private const int DSTYLE_SIZE = 2;
         private const int AFTER_BUILDINGS_PAD = 14;
 
         /// <summary>
-        /// Attempts to add a new cable facet to the map.
+        /// Adds a new cable facet within the specified building's facet range.
+        /// The cable is inserted at the building's EndFacet position and all
+        /// subsequent buildings' facet ranges are shifted up by 1.
         /// </summary>
-        /// <param name="x0">Start X coordinate (0-127 building units)</param>
-        /// <param name="z0">Start Z coordinate (0-127 building units)</param>
+        /// <param name="buildingId1">1-based building ID to own the cable</param>
+        /// <param name="x0">Start X coordinate (0-127)</param>
+        /// <param name="z0">Start Z coordinate (0-127)</param>
         /// <param name="y0">Start Y world coordinate</param>
-        /// <param name="x1">End X coordinate (0-127 building units)</param>
-        /// <param name="z1">End Z coordinate (0-127 building units)</param>
+        /// <param name="x1">End X coordinate (0-127)</param>
+        /// <param name="z1">End Z coordinate (0-127)</param>
         /// <param name="y1">End Y world coordinate</param>
         /// <param name="segments">Number of cable segments (auto-calculated if 0)</param>
         /// <param name="stepAngle1">First step angle (auto-calculated if null)</param>
         /// <param name="stepAngle2">Second step angle (auto-calculated if null)</param>
-        /// <param name="fHeight">Texture style mode (default 2)</param>
+        /// <param name="fHeight">Texture style mode (default 0; working cables use 4)</param>
         /// <returns>Tuple of (success, newFacetId, errorMessage)</returns>
         public static (bool Success, int NewFacetId, string? Error) TryAddCable(
+            int buildingId1,
             byte x0, byte z0, short y0,
             byte x1, byte z1, short y1,
             int segments = 0,
             short? stepAngle1 = null,
             short? stepAngle2 = null,
-            byte fHeight = 2)
+            byte fHeight = 0)
         {
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded)
                 return (false, 0, "No map loaded");
 
-            // Use BuildingsAccessor to get a proper snapshot
+            if (buildingId1 <= 0)
+                return (false, 0, "A building must be selected. Cables must belong to a building.");
+
             var acc = new BuildingsAccessor(svc);
             var snap = acc.ReadSnapshot();
 
             if (snap.StartOffset < 0)
                 return (false, 0, "Could not find building region");
+
+            if (buildingId1 > snap.Buildings.Length)
+                return (false, 0, $"Building #{buildingId1} not found.");
 
             // Calculate length for auto-segments
             double dx = (x1 - x0) * 256.0;
@@ -92,16 +102,26 @@ namespace UrbanChaosMapEditor.Services.Buildings
             // Read current header counters
             ushort oldNextBuilding = ReadU16(bytes, blockStart + 2);
             ushort oldNextFacet = ReadU16(bytes, blockStart + 4);
+            ushort oldNextStyle = ReadU16(bytes, blockStart + 6);
 
             // Calculate offsets
             int buildingsOff = blockStart + HEADER_SIZE;
             int totalBuildings = Math.Max(0, oldNextBuilding - 1);
-            int facetsOff = buildingsOff + totalBuildings * DBUILDING_SIZE + AFTER_BUILDINGS_PAD;
+            int padOff = buildingsOff + totalBuildings * DBUILDING_SIZE;
+            int facetsOff = padOff + AFTER_BUILDINGS_PAD;
             int totalFacets = Math.Max(0, oldNextFacet - 1);
             int stylesOff = facetsOff + totalFacets * DFACET_SIZE;
+            int oldStylesSize = Math.Max(0, oldNextStyle - 1) * DSTYLE_SIZE;
+            int afterStylesOff = stylesOff + oldStylesSize;
 
-            // The new facet ID (1-based) - cables go at the end
-            int newFacetId = oldNextFacet;
+            // Get the target building's current facet range
+            int buildingRecOff = buildingsOff + (buildingId1 - 1) * DBUILDING_SIZE;
+            ushort oldEndFacet = ReadU16(bytes, buildingRecOff + 2);
+
+            // Insert at the building's current EndFacet position (1-based)
+            int insertPosition = oldEndFacet;
+
+            Debug.WriteLine($"[CableAdder] Inserting cable into Building #{buildingId1}, insertPos={insertPosition}");
 
             // Create the new cable facet record (26 bytes)
             var newFacet = new byte[DFACET_SIZE];
@@ -110,61 +130,89 @@ namespace UrbanChaosMapEditor.Services.Buildings
             newFacet[OFF_HEIGHT] = (byte)segments;
             newFacet[OFF_X0] = x0;
             newFacet[OFF_X1] = x1;
-
-            // Y0 and Y1 are signed 16-bit little-endian
             WriteS16(newFacet, OFF_Y0, y0);
             WriteS16(newFacet, OFF_Y1, y1);
-
             newFacet[OFF_Z0] = z0;
             newFacet[OFF_Z1] = z1;
 
-            // Flags - MUST be Unclimbable (0x0100 = 256) for cables to render correctly
-            WriteU16(newFacet, OFF_FLAGS, (ushort)FacetFlags.Unclimbable);
+            // Flags — bit 8 (0x0100) is set on all working cables in the original maps
+            WriteU16(newFacet, OFF_FLAGS, 0x0100);
 
-            // StyleIndex = step_angle1 (as unsigned representation of signed value)
+            // StyleIndex = step_angle1 (repurposed, NOT a real style index)
             WriteU16(newFacet, OFF_STYLE, unchecked((ushort)step1));
 
-            // Building = step_angle2 (as unsigned representation of signed value)
+            // Building = step_angle2 (repurposed, NOT a real building ID)
             WriteU16(newFacet, OFF_BUILDING, unchecked((ushort)step2));
 
             // Storey = 0 for cables
             WriteU16(newFacet, OFF_STOREY, 0);
 
-            // FHeight = mode/texture style
+            // FHeight
             newFacet[OFF_FHEIGHT] = fHeight;
 
-            // Remaining bytes (19-25) are already 0
-
-            // Build the new file with the cable inserted at the end of facets
+            // Build new file with cable inserted at the correct position
             using var ms = new MemoryStream();
 
-            // 1. Copy everything up to and including the building block header
-            ms.Write(bytes, 0, blockStart + HEADER_SIZE);
+            // 1. Copy everything up to building block start
+            ms.Write(bytes, 0, blockStart);
 
-            // 2. Go back and update the header's NextDFacet counter
-            ms.Position = blockStart + 4;
-            WriteU16ToStream(ms, (ushort)(oldNextFacet + 1));
-            ms.Position = ms.Length;
+            // 2. Write building block header with updated NextDFacet
+            var header = new byte[HEADER_SIZE];
+            Buffer.BlockCopy(bytes, blockStart, header, 0, HEADER_SIZE);
+            WriteU16(header, 4, (ushort)(oldNextFacet + 1));  // +1 facet
+            // NextDStyle stays the same — cables don't use dstyles
+            ms.Write(header, 0, HEADER_SIZE);
 
-            // 3. Write existing buildings (unchanged)
-            if (totalBuildings > 0)
+            // 3. Write buildings with updated facet ranges
+            for (int bldIdx = 0; bldIdx < totalBuildings; bldIdx++)
             {
-                ms.Write(bytes, buildingsOff, totalBuildings * DBUILDING_SIZE);
+                int srcOff = buildingsOff + bldIdx * DBUILDING_SIZE;
+                var bldBytes = new byte[DBUILDING_SIZE];
+                Buffer.BlockCopy(bytes, srcOff, bldBytes, 0, DBUILDING_SIZE);
+
+                int bldId1 = bldIdx + 1;
+                ushort start = ReadU16(bldBytes, 0);
+                ushort end = ReadU16(bldBytes, 2);
+
+                if (bldId1 == buildingId1)
+                {
+                    // Target building — expand EndFacet by 1
+                    WriteU16(bldBytes, 2, (ushort)(end + 1));
+                    Debug.WriteLine($"[CableAdder] Building #{bldId1} (target): EndFacet {end} -> {end + 1}");
+                }
+                else if (start >= insertPosition)
+                {
+                    // Building comes after insertion point — shift its range
+                    WriteU16(bldBytes, 0, (ushort)(start + 1));
+                    WriteU16(bldBytes, 2, (ushort)(end + 1));
+                    Debug.WriteLine($"[CableAdder] Building #{bldId1} (after): range ({start},{end}) -> ({start + 1},{end + 1})");
+                }
+
+                ms.Write(bldBytes, 0, DBUILDING_SIZE);
             }
 
-            // 4. Write the padding between buildings and facets
-            ms.Write(bytes, buildingsOff + totalBuildings * DBUILDING_SIZE, AFTER_BUILDINGS_PAD);
+            // 4. Write padding between buildings and facets (copy original bytes)
+            ms.Write(bytes, padOff, AFTER_BUILDINGS_PAD);
 
-            // 5. Write existing facets (unchanged)
-            if (totalFacets > 0)
+            // 5. Write facets with the cable inserted at the correct position
+            int facetsBefore = insertPosition - 1; // 0-based count of facets before insertion
+            if (facetsBefore > 0)
             {
-                ms.Write(bytes, facetsOff, totalFacets * DFACET_SIZE);
+                ms.Write(bytes, facetsOff, facetsBefore * DFACET_SIZE);
             }
 
-            // 6. Write the NEW cable facet at the end
+            // Insert the new cable facet
             ms.Write(newFacet, 0, DFACET_SIZE);
 
-            // 7. Copy everything AFTER the old facets (styles, paint, storeys, indoors, walkables, objects, tail)
+            // Write remaining facets after insertion point
+            int facetsAfter = totalFacets - facetsBefore;
+            if (facetsAfter > 0)
+            {
+                int afterSrcOff = facetsOff + facetsBefore * DFACET_SIZE;
+                ms.Write(bytes, afterSrcOff, facetsAfter * DFACET_SIZE);
+            }
+
+            // 6. Copy everything after facets (dstyles, paint, storeys, walkables, etc.)
             int afterFacetsLen = bytes.Length - stylesOff;
             if (afterFacetsLen > 0)
             {
@@ -173,7 +221,7 @@ namespace UrbanChaosMapEditor.Services.Buildings
 
             var newBytes = ms.ToArray();
 
-            // Validate the new file size
+            // Validate
             int expectedSize = bytes.Length + DFACET_SIZE;
             if (newBytes.Length != expectedSize)
             {
@@ -181,50 +229,37 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 return (false, 0, $"File size mismatch: expected {expectedSize}, got {newBytes.Length}");
             }
 
-            Debug.WriteLine($"[CableAdder] Created cable facet #{newFacetId} at end of facets array");
+            // The new facet's 1-based ID
+            int newFacetId = insertPosition;
+
+            Debug.WriteLine($"[CableAdder] Created cable facet #{newFacetId} within Building #{buildingId1}");
             Debug.WriteLine($"[CableAdder]   ({x0},{z0},{y0}) -> ({x1},{z1},{y1}), segments={segments}");
             Debug.WriteLine($"[CableAdder]   step1={step1} (0x{unchecked((ushort)step1):X4}), step2={step2} (0x{unchecked((ushort)step2):X4})");
-            Debug.WriteLine($"[CableAdder]   flags=0x{(ushort)FacetFlags.Unclimbable:X4}");
+            Debug.WriteLine($"[CableAdder]   flags=0x0100, fHeight={fHeight}");
             Debug.WriteLine($"[CableAdder]   Old file: {bytes.Length} bytes, new file: {newBytes.Length} bytes (+{DFACET_SIZE})");
 
-            // Replace the entire file
+            // Replace the file
             svc.ReplaceBytes(newBytes);
 
-            // Notify change bus
-            BuildingsChangeBus.Instance.NotifyChanged();
+            // Notify
+            BuildingsChangeBus.Instance.NotifyBuildingChanged(buildingId1, BuildingChangeType.Modified);
 
             return (true, newFacetId, null);
         }
 
         /// <summary>
-        /// Calculates step angles for cable catenary curve based on the original game algorithm.
-        /// step1 is positive (controls curve at start), step2 is negative (controls curve at end).
-        /// The magnitudes should be roughly equal for a symmetric catenary.
+        /// Calculates step angles for cable catenary curve.
+        /// step1 is positive (curve at start), step2 is negative (curve at end).
         /// </summary>
         public static (short step1, short step2) CalculateStepAngles(double length, int segments)
         {
             if (segments <= 0) segments = 1;
 
-            // Based on reverse-engineering the original create_cable_dfacet:
-            // The step angles control the "sag" of the cable catenary curve.
-            // step1 is positive (angle at start), step2 is NEGATIVE (angle at end)
-            // This creates the characteristic "hanging" catenary shape.
-
-            // From game data analysis:
-            // Working cable: segments=15, step1=48 (0x0030), step2=-48 (0xFFD0)
-            // Formula: step1 ˜ 1024 / segments, step2 = -step1
-
-            // Calculate base step from segments
             int baseStep = 1024 / segments;
-
-            // Adjust based on cable length - longer cables need more sag
             double lengthFactor = Math.Clamp(length / 1000.0, 0.5, 2.0);
             baseStep = (int)(baseStep * lengthFactor);
-
-            // Clamp to reasonable range (based on game data, values are typically 20-100)
             baseStep = Math.Clamp(baseStep, 20, 150);
 
-            // step1 is positive, step2 is NEGATIVE (this is critical!)
             short step1 = (short)baseStep;
             short step2 = (short)(-baseStep);
 
@@ -236,11 +271,6 @@ namespace UrbanChaosMapEditor.Services.Buildings
         /// </summary>
         public static int CalculateSegmentCount(double length)
         {
-            // Based on analysis of game data:
-            // Short cables (~500 units): 4-6 segments
-            // Medium cables (~1000 units): 8-10 segments
-            // Long cables (~2000+ units): 12-16 segments
-
             int segments = (int)(length / 150.0);
             return Math.Clamp(segments, 4, 24);
         }
@@ -260,12 +290,6 @@ namespace UrbanChaosMapEditor.Services.Buildings
         {
             b[off] = (byte)(val & 0xFF);
             b[off + 1] = (byte)((val >> 8) & 0xFF);
-        }
-
-        private static void WriteU16ToStream(Stream s, ushort val)
-        {
-            s.WriteByte((byte)(val & 0xFF));
-            s.WriteByte((byte)((val >> 8) & 0xFF));
         }
 
         #endregion

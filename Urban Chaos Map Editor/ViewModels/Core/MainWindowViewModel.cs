@@ -7,10 +7,11 @@ using System.Windows;
 using System.Windows.Input;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
-using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Heights;
 using UrbanChaosMapEditor.Services.Prims;
+using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.ViewModels.Prims;
 using UrbanChaosMapEditor.Views.Buildings.MapOverlays;
@@ -214,6 +215,8 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                    // Refresh status bar filenames/paths (map shows default)
                    RaisePropertyChanged(nameof(MapFileDisplay));
                    RaisePropertyChanged(nameof(StatusFiles));
+                   BuildingsChangeBus.Instance.NotifyChanged();
+                   RoofsChangeBus.Instance.NotifyChanged();
                });
 
             MapDataService.Instance.MapSaved += (_, e) =>
@@ -247,6 +250,8 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                         Map.TextureWorld = acc.ReadTextureWorld(); // update the Textures tab field
                         Map.RefreshTextureLists();
                         Map.RefreshPrimsList();
+                        BuildingsChangeBus.Instance.NotifyChanged();
+                        RoofsChangeBus.Instance.NotifyChanged();
                     }
                     catch { /* ignore */ }
                 });

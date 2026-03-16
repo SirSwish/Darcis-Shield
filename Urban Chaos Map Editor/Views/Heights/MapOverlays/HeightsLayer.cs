@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -11,36 +12,24 @@ using UrbanChaosMapEditor.ViewModels.Core;
 
 namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 {
-    /// <summary>
-    /// HIGHLY OPTIMIZED HeightsLayer with:
-    /// 1. Viewport culling (only draw visible vertices)
-    /// 2. StreamGeometry batching (single draw call for all circles)
-    /// 3. Smart hover detection (only repaint when hover actually changes)
-    /// 4. Cached Typeface and frozen brushes
-    /// 5. Squared distance comparison (avoids sqrt)
-    /// </summary>
     public sealed class HeightsLayer : FrameworkElement
     {
         private readonly HeightsAccessor _accessor = new(MapDataService.Instance);
         private readonly DispatcherTimer _debounceTimer;
 
-        // Text cache per height value
         private readonly Dictionary<int, FormattedText> _textCacheBlack = new(256);
         private readonly Dictionary<int, FormattedText> _textCacheWhite = new(256);
         private double _lastPixelsPerDip = -1.0;
         private Typeface _typeface = new("Segoe UI");
 
-        // Area drag state (Set Height by Drag Area)
         private bool _isAreaDragging;
         private Point _areaStart;
         private Point _areaEnd;
         private Rect _areaRectPx = Rect.Empty;
 
-        // Pre-frozen selection visuals
         private static readonly Brush AreaFill;
         private static readonly Pen AreaOutline;
 
-        // Constants
         private const double Radius = 14.0;
         private const double HitRadius = 12.0;
         private const double HitRadiusSq = HitRadius * HitRadius;
@@ -48,7 +37,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private const int TilesPerSide = 128;
         private const int MapPixels = 8192;
 
-        // Pre-frozen resources
         private static readonly Brush DefaultFill;
         private static readonly Brush DefaultText;
         private static readonly Brush HoverFill;
@@ -56,11 +44,9 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private static readonly Pen DefaultOutline;
         private static readonly Pen HoverOutline;
 
-        // Elevation color ramp (sbyte -128..127 => index 0..255)
         private static readonly Brush[] ElevationFillLut;
         private static readonly bool[] ElevationUseWhiteTextLut;
 
-        // Cached circle geometry
         private static readonly EllipseGeometry CircleGeometry;
 
         private MapViewModel? _vm;
@@ -70,7 +56,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
         static HeightsLayer()
         {
-            // Default / hover visuals
             DefaultFill = Brushes.White;
             DefaultText = Brushes.Black;
 
@@ -86,7 +71,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             HoverOutline = new Pen(Brushes.White, 1.25);
             HoverOutline.Freeze();
 
-            // Area drag rectangle visuals
             var areaFill = new SolidColorBrush(Color.FromArgb(48, 0, 120, 215));
             areaFill.Freeze();
             AreaFill = areaFill;
@@ -97,11 +81,9 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             AreaOutline = new Pen(areaStrokeBrush, 1.5);
             AreaOutline.Freeze();
 
-            // Circle geometry
             CircleGeometry = new EllipseGeometry(new Point(0, 0), Radius, Radius);
             CircleGeometry.Freeze();
 
-            // Elevation ramp: low=light blue, high=green
             var low = Color.FromRgb(0x7A, 0xD7, 0xFF);
             var high = Color.FromRgb(0x2E, 0xB8, 0x4A);
 
@@ -137,6 +119,14 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             HeightsChangeBus.Instance.TileChanged += (_, __) => KickRepaint();
             HeightsChangeBus.Instance.RegionChanged += (_, __) => KickRepaint();
 
+            // Repaint on scroll so view culling updates
+            Loaded += (_, __) =>
+            {
+                var sv = FindParentScrollViewer();
+                if (sv != null)
+                    sv.ScrollChanged += (_, __) => KickRepaint();
+            };
+
             Width = MapPixels;
             Height = MapPixels;
             IsHitTestVisible = true;
@@ -153,6 +143,18 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             };
 
             DataContextChanged += (_, __) => HookVm();
+        }
+
+        private ScrollViewer? FindParentScrollViewer()
+        {
+            DependencyObject? current = this;
+            while (current != null)
+            {
+                if (current is ScrollViewer sv)
+                    return sv;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
         }
 
         private void HookVm()
@@ -205,6 +207,10 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                         }
                         break;
                     }
+
+                case nameof(MapViewModel.Zoom):
+                    KickRepaint();
+                    break;
             }
         }
 
@@ -359,7 +365,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             DependencyObject? current = this;
             while (current != null)
             {
-                if (current is System.Windows.Controls.ScrollViewer sv && sv.IsLoaded)
+                if (current is ScrollViewer sv && sv.IsLoaded)
                 {
                     try
                     {
@@ -374,7 +380,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                     catch { }
                 }
 
-                if (current is System.Windows.Controls.ScrollContentPresenter scp && scp.IsLoaded)
+                if (current is ScrollContentPresenter scp && scp.IsLoaded)
                 {
                     try
                     {
@@ -505,8 +511,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             if (rectPx.Width < 2 || rectPx.Height < 2)
                 return;
 
-            // Vertices are rendered at 64,128,...,8192 => indices 1..128
-            // Use Floor/Ceiling so dragged coverage feels natural and inclusive.
             int vx0 = ClampToVertexIndex((int)Math.Floor(rectPx.Left / TileSize));
             int vx1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Right / TileSize));
             int vz0 = ClampToVertexIndex((int)Math.Floor(rectPx.Top / TileSize));

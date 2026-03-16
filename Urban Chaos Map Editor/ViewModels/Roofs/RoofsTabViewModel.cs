@@ -66,6 +66,7 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
                 if (_selectedRoofFace4 == value) return;
                 _selectedRoofFace4 = value;
                 OnPropertyChanged();
+                SyncRf4SelectionIntoMap();
             }
         }
 
@@ -276,6 +277,12 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
         {
             if (_mapViewModel == null) return;
             _mapViewModel.SelectedWalkableId1 = SelectedWalkable?.WalkableId1 ?? 0;
+        }
+
+        private void SyncRf4SelectionIntoMap()
+        {
+            if (_mapViewModel == null) return;
+            _mapViewModel.SelectedRf4Id = SelectedRoofFace4?.FaceId ?? -1;
         }
 
         // ====================================================================

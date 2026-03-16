@@ -1,5 +1,3 @@
-// /Views/MapOverlays/RoofsLayer.cs
-// Visualizes RoofFace4 entries for the SELECTED building only
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +11,7 @@ using UrbanChaosMapEditor.Services.Buildings;
 namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 {
     /// <summary>
-    /// Visualizes RoofFace4 tiles for the selected building only.
+    /// Visualizes RoofFace4 tiles for the selected walkable only.
     /// </summary>
     public sealed class RoofsLayer : Canvas
     {
@@ -24,6 +22,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private static readonly Pen InputBorderPen;
         private static readonly Pen InputBorderHoverPen;
         private static readonly Typeface LabelTypeface;
+        private static readonly Brush SelectedTileFillBrush;
+        private static readonly Pen SelectedTileBorderPen;
 
         private TextBox? _editBox;
         private int _editingRf4Idx;
@@ -31,35 +31,34 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private int _hoverRf4Idx = -1;
         private EditField _hoverField = EditField.None;
 
-        // Cached data for fast hit testing
         private record struct TileInfo(int Rf4Idx, double UiX, double UiZ, short Y, sbyte DY0, sbyte DY1, sbyte DY2);
         private List<TileInfo>? _cachedTiles;
         private int _cacheWalkablesStart;
         private int _cacheNextRf4;
-        private int _cachedBuildingId = -1;
+        private int _cachedWalkableId1 = -1;
 
         private enum EditField { None, Y, DY0, DY1, DY2 }
 
-        #region SelectedBuildingId Dependency Property
+        #region SelectedWalkableId1 Dependency Property
 
-        public static readonly DependencyProperty SelectedBuildingIdProperty =
+        public static readonly DependencyProperty SelectedWalkableId1Property =
             DependencyProperty.Register(
-                nameof(SelectedBuildingId),
+                nameof(SelectedWalkableId1),
                 typeof(int),
                 typeof(RoofsLayer),
-                new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsRender, OnSelectedBuildingChanged));
+                new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsRender, OnSelectedWalkableChanged));
 
-        public int SelectedBuildingId
+        public int SelectedWalkableId1
         {
-            get => (int)GetValue(SelectedBuildingIdProperty);
-            set => SetValue(SelectedBuildingIdProperty, value);
+            get => (int)GetValue(SelectedWalkableId1Property);
+            set => SetValue(SelectedWalkableId1Property, value);
         }
 
-        private static void OnSelectedBuildingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSelectedWalkableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is RoofsLayer layer)
             {
-                layer._cachedTiles = null; // Invalidate cache
+                layer._cachedTiles = null;
                 layer.CancelEdit();
                 layer.InvalidateVisual();
             }
@@ -88,6 +87,12 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             InputBorderHoverPen.Freeze();
 
             LabelTypeface = new Typeface("Consolas");
+
+            SelectedTileFillBrush = new SolidColorBrush(Color.FromArgb(100, 255, 255, 0));
+            SelectedTileFillBrush.Freeze();
+
+            SelectedTileBorderPen = new Pen(Brushes.Yellow, 3.0);
+            SelectedTileBorderPen.Freeze();
         }
 
         public RoofsLayer()
@@ -120,46 +125,36 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private void RebuildCache()
         {
             _cachedTiles = new List<TileInfo>();
-            _cachedBuildingId = SelectedBuildingId;
+            _cachedWalkableId1 = SelectedWalkableId1;
 
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded) return;
-
-            // No building selected = nothing to show
-            if (_cachedBuildingId < 1) return;
+            if (_cachedWalkableId1 < 1) return;
 
             var snap = new BuildingsAccessor(svc).ReadSnapshot();
             if (snap.Walkables == null || snap.RoofFaces4 == null) return;
+            if (_cachedWalkableId1 >= snap.Walkables.Length) return;
 
             _cacheWalkablesStart = snap.WalkablesStart;
             _cacheNextRf4 = snap.NextDWalkable;
 
-            // Only process walkables that belong to the selected building
-            for (int wIdx = 1; wIdx < snap.Walkables.Length; wIdx++)
+            var w = snap.Walkables[_cachedWalkableId1];
+
+            for (int i = w.StartFace4; i < w.EndFace4 && i < snap.RoofFaces4.Length; i++)
             {
-                var w = snap.Walkables[wIdx];
-                if (w.Building != _cachedBuildingId) continue; // Filter by selected building
+                if (i < 1) continue;
+                var rf4 = snap.RoofFaces4[i];
 
-                for (int i = w.StartFace4; i < w.EndFace4 && i < snap.RoofFaces4.Length; i++)
-                {
-                    if (i < 1) continue;
-                    var rf4 = snap.RoofFaces4[i];
+                int tileX = rf4.RX & 0x7F;
+                int tileZ = rf4.RZ - 128;
 
-                    // RF4 coordinates are ABSOLUTE:
-                    // RX = absolute tile X
-                    // RZ = absolute tile Z + 128
-                    int tileX = rf4.RX;
-                    int tileZ = rf4.RZ - 128;
+                if (tileX < 0 || tileX > 127 || tileZ < 0 || tileZ > 127)
+                    continue;
 
-                    // Skip invalid entries
-                    if (tileX < 0 || tileX > 127 || tileZ < 0 || tileZ > 127)
-                        continue;
+                double uiX = (128 - tileX - 1) * 64.0;
+                double uiZ = (128 - tileZ - 1) * 64.0;
 
-                    double uiX = (128 - tileX - 1) * 64.0;
-                    double uiZ = (128 - tileZ - 1) * 64.0;
-
-                    _cachedTiles.Add(new TileInfo(i, uiX, uiZ, rf4.Y, rf4.DY0, rf4.DY1, rf4.DY2));
-                }
+                _cachedTiles.Add(new TileInfo(i, uiX, uiZ, rf4.Y, rf4.DY0, rf4.DY1, rf4.DY2));
             }
         }
 
@@ -180,8 +175,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         {
             base.OnRender(dc);
 
-            // Rebuild cache if needed or if building selection changed
-            if (_cachedTiles == null || _cachedBuildingId != SelectedBuildingId)
+            if (_cachedTiles == null || _cachedWalkableId1 != SelectedWalkableId1)
                 RebuildCache();
 
             if (_cachedTiles == null || _cachedTiles.Count == 0) return;
@@ -189,9 +183,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
             foreach (var tile in _cachedTiles)
-            {
                 DrawTile(dc, tile, dpi);
-            }
         }
 
         private void DrawTile(DrawingContext dc, TileInfo tile, double dpi)
@@ -199,26 +191,25 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             double uiX = tile.UiX;
             double uiZ = tile.UiZ;
 
-            // Tile background
-            dc.DrawRectangle(TileFillBrush, TileBorderPen, new Rect(uiX, uiZ, 64, 64));
+            // Tile background — yellow highlight if selected
+            bool isSelected = tile.Rf4Idx == SelectedRf4Id;
+            dc.DrawRectangle(
+                isSelected ? SelectedTileFillBrush : TileFillBrush,
+                isSelected ? SelectedTileBorderPen : TileBorderPen,
+                new Rect(uiX, uiZ, 64, 64));
 
-            // Define input field rectangles
             var yRect = new Rect(uiX + 12, uiZ + 24, 40, 16);
             var dy0Rect = new Rect(uiX + 2, uiZ + 2, 24, 14);
             var dy1Rect = new Rect(uiX + 38, uiZ + 2, 24, 14);
             var dy2Rect = new Rect(uiX + 38, uiZ + 48, 24, 14);
             var swRect = new Rect(uiX + 2, uiZ + 48, 24, 14);
 
-            // Draw input fields with hover state
             DrawInputField(dc, yRect, $"{tile.Y}", tile.Rf4Idx, EditField.Y, dpi, Brushes.White);
             DrawInputField(dc, dy0Rect, $"{tile.DY0}", tile.Rf4Idx, EditField.DY0, dpi, GetDyColor(tile.DY0));
             DrawInputField(dc, dy1Rect, $"{tile.DY1}", tile.Rf4Idx, EditField.DY1, dpi, GetDyColor(tile.DY1));
             DrawInputField(dc, dy2Rect, $"{tile.DY2}", tile.Rf4Idx, EditField.DY2, dpi, GetDyColor(tile.DY2));
 
-            // SW is read-only
             DrawReadOnlyValue(dc, swRect, "0", dpi);
-
-            // Label
             DrawLabel(dc, "Y:", uiX + 4, uiZ + 26, 8, dpi);
         }
 
@@ -316,6 +307,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
         #endregion
 
+        #region SelectedRf4Id Dependency Property
+
+        public static readonly DependencyProperty SelectedRf4IdProperty =
+            DependencyProperty.Register(
+                nameof(SelectedRf4Id),
+                typeof(int),
+                typeof(RoofsLayer),
+                new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public int SelectedRf4Id
+        {
+            get => (int)GetValue(SelectedRf4IdProperty);
+            set => SetValue(SelectedRf4IdProperty, value);
+        }
+
+        #endregion
+
         #region Edit
 
         private void StartEdit(int idx, EditField field, int val, Rect rect)
@@ -368,14 +376,12 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 WriteField(_editingRf4Idx, _editingField, dy);
 
             CancelEdit();
-            // Cache will be invalidated by BuildingsChangeBus
         }
 
         private void WriteField(int idx, EditField field, int val)
         {
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded) return;
-
             if (_cachedTiles == null) return;
 
             int off = _cacheWalkablesStart + 4 + _cacheNextRf4 * 22 + idx * 10;

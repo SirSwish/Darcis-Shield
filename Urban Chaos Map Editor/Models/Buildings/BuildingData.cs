@@ -33,10 +33,10 @@ namespace UrbanChaosMapEditor.Models.Buildings
         {
             BuildingType.House => "House",
             BuildingType.Warehouse => "Warehouse",
-            BuildingType.Office => "Office",
-            BuildingType.Apartment => "Apartment",
-            BuildingType.CrateIn => "Crate (In)",
-            BuildingType.CrateOut => "Crate (Out)",
+            BuildingType.Office => "Office (Legacy - Unused)",
+            BuildingType.Apartment => "Apartment (Legacy - Unused)",
+            BuildingType.CrateIn => "Crate (In) (Legacy - Unused)",
+            BuildingType.CrateOut => "Crate (Out) (Legacy - Unused)",
             _ => $"Unknown ({Type})"
         };
 

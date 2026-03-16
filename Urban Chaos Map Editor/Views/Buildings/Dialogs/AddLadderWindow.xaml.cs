@@ -1,4 +1,3 @@
-// /Views/Dialogs/Buildings/AddLadderWindow.xaml.cs
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -50,20 +49,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!byte.TryParse(TxtHeight.Text, out byte height)) height = 4;
             Height = height;
 
-            if (!byte.TryParse(TxtFHeight.Text, out byte fheight)) fheight = 0;
-            FHeight = fheight;
-
-            if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeight)) blockHeight = 16;
-            BlockHeight = blockHeight;
-
             if (!short.TryParse(TxtY0.Text, out short y0)) y0 = 0;
             Y0 = y0;
+            Y1 = y0;       // mirror Y0 into Y1
 
-            if (!short.TryParse(TxtY1.Text, out short y1)) y1 = 0;
-            Y1 = y1;
-
-            if (!ushort.TryParse(TxtStyleIndex.Text, out ushort styleIndex)) styleIndex = 1;
-            StyleIndex = styleIndex;
+            FHeight = 0;   // forced
+            BlockHeight = 16; // forced
+            StyleIndex = 1;   // forced
 
             return true;
         }
@@ -79,10 +71,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!ParseAndValidate())
                 return;
 
-            // Start ladder placement mode
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
             {
-                // Create the ladder template
                 var template = new LadderTemplate
                 {
                     Height = Height,
@@ -95,10 +85,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     Storey = 0
                 };
 
-                // Begin ladder placement mode
                 mainVm.Map.BeginLadderPlacement(this, template);
 
-                // Hide this window
                 Hide();
 
                 mainVm.StatusMessage = $"Click to place ladder for Building #{_buildingId1}. Right-click to cancel.";

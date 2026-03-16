@@ -85,8 +85,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -106,14 +104,11 @@
             <TextBlock Text="Roof Type:" Style="{StaticResource FieldLabel}"/>
             <StackPanel Margin="8,0,0,0">
                 <RadioButton x:Name="RbFlatRoof" 
-                             Content="Flat Roof (fill entire walkable)" 
+                             Content="Fill entire Walkable" 
                              IsChecked="True"
                              Checked="RoofType_Changed"/>
-                <RadioButton x:Name="RbPitchedRoof" 
-                             Content="Pitched Roof (sloped)" 
-                             Checked="RoofType_Changed"/>
                 <RadioButton x:Name="RbSingleTile" 
-                             Content="Single Tile (advanced)" 
+                             Content="Add Single Tile" 
                              Checked="RoofType_Changed"/>
             </StackPanel>
         </StackPanel>
@@ -122,50 +117,16 @@
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
                 <TextBlock Text="Altitude (Y):" Style="{StaticResource FieldLabel}"/>
                 <TextBox x:Name="TxtAltitude" Text="512"/>
             </StackPanel>
-
-            <StackPanel Grid.Column="2" x:Name="PnlPitchDirection" Visibility="Collapsed">
-                <TextBlock Text="Slope Direction:" Style="{StaticResource FieldLabel}"/>
-                <ComboBox x:Name="CmbPitchDirection" SelectedIndex="0">
-                    <ComboBoxItem Content="Slopes North ?" Tag="0"/>
-                    <ComboBoxItem Content="Slopes South ?" Tag="1"/>
-                    <ComboBoxItem Content="Slopes East ?" Tag="2"/>
-                    <ComboBoxItem Content="Slopes West ?" Tag="3"/>
-                </ComboBox>
-            </StackPanel>
         </Grid>
 
-        <!-- Pitched Roof Settings -->
-        <StackPanel Grid.Row="6" x:Name="PnlPitchedSettings" Visibility="Collapsed">
-            <TextBlock Text="Pitch Settings:" Style="{StaticResource FieldLabel}"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Pitch Per Tile:" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="TxtPitchPerTile" Text="16"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Draw Flags:" Style="{StaticResource FieldLabel}"/>
-                    <CheckBox x:Name="ChkWalkable" Content="Walkable (0x08)" IsChecked="True"/>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-
         <!-- Single Tile Settings -->
-        <StackPanel Grid.Row="6" x:Name="PnlSingleTileSettings" Visibility="Collapsed">
+        <StackPanel Grid.Row="5" x:Name="PnlSingleTileSettings" Visibility="Collapsed" Margin="0,16,0,0">
             <TextBlock Text="Tile Position &amp; Corners:" Style="{StaticResource FieldLabel}"/>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -198,6 +159,11 @@
                 <TextBox Grid.Row="2" Grid.Column="8" x:Name="TxtDY2" Text="0"/>
             </Grid>
 
+            <CheckBox x:Name="ChkWalkable"
+                      Content="Walkable (0x08)"
+                      IsChecked="True"
+                      Margin="0,8,0,0"/>
+
             <TextBlock Text="Corner Layout: 0=NW, 1=NE, 2=SE, 3=SW(base)"
                        Foreground="{StaticResource Subtle}"
                        FontSize="10"
@@ -205,15 +171,16 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="8" 
+        <StackPanel Grid.Row="6" 
                     Orientation="Horizontal" 
-                    HorizontalAlignment="Right">
+                    HorizontalAlignment="Right"
+                    Margin="0,20,0,0">
             <Button Content="Cancel" 
                     Style="{StaticResource ActionButton}"
                     Click="BtnCancel_Click"
                     Margin="0,0,8,0"/>
             <Button x:Name="BtnAdd"
-                    Content="Add Roof" 
+                    Content="Add Flat Roof" 
                     Style="{StaticResource PrimaryButton}"
                     Click="BtnAdd_Click"/>
         </StackPanel>

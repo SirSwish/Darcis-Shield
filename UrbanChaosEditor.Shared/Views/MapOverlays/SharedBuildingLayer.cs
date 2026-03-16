@@ -232,6 +232,35 @@ public class SharedBuildingLayer : MapOverlayBase
         }
     }
 
+    protected void DrawDirectionArrow(DrawingContext dc, Point p1, Point p2, Pen pen)
+    {
+        double dx = p2.X - p1.X;
+        double dz = p2.Y - p1.Y;
+        double length = Math.Sqrt(dx * dx + dz * dz);
+        if (length < 1.0) return;
+        dx /= length;
+        dz /= length;
+        double perpX = dz;
+        double perpZ = -dx;
+        double midX = (p1.X + p2.X) / 2.0;
+        double midZ = (p1.Y + p2.Y) / 2.0;
+        const double arrowLength = 20.0;
+        const double arrowHeadSize = 8.0;
+        double tipX = midX + perpX * arrowLength;
+        double tipZ = midZ + perpZ * arrowLength;
+        dc.DrawLine(pen, new Point(midX, midZ), new Point(tipX, tipZ));
+        double backX = -perpX * arrowHeadSize * 0.7;
+        double backZ = -perpZ * arrowHeadSize * 0.7;
+        double sideX = dx * arrowHeadSize * 0.5;
+        double sideZ = dz * arrowHeadSize * 0.5;
+        dc.DrawLine(pen,
+            new Point(tipX, tipZ),
+            new Point(tipX + backX + sideX, tipZ + backZ + sideZ));
+        dc.DrawLine(pen,
+            new Point(tipX, tipZ),
+            new Point(tipX + backX - sideX, tipZ + backZ - sideZ));
+    }
+
     /// <summary>
     /// Draws a direction arrow for a ladder, showing which way it faces.
     /// The arrow points perpendicular to the ladder line, to the "right" of the direction (p1 -> p2).

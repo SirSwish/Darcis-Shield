@@ -71,12 +71,18 @@ namespace UrbanChaosMapEditor.Services.Buildings
             var walkableIdsToDelete = new HashSet<int>();
             if (snap.Walkables != null)
             {
-                for (int i = 1; i < snap.Walkables.Length; i++) // Skip sentinel at [0]
+                for (int i = 1; i < snap.Walkables.Length; i++)
                 {
-                    if (snap.Walkables[i].Building == buildingId1)
+                    var w = snap.Walkables[i];
+                    if (w.Building == buildingId1)
                     {
-                        walkablesToDelete++;
-                        walkableIdsToDelete.Add(i); // 1-based ID
+                        // Skip soft-deleted (zeroed) walkables — they're already dead
+                        bool isSoftDeleted = w.X1 == 0 && w.Z1 == 0 && w.X2 == 0 && w.Z2 == 0 && w.Y == 0;
+                        if (!isSoftDeleted)
+                        {
+                            walkablesToDelete++;
+                            walkableIdsToDelete.Add(i);
+                        }
                     }
                 }
             }
@@ -323,20 +329,53 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 }
                 wBytes[8] = (byte)(ns & 0xFF); wBytes[9] = (byte)((ns >> 8) & 0xFF);
                 wBytes[10] = (byte)(ne & 0xFF); wBytes[11] = (byte)((ne >> 8) & 0xFF);
+
+                // Remap Next pointer at +18
+                ushort oldNext = (ushort)(wBytes[18] | (wBytes[19] << 8));
+                if (oldNext > 0)
+                {
+                    if (walkableIdMap.TryGetValue((int)oldNext, out int newNext))
+                    {
+                        wBytes[18] = (byte)(newNext & 0xFF);
+                        wBytes[19] = (byte)((newNext >> 8) & 0xFF);
+                    }
+                    else
+                    {
+                        wBytes[18] = 0;
+                        wBytes[19] = 0;
+                    }
+                }
             }
 
-            // Update building Walkable references (at +16)
+            // Update building Walkable pointers (at +4, NOT +16)
             foreach (var b in newBuildings)
             {
-                ushort oldW = (ushort)(b[16] | (b[17] << 8));
+                ushort oldW = (ushort)(b[4] | (b[5] << 8));
                 if (oldW > 0 && walkableIdMap.TryGetValue(oldW, out int nw))
                 {
-                    b[16] = (byte)(nw & 0xFF);
-                    b[17] = (byte)((nw >> 8) & 0xFF);
+                    b[4] = (byte)(nw & 0xFF);
+                    b[5] = (byte)((nw >> 8) & 0xFF);
                 }
                 else if (oldW > 0)
                 {
-                    b[16] = 0; b[17] = 0; // Deleted walkable
+                    b[4] = 0; b[5] = 0;
+                }
+            }
+
+            // Remap walkable Next pointers (linked list chain)
+            foreach (var wBytes in newWalkables)
+            {
+                ushort oldNext = (ushort)(wBytes[18] | (wBytes[19] << 8));
+                if (oldNext > 0 && walkableIdMap.TryGetValue((int)oldNext, out int newNext))
+                {
+                    wBytes[18] = (byte)(newNext & 0xFF);
+                    wBytes[19] = (byte)((newNext >> 8) & 0xFF);
+                }
+                else if (oldNext > 0)
+                {
+                    // Walkable was deleted, break chain
+                    wBytes[18] = 0;
+                    wBytes[19] = 0;
                 }
             }
 
@@ -364,7 +403,9 @@ namespace UrbanChaosMapEditor.Services.Buildings
             foreach (var b in newBuildings) ms.Write(b, 0, b.Length);
 
             // 5. Write pad
-            ms.Write(new byte[AfterBuildingsPad], 0, AfterBuildingsPad);
+            // Copy original padding bytes (they may contain meaningful data)
+            int padOff = buildingsOff + (oldNextBuilding - 1) * DBuildingSize;
+            ms.Write(bytes, padOff, AfterBuildingsPad);
 
             // 6. Write facets
             foreach (var f in newFacets) ms.Write(f, 0, f.Length);
