@@ -237,17 +237,15 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             for (int i = 0; i <= MaxTextureIndex; i++)
             {
+                if (!TryLoadPaletteTexture(i, out var bmp))
+                    continue;
+
                 var item = new PaletteItemVM
                 {
                     Index = i,
-                    TooltipText = $"tex{i:D3}hi"
+                    TooltipText = $"tex{i:D3}hi",
+                    Thumbnail = bmp
                 };
-
-                // Try to load thumbnail
-                if (TryLoadPaletteTexture(i, out var bmp))
-                {
-                    item.Thumbnail = bmp;
-                }
 
                 _paletteItems.Add(item);
             }
