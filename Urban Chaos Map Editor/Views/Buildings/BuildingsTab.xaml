@@ -4,6 +4,8 @@
              xmlns:vm="clr-namespace:UrbanChaosMapEditor.ViewModels.Buildings"
              xmlns:conv="clr-namespace:UrbanChaosMapEditor.Views.Converters"
              xmlns:m="clr-namespace:UrbanChaosMapEditor.Models.Buildings"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
              Foreground="White">
 
     <UserControl.DataContext>
@@ -136,7 +138,9 @@
         <conv:FacetTypeToBrushConverter x:Key="FacetTypeToBrush"/>
     </UserControl.Resources>
 
-    <DockPanel>
+    <DockPanel LastChildFill="True"
+           HorizontalAlignment="Stretch"
+           VerticalAlignment="Stretch">
         <!-- Toolbar: Filter toggles + Action buttons -->
         <Grid DockPanel.Dock="Top" Margin="8,6">
             <Grid.ColumnDefinitions>
@@ -181,6 +185,7 @@
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="6" />
                 <RowDefinition Height="*" MinHeight="120" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
@@ -653,6 +658,38 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+            </Border>
+            <!-- Auto-Build Options -->
+            <Border Grid.Row="4" 
+                    BorderBrush="#333" 
+                    BorderThickness="1" 
+                    CornerRadius="6" 
+                    Padding="8"
+                    Margin="0,8,0,0"
+                    Background="#1A1D20">
+                <StackPanel>
+                    <TextBlock Text="Auto-Build Options" 
+                               FontWeight="SemiBold" FontSize="12" 
+                               Foreground="#808080" Margin="0,0,0,4"/>
+                    <CheckBox x:Name="ChkAutoDetectRoofs" 
+                              Content="Auto-detect Roofs" 
+                              Foreground="White" FontSize="12"
+                              IsChecked="{Binding AutoDetectRoofs, Mode=TwoWay}"
+                              ToolTip="Automatically detect closed wall loops and set PAP_HI roof flags"
+                              Margin="0,2"/>
+                    <CheckBox x:Name="ChkAutoPaintRoofTextures" 
+                              Content="Auto-paint Roof Textures" 
+                              Foreground="White" FontSize="12"
+                              IsChecked="{Binding AutoPaintRoofTextures, Mode=TwoWay}"
+                              ToolTip="Paint a default texture onto enclosed roof tiles (off by default)"
+                              Margin="0,2"/>
+                    <CheckBox x:Name="ChkAutoCreateWalkables" 
+                              Content="Auto-create Walkables" 
+                              Foreground="White" FontSize="12"
+                              IsChecked="{Binding AutoCreateWalkables, Mode=TwoWay}"
+                              ToolTip="Automatically create walkable regions for detected roof enclosures"
+                              Margin="0,2"/>
+                </StackPanel>
             </Border>
         </Grid>
     </DockPanel>

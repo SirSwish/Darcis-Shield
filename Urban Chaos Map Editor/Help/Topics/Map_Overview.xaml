@@ -1,0 +1,273 @@
+﻿<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Map Overview
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Understanding what makes up an Urban Chaos map and how its components fit together.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What is a .iam File?
+    </Paragraph>
+    <Paragraph>
+        Every playable level in Urban Chaos is defined by a single binary
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.iam</Run> file. These files contain
+        all of the data needed to construct a complete game level: the terrain, textures,
+        buildings, rooftops, and placed objects. The game ships with approximately 30 map files,
+        located in the game's
+        <Run FontFamily="Consolas" Foreground="#E8B84B">data\</Run> folder.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The Map Editor reads and writes these files directly. When you save a map, the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.iam</Run> file is overwritten in place,
+        so it is important to always work on copies of the original game files.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        The Tile Grid
+    </Paragraph>
+    <Paragraph>
+        The foundation of every map is a 128 x 128 tile grid. Each tile is a square
+        cell that holds a ground texture, a set of flags, and an altitude value. Everything in the
+        game world -- buildings, objects, terrain features -- is positioned relative to this grid.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/map_overview_tile_grid.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Margin="0,4,0,0">
+        In the editor, each tile occupies 64 x 64 pixels on the canvas. The full 128 x 128 grid
+        therefore produces an 8192 x 8192 pixel working area. Tiles are addressed by their X and Z
+        coordinates, each ranging from 0 to 127.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        PAP_HI Cells
+    </Paragraph>
+    <Paragraph>
+        Each tile on the grid is stored internally as a PAP_HI cell -- a 6-byte
+        structure that holds all of the tile's properties. The name comes from the game engine's
+        source code, where "PAP" refers to the map tile system and "HI" denotes the high-resolution
+        (per-tile) layer.
+    </Paragraph>
+    <Paragraph Margin="0,8,0,2">
+        Every PAP_HI cell contains:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Texture</Paragraph>
+    <Paragraph Margin="24,0,0,0">A reference to the ground texture displayed on this tile, defined by a texture page, X and Y position within the page, and a flip value.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Altitude</Paragraph>
+    <Paragraph Margin="24,0,0,0">The roof altitude at this tile. This is used by the engine to determine the height of indoor surfaces and rooftops. A value of zero means no roof is present.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Flags</Paragraph>
+    <Paragraph Margin="24,0,0,0">A 16-bit field controlling tile behaviour. Key flags include Hidden (the tile is an indoor area, not visible from above), Roof Exists (a roof surface is present at this altitude), and Flat Roof (the roof surface is level).</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Height Vertices
+    </Paragraph>
+    <Paragraph>
+        Overlaid on the tile grid is a 129 x 129 vertex grid -- one vertex at each
+        corner of every tile. Each vertex stores a signed byte height value ranging from -128 to 127.
+        These heights define the terrain surface: positive values raise the ground, negative values
+        lower it.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/map_overview_height_vertices.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Margin="0,4,0,0">
+        By adjusting height vertices, you can create hills, valleys, ramps, ditches, and other
+        terrain features. The Heights tab in the editor drawer provides tools for raising,
+        lowering, levelling, and flattening terrain. Heights are visualised on the canvas as
+        colour-coded circles -- blue for low values, green for high, white for zero.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Buildings
+    </Paragraph>
+    <Paragraph>
+        Buildings are the primary structural elements of a map. Each building is a container
+        that holds a range of facets (walls, doors, ladders, fences, and cables) and
+        optionally one or more walkable roof regions.
+    </Paragraph>
+    <Paragraph Margin="0,8,0,2">
+        Every building has:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Building ID</Paragraph>
+    <Paragraph Margin="24,0,0,0">A unique 1-based index identifying the building.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Facet Range</Paragraph>
+    <Paragraph Margin="24,0,0,0">A start and end index defining which facets belong to this building. All facets within the range are drawn and processed as part of this building.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Walkable Pointer</Paragraph>
+    <Paragraph Margin="24,0,0,0">A reference to the head of a linked list of walkable regions that define the building's rooftop surfaces.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Type</Paragraph>
+    <Paragraph Margin="24,0,0,0">Determines the building's behaviour. The two primary types are House (type 0) -- standard exterior buildings with visible rooftops, and Warehouse (type 1) -- indoor structures where the player can enter and walk on the floor inside.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/map_overview_buildings.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Facets
+    </Paragraph>
+    <Paragraph>
+        Facets are the individual structural segments that make up buildings. Each facet is a line
+        drawn between two tile coordinates, with properties controlling its appearance and
+        behaviour in-game.
+    </Paragraph>
+    <Paragraph Margin="0,8,0,2">
+        Every facet has:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Endpoints</Paragraph>
+    <Paragraph Margin="24,0,0,0">Two tile coordinates -- (X0, Z0) and (X1, Z1) -- defining where the facet starts and ends on the grid.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Type</Paragraph>
+    <Paragraph Margin="24,0,0,0">Determines what the facet represents. Common types include Normal (walls), Fence, Ladder, Door, and Cable.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Height and BlockHeight</Paragraph>
+    <Paragraph Margin="24,0,0,0">Control the vertical size of the facet. Height defines how many texture bands tall the facet is, while BlockHeight sets the pixel height of each band.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Style Index</Paragraph>
+    <Paragraph Margin="24,0,0,0">A reference into the dstyles array that determines which textures are applied to the facet surface. See the Styles section below.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Flags</Paragraph>
+    <Paragraph Margin="24,0,0,0">A 16-bit field controlling facet behaviour -- such as TwoTextured (dual-face rendering), Unclimbable, Inside (reversed interior facet for warehouses), Invisible, and others.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Y0 / Y1</Paragraph>
+    <Paragraph Margin="24,0,0,0">The vertical offset at each endpoint. These values position the base of the facet at the correct altitude, allowing walls to follow terrain height changes.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Styles and DStyles
+    </Paragraph>
+    <Paragraph>
+        The texturing system for facets uses two layers of indirection:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">TMA Styles</Paragraph>
+    <Paragraph Margin="24,0,0,0">Defined in the .tma file, these are named texture recipes. Each style contains a list of texture entries (pieces) that define how a wall surface is tiled -- left edge, right edge, middle fill, and so on.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">DStyles Array</Paragraph>
+    <Paragraph Margin="24,0,0,0">Stored in the .iam file, this is an array of signed 16-bit values. Each facet's Style Index points into this array. A positive value is a direct TMA style reference. A negative value points to a DStorey entry, which enables per-cell painted textures.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">DStorey (Painted Textures)</Paragraph>
+    <Paragraph Margin="24,0,0,0">When a dstyle value is negative, the engine looks up a DStorey record. Each DStorey contains a base style (fallback), a paint memory index, and a count. The paint memory stores individual texture indices per cell, allowing every panel of a wall to display a different texture.</Paragraph>
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>You can paint individual textures onto facet cells using the Facet Painter tool, accessible by right-clicking a facet in the Buildings tab. See the Facet Painting help topic for details.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Walkables and Roof Tiles
+    </Paragraph>
+    <Paragraph>
+        The rooftop system is built from two components that work together:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Walkable Regions</Paragraph>
+    <Paragraph Margin="24,0,0,0">Each walkable defines a rectangular area of a building's rooftop. It stores the bounding coordinates (X1, Z1 to X2, Z2), a Y height, and a range of Roof Face 4 tiles. Walkables are linked together in a chain per building -- the building's Walkable pointer leads to the first walkable, and each walkable's Next field leads to the next.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Roof Face 4 Tiles (RF4)</Paragraph>
+    <Paragraph Margin="24,0,0,0">Individual roof tiles within a walkable region. Each RF4 occupies one cell on the tile grid and stores its position (RX, RZ), a base Y height, height deltas for sloped surfaces (DY values), and draw flags. The engine uses these tiles for both collision detection (allowing the player to walk on rooftops) and for rendering the roof texture.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/map_overview_walkables_rf4.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Margin="0,4,0,0">
+        When walls are drawn to form a closed polygon around a building, the editor automatically
+        detects the enclosure and creates the appropriate PAP_HI flags, altitude values, and
+        walkable region. For more complex roof shapes, individual RF4 tiles can be added and
+        edited manually using the Roofs tab.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Prims and Objects
+    </Paragraph>
+    <Paragraph>
+        Prims are the 3D objects placed throughout the game world -- street lamps, crates, vehicles,
+        barrels, bins, signs, and hundreds of other items. Each placed prim is stored as a
+        map object with the following properties:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Prim ID</Paragraph>
+    <Paragraph Margin="24,0,0,0">References an entry in the game's prim library, determining which 3D model is used.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Position (X, Y, Z)</Paragraph>
+    <Paragraph Margin="24,0,0,0">The world-space coordinates where the object is placed. Y is the vertical axis.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Rotation (Angle Y)</Paragraph>
+    <Paragraph Margin="24,0,0,0">The object's rotation around the vertical axis, controlling which direction it faces.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/map_overview_prims.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Margin="0,4,0,0">
+        Objects are organised spatially into MapWho regions -- groups of 4 x 4 tiles
+        that act as containers. The engine uses MapWho regions to efficiently determine which
+        objects are near the player. You can visualise these regions by enabling the MapWho layer
+        in the toolbar.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Coordinate Systems
+    </Paragraph>
+    <Paragraph>
+        There are two coordinate systems you will encounter when using the editor. Understanding
+        the relationship between them is important for precise editing.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,10,0,1">Game Coordinates</Paragraph>
+    <Paragraph Margin="24,0,0,0">The coordinate system used internally by the game engine. Tile positions range from 0 to 127 on both the X and Z axes. The origin (0, 0) is at one corner of the map. Facet endpoints, building positions, and prim coordinates all use this system.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,10,0,1">Editor (Pixel) Coordinates</Paragraph>
+    <Paragraph Margin="24,0,0,0">The coordinate system used by the editor canvas. Pixel positions range from 0 to 8192 on both axes (128 tiles x 64 pixels per tile). The editor's coordinate display in the bottom-left corner shows both systems simultaneously.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,10,0,1">Axis Inversion</Paragraph>
+    <Paragraph Margin="24,0,0,0">The editor canvas is inverted relative to the game coordinate system. Game tile (0, 0) appears at the bottom-right of the canvas, while game tile (127, 127) appears at the top-left. This means: editorPixel = (128 - gameTile) x 64. The coordinate display handles this conversion automatically.</Paragraph>
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>Use the View, Go To Cell command to navigate directly to a specific game coordinate. The editor will centre the canvas on that tile.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        File Structure
+    </Paragraph>
+    <Paragraph>
+        For those interested in the technical details, the .iam file is laid out in the
+        following order:
+    </Paragraph>
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#1A1B1E" BorderBrush="#333" BorderThickness="1"
+                CornerRadius="4" Padding="14">
+            <TextBlock FontFamily="Consolas" FontSize="12" Foreground="#C0C0C0" TextWrapping="Wrap">File Header (8 bytes) -- save type and object section size
+PAP_HI Tiles (98,304 bytes) -- 128 x 128 x 6 bytes per tile
+Objects Section (variable) -- placed prims
+Building Block (variable) -- buildings, facets, styles, storeys, walkables, RF4s
+Texture Set ID (tail) -- identifies which world texture folder to use</TextBlock>
+        </Border>
+    </BlockUIContainer>
+    <Paragraph>
+        The Building Block itself contains multiple sub-sections stored sequentially: a header
+        with array counters, the DBuilding records, a 14-byte padding region, DFacet records,
+        the dstyles array, paint memory, DStorey records, indoor data sections, DWalkable records,
+        and Roof Face 4 records.
+    </Paragraph>
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>You do not need to understand the binary file format to use the editor. It handles all reading and writing automatically. This section is provided for advanced users and developers.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

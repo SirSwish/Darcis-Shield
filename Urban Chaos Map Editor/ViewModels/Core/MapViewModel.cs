@@ -198,6 +198,29 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             set { _heightSelectionEndY = value; OnPropertyChanged(); }
         }
 
+        // Auto-build options (checked by RoofEnclosureService)
+        private bool _autoDetectRoofs = true;
+        private bool _autoPaintRoofTextures = false;  // Off by default per user feedback
+        private bool _autoCreateWalkables = true;
+
+        public bool AutoDetectRoofs
+        {
+            get => _autoDetectRoofs;
+            set { if (_autoDetectRoofs != value) { _autoDetectRoofs = value; OnPropertyChanged(); } }
+        }
+
+        public bool AutoPaintRoofTextures
+        {
+            get => _autoPaintRoofTextures;
+            set { if (_autoPaintRoofTextures != value) { _autoPaintRoofTextures = value; OnPropertyChanged(); } }
+        }
+
+        public bool AutoCreateWalkables
+        {
+            get => _autoCreateWalkables;
+            set { if (_autoCreateWalkables != value) { _autoCreateWalkables = value; OnPropertyChanged(); } }
+        }
+
         /// <summary>
         /// Gets the normalized selection rectangle for the area height tool.
         /// Returns null if no valid selection.
@@ -1355,11 +1378,14 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                     BuildingsChangeBus.Instance.NotifyChanged();
 
                     // Check if walls now form a closed polygon - if so, set roof tiles
-                    if (_facetTemplate.Type == FacetType.Normal)
+                    if (_facetTemplate.Type == FacetType.Normal && AutoDetectRoofs)
                     {
                         try
                         {
-                            bool roofApplied = RoofEnclosureService.CheckAndApplyRoofEnclosure(_facetTemplate.BuildingId1);
+                            bool roofApplied = RoofEnclosureService.CheckAndApplyRoofEnclosure(
+                                _facetTemplate.BuildingId1,
+                                applyRoofTextures: AutoPaintRoofTextures,
+                                createWalkables: AutoCreateWalkables);
                             if (roofApplied)
                             {
                                 Debug.WriteLine($"[MapViewModel] Roof enclosure detected and applied for building #{_facetTemplate.BuildingId1}");
@@ -1368,7 +1394,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                         catch (Exception ex)
                         {
                             Debug.WriteLine($"[MapViewModel] RoofEnclosureService error: {ex.Message}");
-                            // Don't let roof detection errors break facet drawing
                         }
                     }
 

@@ -8,10 +8,10 @@ using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
-using UrbanChaosMapEditor.Views.Prims.Dialogs;
-using UrbanChaosMapEditor.Views.Core.Dialogs;
-
 using UrbanChaosMapEditor.ViewModels.Core;
+using UrbanChaosMapEditor.Views.Core.Dialogs;
+using UrbanChaosMapEditor.Views.Help;
+using UrbanChaosMapEditor.Views.Prims.Dialogs;
 
 namespace UrbanChaosMapEditor.Views.Core
 {
@@ -142,6 +142,11 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             shell.Map.SelectedRotationIndex = (shell.Map.SelectedRotationIndex + 1) % 4;
             shell.StatusMessage = $"Rotation: {shell.Map.SelectedRotationIndex}";
+        }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            HelpViewerWindow.ShowHelp(owner: this);
         }
 
         private void GoToCell_Click(object sender, RoutedEventArgs e)

@@ -221,6 +221,9 @@
                           ToolTip="Visual grid editor for painting individual roof tiles"/>
                 <MenuItem Header="PAP_HI Cell _Editor..." Click="EditPapHiCell_Click"/>
             </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="Help Documentation" Click="Help_Click"/>
+            </MenuItem>
         </Menu>
 
         <Border DockPanel.Dock="Top" Background="#2D2D2D" Padding="4">
@@ -391,10 +394,12 @@
                     </TextBlock>
                 </Expander.Header>
 
-                <Grid Background="#252526">
+                <Grid Background="#252526" VerticalAlignment="Stretch">
                     <TabControl Background="#252526"
                                 Foreground="White"
                                 SelectedIndex="0"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
                                 SnapsToDevicePixels="True"
                                 UseLayoutRounding="True">
 
@@ -406,8 +411,8 @@
                                 <Setter Property="Padding" Value="4,2"/>
                                 <Setter Property="Margin" Value="0"/>
                                 <Setter Property="MinWidth" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TabItem">
@@ -419,8 +424,8 @@
                                                     Margin="{TemplateBinding Margin}"
                                                     SnapsToDevicePixels="True">
                                                 <ContentPresenter ContentSource="Header"
-                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
                                                                   RecognizesAccessKey="True"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -463,7 +468,9 @@
                                             BorderThickness="1">
                                         <ContentPresenter x:Name="PART_SelectedContentHost"
                                                           Margin="0"
-                                                          ContentSource="SelectedContent"/>
+                                                          ContentSource="SelectedContent"
+                                                          HorizontalAlignment="Stretch"
+                                                          VerticalAlignment="Stretch"/>
                                     </Border>
                                 </Grid>
                             </ControlTemplate>

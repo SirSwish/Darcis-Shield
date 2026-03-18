@@ -23,6 +23,7 @@ namespace UrbanChaosMapEditor.Models.Core
 
         // Textures
         PaintTexture,
+        EyedropTexture,
 
         // Future expansion
         PlacePrim,

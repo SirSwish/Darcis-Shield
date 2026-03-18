@@ -1,0 +1,251 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Heights and Terrain
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to sculpt terrain by raising, lowering, levelling, and flattening height vertices.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Enabling the Heights Layer
+    </Paragraph>
+    <Paragraph>
+        The Heights layer is
+        <Bold>switched off by default</Bold> . To enable it, either press
+        <Bold>Ctrl+H</Bold> or click the
+        <Bold>Heights</Bold> button in the Terrain group of
+        the layer toolbar at the top of the screen.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_layer_toggle.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Understanding Vertices
+    </Paragraph>
+    <Paragraph>
+        It is important to understand that when editing heights, you are modifying the
+        <Bold>vertices</Bold> (corners) of cells, not the cells themselves. Each tile on the
+        128 x 128 grid has four corner vertices, shared with its neighbouring tiles. This creates
+        a 129 x 129 vertex grid that defines the shape of the terrain surface.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        When the Heights layer is enabled, each vertex appears as a
+        <Bold>circle</Bold> displaying
+        an integer value representing the current height at that point. A value of
+        <Bold>0</Bold>
+        means the vertex is at the baseline (flat ground). Positive values raise the terrain
+        upward and negative values lower it, with a range of -128 to 127.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_vertex_circles.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Colour Coding
+    </Paragraph>
+    <Paragraph>
+        The vertex circles are colour-coded to give you an at-a-glance view of the terrain shape:
+    </Paragraph>
+    <Paragraph Margin="24,6,0,0">
+        <Bold Foreground="#7AD7FF">Blue</Bold> -- low values (valleys, ditches, depressions)
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#FFFFFF">White</Bold> -- zero (flat baseline)
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#2EB84A">Green</Bold> -- high values (hills, ridges, elevated areas)
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        When you hover over a vertex with a height tool selected, the circle turns
+        <Bold Foreground="#E50000">red</Bold> to indicate the target vertex.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Height Editing Controls
+    </Paragraph>
+    <Paragraph>
+        The Heights tab in the editor drawer contains all of the tools for terrain editing.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_editor_tab.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Units
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>Units</Bold> box controls how many height units are applied per click. For
+        example, with Units set to 1, each click on a vertex raises or lowers it by 1. Setting
+        a higher value allows you to make larger changes more quickly. The height range is -128
+        to 127, so each unit represents a small step in elevation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Brush Size
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>Brush Size</Bold> determines the area affected by each click, ranging from
+        1 to 10. A brush size of 1 affects a single vertex (1x1), while a size of 10 affects a
+        10x10 area of vertices centred on the click point. Larger brush sizes are useful for
+        creating smooth, gradual terrain features like hills, while smaller sizes give you
+        fine-grained control for detailed sculpting.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Actions
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Raise</Paragraph>
+    <Paragraph Margin="24,0,0,0">Click on a vertex to increase its height by the number specified
+        in the Units box. Each click adds the unit value to the current height. The affected area
+        is determined by the current brush size.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Lower</Paragraph>
+    <Paragraph Margin="24,0,0,0">Click on a vertex to decrease its height by the number specified
+        in the Units box. Each click subtracts the unit value from the current height.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Level</Paragraph>
+    <Paragraph Margin="24,0,0,0">Click on a vertex to sample its height value, then drag across
+        other vertices to set them all to the same height. The first vertex clicked determines
+        the target height, and every vertex you drag over is set to that value. This is useful
+        for creating flat platforms or extending an existing height across an area.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Flatten</Paragraph>
+    <Paragraph Margin="24,0,0,0">Click on a vertex to reset it to 0 (flat baseline). This is a
+        quick way to remove height changes and return the terrain to its default flat state.</Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_raise_lower_example.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Set Height Area by Drag
+    </Paragraph>
+    <Paragraph>
+        For situations where you need to set a large number of vertices to a specific height
+        value, use the
+        <Bold>Set Height Area</Bold> tool. First, enter the desired height value
+        in the input box. Then click the
+        <Bold>Drag Area</Bold> button and draw a rectangle over
+        the vertices you want to modify. All vertices within the rectangle will be set to the
+        specified value.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is particularly useful for creating flat elevated platforms, uniform depressions,
+        or quickly preparing an area for building placement where consistent terrain height
+        is required.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_drag_area.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Templates
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>Templates</Bold> section provides pre-built vertex height patterns that can
+        be applied to the map with a single action. Currently, one template is available:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ditch</Paragraph>
+    <Paragraph Margin="24,0,0,0">Creates a ditch pattern -- a recessed channel in the terrain
+        useful for rivers, drainage channels, or sunken paths.</Paragraph>
+    <Paragraph Margin="0,6,0,0" Foreground="#A0A0A0" FontStyle="Italic">
+        Additional templates for common terrain features are planned for future updates.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Randomize Terrain
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>Randomize</Bold> button applies a procedural algorithm to generate realistic
+        terrain heights across the entire map. This produces natural-looking hills, valleys, and
+        undulating ground that can serve as a starting point for further manual sculpting. It
+        affects all 129 x 129 vertices at once.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_randomized.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Warning:</Run>
+                <Run>Randomize overwrites all height values on the map. If you have existing terrain work, save your map first or use it only on a fresh map.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Zoom in with
+                <Bold>Ctrl+Mouse Wheel</Bold> for precise vertex editing. At high zoom levels, individual vertices are easier to target.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Use a small brush size (1 or 2) for detailed work around buildings and paths, and a larger brush (5-10) for broad landscape shaping.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>The
+                <Bold>Level</Bold> tool is excellent for creating flat building sites -- raise one vertex to the desired height, then level-drag across the surrounding area.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Keep terrain changes gradual where possible. Sharp height differences between adjacent vertices can create visual artefacts in-game.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Heights are independent of textures -- you can paint textures before or after sculpting terrain. Both are saved together in the .iam file.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Remember that buildings and prims sit on top of the terrain surface. If you change heights after placing buildings, the walls may no longer align with the ground. Adjust facet Y0/Y1 values if needed.</Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

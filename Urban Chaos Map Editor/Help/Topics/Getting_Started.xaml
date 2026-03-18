@@ -1,0 +1,355 @@
+﻿<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Getting Started
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        An overview of the Urban Chaos Map Editor interface and how to navigate it.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- THE CANVAS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        The Canvas
+    </Paragraph>
+    <Paragraph>
+        When the editor first opens, you are presented with an empty canvas. This is the main
+        working area where your map will be displayed and edited. The canvas represents the full
+        128×128 tile grid of an Urban Chaos map.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_empty_canvas.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- STATUS BAR -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        The Status Bar
+    </Paragraph>
+    <Paragraph>
+        At the bottom of the screen is the
+        <Bold>status bar</Bold> , highlighted in red. This bar
+        provides real-time feedback on actions performed within the editor — such as saving,
+        loading, placing objects, or drawing facets. The bottom-right corner displays the
+        <Bold>currently loaded map file</Bold> and the
+        <Bold>current zoom level</Bold> .
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_status_bar.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COORDINATES -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Coordinates Display
+    </Paragraph>
+    <Paragraph>
+        In the bottom-left corner of the canvas area, the editor displays the current mouse
+        position in two formats:
+        <Bold>pixel coordinates</Bold> (relative to the canvas)
+        and
+        <Bold>game coordinates</Bold> on the 128×128 tile grid. This is useful for precise
+        placement and for cross-referencing positions with the game engine.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_coordinates.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- EDITOR DRAWER -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        The Editor Drawer
+    </Paragraph>
+    <Paragraph>
+        On the left-hand side of the screen is the
+        <Bold>collapsible editor drawer</Bold> . This
+        panel contains all of the editing tools, organised into functional tabs. You can collapse
+        or expand the drawer using the toggle button above the "Editor" label — collapsing it
+        gives you more canvas visibility when working on larger areas of the map.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_editor_drawer.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Margin="0,4,0,2">
+        The editor drawer is divided into
+        <Bold>five functional tabs</Bold> :
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Textures</Paragraph>
+    <Paragraph Margin="24,0,0,0">Used to select the current world texture folder and paint ground textures onto the 128×128 tile grid. Each tile corresponds to a 64×64 pixel region on the canvas.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Heights</Paragraph>
+    <Paragraph Margin="24,0,0,0">Modify the height of cell vertices to create terrain features such as hills, valleys, slopes, and ditches. Heights are displayed as numeric values on each vertex when the Heights layer is enabled.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Prims</Paragraph>
+    <Paragraph Margin="24,0,0,0">Place and move 3D objects (known as "prims") on the map. Prims include items such as street lamps, crates, vehicles, and other environmental objects that populate the game world.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Buildings</Paragraph>
+    <Paragraph Margin="24,0,0,0">Draw building facets onto the map. Facets are the fundamental structural elements of buildings in Urban Chaos and include walls, ladders, doors, fences, and cables. Each facet type has its own colour on the canvas for easy identification.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Roofs</Paragraph>
+    <Paragraph Margin="24,0,0,0">Manage rooftop surfaces, walkable regions, and cell altitudes. This tab allows you to define walkable areas on building rooftops, add individual roof tiles (known as Roof Face 4s) for custom roof shaping, and adjust cell altitudes to match the height of the roof surface.</Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_editor_tabs.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- QUICK ACTIONS & LAYERS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Quick Actions &amp; Layer Controls
+    </Paragraph>
+    <Paragraph>
+        Above the editor drawer are the
+        <Bold>Quick Action</Bold> buttons —
+        <Bold>Open</Bold> and
+        <Bold>Save</Bold> — which load and save
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.iam</Run> map files respectively.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,2">
+        To the right of the Quick Actions are the
+        <Bold>Layer toggle buttons</Bold> , grouped
+        by functional area. Layers are visual overlays on the canvas that can be individually
+        switched on and off, allowing you to focus on the specific aspects of the map you are
+        currently editing.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_toolbar.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- Map layers -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Map Layers
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Grid</Paragraph>
+    <Paragraph Margin="24,0,0,0">Displays gridlines along the 64×64 pixel texture cell boundaries.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">MapWho</Paragraph>
+    <Paragraph Margin="24,0,0,0">Shows 4×4 cell groupings that act as spatial containers for prims. Objects can be referenced by their MapWho region.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Textures</Paragraph>
+    <Paragraph Margin="24,0,0,0">Renders the ground textures currently painted across the 128×128 tile grid.</Paragraph>
+
+    <!-- Terrain layers -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Terrain Layers
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Heights</Paragraph>
+    <Paragraph Margin="24,0,0,0">Displays the height value of each cell vertex as a colour-coded circle with a numeric label.</Paragraph>
+
+    <!-- Prims layers -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Prims Layers
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Objects</Paragraph>
+    <Paragraph Margin="24,0,0,0">Shows each placed prim as a red dot indicating its position on the grid.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Graphics</Paragraph>
+    <Paragraph Margin="24,0,0,0">Renders the actual prim graphics to scale, showing how objects will appear from a bird's-eye view.</Paragraph>
+
+    <!-- Buildings layer -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Buildings Layer
+    </Paragraph>
+    <Paragraph Margin="8,0,0,2">The Buildings layer displays all facets drawn on the map. Each facet type is colour-coded:</Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold Foreground="#00CC00">Green</Bold> — Walls
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#FFD700">Yellow</Bold> — Fences
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#FFA500">Orange</Bold> — Ladders
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#CC66FF">Purple</Bold> — Doors
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#FF4444">Red</Bold> — Cables
+    </Paragraph>
+
+    <!-- Roofs layers -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Roofs Layers
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Walkables</Paragraph>
+    <Paragraph Margin="24,0,0,0">Displays walkable regions per building. Walkables define the approximate area of a building's roof and serve as containers for individual roof tiles.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Roof Tiles</Paragraph>
+    <Paragraph Margin="24,0,0,0">Shows individual roof tiles (officially called Roof Face 4s) and their attributes for the currently selected walkable.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Altitudes</Paragraph>
+    <Paragraph Margin="24,0,0,0">Within each walkable region, displays the cell altitude value representing the height of the roof surface at that position.</Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- MENUS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Menu Reference
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_menu_bar.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- File menu -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,8,0,2">
+        File Menu
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">New Map
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+N)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Creates a new map from the default template.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Open
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+O)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Opens an existing
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.iam</Run> map file.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Save
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+S)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Saves the current map in place, overwriting the loaded file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Save As
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+Shift+S)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Saves the current map to a new file location.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Recent</Paragraph>
+    <Paragraph Margin="24,0,0,0">A submenu listing the last 10 recently opened map files for quick access.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Exit
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Alt+F4)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Closes the application.</Paragraph>
+
+    <!-- View menu -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        View Menu
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Zoom In / Zoom Out</Paragraph>
+    <Paragraph Margin="24,0,0,0">Adjusts the canvas zoom level. Range: 10% to 800%.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Reset Zoom</Paragraph>
+    <Paragraph Margin="24,0,0,0">Restores the zoom level to 100%.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Go To Cell</Paragraph>
+    <Paragraph Margin="24,0,0,0">Navigates the canvas to a specific X, Z tile coordinate entered by the user.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Map Layers</Paragraph>
+    <Paragraph Margin="24,0,0,0">An alternative method for toggling individual layers on and off (same as the toolbar buttons).</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Use Beta Textures</Paragraph>
+    <Paragraph Margin="24,0,0,0">Switches the texture variant to the Beta set. Also accessible via the Textures tab in the editor drawer.</Paragraph>
+
+    <!-- Edit menu -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Edit Menu
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Copy Object
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+C)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Copies the currently selected prim object.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Paste Object
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+V)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">Pastes a previously copied prim at the current cursor position.</Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>Copy and Paste currently apply to prim objects only. Building facet copy/paste is not yet supported.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ZOOM & NAVIGATION -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Zooming &amp; Navigation
+    </Paragraph>
+    <Paragraph>
+        The canvas zoom level can be adjusted in several ways:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Ctrl + Mouse Wheel</Bold> — scroll up to zoom in, scroll down to zoom out.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Zoom bar</Bold> — located in the bottom-right corner of the canvas area, with +/- buttons and a percentage readout.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>View menu</Bold> — use Zoom In, Zoom Out, or Reset Zoom.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Ctrl+0</Bold> — resets the zoom level to 100%.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        Scroll the canvas using the scrollbars or by using the mouse wheel. The current
+        zoom percentage is always displayed in both the status bar and next to the zoom controls.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/getting_started_zoom_controls.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- NEXT STEPS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        Now that you are familiar with the editor interface, explore the individual help topics
+        in the sidebar for detailed guides on each editing feature. A good starting point is to
+        open one of the shipped game maps — found in the game's
+        <Run FontFamily="Consolas" Foreground="#E8B84B">data\</Run> folder — and examine how
+        existing levels are constructed before creating your own.
+    </Paragraph>
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>Always work on copies of the original game files. Saving a map overwrites the file directly — there is no automatic backup.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -65,6 +65,31 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
+        // Auto-build options — relay to MapViewModel
+        private static MapViewModel? GetMapVm()
+        {
+            var shell = System.Windows.Application.Current.MainWindow?.DataContext as MainWindowViewModel;
+            return shell?.Map;
+        }
+
+        public bool AutoDetectRoofs
+        {
+            get => GetMapVm()?.AutoDetectRoofs ?? true;
+            set { var vm = GetMapVm(); if (vm != null) vm.AutoDetectRoofs = value; OnPropertyChanged(); }
+        }
+
+        public bool AutoPaintRoofTextures
+        {
+            get => GetMapVm()?.AutoPaintRoofTextures ?? false;
+            set { var vm = GetMapVm(); if (vm != null) vm.AutoPaintRoofTextures = value; OnPropertyChanged(); }
+        }
+
+        public bool AutoCreateWalkables
+        {
+            get => GetMapVm()?.AutoCreateWalkables ?? true;
+            set { var vm = GetMapVm(); if (vm != null) vm.AutoCreateWalkables = value; OnPropertyChanged(); }
+        }
+
         /// <summary>Flat list of all cable facets (for the cables ListView).</summary>
         public ObservableCollection<FacetVM> CableFacets { get; } = new();
 

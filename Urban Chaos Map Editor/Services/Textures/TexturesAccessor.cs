@@ -112,6 +112,79 @@ namespace UrbanChaosMapEditor.Services.Textures
             return (relativeKey, rotationDeg);
         }
 
+        public bool TryGetTileTextureSelection(
+    int tx,
+    int ty,
+    out TextureGroup group,
+    out int textureNumber,
+    out int rotationIndex)
+        {
+            group = TextureGroup.World;
+            textureNumber = 0;
+            rotationIndex = 0;
+
+            if (!TryReadTileRecord(tx, ty, out byte textureByte, out byte combinedByte, out byte b2, out int off))
+                return false;
+
+            int groupTag = combinedByte & 0x03;
+            rotationIndex = (combinedByte >> 2) & 0x03;
+
+            switch (groupTag)
+            {
+                case 0: // world
+                    group = TextureGroup.World;
+                    textureNumber = textureByte;
+                    break;
+
+                case 1: // shared
+                    group = TextureGroup.Shared;
+                    textureNumber = textureByte + 256;
+                    break;
+
+                case 2: // prims
+                case 3:
+                    group = TextureGroup.Prims;
+                    textureNumber = (sbyte)textureByte + 64;
+                    break;
+
+                default:
+                    group = TextureGroup.World;
+                    textureNumber = textureByte;
+                    break;
+            }
+
+            System.Diagnostics.Debug.WriteLine(
+                $"[TEXACCESSOR] TryGetTileTextureSelection tx={tx} ty={ty} off={off} " +
+                $"RAW=({textureByte},{combinedByte},{b2}) " +
+                $"groupTag={groupTag} rotIdx={rotationIndex} " +
+                $"decoded=({group},{textureNumber},{rotationIndex})");
+
+            return true;
+        }
+
+        private bool TryReadTileRecord(int tx, int ty, out byte b0, out byte b1, out byte b2, out int off)
+        {
+            b0 = b1 = b2 = 0;
+            off = -1;
+
+            if (!_data.IsLoaded || _data.MapBytes == null)
+                return false;
+
+            if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide)
+                return false;
+
+            off = TileOffset(tx, ty);
+            var bytes = _data.MapBytes;
+
+            if (off < 0 || off + BytesPerTile > bytes.Length)
+                return false;
+
+            b0 = bytes[off + 0];
+            b1 = bytes[off + 1];
+            b2 = bytes[off + 2];
+            return true;
+        }
+
         public void WriteTileTexture(int tx, int ty, TextureGroup group, int texNumber, int rotationIndex, int currentWorld)
         {
             if (!_data.IsLoaded || _data.MapBytes is null) throw new InvalidOperationException("No map loaded.");

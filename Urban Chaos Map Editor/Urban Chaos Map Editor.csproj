@@ -28,6 +28,38 @@
     <Page Remove="Assets\Images\NewFolder\**" />
     <Resource Remove="Assets\Images\NewFolder\**" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Help\Images\getting_started_coordinates.png" />
+    <None Remove="Help\Images\getting_started_editor_drawer.png" />
+    <None Remove="Help\Images\getting_started_editor_tabs.png" />
+    <None Remove="Help\Images\getting_started_empty_canvas.png" />
+    <None Remove="Help\Images\getting_started_menu_bar.png" />
+    <None Remove="Help\Images\getting_started_status_bar.png" />
+    <None Remove="Help\Images\getting_started_toolbar.png" />
+    <None Remove="Help\Images\getting_started_zoom_controls.png" />
+    <None Remove="Help\Images\heights_drag_area.png" />
+    <None Remove="Help\Images\heights_editor_tab.png" />
+    <None Remove="Help\Images\heights_layer_toggle.png" />
+    <None Remove="Help\Images\heights_raise_lower_example.png" />
+    <None Remove="Help\Images\heights_randomized.png" />
+    <None Remove="Help\Images\heights_vertex_circles.png" />
+    <None Remove="Help\Images\map_overview_buildings.png" />
+    <None Remove="Help\Images\map_overview_height_vertices.png" />
+    <None Remove="Help\Images\map_overview_prims.png" />
+    <None Remove="Help\Images\map_overview_tile_grid.png" />
+    <None Remove="Help\Images\map_overview_walkables_rf4.png" />
+    <None Remove="Help\Images\textures_beta_checkbox.PNG" />
+    <None Remove="Help\Images\textures_example_5x5.png" />
+    <None Remove="Help\Images\textures_ghost_preview.png" />
+    <None Remove="Help\Images\textures_rotation.png" />
+    <None Remove="Help\Images\textures_world_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="Help\Topics\Getting_Started.xaml" />
+    <Page Remove="Help\Topics\Heights.xaml" />
+    <Page Remove="Help\Topics\Map_Overview.xaml" />
+    <Page Remove="Help\Topics\Textures.xaml" />
+  </ItemGroup>
 
   <!-- (Optional) Keep these folders visible in Solution Explorer -->
   <ItemGroup>
@@ -37,6 +69,36 @@
     <Resource Update="Assets\Images\PrimGraphics\199.PNG">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Help\Images\getting_started_coordinates.png" />
+    <Resource Include="Help\Images\getting_started_editor_drawer.png" />
+    <Resource Include="Help\Images\getting_started_editor_tabs.png" />
+    <Resource Include="Help\Images\getting_started_empty_canvas.png" />
+    <Resource Include="Help\Images\getting_started_menu_bar.png" />
+    <Resource Include="Help\Images\getting_started_status_bar.png" />
+    <Resource Include="Help\Images\getting_started_toolbar.png" />
+    <Resource Include="Help\Images\getting_started_zoom_controls.png" />
+    <Resource Include="Help\Images\heights_drag_area.png" />
+    <Resource Include="Help\Images\heights_editor_tab.png" />
+    <Resource Include="Help\Images\heights_layer_toggle.png" />
+    <Resource Include="Help\Images\heights_raise_lower_example.png" />
+    <Resource Include="Help\Images\heights_randomized.png" />
+    <Resource Include="Help\Images\heights_vertex_circles.png" />
+    <Resource Include="Help\Images\map_overview_buildings.png" />
+    <Resource Include="Help\Images\map_overview_height_vertices.png" />
+    <Resource Include="Help\Images\map_overview_prims.png" />
+    <Resource Include="Help\Images\map_overview_tile_grid.png" />
+    <Resource Include="Help\Images\map_overview_walkables_rf4.png" />
+    <Resource Include="Help\Images\textures_beta_checkbox.PNG" />
+    <Resource Include="Help\Images\textures_example_5x5.png" />
+    <Resource Include="Help\Images\textures_ghost_preview.png" />
+    <Resource Include="Help\Images\textures_rotation.png" />
+    <Resource Include="Help\Images\textures_world_selected.png" />
+    <Resource Include="Help\Topics\Getting_Started.xaml" />
+    <Resource Include="Help\Topics\Heights.xaml" />
+    <Resource Include="Help\Topics\Map_Overview.xaml" />
+    <Resource Include="Help\Topics\Textures.xaml" />
   </ItemGroup>
 
 </Project>

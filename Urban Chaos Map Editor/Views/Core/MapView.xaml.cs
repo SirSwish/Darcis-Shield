@@ -309,6 +309,67 @@ namespace UrbanChaosMapEditor.Views.Core
                 return;
             }
 
+            if (vm.SelectedTool == EditorTool.EyedropTexture)
+            {
+                Point mousePos = e.GetPosition(Surface);
+
+                int tx = (int)Math.Floor(mousePos.X / MapConstants.TileSize);
+                int ty = (int)Math.Floor(mousePos.Y / MapConstants.TileSize);
+
+                if (tx < 0 || tx >= MapConstants.TilesPerSide ||
+                    ty < 0 || ty >= MapConstants.TilesPerSide)
+                    return;
+
+                int gameTx = MapConstants.TilesPerSide - 1 - tx;
+                int gameTy = MapConstants.TilesPerSide - 1 - ty;
+
+                var tex = new TexturesAccessor(MapDataService.Instance);
+
+                // Compute offset using SAME logic as accessor
+                int fx = MapConstants.TilesPerSide - 1 - ty;
+                int fy = MapConstants.TilesPerSide - 1 - tx;
+                int fileIndex = fy * MapConstants.TilesPerSide + fx;
+
+                int off = 8 + (fileIndex * 6); // HeaderBytes=8, BytesPerTile=6
+
+                byte[]? bytes = MapDataService.Instance.MapBytes;
+
+                byte b0 = 0, b1 = 0, b2 = 0;
+
+                if (bytes != null && off >= 0 && off + 2 < bytes.Length)
+                {
+                    b0 = bytes[off + 0];
+                    b1 = bytes[off + 1];
+                    b2 = bytes[off + 2];
+                }
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[EYEDROPPER] Mouse=({mousePos.X:0.0},{mousePos.Y:0.0}) " +
+                    $"UI=({tx},{ty}) GAME=({gameTx},{gameTy}) " +
+                    $"OFF={off} RAW=({b0},{b1},{b2})");
+
+                if (tex.TryGetTileTextureSelection(tx, ty, out var g, out var n, out var r))
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[EYEDROPPER] READ -> Group={g}, Tex={n}, Rot={r}");
+
+                    vm.SelectedTextureGroup = g;
+                    vm.SelectedTextureNumber = n;
+                    vm.SelectedRotationIndex = r;
+
+                    vm.SelectedTool = EditorTool.PaintTexture;
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[EYEDROPPER] APPLY -> Group={vm.SelectedTextureGroup}, Tex={vm.SelectedTextureNumber}, Rot={vm.SelectedRotationIndex}");
+
+                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                        shell.StatusMessage = $"Sampled tile [{gameTx},{gameTy}]";
+                }
+
+                e.Handled = true;
+                return;
+            }
+
             if (vm.SelectedTool == EditorTool.SetAltitude ||
                 vm.SelectedTool == EditorTool.SampleAltitude ||
                 vm.SelectedTool == EditorTool.ResetAltitude ||

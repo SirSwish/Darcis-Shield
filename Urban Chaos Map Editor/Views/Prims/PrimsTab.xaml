@@ -1,7 +1,8 @@
 <UserControl x:Class="UrbanChaosMapEditor.Views.Prims.PrimsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:models="clr-namespace:UrbanChaosMapEditor.Models.Prims">
+             xmlns:models="clr-namespace:UrbanChaosMapEditor.Models.Prims"
+             HorizontalAlignment="Stretch">
     <!-- Inherit DataContext from MainWindow -->
 
     <Grid Margin="8">

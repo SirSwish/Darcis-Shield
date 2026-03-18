@@ -16,7 +16,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
         /// If so, sets PAP_HI altitude/Hidden flags AND creates a walkable region.
         /// Call this after adding a wall facet to a building.
         /// </summary>
-        public static bool CheckAndApplyRoofEnclosure(int buildingId1)
+        public static bool CheckAndApplyRoofEnclosure(
+            int buildingId1,
+            bool applyRoofTextures = true,
+            bool createWalkables = true)
         {
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded)
@@ -119,7 +122,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     altAcc.SetFlags(wpfTx, wpfTy, PapFlags.Hidden);
                 else
                     altAcc.SetFlags(wpfTx, wpfTy, PapFlags.RoofExists | PapFlags.Hidden);
-                texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.World, 50, 0, currentWorld);
+                if (applyRoofTextures)
+                {
+                    texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.World, 50, 0, currentWorld);
+                }
             }
 
             // Notify altitude + texture changes
@@ -142,7 +148,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
             byte minZ = (byte)polygon.Min(p => p.z);
             byte maxZ = (byte)polygon.Max(p => p.z);
 
-            if (maxX > minX && maxZ > minZ)
+            if (createWalkables && maxX > minX && maxZ > minZ)
             {
                 bool walkableExists = false;
                 if (svc.TryGetWalkables(out var existingWalkables, out _))
