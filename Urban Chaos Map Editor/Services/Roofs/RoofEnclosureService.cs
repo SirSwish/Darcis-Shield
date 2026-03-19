@@ -3,8 +3,8 @@
 // AND creates a walkable region covering the enclosed area.
 using System.Diagnostics;
 using UrbanChaosMapEditor.Models.Buildings;
-using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Textures;
 
 namespace UrbanChaosMapEditor.Services.Roofs
@@ -12,8 +12,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
     public static class RoofEnclosureService
     {
         /// <summary>
-        /// Checks if a building's wall facets form a closed polygon.
-        /// If so, sets PAP_HI altitude/Hidden flags AND creates a walkable region.
+        /// Checks if a building's wall facets form one or more closed polygons.
+        /// If so, sets PAP_HI altitude/Hidden flags AND creates walkable region(s).
         /// Call this after adding a wall facet to a building.
         /// </summary>
         public static bool CheckAndApplyRoofEnclosure(
@@ -53,6 +53,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 int h = facet.Height;
                 if (!facetsByHeight.ContainsKey(h))
                     facetsByHeight[h] = new List<Edge>();
+
                 facetsByHeight[h].Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
 
                 Debug.WriteLine($"[RoofEnclosureService] Facet: ({facet.X0},{facet.Z0})->({facet.X1},{facet.Z1}) Height={h} Type={facet.Type}");
@@ -60,143 +61,167 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
             Debug.WriteLine($"[RoofEnclosureService] Building #{buildingId1}: {facetsByHeight.Count} height level(s)");
 
-            // Try each height level (highest first) to find a closed polygon
-            List<(byte x, byte z)>? polygon = null;
-            int roofHeight = 0;
+            var altAcc = new AltitudeAccessor(svc);
+            var texAcc = new TexturesAccessor(svc);
+            int currentWorld = texAcc.ReadTextureWorld();
 
+            bool anyApplied = false;
+            bool anyAltitudeChanged = false;
+            bool anyTextureChanged = false;
+
+            var changedWpfTiles = new List<(int wpfTx, int wpfTy)>();
+            var claimedInteriorTiles = new HashSet<(int tx, int ty)>();
+
+            // Try each height level (highest first)
             foreach (var height in facetsByHeight.Keys.OrderByDescending(h => h))
             {
                 var edges = facetsByHeight[height];
                 Debug.WriteLine($"[RoofEnclosureService] Trying height={height} with {edges.Count} edges");
 
-                if (edges.Count >= 3 && TryFindClosedPolygon(edges, out var candidatePolygon))
+                var components = SplitIntoConnectedComponents(edges);
+                Debug.WriteLine($"[RoofEnclosureService] Height={height} split into {components.Count} connected component(s)");
+
+                foreach (var component in components)
                 {
-                    polygon = candidatePolygon;
-                    roofHeight = height;
-                    Debug.WriteLine($"[RoofEnclosureService] Closed polygon found at height={height} with {candidatePolygon.Count} vertices");
-                    break;
+                    Debug.WriteLine($"[RoofEnclosureService] Trying component with {component.Count} edges");
+
+                    if (component.Count < 3)
+                        continue;
+
+                    if (!TryFindClosedPolygon(component, out var polygon))
+                    {
+                        Debug.WriteLine($"[RoofEnclosureService] Component is not a closed polygon");
+                        continue;
+                    }
+
+                    Debug.WriteLine($"[RoofEnclosureService] Closed polygon found at height={height} with {polygon.Count} vertices");
+                    foreach (var (x, z) in polygon)
+                        Debug.WriteLine($"[RoofEnclosureService]   Vertex: ({x}, {z})");
+
+                    var interiorTiles = GetInteriorTiles(polygon);
+                    if (interiorTiles.Count == 0)
+                    {
+                        Debug.WriteLine($"[RoofEnclosureService] No interior tiles found for this polygon");
+                        continue;
+                    }
+
+                    int worldAltitude = height << AltitudeAccessor.PAP_ALT_SHIFT;
+                    Debug.WriteLine($"[RoofEnclosureService] Found {interiorTiles.Count} interior tiles, applying roof at Height={height} (world={worldAltitude})");
+
+                    int appliedCount = 0;
+
+                    foreach (var (tx, ty) in interiorTiles)
+                    {
+                        // Higher roofs claim tiles first. Do not let a lower roof overwrite them.
+                        if (!claimedInteriorTiles.Add((tx, ty)))
+                        {
+                            Debug.WriteLine($"[RoofEnclosureService] Skipping tile ({tx},{ty}) because it is already claimed by a higher roof");
+                            continue;
+                        }
+
+                        int wpfTx = 127 - tx;
+                        int wpfTy = 127 - ty;
+
+                        Debug.WriteLine($"[RoofEnclosureService] Facet coords (X={tx}, Z={ty}) -> WPF coords ({wpfTx},{wpfTy})");
+
+                        bool isWarehouseBuilding = (building.Type == (byte)BuildingType.Warehouse);
+
+                        altAcc.WriteWorldAltitude(wpfTx, wpfTy, worldAltitude);
+                        if (isWarehouseBuilding)
+                            altAcc.SetFlags(wpfTx, wpfTy, PapFlags.Hidden);
+                        else
+                            altAcc.SetFlags(wpfTx, wpfTy, PapFlags.RoofExists | PapFlags.Hidden);
+
+                        changedWpfTiles.Add((wpfTx, wpfTy));
+                        anyAltitudeChanged = true;
+                        appliedCount++;
+
+                        if (applyRoofTextures)
+                        {
+                            texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.World, 50, 0, currentWorld);
+                            anyTextureChanged = true;
+                        }
+                    }
+
+                    // Auto-create walkable for this specific enclosure
+                    byte minX = (byte)polygon.Min(p => p.x);
+                    byte maxX = (byte)polygon.Max(p => p.x);
+                    byte minZ = (byte)polygon.Min(p => p.z);
+                    byte maxZ = (byte)polygon.Max(p => p.z);
+
+                    if (createWalkables && maxX > minX && maxZ > minZ)
+                    {
+                        bool walkableExists = false;
+                        if (svc.TryGetWalkables(out var existingWalkables, out _))
+                        {
+                            for (int i = 1; i < existingWalkables.Length; i++)
+                            {
+                                var w = existingWalkables[i];
+                                if (w.Building == buildingId1 &&
+                                    w.X1 == minX && w.Z1 == minZ &&
+                                    w.X2 == maxX && w.Z2 == maxZ)
+                                {
+                                    walkableExists = true;
+                                    Debug.WriteLine($"[RoofEnclosureService] Walkable already exists for this area, skipping creation");
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!walkableExists)
+                        {
+                            var template = new WalkableTemplate
+                            {
+                                BuildingId1 = buildingId1,
+                                X1 = minX,
+                                Z1 = minZ,
+                                X2 = maxX,
+                                Z2 = maxZ,
+                                WorldY = height * 64,
+                                StoreyY = 0
+                            };
+
+                            var walkableAdder = new WalkableAdder(svc);
+                            var walkResult = walkableAdder.TryAddWalkable(template);
+
+                            if (walkResult.Success)
+                            {
+                                Debug.WriteLine($"[RoofEnclosureService] Auto-created walkable #{walkResult.WalkableId1} " +
+                                    $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) WorldY={height * 64}");
+                                RoofsChangeBus.Instance.NotifyChanged();
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"[RoofEnclosureService] Failed to create walkable: {walkResult.Error}");
+                            }
+                        }
+                    }
+
+                    Debug.WriteLine($"[RoofEnclosureService] Successfully applied roof to {appliedCount} tiles for this polygon");
+                    anyApplied = true;
                 }
             }
 
-            if (polygon == null)
+            if (anyAltitudeChanged && changedWpfTiles.Count > 0)
+            {
+                int minTx = changedWpfTiles.Min(t => t.wpfTx);
+                int minTy = changedWpfTiles.Min(t => t.wpfTy);
+                int maxTx = changedWpfTiles.Max(t => t.wpfTx);
+                int maxTy = changedWpfTiles.Max(t => t.wpfTy);
+                AltitudeChangeBus.Instance.NotifyRegion(minTx, minTy, maxTx, maxTy);
+            }
+
+            if (anyTextureChanged)
+            {
+                TexturesChangeBus.Instance.NotifyChanged();
+            }
+
+            if (!anyApplied)
             {
                 Debug.WriteLine($"[RoofEnclosureService] No closed polygon found at any height level");
                 return false;
             }
 
-            foreach (var (x, z) in polygon)
-                Debug.WriteLine($"[RoofEnclosureService]   Vertex: ({x}, {z})");
-
-            // Find all tiles inside the polygon
-            var interiorTiles = GetInteriorTiles(polygon);
-
-            if (interiorTiles.Count == 0)
-            {
-                Debug.WriteLine($"[RoofEnclosureService] No interior tiles found");
-                return false;
-            }
-
-            // Calculate world altitude from the height of the storey that formed the polygon
-            int worldAltitude = roofHeight << AltitudeAccessor.PAP_ALT_SHIFT;
-
-            Debug.WriteLine($"[RoofEnclosureService] Found {interiorTiles.Count} interior tiles, applying roof at Height={roofHeight} (world={worldAltitude})");
-
-            // Apply PAP_HI altitude and Hidden flag to interior tiles
-            var altAcc = new AltitudeAccessor(svc);
-            var texAcc = new TexturesAccessor(svc);
-            int currentWorld = texAcc.ReadTextureWorld();
-
-            foreach (var (tx, ty) in interiorTiles)
-            {
-                int wpfTx = 127 - tx;
-                int wpfTy = 127 - ty;
-
-                Debug.WriteLine($"[RoofEnclosureService] Facet coords (X={tx}, Z={ty}) -> WPF coords ({wpfTx},{wpfTy})");
-
-                // Warehouse buildings only need Hidden flag (not RoofExists)
-                // Normal buildings need both Hidden + RoofExists
-                bool isWarehouseBuilding = (building.Type == (byte)BuildingType.Warehouse);
-
-                altAcc.WriteWorldAltitude(wpfTx, wpfTy, worldAltitude);
-                if (isWarehouseBuilding)
-                    altAcc.SetFlags(wpfTx, wpfTy, PapFlags.Hidden);
-                else
-                    altAcc.SetFlags(wpfTx, wpfTy, PapFlags.RoofExists | PapFlags.Hidden);
-                if (applyRoofTextures)
-                {
-                    texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.World, 50, 0, currentWorld);
-                }
-            }
-
-            // Notify altitude + texture changes
-            if (interiorTiles.Count > 0)
-            {
-                var wpfTiles = interiorTiles.Select(t => (wpfTx: 127 - t.tx, wpfTy: 127 - t.ty)).ToList();
-                var minTx = wpfTiles.Min(t => t.wpfTx);
-                var minTy = wpfTiles.Min(t => t.wpfTy);
-                var maxTx = wpfTiles.Max(t => t.wpfTx);
-                var maxTy = wpfTiles.Max(t => t.wpfTy);
-                AltitudeChangeBus.Instance.NotifyRegion(minTx, minTy, maxTx, maxTy);
-                TexturesChangeBus.Instance.NotifyChanged();
-            }
-
-            // ============================================================
-            // AUTO-CREATE WALKABLE for the enclosed roof area
-            // ============================================================
-            byte minX = (byte)polygon.Min(p => p.x);
-            byte maxX = (byte)polygon.Max(p => p.x);
-            byte minZ = (byte)polygon.Min(p => p.z);
-            byte maxZ = (byte)polygon.Max(p => p.z);
-
-            if (createWalkables && maxX > minX && maxZ > minZ)
-            {
-                bool walkableExists = false;
-                if (svc.TryGetWalkables(out var existingWalkables, out _))
-                {
-                    for (int i = 1; i < existingWalkables.Length; i++)
-                    {
-                        var w = existingWalkables[i];
-                        if (w.Building == buildingId1 &&
-                            w.X1 == minX && w.Z1 == minZ &&
-                            w.X2 == maxX && w.Z2 == maxZ)
-                        {
-                            walkableExists = true;
-                            Debug.WriteLine($"[RoofEnclosureService] Walkable already exists for this area, skipping creation");
-                            break;
-                        }
-                    }
-                }
-
-                if (!walkableExists)
-                {
-                    var template = new WalkableTemplate
-                    {
-                        BuildingId1 = buildingId1,
-                        X1 = minX,
-                        Z1 = minZ,
-                        X2 = maxX,
-                        Z2 = maxZ,
-                        WorldY = roofHeight * 64,
-                        StoreyY = 0
-                    };
-
-                    var walkableAdder = new WalkableAdder(svc);
-                    var walkResult = walkableAdder.TryAddWalkable(template);
-
-                    if (walkResult.Success)
-                    {
-                        Debug.WriteLine($"[RoofEnclosureService] Auto-created walkable #{walkResult.WalkableId1} " +
-                            $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) WorldY={roofHeight * 64}");
-                        RoofsChangeBus.Instance.NotifyChanged();
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"[RoofEnclosureService] Failed to create walkable: {walkResult.Error}");
-                    }
-                }
-            }
-
-            Debug.WriteLine($"[RoofEnclosureService] Successfully applied roof to {interiorTiles.Count} tiles");
             return true;
         }
 
@@ -224,35 +249,47 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 if (fIdx < 1) continue;
                 var facet = snap.Facets[fIdx - 1];
                 if (facet.Type != FacetType.Normal) continue;
-                // Skip interior (back-to-front) facets — they duplicate the exterior edges
                 if ((facet.Flags & FacetFlags.Inside) != 0)
                     continue;
                 if (facet.Building != buildingId1) continue;
                 wallEdges.Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
             }
 
-            if (!TryFindClosedPolygon(wallEdges, out var polygon))
-                return;
+            var components = SplitIntoConnectedComponents(wallEdges);
+            var allInteriorTiles = new List<(int tx, int ty)>();
 
-            var interiorTiles = GetInteriorTiles(polygon);
-            if (interiorTiles.Count == 0)
+            foreach (var component in components)
+            {
+                if (!TryFindClosedPolygon(component, out var polygon))
+                    continue;
+
+                var interiorTiles = GetInteriorTiles(polygon);
+                if (interiorTiles.Count > 0)
+                    allInteriorTiles.AddRange(interiorTiles);
+            }
+
+            if (allInteriorTiles.Count == 0)
                 return;
 
             var altAcc = new AltitudeAccessor(svc);
-            foreach (var (tx, ty) in interiorTiles)
+            foreach (var (tx, ty) in allInteriorTiles.Distinct())
             {
                 int wpfTx = 127 - tx;
                 int wpfTy = 127 - ty;
                 altAcc.ClearRoofTile(wpfTx, wpfTy);
             }
 
-            if (interiorTiles.Count > 0)
+            var wpfTiles = allInteriorTiles
+                .Distinct()
+                .Select(t => (wpfTx: 127 - t.tx, wpfTy: 127 - t.ty))
+                .ToList();
+
+            if (wpfTiles.Count > 0)
             {
-                var wpfTiles = interiorTiles.Select(t => (wpfTx: 127 - t.tx, wpfTy: 127 - t.ty)).ToList();
-                var minTx = wpfTiles.Min(t => t.wpfTx);
-                var minTy = wpfTiles.Min(t => t.wpfTy);
-                var maxTx = wpfTiles.Max(t => t.wpfTx);
-                var maxTy = wpfTiles.Max(t => t.wpfTy);
+                int minTx = wpfTiles.Min(t => t.wpfTx);
+                int minTy = wpfTiles.Min(t => t.wpfTy);
+                int maxTx = wpfTiles.Max(t => t.wpfTx);
+                int maxTy = wpfTiles.Max(t => t.wpfTy);
                 AltitudeChangeBus.Instance.NotifyRegion(minTx, minTy, maxTx, maxTy);
             }
         }
@@ -280,6 +317,69 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
             public bool HasVertex(byte x, byte z) =>
                 (X0 == x && Z0 == z) || (X1 == x && Z1 == z);
+        }
+
+        private static List<List<Edge>> SplitIntoConnectedComponents(List<Edge> edges)
+        {
+            var result = new List<List<Edge>>();
+            if (edges.Count == 0)
+                return result;
+
+            var adjacency = new Dictionary<(byte x, byte z), List<int>>();
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var e = edges[i];
+
+                if (!adjacency.TryGetValue(e.Start, out var startList))
+                {
+                    startList = new List<int>();
+                    adjacency[e.Start] = startList;
+                }
+                startList.Add(i);
+
+                if (!adjacency.TryGetValue(e.End, out var endList))
+                {
+                    endList = new List<int>();
+                    adjacency[e.End] = endList;
+                }
+                endList.Add(i);
+            }
+
+            var visitedEdges = new HashSet<int>();
+
+            for (int i = 0; i < edges.Count; i++)
+            {
+                if (visitedEdges.Contains(i))
+                    continue;
+
+                var component = new List<Edge>();
+                var queue = new Queue<int>();
+                queue.Enqueue(i);
+                visitedEdges.Add(i);
+
+                while (queue.Count > 0)
+                {
+                    int edgeIdx = queue.Dequeue();
+                    var edge = edges[edgeIdx];
+                    component.Add(edge);
+
+                    foreach (var vertex in new[] { edge.Start, edge.End })
+                    {
+                        if (!adjacency.TryGetValue(vertex, out var touchingEdges))
+                            continue;
+
+                        foreach (int nextIdx in touchingEdges)
+                        {
+                            if (visitedEdges.Add(nextIdx))
+                                queue.Enqueue(nextIdx);
+                        }
+                    }
+                }
+
+                result.Add(component);
+            }
+
+            return result;
         }
 
         private static bool TryFindClosedPolygon(List<Edge> edges, out List<(byte x, byte z)> polygon)
@@ -337,18 +437,22 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                 if (nextEdgeIdx < 0)
                 {
-                    if (currentVertex.x == startVertex.x && currentVertex.z == startVertex.z && polygon.Count > 2)
+                    if (currentVertex.Item1 == startVertex.Item1 &&
+                        currentVertex.Item2 == startVertex.Item2 &&
+                        polygon.Count > 2)
                     {
                         if (polygon.Count > 1 && polygon[^1] == startVertex)
                             polygon.RemoveAt(polygon.Count - 1);
+
                         return usedEdges.Count == edges.Count;
                     }
+
                     return false;
                 }
 
                 usedEdges.Add(nextEdgeIdx);
                 var edge = edges[nextEdgeIdx];
-                var nextVertex = edge.GetOtherEnd(currentVertex.x, currentVertex.z);
+                var nextVertex = edge.GetOtherEnd(currentVertex.Item1, currentVertex.Item2);
 
                 if (nextVertex == null)
                 {
@@ -358,7 +462,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                 currentVertex = nextVertex.Value;
 
-                if (currentVertex.x == startVertex.x && currentVertex.z == startVertex.z)
+                if (currentVertex.Item1 == startVertex.Item1 &&
+                    currentVertex.Item2 == startVertex.Item2)
                 {
                     return usedEdges.Count == edges.Count;
                 }
@@ -396,9 +501,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     bool isInside = IsPointInPolygon(centerX, centerZ, polygon);
 
                     if (isInside)
-                    {
                         result.Add((tx, ty));
-                    }
                 }
             }
 

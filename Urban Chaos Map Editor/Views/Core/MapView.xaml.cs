@@ -12,6 +12,10 @@ using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.ViewModels.Core;
+using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosMapEditor.Views.Buildings;
+using UrbanChaosMapEditor.Views.Buildings.Dialogs;
 
 namespace UrbanChaosMapEditor.Views.Core
 {
@@ -42,6 +46,124 @@ namespace UrbanChaosMapEditor.Views.Core
         private MapViewModel? _hookedVm;
 
         public event EventHandler? WalkableDrawingCompleted;
+
+        private sealed class FacetHitCandidate
+        {
+            public int FacetId1 { get; init; }
+            public int BuildingId1 { get; init; }
+            public int StoreyId { get; init; }
+            public FacetType Type { get; init; }
+            public byte X0 { get; init; }
+            public byte Z0 { get; init; }
+            public byte X1 { get; init; }
+            public byte Z1 { get; init; }
+            public double DistancePx { get; init; }
+
+            public string Display =>
+                $"Facet #{FacetId1} | Building #{BuildingId1} | Storey {StoreyId} | {Type} | ({X0},{Z0}) -> ({X1},{Z1})";
+        }
+
+        private static double DistancePointToSegment(
+            double px, double py,
+            double x1, double y1,
+            double x2, double y2)
+        {
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+
+            if (dx == 0 && dy == 0)
+            {
+                double ox = px - x1;
+                double oy = py - y1;
+                return Math.Sqrt(ox * ox + oy * oy);
+            }
+
+            double t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+            t = Math.Max(0, Math.Min(1, t));
+
+            double cx = x1 + t * dx;
+            double cy = y1 + t * dy;
+
+            double rx = px - cx;
+            double ry = py - cy;
+            return Math.Sqrt(rx * rx + ry * ry);
+        }
+
+        private static List<FacetHitCandidate> FindFacetHits(double uiX, double uiZ, double maxDistancePx = 8.0)
+        {
+            var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
+            var hits = new List<FacetHitCandidate>();
+
+            if (snap.Facets == null || snap.Facets.Length == 0)
+                return hits;
+
+            for (int i = 0; i < snap.Facets.Length; i++)
+            {
+                var f = snap.Facets[i];
+                int facetId1 = i + 1;
+
+                if (f.Building <= 0)
+                    continue;
+
+                // Convert facet tile coords to UI pixel coords.
+                // This matches your existing facet redraw conversion.
+                double x0 = (128 - f.X0) * 64.0;
+                double z0 = (128 - f.Z0) * 64.0;
+                double x1 = (128 - f.X1) * 64.0;
+                double z1 = (128 - f.Z1) * 64.0;
+
+                double d = DistancePointToSegment(uiX, uiZ, x0, z0, x1, z1);
+                if (d <= maxDistancePx)
+                {
+                    hits.Add(new FacetHitCandidate
+                    {
+                        FacetId1 = facetId1,
+                        BuildingId1 = f.Building,
+                        StoreyId = f.Storey,
+                        Type = f.Type,
+                        X0 = f.X0,
+                        Z0 = f.Z0,
+                        X1 = f.X1,
+                        Z1 = f.Z1,
+                        DistancePx = d
+                    });
+                }
+            }
+
+            return hits
+                .OrderBy(h => h.DistancePx)
+                .ThenBy(h => h.BuildingId1)
+                .ThenBy(h => h.FacetId1)
+                .ToList();
+        }
+
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T found)
+                    return found;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
+        private bool TrySelectFacetInBuildingsTab(int facetId1, int buildingId1, bool openEditor)
+        {
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return false;
+
+            var buildingsTab = FindVisualChild<BuildingsTab>(mainWindow);
+            if (buildingsTab == null)
+                return false;
+
+            return buildingsTab.SelectFacetFromMap(facetId1, buildingId1, openEditor);
+        }
 
         public MapView()
         {
@@ -142,6 +264,92 @@ namespace UrbanChaosMapEditor.Views.Core
 
             Point mouseDownPos = e.GetPosition(Surface);
             var mainVm = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
+
+            // Facet pick/select from map when no special placement/draw tool is active
+            if (vm.ShowBuildings &&
+                !vm.IsDrawingWalkable &&
+                !vm.IsRedrawingFacet &&
+                !vm.IsMultiDrawingFacets &&
+                !vm.IsPlacingLadder &&
+                !vm.IsPlacingCable &&
+                !vm.IsPlacingDoor &&
+                !vm.IsPlacingPrim &&
+                vm.SelectedTool == EditorTool.None)
+            {
+                int uiX = (int)Math.Clamp(mouseDownPos.X, 0, MapConstants.MapPixels);
+                int uiZ = (int)Math.Clamp(mouseDownPos.Y, 0, MapConstants.MapPixels);
+
+                var hits = FindFacetHits(uiX, uiZ, maxDistancePx: 8.0);
+                if (hits.Count > 0)
+                {
+                    FacetHitCandidate chosen;
+                    bool openEditor = false;
+
+                    if (hits.Count == 1)
+                    {
+                        chosen = hits[0];
+                        openEditor = e.ClickCount >= 2;
+                    }
+                    else
+                    {
+                        var dialogItems = hits.Select(h => new FacetSelectionDialog.CandidateVm
+                        {
+                            FacetId1 = h.FacetId1,
+                            BuildingId1 = h.BuildingId1,
+                            StoreyId = h.StoreyId,
+                            TypeName = h.Type.ToString(),
+                            Coords = $"({h.X0},{h.Z0}) -> ({h.X1},{h.Z1})"
+                        }).ToList();
+
+                        var dlg = new FacetSelectionDialog(dialogItems)
+                        {
+                            Owner = Application.Current.MainWindow
+                        };
+
+                        if (dlg.ShowDialog() != true || dlg.SelectedCandidate == null)
+                        {
+                            e.Handled = true;
+                            return;
+                        }
+
+                        var sel = dlg.SelectedCandidate;
+
+                        chosen = hits.First(h =>
+                            h.FacetId1 == sel.FacetId1 &&
+                            h.BuildingId1 == sel.BuildingId1);
+
+                        // IMPORTANT: use the dialog's intent, not the map click count
+                        openEditor = dlg.OpenEditor;
+                    }
+
+                    if (TrySelectFacetInBuildingsTab(chosen.FacetId1, chosen.BuildingId1, openEditor))
+                    {
+                        if (mainVm != null)
+                        {
+                            mainVm.StatusMessage = openEditor
+                                ? $"Opened facet #{chosen.FacetId1} from building #{chosen.BuildingId1}."
+                                : $"Selected facet #{chosen.FacetId1} from building #{chosen.BuildingId1}.";
+                        }
+
+                        e.Handled = true;
+                        return;
+                    }
+
+                    if (TrySelectFacetInBuildingsTab(chosen.FacetId1, chosen.BuildingId1, openEditor))
+                    {
+                        if (mainVm != null)
+                        {
+                            mainVm.StatusMessage = openEditor
+                                ? $"Opened facet #{chosen.FacetId1} from building #{chosen.BuildingId1}."
+                                : $"Selected facet #{chosen.FacetId1} from building #{chosen.BuildingId1}.";
+                        }
+
+                        e.Handled = true;
+                        return;
+                    }
+                }
+            }
+
 
             if (vm.IsDrawingWalkable)
             {

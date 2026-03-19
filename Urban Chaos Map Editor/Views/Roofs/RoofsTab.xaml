@@ -280,15 +280,16 @@
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
                     <TextBlock Text="Altitude:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <TextBox x:Name="AltitudeInput" Width="64"
-                             Text="{Binding AltitudeValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=0}"
+                             Text="0"
                              Background="#333" Foreground="White" BorderBrush="#555"
                              HorizontalContentAlignment="Right"
                              Padding="4,2"
                              PreviewTextInput="Altitude_PreviewTextInput"
+                             TextChanged="AltitudeInput_TextChanged"
                              ToolTip="World altitude value (stored as value / 8)"/>
                     <TextBlock Text="  (raw:" VerticalAlignment="Center" Margin="8,0,2,0" Foreground="#888"/>
                     <TextBlock x:Name="RawAltitudeDisplay"
-                               Text="{Binding AltitudeValueRaw, FallbackValue=0}"
+                               Text="0"
                                VerticalAlignment="Center" Foreground="#888"/>
                     <TextBlock Text=")" VerticalAlignment="Center" Foreground="#888"/>
                 </StackPanel>

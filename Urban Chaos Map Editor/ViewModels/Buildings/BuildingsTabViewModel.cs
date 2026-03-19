@@ -809,6 +809,40 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             Debug.WriteLine("=== [BuildingsTabVM] Refresh() done ===");
         }
 
+        public bool TrySelectFacetFromMap(int facetId1, int buildingId1)
+        {
+            var building = Buildings.FirstOrDefault(b => b.Id == buildingId1);
+            if (building == null)
+                return false;
+
+            ShowCablesList = false;
+
+            if (!ReferenceEquals(SelectedBuilding, building))
+                SelectedBuilding = building;
+
+            var facet = building.Storeys
+                .SelectMany(s => s.Groups)
+                .SelectMany(g => g.Facets)
+                .FirstOrDefault(f => f.FacetId1 == facetId1);
+
+            if (facet == null)
+                return false;
+
+            SelectedStoreyId = facet.StoreyId;
+
+            var group = SelectedBuildingFacetGroups
+                .FirstOrDefault(g => g.Facets.Any(f => f.FacetId1 == facetId1));
+
+            if (group != null)
+                SelectedFacetTypeGroup = group;
+
+            SelectedFacet = facet;
+
+            SyncSelectionIntoMapVm();
+            return true;
+        }
+
+
         /// <summary>
         /// Called from the RIGHT facet TreeView (or cable list) selection change in the view.
         /// Keeps SelectedFacet, SelectedBuilding and SelectedStoreyId in sync,

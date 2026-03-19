@@ -370,20 +370,36 @@ namespace UrbanChaosMapEditor.Views.Roofs
 
         private void SetAltitude_Click(object sender, RoutedEventArgs e)
         {
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-            {
-                mainVm.Map.SelectedTool = EditorTool.SetAltitude;
-                Debug.WriteLine("[RoofsTab] Set Altitude tool selected");
-            }
+            if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm)
+                return;
+
+            if (!int.TryParse(AltitudeInput.Text, out int altitude))
+                altitude = 0;
+
+            mainVm.Map.TargetAltitude = altitude;
+            mainVm.Map.SelectedTool = EditorTool.SetAltitude;
+
+            Debug.WriteLine($"[RoofsTab] Set Altitude tool selected, TargetAltitude={mainVm.Map.TargetAltitude}");
         }
 
         private void SampleAltitude_Click(object sender, RoutedEventArgs e)
         {
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-            {
-                mainVm.Map.SelectedTool = EditorTool.SampleAltitude;
-                Debug.WriteLine("[RoofsTab] Sample Altitude tool selected");
-            }
+            if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm)
+                return;
+
+            mainVm.Map.SelectedTool = EditorTool.SampleAltitude;
+            Debug.WriteLine("[RoofsTab] Sample Altitude tool selected");
+        }
+
+        private void AltitudeInput_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox tb || RawAltitudeDisplay == null)
+                return;
+
+            if (int.TryParse(tb.Text, out int altitude))
+                RawAltitudeDisplay.Text = (altitude >> 3).ToString();
+            else
+                RawAltitudeDisplay.Text = "0";
         }
 
         private void ResetAltitude_Click(object sender, RoutedEventArgs e)

@@ -553,6 +553,42 @@ namespace UrbanChaosMapEditor.Views.Buildings
             addCableWindow.Show();
         }
 
+        public bool SelectFacetFromMap(int facetId1, int buildingId1, bool openEditor)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return false;
+
+            if (!vm.TrySelectFacetFromMap(facetId1, buildingId1))
+                return false;
+
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.Map.SelectedWalkableId1 = 0;
+
+            if (vm.SelectedBuilding != null)
+                BuildingsList?.ScrollIntoView(vm.SelectedBuilding);
+
+            if (vm.SelectedFacetTypeGroup != null)
+                FacetTypesList?.ScrollIntoView(vm.SelectedFacetTypeGroup);
+
+            if (vm.SelectedFacet != null)
+                FacetsList?.ScrollIntoView(vm.SelectedFacet);
+
+            if (openEditor)
+            {
+                var fvm = vm.SelectedFacet;
+                if (fvm == null)
+                    return false;
+
+                if (fvm.Type == FacetType.Cable)
+                    OpenCableEditor(fvm);
+                else
+                    OpenFacetPreview(fvm);
+            }
+
+            Focus();
+            return true;
+        }
+
         private void BtnDeleteBuilding_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not BuildingsTabViewModel vm)
