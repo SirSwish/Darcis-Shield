@@ -17,6 +17,7 @@ using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.ViewModels.Core;
 using UrbanChaosMapEditor.Services.Styles;
+using UrbanChaosEditor.Shared.Services.Textures;
 
 namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 {
@@ -1362,70 +1363,41 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private async Task EnsureStylesLoadedAsync()
         {
-            if (string.IsNullOrWhiteSpace(_variant) || _worldNumber <= 0) return;
+            if (_worldNumber <= 0) return;
             if (StyleDataService.Instance.IsLoaded) return;
 
-            string packUri =
-                $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/world{_worldNumber}/style.tma";
-
-            try
+            // For custom worlds (>20), try disk first
+            if (_worldNumber > 20)
             {
-                var sri = Application.GetResourceStream(new Uri(packUri, UriKind.Absolute));
-                if (sri?.Stream != null)
-                    await StyleDataService.Instance.LoadFromResourceStreamAsync(sri.Stream, packUri);
+                var customTmaPath = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, "CustomTextures",
+                    $"world{_worldNumber}", "style.tma");
+
+                if (System.IO.File.Exists(customTmaPath))
+                {
+                    await StyleDataService.Instance.LoadAsync(customTmaPath);
+                    return;
+                }
             }
-            catch { }
+
+            // For shipped worlds, try embedded resource
+            if (!string.IsNullOrWhiteSpace(_variant))
+            {
+                string packUri =
+                    $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/world{_worldNumber}/style.tma";
+                try
+                {
+                    var sri = Application.GetResourceStream(new Uri(packUri, UriKind.Absolute));
+                    if (sri?.Stream != null)
+                        await StyleDataService.Instance.LoadFromResourceStreamAsync(sri.Stream, packUri);
+                }
+                catch { }
+            }
         }
 
         private bool TryLoadTileBitmap(byte page, byte tx, byte ty, byte flip, out BitmapSource? bmp)
         {
-            bmp = null;
-            if (string.IsNullOrWhiteSpace(_variant) || _worldNumber <= 0) return false;
-
-            var candidates = new List<string>(3);
-            if (page <= 3) candidates.Add($"world{_worldNumber}");
-            else if (page <= 7) candidates.Add("shared");
-            else if (page == 8) candidates.Add($"world{_worldNumber}/insides");
-            else candidates.Add($"world{_worldNumber}");
-
-            int totalIndex = (tx == 255 && ty == 255) ? page : page * 64 + ty * 8 + tx;
-
-            foreach (var subfolder in candidates)
-            {
-                string packUri =
-                    $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
-                try
-                {
-                    var sri = Application.GetResourceStream(new Uri(packUri));
-                    if (sri?.Stream == null) continue;
-
-                    var baseBmp = new BitmapImage();
-                    baseBmp.BeginInit();
-                    baseBmp.CacheOption = BitmapCacheOption.OnLoad;
-                    baseBmp.StreamSource = sri.Stream;
-                    baseBmp.EndInit();
-                    baseBmp.Freeze();
-
-                    bool flipX = (flip & 0x01) != 0;
-                    bool flipY = (flip & 0x02) != 0;
-
-                    if (flipX || flipY)
-                    {
-                        var tb = new TransformedBitmap(baseBmp, new ScaleTransform(flipX ? -1 : 1, flipY ? -1 : 1));
-                        tb.Freeze();
-                        bmp = tb;
-                    }
-                    else
-                    {
-                        bmp = baseBmp;
-                    }
-
-                    return true;
-                }
-                catch { }
-            }
-
-            return false;
+            return TextureResolver.TryResolve(page, tx, ty, flip, _worldNumber, _variant, out bmp);
         }
 
         #endregion

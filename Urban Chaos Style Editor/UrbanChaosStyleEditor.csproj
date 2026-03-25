@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>UrbanChaosStyleEditor</RootNamespace>
+    <AssemblyName>UrbanChaosStyleEditor</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Defaults\default.tma" />
+    <None Remove="Assets\Defaults\style.tma" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Defaults\default.tma" />
+    <Resource Include="Assets\Icons\app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

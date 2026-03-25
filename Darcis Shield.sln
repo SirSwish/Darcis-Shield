@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Storyboard Edit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Urban Chaos Mission Editor", "Urban Chaos Mission Editor\Urban Chaos Mission Editor.csproj", "{9685069B-38DC-49EA-8CDA-26B24EB681FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrbanChaosStyleEditor", "Urban Chaos Style Editor\UrbanChaosStyleEditor.csproj", "{38D03315-41CA-DD49-3549-D5722EEAE945}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9685069B-38DC-49EA-8CDA-26B24EB681FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38D03315-41CA-DD49-3549-D5722EEAE945}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38D03315-41CA-DD49-3549-D5722EEAE945}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38D03315-41CA-DD49-3549-D5722EEAE945}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38D03315-41CA-DD49-3549-D5722EEAE945}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

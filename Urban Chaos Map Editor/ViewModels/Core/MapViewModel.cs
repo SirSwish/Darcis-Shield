@@ -12,13 +12,14 @@ using UrbanChaosEditor.Shared.Services.Textures;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
-using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Roofs;
+using UrbanChaosMapEditor.Services.Styles;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.Views.Buildings.Dialogs;
-using UrbanChaosMapEditor.Services.Styles;
+using static UrbanChaosMapEditor.Services.Textures.TexturesAccessor;
 
 namespace UrbanChaosMapEditor.ViewModels.Core
 {
@@ -910,21 +911,33 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
             var cache = TextureCacheService.Instance;
 
+            System.Diagnostics.Debug.WriteLine($"[RefreshTex] ActiveSet={cache.ActiveSet}, WorldNumber={_textureWorld}, CacheCount={cache.Count}");
+
             // WORLD depends on current world number
             var worldFolder = $"world{_textureWorld}";
+            System.Diagnostics.Debug.WriteLine($"[RefreshTex] Enumerating keys for folder='{worldFolder}'");
+
+            int worldCount = 0;
             foreach (var key in cache.EnumerateRelativeKeys(worldFolder))
             {
-                if (!cache.TryGetRelative(key, out var img) || img is null) continue;
+                if (!cache.TryGetRelative(key, out var img) || img is null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RefreshTex] MISS: TryGetRelative('{key}') returned null");
+                    continue;
+                }
                 var num = ParseNumber(key);
-                WorldTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TexturesAccessor.TextureGroup.World, Number = num });
+                WorldTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TextureGroup.World, Number = num });
+                worldCount++;
             }
+
+            System.Diagnostics.Debug.WriteLine($"[RefreshTex] World textures loaded: {worldCount}");
 
             // SHARED
             foreach (var key in cache.EnumerateRelativeKeys("shared"))
             {
                 if (!cache.TryGetRelative(key, out var img) || img is null) continue;
                 var num = ParseNumber(key);
-                SharedTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TexturesAccessor.TextureGroup.Shared, Number = num });
+                SharedTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TextureGroup.Shared, Number = num });
             }
 
             // PRIMS
@@ -932,8 +945,10 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             {
                 if (!cache.TryGetRelative(key, out var img) || img is null) continue;
                 var num = ParseNumber(key);
-                PrimTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TexturesAccessor.TextureGroup.Prims, Number = num });
+                PrimTextures.Add(new TextureThumb { RelativeKey = key, Image = img, Group = TextureGroup.Prims, Number = num });
             }
+
+            System.Diagnostics.Debug.WriteLine($"[RefreshTex] Total: World={WorldTextures.Count}, Shared={SharedTextures.Count}, Prims={PrimTextures.Count}");
         }
 
         /// <summary>
@@ -1521,33 +1536,90 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         {
             try
             {
+                // For custom worlds (>20), skip embedded resource and go straight to disk
+                if (TextureWorld > 20)
+                {
+                    var customTmaPath = ResolveCustomStyleTmaPath(TextureWorld);
+                    if (customTmaPath != null && System.IO.File.Exists(customTmaPath))
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[StyleDataService] Loading custom TMA from disk: {customTmaPath}");
+                        await StyleDataService.Instance.LoadAsync(customTmaPath);
+                        return;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[StyleDataService] No style.tma found for custom world {TextureWorld}");
+                    StyleDataService.Instance.Clear();
+                    return;
+                }
+
+                // For shipped worlds (1-20), try embedded resource
                 var uri = ResolveStyleTmaPath(TextureWorld, UseBetaTextures);
                 System.Diagnostics.Debug.WriteLine($"STYLE URI = {uri}");
 
-                // Try to get the embedded resource stream
-                StreamResourceInfo? sri = Application.GetResourceStream(uri);
-                if (sri != null && sri.Stream != null)
+                StreamResourceInfo? sri = null;
+                try
+                {
+                    sri = Application.GetResourceStream(uri);
+                }
+                catch (System.IO.IOException)
+                {
+                    // Resource not found — not an error for missing worlds
+                }
+
+                if (sri?.Stream != null)
                 {
                     using (var stream = sri.Stream)
                     {
-                        // Load via the resource-stream API we just implemented
                         await StyleDataService.Instance.LoadFromResourceStreamAsync(
-                            stream,
-                            uri.ToString());
+                            stream, uri.ToString());
                     }
+                    return;
                 }
-                else
+
+                // Fallback to disk even for worlds 1-20 (in case of overrides)
+                var fallbackPath = ResolveCustomStyleTmaPath(TextureWorld);
+                if (fallbackPath != null && System.IO.File.Exists(fallbackPath))
                 {
                     System.Diagnostics.Debug.WriteLine(
-                        "[StyleDataService] style.tma resource not found for current world");
-                    StyleDataService.Instance.Clear();
+                        $"[StyleDataService] Loading fallback TMA from disk: {fallbackPath}");
+                    await StyleDataService.Instance.LoadAsync(fallbackPath);
+                    return;
                 }
+
+                System.Diagnostics.Debug.WriteLine(
+                    "[StyleDataService] style.tma not found in embedded resources or CustomTextures");
+                StyleDataService.Instance.Clear();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[StyleDataService] Failed to load styles: {ex}");
                 StyleDataService.Instance.Clear();
             }
+        }
+
+
+        /// <summary>
+        /// Resolves the path to a custom style.tma on disk.
+        /// Looks in CustomTextures/worldX/style.tma next to the .exe.
+        /// </summary>
+        private static string? ResolveCustomStyleTmaPath(int world)
+        {
+            var customRoot = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, "CustomTextures", $"world{world}");
+
+            if (!System.IO.Directory.Exists(customRoot))
+                return null;
+
+            // Try style.tma first, then Style.tma (case-insensitive filesystems handle both)
+            var tmaPath = System.IO.Path.Combine(customRoot, "style.tma");
+            if (System.IO.File.Exists(tmaPath))
+                return tmaPath;
+
+            // Also check for any .tma file in the folder
+            var tmaFiles = System.IO.Directory.GetFiles(customRoot, "*.tma");
+            return tmaFiles.Length > 0 ? tmaFiles[0] : null;
         }
 
         // helper used above

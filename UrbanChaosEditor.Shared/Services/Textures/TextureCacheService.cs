@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Windows.Media.Imaging;
@@ -180,7 +181,7 @@ namespace UrbanChaosEditor.Shared.Services.Textures
                 }
             });
 
-            Debug.WriteLine($"[TextureCacheService] Preload complete. Loaded {Count} textures.");
+            Debug.WriteLine($"[TextureCacheService] Preload complete. Loaded {Count} embedded textures.");
             if (Count > 0)
             {
                 Debug.WriteLine("[TextureCacheService] Sample keys in cache:");
@@ -193,7 +194,142 @@ namespace UrbanChaosEditor.Shared.Services.Textures
                 }
             }
 
+            // Load custom textures from disk (CustomTextures/ folder next to .exe)
+            await LoadCustomTexturesFromDiskAsync(decodeSize);
+
             Completed?.Invoke(this, EventArgs.Empty);
+        }
+
+        private async Task LoadCustomTexturesFromDiskAsync(int decodeSize)
+        {
+            var customRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CustomTextures");
+            Debug.WriteLine($"[CustomTex] Looking for custom textures at: {customRoot}");
+            Debug.WriteLine($"[CustomTex] BaseDirectory = {AppDomain.CurrentDomain.BaseDirectory}");
+
+            if (!Directory.Exists(customRoot))
+            {
+                Debug.WriteLine($"[CustomTex] FOLDER NOT FOUND: {customRoot}");
+                return;
+            }
+
+            Debug.WriteLine($"[CustomTex] Folder exists. Scanning...");
+
+            var dirs = Directory.GetDirectories(customRoot);
+            Debug.WriteLine($"[CustomTex] Found {dirs.Length} subdirectories:");
+            foreach (var d in dirs)
+                Debug.WriteLine($"[CustomTex]   dir: {d}");
+
+            var pngFiles = new List<(string fullPath, string set, string folder, string fileName)>();
+
+            foreach (var dir in dirs)
+            {
+                var dirName = Path.GetFileName(dir).ToLowerInvariant();
+                Debug.WriteLine($"[CustomTex] Processing directory: {dirName}");
+
+                if (dirName == "release" || dirName == "beta")
+                {
+                    foreach (var subDir in Directory.GetDirectories(dir))
+                    {
+                        var folderName = Path.GetFileName(subDir).ToLowerInvariant();
+                        var pngs = Directory.GetFiles(subDir, "*.png");
+                        Debug.WriteLine($"[CustomTex]   {dirName}/{folderName}: {pngs.Length} PNGs");
+                        foreach (var png in pngs)
+                            pngFiles.Add((png, dirName, folderName, Path.GetFileName(png)));
+                    }
+                }
+                else
+                {
+                    var pngs = Directory.GetFiles(dir, "*.png");
+                    var tgas = Directory.GetFiles(dir, "*.tga");
+                    var bmps = Directory.GetFiles(dir, "*.bmp");
+                    Debug.WriteLine($"[CustomTex]   {dirName}: {pngs.Length} PNGs, {tgas.Length} TGAs, {bmps.Length} BMPs");
+
+                    // Load PNGs
+                    foreach (var png in pngs)
+                    {
+                        pngFiles.Add((png, "release", dirName, Path.GetFileName(png)));
+                        pngFiles.Add((png, "beta", dirName, Path.GetFileName(png)));
+                    }
+
+                    // Also try BMPs (in case user only has BMPs)
+                    foreach (var bmp in bmps)
+                    {
+                        var bmpName = Path.GetFileName(bmp);
+                        if (bmpName.Equals("sky.bmp", StringComparison.OrdinalIgnoreCase))
+                            continue; // skip sky
+                        pngFiles.Add((bmp, "release", dirName, bmpName));
+                        pngFiles.Add((bmp, "beta", dirName, bmpName));
+                    }
+                }
+            }
+
+            if (pngFiles.Count == 0)
+            {
+                Debug.WriteLine("[CustomTex] NO texture files found in any subdirectory.");
+                Debug.WriteLine("[CustomTex] Expected structure: CustomTextures/world21/tex000hi.png");
+                return;
+            }
+
+            Debug.WriteLine($"[CustomTex] Found {pngFiles.Count} texture file entries to load.");
+            foreach (var f in pngFiles.Take(10))
+                Debug.WriteLine($"[CustomTex]   sample: set={f.set} folder={f.folder} file={f.fileName}");
+
+            int loaded = 0;
+            int failed = 0;
+
+            await Task.Run(() =>
+            {
+                foreach (var (fullPath, set, folder, fileName) in pngFiles)
+                {
+                    try
+                    {
+                        var nameNoExt = Path.GetFileNameWithoutExtension(fileName);
+                        var matches = IdRegex.Matches(nameNoExt);
+                        if (matches.Count == 0)
+                        {
+                            Debug.WriteLine($"[CustomTex] SKIP (no numeric id): {fileName}");
+                            continue;
+                        }
+
+                        var numericId = matches[^1].Value;
+                        var finalKey = $"{set}_{folder}_{numericId}";
+
+                        var bmp = new BitmapImage();
+                        bmp.BeginInit();
+                        bmp.CacheOption = BitmapCacheOption.OnLoad;
+                        bmp.DecodePixelWidth = decodeSize;
+                        bmp.UriSource = new Uri(fullPath, UriKind.Absolute);
+                        bmp.EndInit();
+                        bmp.Freeze();
+
+                        lock (_sync) { _byKey[finalKey] = bmp; }
+                        loaded++;
+
+                        if (loaded <= 5)
+                            Debug.WriteLine($"[CustomTex] Loaded: {fileName} -> key='{finalKey}'");
+                    }
+                    catch (Exception ex)
+                    {
+                        failed++;
+                        Debug.WriteLine($"[CustomTex] FAILED: {fullPath} -> {ex.Message}");
+                    }
+                }
+            });
+
+            Debug.WriteLine($"[CustomTex] Complete. Loaded={loaded}, Failed={failed}");
+
+            // Verify what's in the cache for custom worlds
+            lock (_sync)
+            {
+                var customKeys = _byKey.Keys
+                    .Where(k => k.Contains("world2", StringComparison.OrdinalIgnoreCase))
+                    .Take(10)
+                    .ToList();
+
+                Debug.WriteLine($"[CustomTex] Sample custom world keys in cache ({customKeys.Count}):");
+                foreach (var k in customKeys)
+                    Debug.WriteLine($"[CustomTex]   '{k}'");
+            }
         }
 
         private void RaiseProgress(int done, int total)

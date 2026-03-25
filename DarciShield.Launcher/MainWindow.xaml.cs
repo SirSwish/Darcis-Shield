@@ -108,6 +108,38 @@ namespace DarciShield.Launcher
                     MessageBoxImage.Error);
             }
         }
+        private void StyleEditor_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string styleEditorExe = Path.Combine(baseDir, "UrbanChaosStyleEditor.exe");
+
+                if (!File.Exists(styleEditorExe))
+                {
+                    MessageBox.Show(
+                        $"Could not find Style Editor executable:\n{styleEditorExe}",
+                        "Style Editor not found",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = styleEditorExe,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.ToString(),
+                    "Error launching Style Editor",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
         private void MissionEditor_Click(object sender, RoutedEventArgs e)
         {
             try

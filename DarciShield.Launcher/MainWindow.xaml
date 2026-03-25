@@ -106,7 +106,8 @@
                 <Button Style="{StaticResource BadgeButton}"
                     Width="174" Height="28"
                     Margin="14"
-                    Content="Style Editor"/>
+                    Content="Style Editor"
+                    Click="StyleEditor_Click"/>
 
                 <Button Style="{StaticResource BadgeButton}"
                     Width="176"

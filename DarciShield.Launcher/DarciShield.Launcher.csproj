@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Urban Chaos Map Editor\Urban Chaos Map Editor.csproj" />
     <ProjectReference Include="..\Urban Chaos Mission Editor\Urban Chaos Mission Editor.csproj" />
     <ProjectReference Include="..\Urban Chaos Storyboard Editor\Urban Chaos Storyboard Editor.csproj" />
+    <ProjectReference Include="..\Urban Chaos Style Editor\UrbanChaosStyleEditor.csproj" />
   </ItemGroup>
 
   <ItemGroup>

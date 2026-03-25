@@ -12,6 +12,7 @@ using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Styles;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosEditor.Shared.Services.Textures;
 
 namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 {
@@ -255,37 +256,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private bool TryLoadPaletteTexture(int textureIndex, out BitmapSource? bmp)
         {
-            bmp = null;
-            if (string.IsNullOrWhiteSpace(_variant) || _worldNumber <= 0) return false;
-
-            // Determine which folder based on texture index
-            // Pages 0-3 (indices 0-255) = world textures
-            // Pages 4-7 (indices 256-511) = shared
-            // For paint bytes, we only use 0-127, which is pages 0-1 (world textures)
-            const string TexturesAsm = "UrbanChaosEditor.Shared";
-            string subfolder = $"world{_worldNumber}";
-
-            string packUri = $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{textureIndex:D3}hi.png";
-            try
-            {
-                var sri = Application.GetResourceStream(new Uri(packUri));
-                if (sri?.Stream == null) return false;
-
-                var baseBmp = new BitmapImage();
-                baseBmp.BeginInit();
-                baseBmp.CacheOption = BitmapCacheOption.OnLoad;
-                baseBmp.StreamSource = sri.Stream;
-                baseBmp.EndInit();
-                baseBmp.Freeze();
-
-                bmp = baseBmp;
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return TextureResolver.TryResolvePalette(textureIndex, _worldNumber, _variant, out bmp);
         }
+
 
         #endregion
 
@@ -548,49 +521,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private bool TryLoadTileBitmap(byte page, byte tx, byte ty, byte flip, out BitmapSource? bmp)
         {
-            bmp = null;
-            if (string.IsNullOrWhiteSpace(_variant) || _worldNumber <= 0) return false;
-
-            string subfolder;
-            if (page <= 3) subfolder = $"world{_worldNumber}";
-            else if (page <= 7) subfolder = "shared";
-            else subfolder = $"world{_worldNumber}";
-
-            int totalIndex = page * 64 + ty * 8 + tx;
-            const string TexturesAsm = "UrbanChaosEditor.Shared";
-
-            string packUri = $"pack://application:,,,/{TexturesAsm};component/Assets/Textures/{_variant}/{subfolder}/tex{totalIndex:D3}hi.png";
-            try
-            {
-                var sri = Application.GetResourceStream(new Uri(packUri));
-                if (sri?.Stream == null) return false;
-
-                var baseBmp = new BitmapImage();
-                baseBmp.BeginInit();
-                baseBmp.CacheOption = BitmapCacheOption.OnLoad;
-                baseBmp.StreamSource = sri.Stream;
-                baseBmp.EndInit();
-                baseBmp.Freeze();
-
-                bool flipX = (flip & 0x01) != 0;
-                bool flipY = (flip & 0x02) != 0;
-
-                if (flipX || flipY)
-                {
-                    var tb = new TransformedBitmap(baseBmp, new ScaleTransform(flipX ? -1 : 1, flipY ? -1 : 1));
-                    tb.Freeze();
-                    bmp = tb;
-                }
-                else
-                {
-                    bmp = baseBmp;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return TextureResolver.TryResolve(page, tx, ty, flip, _worldNumber, _variant, out bmp);
         }
 
         private static void DrawGrid(Canvas canvas, int width, int height, int cellW, int cellH)
