@@ -8,6 +8,7 @@
              xmlns:rfOvl="clr-namespace:UrbanChaosMapEditor.Views.Roofs.MapOverlays"
              xmlns:texOvl="clr-namespace:UrbanChaosMapEditor.Views.Textures.MapOverlays"
              xmlns:models="clr-namespace:UrbanChaosMapEditor.Models.Core"
+             xmlns:papOvl="clr-namespace:UrbanChaosMapEditor.Views.Heights.MapOverlays"
              Focusable="True"
              PreviewKeyDown="OnPreviewKeyDown">
     <Grid>
@@ -68,6 +69,15 @@
                         </hgtOvl:HeightsLayer.Style>
                     </hgtOvl:HeightsLayer>
 
+                    <!-- PAP Flags -->
+                    <papOvl:CellFlagsLayer
+                        x:Name="CellFlagsOverlay"
+                        Width="8192"
+                        Height="8192"
+                        Visibility="{Binding ShowCellFlags, Converter={StaticResource BoolToVis}}"
+                        Panel.ZIndex="98"
+                        IsHitTestVisible="True"/>
+
                     <!-- Buildings -->
                     <bldOvl:BuildingLayer
                         x:Name="BuildingLayer"
@@ -113,7 +123,7 @@
                         Visibility="{Binding ShowWalkables, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="6"
                         IsHitTestVisible="False"/>
-
+                    
                     <!-- Altitude hover -->
                     <hgtOvl:AltitudeHoverLayer
                         x:Name="AltitudeHoverLayer"

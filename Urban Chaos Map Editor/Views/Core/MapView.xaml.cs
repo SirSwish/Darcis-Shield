@@ -185,6 +185,7 @@ namespace UrbanChaosMapEditor.Views.Core
             {
                 HookVm();
                 UpdateOverlayHitTesting();
+                RefreshCellFlagsOverlay();
             };
         }
 
@@ -993,14 +994,24 @@ namespace UrbanChaosMapEditor.Views.Core
                         for (int tx = rect.Value.MinX; tx <= rect.Value.MaxX; tx++)
                         {
                             if (isReset)
+                            {
                                 _altitude.ClearRoofTile(tx, ty);
+                                ClearPapFlagsForTile(tx, ty);
+                            }
                             else
+                            {
                                 _altitude.SetRoofTile(tx, ty, vm.TargetAltitude);
+
+                                if (vm.TargetAltitude == 0)
+                                    ClearPapFlagsForTile(tx, ty);
+                            }
+
                             tileCount++;
                         }
                     }
 
                     HeightsOverlay?.InvalidateVisual();
+                    CellFlagsOverlay?.RefreshFlags();
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     {
@@ -1475,6 +1486,34 @@ namespace UrbanChaosMapEditor.Views.Core
 
             uiX = Math.Clamp(uiX, 0, MapConstants.MapPixels - 1);
             uiZ = Math.Clamp(uiZ, 0, MapConstants.MapPixels - 1);
+        }
+        private void RefreshCellFlagsOverlay()
+        {
+            CellFlagsOverlay?.RefreshFlags();
+        }
+        private void ClearPapFlagsForTile(int tx, int ty)
+        {
+            byte[]? bytes = MapDataService.Instance.MapBytes;
+            if (bytes == null || bytes.Length < 8)
+                return;
+
+            const int HeaderBytes = 8;
+            const int BytesPerTile = 6;
+            const int TilesPerSide = 128;
+            const int OffFlags = 2;
+
+            // Match the same UI->file mapping style already used elsewhere in MapView.
+            int fx = TilesPerSide - 1 - ty;
+            int fy = TilesPerSide - 1 - tx;
+            int fileIndex = fy * TilesPerSide + fx;
+
+            int off = HeaderBytes + (fileIndex * BytesPerTile) + OffFlags;
+
+            if (off < 0 || off + 1 >= bytes.Length)
+                return;
+
+            bytes[off] = 0;
+            bytes[off + 1] = 0;
         }
     }
 }

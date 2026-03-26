@@ -2488,18 +2488,6 @@ namespace UrbanChaosMapEditor.Views.Core
 
             dialog.ShowDialog();
         }
-        private void EditPapHiCell_Click(object sender, RoutedEventArgs e)
-        {
-            if (!MapDataService.Instance.IsLoaded)
-            {
-                MessageBox.Show("No map loaded.", "PAP_HI Editor",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            var dialog = new PapHiCellEditorDialog { Owner = this };
-            dialog.Show(); // non-modal so you can keep it open while working
-        }
 
         private void IndoorBuildingEditor_Click(object sender, RoutedEventArgs e)
         {

@@ -20,6 +20,7 @@ using UrbanChaosMapEditor.Services.Styles;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.Views.Buildings.Dialogs;
 using static UrbanChaosMapEditor.Services.Textures.TexturesAccessor;
+using UrbanChaosMapEditor.Services.Heights;
 
 namespace UrbanChaosMapEditor.ViewModels.Core
 {
@@ -144,6 +145,18 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 }
             }
         }
+
+        private bool _showCellFlags;
+        public bool ShowCellFlags
+        {
+            get => _showCellFlags;
+            set
+            {
+                _showCellFlags = value;
+                OnPropertyChanged(nameof(ShowCellFlags));
+            }
+        }
+
         private bool _showRoofAltitudes;
         public bool ShowRoofAltitudes
         {

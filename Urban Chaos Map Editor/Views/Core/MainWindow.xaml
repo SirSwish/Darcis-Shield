@@ -168,6 +168,7 @@
                     <Separator/>
                     <MenuItem Header="Terrain" IsEnabled="False" FontWeight="SemiBold"/>
                     <MenuItem Header="Show _Heights" IsCheckable="True" IsChecked="{Binding Map.ShowHeights}" InputGestureText="Ctrl+H"/>
+                    <MenuItem Header="Show _PAP Flags" IsCheckable="True" IsChecked="{Binding Map.ShowCellFlags}"/>
                     <Separator/>
                     <MenuItem Header="Prims" IsEnabled="False" FontWeight="SemiBold"/>
                     <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding Map.ShowObjects}" InputGestureText="Ctrl+J"/>
@@ -219,7 +220,6 @@
                 <MenuItem Header="?? _Paint RF4 Tiles..."
                           Click="PaintRF4Tiles_Click"
                           ToolTip="Visual grid editor for painting individual roof tiles"/>
-                <MenuItem Header="PAP_HI Cell _Editor..." Click="EditPapHiCell_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="Help Documentation" Click="Help_Click"/>
@@ -268,6 +268,8 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Heights"
                                           IsChecked="{Binding Map.ShowHeights}" ToolTip="Ctrl+H"/>
+                            <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="PAP Flags"
+                                          IsChecked="{Binding Map.ShowCellFlags}" ToolTip="Show PAP_HI cell flags"/>
                         </StackPanel>
                     </StackPanel>
 
