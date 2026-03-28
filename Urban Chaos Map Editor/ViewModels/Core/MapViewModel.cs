@@ -21,6 +21,8 @@ using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.Views.Buildings.Dialogs;
 using static UrbanChaosMapEditor.Services.Textures.TexturesAccessor;
 using UrbanChaosMapEditor.Services.Heights;
+using UrbanChaosMapEditor.Models.Heights;
+using UrbanChaosMapEditor.Models.Textures;
 
 namespace UrbanChaosMapEditor.ViewModels.Core
 {
@@ -79,7 +81,12 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public ICommand LevelHeightCommand { get; }
         public ICommand FlattenHeightCommand { get; }
         public ICommand DitchTemplateCommand { get; }
+        public ICommand StampHeightCommand { get; }
         public ICommand ClearToolCommand { get; }
+        // Texture area select / copy / paste
+        public ICommand SelectTextureAreaCommand { get; }
+        public ICommand CopyTextureCellsCommand { get; }
+        public ICommand PasteTextureCellsCommand { get; }
         // Altitude
         public ICommand SetAltitudeCommand { get; }
         public ICommand SampleAltitudeCommand { get; }
@@ -101,6 +108,17 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                     CommandManager.InvalidateRequerySuggested(); // refresh CanExecute
                 }
             }
+        }
+
+        // ===== Stamp library ======
+        /// <summary>The shared stamp library (built-in + custom stamps).</summary>
+        public IReadOnlyList<HeightStamp> StampLibrary => StampLibraryService.Instance.Stamps;
+
+        private HeightStamp? _selectedStamp;
+        public HeightStamp? SelectedStamp
+        {
+            get => _selectedStamp;
+            set { if (_selectedStamp != value) { _selectedStamp = value; OnPropertyChanged(); } }
         }
 
         // ===== View / overlays =====
@@ -168,6 +186,13 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 OnPropertyChanged();
             }
         }
+
+
+        /// <summary>The flag bitmask selected in the HeightsTab PAP flags checkboxes.</summary>
+        public ushort PapFlagsMask { get; set; }
+
+        /// <summary>If true, CLEAR the flags (AND NOT). If false, SET them (OR).</summary>
+        public bool PapFlagsClearMode { get; set; }
 
         // ===== Area Set Height painting state (for rectangle selection and overlay) =====
         private bool _isAreaSettingHeight;
@@ -385,7 +410,57 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public EditorTool SelectedTool
         {
             get => _selectedTool;
-            set { if (_selectedTool != value) { _selectedTool = value; OnPropertyChanged(); } }
+            set
+            {
+                if (_selectedTool != value)
+                {
+                    CancelActiveToolState();
+                    _selectedTool = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears all in-progress tool state without changing SelectedTool.
+        /// Called automatically when switching tools or changing editor tabs.
+        /// </summary>
+        public void CancelActiveToolState()
+        {
+            // Heights
+            IsAreaSettingHeight = false;
+            ClearHeightSelection();
+            IsSettingAltitude = false;
+            ClearAltitudeSelection();
+
+            // Walkable
+            IsDrawingWalkable = false;
+            ClearWalkableSelection();
+
+            // Textures
+            IsPaintingTexture = false;
+            ClearTextureSelection();
+            ClearTextureAreaSelection();
+
+            // Prims
+            if (IsPlacingPrim)
+                CancelPlacePrim();
+
+            // Facets
+            if (IsRedrawingFacet)
+                CancelFacetRedraw();
+            if (IsMultiDrawingFacets)
+                CancelFacetMultiDraw();
+
+            // Cables / Ladders
+            if (IsPlacingCable)
+                CancelCablePlacement();
+            if (IsPlacingLadder)
+                CancelLadderPlacement();
+
+            // Door state is tied to facet multi-draw; cleared above via CancelFacetMultiDraw
+            IsPlacingDoor = false;
+            DoorPreviewLine = null;
         }
 
         // ===== Heights editing =====
@@ -765,6 +840,59 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             TextureSelectionEndY = -1;
         }
 
+        // ===== Texture area selection (SelectTextureArea tool) =====
+        private bool _isSelectingTextureArea;
+        public bool IsSelectingTextureArea
+        {
+            get => _isSelectingTextureArea;
+            set { if (_isSelectingTextureArea != value) { _isSelectingTextureArea = value; OnPropertyChanged(); } }
+        }
+
+        private bool _textureAreaCommitted;
+        /// <summary>True once the user releases the mouse â€” the selection rect is frozen.</summary>
+        public bool TextureAreaCommitted
+        {
+            get => _textureAreaCommitted;
+            set { if (_textureAreaCommitted != value) { _textureAreaCommitted = value; OnPropertyChanged(); } }
+        }
+
+        private int _texAreaStartX = -1, _texAreaStartY = -1, _texAreaEndX = -1, _texAreaEndY = -1;
+        public int TexAreaStartX { get => _texAreaStartX; set { _texAreaStartX = value; OnPropertyChanged(); } }
+        public int TexAreaStartY { get => _texAreaStartY; set { _texAreaStartY = value; OnPropertyChanged(); } }
+        public int TexAreaEndX   { get => _texAreaEndX;   set { _texAreaEndX   = value; OnPropertyChanged(); } }
+        public int TexAreaEndY   { get => _texAreaEndY;   set { _texAreaEndY   = value; OnPropertyChanged(); } }
+
+        public (int MinX, int MinY, int MaxX, int MaxY)? GetTextureAreaRect()
+        {
+            if (!IsSelectingTextureArea || _texAreaStartX < 0) return null;
+            return (
+                Math.Min(_texAreaStartX, _texAreaEndX),
+                Math.Min(_texAreaStartY, _texAreaEndY),
+                Math.Max(_texAreaStartX, _texAreaEndX),
+                Math.Max(_texAreaStartY, _texAreaEndY)
+            );
+        }
+
+        public void ClearTextureAreaSelection()
+        {
+            IsSelectingTextureArea = false;
+            TextureAreaCommitted = false;
+            _texAreaStartX = _texAreaStartY = _texAreaEndX = _texAreaEndY = -1;
+        }
+
+        // ===== Texture cell clipboard =====
+        private TextureCellClipboard? _textureClipboard;
+        public TextureCellClipboard? TextureClipboard
+        {
+            get => _textureClipboard;
+            set
+            {
+                _textureClipboard = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
         private PrimListItem? _selectedPrim;
         public PrimListItem? SelectedPrim
         {
@@ -775,9 +903,28 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 {
                     _selectedPrim = value;
                     OnPropertyChanged();
-                    System.Windows.Input.CommandManager.InvalidateRequerySuggested(); // <-- add this
+                    System.Windows.Input.CommandManager.InvalidateRequerySuggested();
                 }
             }
+        }
+
+        // Multi-selection set (used by canvas Ctrl+Click and DeletePrimCommand)
+        private readonly List<PrimListItem> _selectedPrims = new();
+        public IReadOnlyList<PrimListItem> SelectedPrims => _selectedPrims;
+
+        /// <summary>
+        /// When true, PrimsList_SelectionChanged should not overwrite SelectedPrims.
+        /// Set by canvas code around SelectedPrim assignments to prevent the TwoWay
+        /// SelectedItem binding from clobbering the canvas multi-selection.
+        /// </summary>
+        public bool SuppressListToCanvasSync { get; set; }
+
+        public void SetSelectedPrims(IEnumerable<PrimListItem> prims)
+        {
+            _selectedPrims.Clear();
+            _selectedPrims.AddRange(prims);
+            OnPropertyChanged(nameof(SelectedPrims));
+            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
         }
 
         private PrimListItem? _dragPreviewPrim;
@@ -826,7 +973,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             get => _selectedStoreyId;
             set { if (_selectedStoreyId != value) { _selectedStoreyId = value; OnPropertyChanged(); } }
         }
-        private int? _selectedFacetId;  // null = don’t facet-highlight
+        private int? _selectedFacetId;  // null = donï¿½t facet-highlight
         public int? SelectedFacetId
         {
             get => _selectedFacetId;
@@ -849,17 +996,17 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         public ObservableCollection<PrimButton> PrimButtons { get; } = new();
 
-        // NEW: constructor — put the two lines here
+        // NEW: constructor ï¿½ put the two lines here
         public MapViewModel()
         {
-            System.Diagnostics.Debug.WriteLine("[MapVM] ctor: starting up…");
+            System.Diagnostics.Debug.WriteLine("[MapVM] ctor: starting upï¿½");
 
             var mapSvc = MapDataService.Instance;
             IsMapLoaded = mapSvc.IsLoaded;
 
             mapSvc.MapLoaded += (_, __) => IsMapLoaded = true;
             mapSvc.MapCleared += (_, __) => IsMapLoaded = false;
-            // if bytes reset implies “still loaded”, reflect it:
+            // if bytes reset implies ï¿½still loadedï¿½, reflect it:
             mapSvc.MapBytesReset += (_, __) => IsMapLoaded = mapSvc.IsLoaded;
 
             RaiseHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.RaiseHeight, _ => IsMapLoaded);
@@ -867,7 +1014,46 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             LevelHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.LevelHeight, _ => IsMapLoaded);
             FlattenHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.FlattenHeight, _ => IsMapLoaded);
             DitchTemplateCommand = new RelayCommand(_ => SelectedTool = EditorTool.DitchTemplate, _ => IsMapLoaded);
+            StampHeightCommand = new RelayCommand(_ =>
+            {
+                if (SelectedStamp == null && StampLibrary.Count > 0)
+                    SelectedStamp = StampLibrary[0];
+                SelectedTool = EditorTool.StampHeight;
+            }, _ => IsMapLoaded && SelectedStamp != null);
             ClearToolCommand = new RelayCommand(_ => SelectedTool = EditorTool.None, _ => IsMapLoaded);
+
+            SelectTextureAreaCommand = new RelayCommand(_ =>
+            {
+                ClearTextureAreaSelection();
+                SelectedTool = EditorTool.SelectTextureArea;
+            }, _ => IsMapLoaded);
+
+            CopyTextureCellsCommand = new RelayCommand(_ =>
+            {
+                var rect = GetTextureAreaRect();
+                if (rect == null) return;
+                var acc = new TexturesAccessor(MapDataService.Instance);
+                int w = rect.Value.MaxX - rect.Value.MinX + 1;
+                int h = rect.Value.MaxY - rect.Value.MinY + 1;
+                var cells = new TextureCellEntry[w, h];
+                for (int row = 0; row < h; row++)
+                    for (int col = 0; col < w; col++)
+                    {
+                        int tx = rect.Value.MinX + col;
+                        int ty = rect.Value.MinY + row;
+                        if (acc.TryGetTileTextureSelection(tx, ty, out var g, out var n, out var r))
+                            cells[col, row] = new TextureCellEntry { Group = g, TextureNumber = n, RotationIndex = r };
+                    }
+                TextureClipboard = new TextureCellClipboard(w, h, cells);
+                ClearTextureAreaSelection();
+                SelectedTool = EditorTool.None;
+            }, _ => IsMapLoaded && TextureAreaCommitted && GetTextureAreaRect().HasValue);
+
+            PasteTextureCellsCommand = new RelayCommand(_ =>
+            {
+                if (TextureClipboard != null)
+                    SelectedTool = EditorTool.PasteTexture;
+            }, _ => IsMapLoaded && TextureClipboard != null);
             SetAltitudeCommand = new RelayCommand(_ => SelectedTool = EditorTool.SetAltitude, _ => IsMapLoaded);
             SampleAltitudeCommand = new RelayCommand(_ => SelectedTool = EditorTool.SampleAltitude, _ => IsMapLoaded);
             ResetAltitudeCommand = new RelayCommand(_ => SelectedTool = EditorTool.ResetAltitude, _ => IsMapLoaded);
@@ -1357,6 +1543,47 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         }
 
         /// <summary>
+        /// Apply the selected PAP flags to all cells in the dragged rectangle.
+        /// tx1/ty1 and tx2/ty2 are WPF tile coordinates (inclusive).
+        /// Uses AltitudeAccessor so the file's transposed+flipped coordinate
+        /// mapping is applied correctly.
+        /// </summary>
+        public void ApplyPapFlagsToArea(int tx1, int ty1, int tx2, int ty2)
+        {
+            if (!MapDataService.Instance.IsLoaded) return;
+            if (PapFlagsMask == 0) return;
+
+            int minX = Math.Max(0, Math.Min(tx1, tx2));
+            int maxX = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(tx1, tx2));
+            int minZ = Math.Max(0, Math.Min(ty1, ty2));
+            int maxZ = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(ty1, ty2));
+
+            var accessor = new AltitudeAccessor(MapDataService.Instance);
+            var flagsToApply = (PapFlags)PapFlagsMask;
+            int count = 0;
+
+            for (int tx = minX; tx <= maxX; tx++)
+            {
+                for (int ty = minZ; ty <= maxZ; ty++)
+                {
+                    if (PapFlagsClearMode)
+                        accessor.ClearFlags(tx, ty, flagsToApply);
+                    else
+                        accessor.SetFlags(tx, ty, flagsToApply);
+                    count++;
+                }
+            }
+
+            MapDataService.Instance.MarkDirty();
+
+            string mode = PapFlagsClearMode ? "Cleared" : "Set";
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+                mainVm.StatusMessage = $"{mode} flags 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ}) to ({maxX},{maxZ})";
+
+            Debug.WriteLine($"[PapFlags] {mode} 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ})-({maxX},{maxZ})");
+        }
+
+        /// <summary>
         /// Called by MapView when user clicks during facet multi-draw mode.
         /// Returns true if the click was handled.
         /// </summary>
@@ -1578,7 +1805,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 }
                 catch (System.IO.IOException)
                 {
-                    // Resource not found — not an error for missing worlds
+                    // Resource not found ï¿½ not an error for missing worlds
                 }
 
                 if (sri?.Stream != null)

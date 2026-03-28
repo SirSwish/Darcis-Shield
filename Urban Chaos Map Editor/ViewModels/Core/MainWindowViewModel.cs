@@ -158,7 +158,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     RecentFilesService.Instance.Add(e.Path);
-                    StatusMessage = $"Loaded Map – {e.Path}";
+                    StatusMessage = $"Loaded Map ï¿½ {e.Path}";
                     CurrentMapPath = e.Path;
 
                     // Seed world number, refresh
@@ -222,7 +222,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             MapDataService.Instance.MapSaved += (_, e) =>
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    StatusMessage = $"Saved Map – {e.Path}";
+                    StatusMessage = $"Saved Map ï¿½ {e.Path}";
                     // path may change after Save As
                     CurrentMapPath = e.Path;
                     CommandManager.InvalidateRequerySuggested();
@@ -321,24 +321,55 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
             DeletePrimCommand = new RelayCommand(_ =>
             {
-                var sel = Map.SelectedPrim;
-                if (sel is null) return;
+                // Prefer canvas multi-selection; fall back to the single SelectedPrim
+                var toDelete = Map.SelectedPrims.Count > 0
+                    ? Map.SelectedPrims.Where(p => p != null).ToList()
+                    : Map.SelectedPrim != null
+                        ? new List<PrimListItem> { Map.SelectedPrim }
+                        : new List<PrimListItem>();
+                if (toDelete.Count == 0) return;
+
+                string msg = toDelete.Count == 1
+                    ? $"Delete \"{toDelete[0].Name}\"?"
+                    : $"Delete {toDelete.Count} selected prims?";
+
+                var confirm = MessageBox.Show(msg, "Confirm Delete",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (confirm != MessageBoxResult.Yes) return;
 
                 try
                 {
                     var acc = new PrimsAccessor(MapDataService.Instance);
-                    acc.DeletePrim(sel.Index);          // remove from IAM (object array + MapWho rebuilt)
-                    Map.RefreshPrimsList();             // refresh UI list and overlay points
-                    StatusMessage = $"Deleted \"{sel.Name}\" (index {sel.Index}).";
+                    var snap = acc.ReadSnapshot();
+                    var prims = snap.Prims.ToList();
+
+                    var indices = toDelete
+                        .Select(p => p.Index)
+                        .Where(i => i >= 0)
+                        .Distinct()
+                        .OrderByDescending(i => i)
+                        .ToList();
+
+                    foreach (int idx in indices)
+                        if (idx < prims.Count) prims.RemoveAt(idx);
+
+                    acc.ReplaceAllPrims(prims.ToArray());
+                    Map.RefreshPrimsList();
+                    Map.SelectedPrim = null;
+                    Map.SetSelectedPrims(Array.Empty<PrimListItem>());
+
+                    StatusMessage = toDelete.Count == 1
+                        ? $"Deleted \"{toDelete[0].Name}\"."
+                        : $"Deleted {indices.Count} prims.";
                 }
                 catch (Exception ex)
                 {
-                    StatusMessage = "Error: Failed to delete prim.";
-                    MessageBox.Show($"Failed to delete prim.\n\n{ex.Message}", "Error",
-                                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    StatusMessage = "Error: Failed to delete prim(s).";
+                    MessageBox.Show($"Failed to delete.\n\n{ex.Message}", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             },
-_ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
+_ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.SelectedPrim != null));
 
             // ----- Track tool/step/texture changes and update status -----
             Map.PropertyChanged += (_, e) =>
@@ -394,7 +425,7 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
                                 : System.IO.Path.GetFileName(MapDataService.Instance.CurrentPath);
             string mapStar = MapDataService.Instance.HasChanges ? "*" : "";
 
-            Title = $"Urban Chaos Map Editor — {mapLabel}{mapStar}";
+            Title = $"Urban Chaos Map Editor - {mapLabel}{mapStar}";
         }
 
         private void SyncRecentFromService()
@@ -413,7 +444,7 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
             try
             {
                 IsBusy = true;
-                StatusMessage = "Saving all…";
+                StatusMessage = "Saving allï¿½";
 
                 // Map
                 if (MapDataService.Instance.IsLoaded && MapDataService.Instance.HasChanges)
@@ -456,7 +487,7 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
             try
             {
                 IsBusy = true;
-                StatusMessage = "Save All As…";
+                StatusMessage = "Save All Asï¿½";
 
                 // Map (if loaded)
                 if (MapDataService.Instance.IsLoaded)
@@ -720,7 +751,7 @@ _ => MapDataService.Instance.IsLoaded && Map.SelectedPrim != null);
             try
             {
                 IsBusy = true;
-                StatusMessage = "Generating terrain…";
+                StatusMessage = "Generating terrainï¿½";
 
                 // Generate in background
                 var seed = Environment.TickCount;

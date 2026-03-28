@@ -1,19 +1,20 @@
 // UrbanChaosMapEditor/Services/BuildingsAccessor.cs
 using System.Diagnostics;
+using System.IO;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
 namespace UrbanChaosMapEditor.Services.Buildings
 {
     /// <summary>
-    /// Primary accessor for the building (“super map”) block.
+    /// Primary accessor for the building (ï¿½super mapï¿½) block.
     /// Produces a BuildingArrays snapshot (DBuildings, DFacets, dstyles, paint_mem, dstoreys, cables).
     /// </summary>
     public sealed class BuildingsAccessor
     {
         private readonly MapDataService _svc;
 
-        // Fixed V1 layout we’re targeting (same as renderer):
+        // Fixed V1 layout weï¿½re targeting (same as renderer):
         private const int HeaderSize = 48;
         private const int DBuildingSize = 24;
         private const int AfterBuildingsPad = 14;
@@ -876,35 +877,211 @@ namespace UrbanChaosMapEditor.Services.Buildings
             if (!_svc.IsLoaded) return false;
             if (!TryGetFacetOffset(facetId1, out int facet0)) return false;
 
-            _svc.Edit(bytes =>
+            _svc.ComputeAndCacheBuildingRegion();
+            if (!_svc.TryGetBuildingRegion(out int blockStart, out int _)) return false;
+
+            var bytes = _svc.GetBytesCopy();
+            if (blockStart < 0 || blockStart + HeaderSize > bytes.Length) return false;
+
+            // Read current facet fields needed to determine dstyle allocation
+            byte currentHeight = bytes[facet0 + 1];
+            var facetFlags = (FacetFlags)ReadU16(bytes, facet0 + 10);
+            ushort styleIndex = ReadU16(bytes, facet0 + 12);
+            ushort buildingId = ReadU16(bytes, facet0 + 14);
+
+            int oldBands = currentHeight == 0 ? 1 : (currentHeight / 4) + 1;
+            int newBands = height == 0 ? 1 : (height / 4) + 1;
+
+            if (newBands > oldBands)
             {
-                if (facet0 >= 0 && facet0 + DFacetSize <= bytes.Length)
+                // More bands are being added: we must allocate new dstyle slots in the file
+                // and fix up all subsequent facets' StyleIndex values.
+                bool twoTextured = (facetFlags & FacetFlags.TwoTextured) != 0;
+                bool twoSided    = (facetFlags & FacetFlags.TwoSided)    != 0;
+                bool hugFloor    = (facetFlags & FacetFlags.HugFloor)    != 0;
+                bool isInside    = (facetFlags & FacetFlags.Inside)      != 0;
+                int entriesPerBand = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+
+                // Warehouse outside/inside dstyles are interleaved, so step skips one extra slot
+                bool isWarehouse = false;
+                ushort nextBuilding = ReadU16(bytes, blockStart + 2);
+                if (buildingId >= 1 && buildingId < nextBuilding)
                 {
-                    // Height (coarse) at +1
-                    bytes[facet0 + 1] = height;
-
-                    // Y0 at +4 (short, little-endian)
-                    bytes[facet0 + 4] = (byte)(y0 & 0xFF);
-                    bytes[facet0 + 5] = (byte)((y0 >> 8) & 0xFF);
-
-                    // Y1 at +6 (short, little-endian)
-                    bytes[facet0 + 6] = (byte)(y1 & 0xFF);
-                    bytes[facet0 + 7] = (byte)((y1 >> 8) & 0xFF);
-
-                    // FHeight (fine) at +18
-                    bytes[facet0 + 18] = fheight;
-
-                    // BlockHeight at +19
-                    bytes[facet0 + 19] = blockHeight;
+                    int bldOff = blockStart + HeaderSize + (buildingId - 1) * DBuildingSize;
+                    if (bldOff + DBuildingSize <= bytes.Length)
+                        isWarehouse = (BuildingType)bytes[bldOff + 11] == BuildingType.Warehouse;
                 }
-            });
+                int styleIndexStep = isWarehouse ? entriesPerBand + 1 : entriesPerBand;
+
+                // facetStyleStart: first dstyle slot for this facet
+                // (TwoTextured facets store StyleIndex pointing to slot 1, not slot 0)
+                int facetStyleStart = styleIndex - (twoTextured ? 1 : 0);
+
+                // Read header counters
+                ushort nextFacet    = ReadU16(bytes, blockStart + 4);
+                ushort nextStyle    = ReadU16(bytes, blockStart + 6);
+                ushort nextPaintMem = ReadU16(bytes, blockStart + 8);
+                ushort nextStorey   = ReadU16(bytes, blockStart + 10);
+
+                // File section offsets
+                int buildingsOff    = blockStart + HeaderSize;
+                int padOff          = buildingsOff + (nextBuilding - 1) * DBuildingSize;
+                int facetsOff       = padOff + AfterBuildingsPad;
+                int stylesOff       = facetsOff + (nextFacet - 1) * DFacetSize;
+                int paintMemOff     = stylesOff + nextStyle * 2;
+                int storeysOff      = paintMemOff + nextPaintMem;
+                int afterStoreysOff = storeysOff + nextStorey * DStoreyRecSize;
+
+                // Insertion point in dstyles[]: immediately after the last old-band slot
+                int insertAt    = facetStyleStart + oldBands * styleIndexStep;
+                int extraSlots  = (newBands - oldBands) * styleIndexStep;
+
+                if (insertAt > nextStyle)
+                {
+                    Debug.WriteLine($"[BuildingsAccessor] TryUpdateFacetHeights: insertAt={insertAt} > nextStyle={nextStyle}, bad dstyle layout");
+                    return false;
+                }
+
+                // Determine base style for the new slots (copy from band 0)
+                short baseStyle = 1;
+                if (facetStyleStart >= 0 && facetStyleStart < nextStyle)
+                {
+                    int b0Off = stylesOff + facetStyleStart * 2;
+                    short b0Val = (short)(bytes[b0Off] | (bytes[b0Off + 1] << 8));
+                    if (b0Val > 0)
+                    {
+                        baseStyle = b0Val;
+                    }
+                    else if (b0Val < 0)
+                    {
+                        // Band 0 is painted â€” look up its DStorey to find the base style
+                        int storeyIdx = -b0Val;
+                        if (storeyIdx > 0 && storeyIdx < nextStorey)
+                        {
+                            int sOff = storeysOff + storeyIdx * DStoreyRecSize;
+                            if (sOff + 2 <= bytes.Length)
+                                baseStyle = (short)(bytes[sOff] | (bytes[sOff + 1] << 8));
+                        }
+                    }
+                }
+
+                Debug.WriteLine($"[BuildingsAccessor] TryUpdateFacetHeights: bands {oldBands}->{newBands}, inserting {extraSlots} dstyle slots at index {insertAt}, baseStyle={baseStyle}");
+
+                using var ms = new MemoryStream();
+
+                // 1. Everything before the building block
+                ms.Write(bytes, 0, blockStart);
+
+                // 2. Header with updated nextStyle
+                var header = new byte[HeaderSize];
+                Buffer.BlockCopy(bytes, blockStart, header, 0, HeaderSize);
+                ushort newNextStyle = (ushort)(nextStyle + extraSlots);
+                header[6] = (byte)(newNextStyle & 0xFF);
+                header[7] = (byte)((newNextStyle >> 8) & 0xFF);
+                ms.Write(header, 0, HeaderSize);
+
+                // 3. Buildings (unchanged)
+                int buildingsSize = (nextBuilding - 1) * DBuildingSize;
+                if (buildingsSize > 0)
+                    ms.Write(bytes, buildingsOff, buildingsSize);
+
+                // 4. Padding (unchanged)
+                ms.Write(bytes, padOff, AfterBuildingsPad);
+
+                // 5. Facets: update height for this facet; bump StyleIndex for facets whose
+                //    dstyle block starts at or after the insertion point.
+                int facetsSize = (nextFacet - 1) * DFacetSize;
+                var facetsData = new byte[facetsSize];
+                Buffer.BlockCopy(bytes, facetsOff, facetsData, 0, facetsSize);
+
+                // Apply height changes to the target facet
+                int facetLocal = (facetId1 - 1) * DFacetSize;
+                facetsData[facetLocal + 1]  = height;
+                facetsData[facetLocal + 4]  = (byte)(y0 & 0xFF);
+                facetsData[facetLocal + 5]  = (byte)((y0 >> 8) & 0xFF);
+                facetsData[facetLocal + 6]  = (byte)(y1 & 0xFF);
+                facetsData[facetLocal + 7]  = (byte)((y1 >> 8) & 0xFF);
+                facetsData[facetLocal + 18] = fheight;
+                facetsData[facetLocal + 19] = blockHeight;
+
+                // Shift StyleIndex for all facets whose dstyle block starts at/after insertAt
+                for (int i = 0; i < nextFacet - 1; i++)
+                {
+                    int off = i * DFacetSize;
+                    var fFlags = (FacetFlags)((ushort)(facetsData[off + 10] | (facetsData[off + 11] << 8)));
+                    bool fTwoTex = (fFlags & FacetFlags.TwoTextured) != 0;
+                    ushort fStyleIdx = (ushort)(facetsData[off + 12] | (facetsData[off + 13] << 8));
+                    int fBlockStart = fStyleIdx - (fTwoTex ? 1 : 0);
+                    if (fBlockStart >= insertAt)
+                    {
+                        ushort newSI = (ushort)(fStyleIdx + extraSlots);
+                        facetsData[off + 12] = (byte)(newSI & 0xFF);
+                        facetsData[off + 13] = (byte)((newSI >> 8) & 0xFF);
+                    }
+                }
+                ms.Write(facetsData, 0, facetsSize);
+
+                // 6. dstyles: copy before insertAt, insert new slots, copy remainder
+                int insertAtByte = Math.Min(insertAt * 2, nextStyle * 2);
+                if (insertAtByte > 0)
+                    ms.Write(bytes, stylesOff, insertAtByte);
+                for (int i = 0; i < extraSlots; i++)
+                {
+                    ms.WriteByte((byte)(baseStyle & 0xFF));
+                    ms.WriteByte((byte)((baseStyle >> 8) & 0xFF));
+                }
+                int remainingStyleBytes = nextStyle * 2 - insertAtByte;
+                if (remainingStyleBytes > 0)
+                    ms.Write(bytes, stylesOff + insertAtByte, remainingStyleBytes);
+
+                // 7. paint_mem (unchanged)
+                if (nextPaintMem > 0)
+                    ms.Write(bytes, paintMemOff, nextPaintMem);
+
+                // 8. dstoreys (unchanged)
+                int storeysSize = nextStorey * DStoreyRecSize;
+                if (storeysSize > 0)
+                    ms.Write(bytes, storeysOff, storeysSize);
+
+                // 9. Tail (unchanged)
+                int tailSize = bytes.Length - afterStoreysOff;
+                if (tailSize > 0)
+                    ms.Write(bytes, afterStoreysOff, tailSize);
+
+                var newBytes = ms.ToArray();
+                int expectedGrowth = extraSlots * 2;
+                int actualGrowth = newBytes.Length - bytes.Length;
+
+                if (actualGrowth != expectedGrowth)
+                {
+                    Debug.WriteLine($"[BuildingsAccessor] TryUpdateFacetHeights size mismatch: expected={expectedGrowth}, actual={actualGrowth}");
+                    return false;
+                }
+
+                _svc.ReplaceBytes(newBytes);
+                Debug.WriteLine($"[BuildingsAccessor] TryUpdateFacetHeights: inserted {extraSlots} dstyle slots, file grew by {actualGrowth} bytes");
+            }
+            else
+            {
+                // Band count unchanged or decreased â€” in-place height update only
+                _svc.Edit(bytes2 =>
+                {
+                    if (facet0 >= 0 && facet0 + DFacetSize <= bytes2.Length)
+                    {
+                        bytes2[facet0 + 1]  = height;
+                        bytes2[facet0 + 4]  = (byte)(y0 & 0xFF);
+                        bytes2[facet0 + 5]  = (byte)((y0 >> 8) & 0xFF);
+                        bytes2[facet0 + 6]  = (byte)(y1 & 0xFF);
+                        bytes2[facet0 + 7]  = (byte)((y1 >> 8) & 0xFF);
+                        bytes2[facet0 + 18] = fheight;
+                        bytes2[facet0 + 19] = blockHeight;
+                    }
+                });
+            }
 
             Debug.WriteLine($"[BuildingsAccessor] Updated facet #{facetId1} heights: H={height} FH={fheight} Y0={y0} Y1={y1} BH={blockHeight}");
-
-            // Notify change bus
             BuildingsChangeBus.Instance.NotifyFacetChanged(facetId1);
             BuildingsChangeBus.Instance.NotifyChanged();
-
             return true;
         }
 

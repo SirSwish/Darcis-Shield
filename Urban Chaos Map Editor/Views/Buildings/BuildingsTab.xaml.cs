@@ -136,13 +136,13 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 else
                     OpenFacetPreview(fvm);
 
-                // Restore type group if it was cleared by cascading selection events
-                if (vm != null && savedGroup != null && vm.SelectedFacetTypeGroup == null)
+                // Ensure the type group always matches the double-clicked facet's type
+                if (vm != null)
                 {
-                    var restored = vm.SelectedBuildingFacetGroups?
-                        .FirstOrDefault(g => g.Type == savedGroup.Type);
-                    if (restored != null)
-                        vm.SelectedFacetTypeGroup = restored;
+                    var correctGroup = vm.SelectedBuildingFacetGroups?
+                        .FirstOrDefault(g => g.Type == fvm.Type);
+                    if (correctGroup != null && vm.SelectedFacetTypeGroup != correctGroup)
+                        vm.SelectedFacetTypeGroup = correctGroup;
                 }
 
                 e.Handled = true;
@@ -627,9 +627,9 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             string message = $"Delete Building #{buildingId}?\n\n" +
                             $"This will remove:\n" +
-                            $"  • {facetCount} facet(s)\n" +
-                            $"  • {walkableCount} walkable(s)\n" +
-                            $"  • Associated roof faces\n\n" +
+                            $"  ï¿½ {facetCount} facet(s)\n" +
+                            $"  ï¿½ {walkableCount} walkable(s)\n" +
+                            $"  ï¿½ Associated roof faces\n\n" +
                             $"This action cannot be undone.";
 
             var confirmResult = MessageBox.Show(message, "Confirm Delete Building",

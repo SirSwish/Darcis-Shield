@@ -65,7 +65,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
-        // Auto-build options — relay to MapViewModel
+        // Auto-build options ï¿½ relay to MapViewModel
         private static MapViewModel? GetMapVm()
         {
             var shell = System.Windows.Application.Current.MainWindow?.DataContext as MainWindowViewModel;
@@ -302,7 +302,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
-        /// <summary>Optional free text filter (not wired up right now – kept for future search).</summary>
+        /// <summary>Optional free text filter (not wired up right now ï¿½ kept for future search).</summary>
         private string _filterText = string.Empty;
         public string FilterText
         {
@@ -323,7 +323,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         public int PaintMemCount { get; private set; }
         public string PaintMemPreview { get; private set; } = string.Empty;
 
-        public int DStoreysNext { get; private set; }          // raw “next”
+        public int DStoreysNext { get; private set; }          // raw ï¿½nextï¿½
         public int DStoreysTotal => Math.Max(0, DStoreysNext - 1);
 
         private short[] _lastDstyles = Array.Empty<short>();
@@ -769,7 +769,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 else
                 {
                     // Forced selection (e.g., newly added building):
-                    // Don’t restore previous facet/storey. Keep facet null; storey set if exists.
+                    // Donï¿½t restore previous facet/storey. Keep facet null; storey set if exists.
                     if (restoredBuilding.Storeys.Count > 0)
                     {
                         SelectedStoreyId = restoredBuilding.Storeys
@@ -852,37 +852,43 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         {
             if (selection is FacetVM f)
             {
-                // 1) Set the selected facet
-                SelectedFacet = f;
-
-                // 2) Ensure the building matches the facet (for non-cable facets)
+                // 1) Ensure the building matches the facet (for non-cable facets)
+                //    SelectedBuilding setter clears SelectedFacetTypeGroup and SelectedFacet,
+                //    so we do this first and re-apply them below.
                 if (f.BuildingId > 0)
                 {
                     var b = Buildings.FirstOrDefault(bb => bb.Id == f.BuildingId);
                     if (b != null && b != SelectedBuilding)
-                    {
                         SelectedBuilding = b;
-                    }
                 }
 
-                // 3) Make sure the current storey matches the facet's storey
+                // 2) Select the type group that actually contains this facet,
+                //    regardless of which group was selected before the building changed.
+                var correctGroup = SelectedBuildingFacetGroups
+                    .FirstOrDefault(g => g.Type == f.Type);
+                if (correctGroup != null)
+                    SelectedFacetTypeGroup = correctGroup;
+
+                // 3) Set the selected facet (after group so the list binding is correct)
+                SelectedFacet = f;
+
+                // 4) Make sure the current storey matches the facet's storey
                 SelectedStoreyId = f.StoreyId;
             }
             else if (selection is FacetTypeGroupVM g && g.Facets.Count > 0)
             {
                 // When a type-group node is selected, use its first facet as the "sample"
                 var first = g.Facets[0];
-                SelectedFacet = first;
 
                 if (first.BuildingId > 0)
                 {
                     var b = Buildings.FirstOrDefault(bb => bb.Id == first.BuildingId);
                     if (b != null && b != SelectedBuilding)
-                    {
                         SelectedBuilding = b;
-                    }
                 }
 
+                SelectedFacetTypeGroup = g;
+                SelectedFacet = first;
                 SelectedStoreyId = first.StoreyId;
             }
             else

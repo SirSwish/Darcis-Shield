@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:UrbanChaosMapEditor.ViewModels"
+             xmlns:models="clr-namespace:UrbanChaosMapEditor.Models.Core"
              HorizontalAlignment="Stretch">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -40,6 +41,16 @@
                 <Button Margin="0,0,6,6" Padding="6,6"
                         ToolTip="{Binding Map.HeightStep, StringFormat=Raise by {0}}"
                         Command="{Binding Map.RaiseHeightCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Map.SelectedTool}" Value="{x:Static models:EditorTool.RaiseHeight}">
+                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentLight}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="/Assets/Icons/raise.ico" Width="24" Height="24" Stretch="Uniform"/>
                         <TextBlock Text="Raise" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -50,6 +61,16 @@
                 <Button Margin="0,0,6,6" Padding="6,6"
                         ToolTip="{Binding Map.HeightStep, StringFormat=Lower by {0}}"
                         Command="{Binding Map.LowerHeightCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Map.SelectedTool}" Value="{x:Static models:EditorTool.LowerHeight}">
+                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentLight}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="/Assets/Icons/lower.ico" Width="24" Height="24" Stretch="Uniform"/>
                         <TextBlock Text="Lower" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -60,6 +81,16 @@
                 <Button Margin="0,0,6,6" Padding="6,6"
                         ToolTip="Level: click then drag to copy height to other tiles"
                         Command="{Binding Map.LevelHeightCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Map.SelectedTool}" Value="{x:Static models:EditorTool.LevelHeight}">
+                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentLight}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="/Assets/Icons/level.ico" Width="24" Height="24" Stretch="Uniform"/>
                         <TextBlock Text="Level" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -70,6 +101,16 @@
                 <Button Margin="0,0,6,6" Padding="6,6"
                         ToolTip="Flatten: set height to 0"
                         Command="{Binding Map.FlattenHeightCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Map.SelectedTool}" Value="{x:Static models:EditorTool.FlattenHeight}">
+                                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentLight}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="/Assets/Icons/flatten.ico" Width="24" Height="24" Stretch="Uniform"/>
                         <TextBlock Text="Flatten" HorizontalAlignment="Center" Margin="0,4,0,0"/>
@@ -102,17 +143,31 @@
             <Separator Margin="0,8,0,8"/>
             <TextBlock Text="Templates" FontWeight="SemiBold" Margin="0,0,0,6"/>
 
-            <WrapPanel>
-                <!-- Ditch template -->
-                <Button Margin="0,0,6,6" Padding="6,6"
-                        ToolTip="Ditch template: click to stamp pattern"
-                        Command="{Binding Map.DitchTemplateCommand}">
+            <!-- Stamp picker -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4" VerticalAlignment="Center">
+                <Button Padding="10,6"
+                        Command="{Binding Map.StampHeightCommand}"
+                        ToolTip="Activate the Stamp tool: click on the map to apply the selected stamp centred on that tile.">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="/Assets/Icons/ditch.ico" Width="24" Height="24" Stretch="Uniform"/>
-                        <TextBlock Text="Ditch" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="Stamp" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Button>
-            </WrapPanel>
+
+                <StackPanel Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                    <ComboBox Width="150"
+                              Margin="0,0,0,4"
+                              ItemsSource="{Binding Map.StampLibrary}"
+                              SelectedItem="{Binding Map.SelectedStamp, Mode=TwoWay}"
+                              DisplayMemberPath="Name"
+                              ToolTip="Select which stamp to apply"/>
+                    <Button Content="+ New Stamp"
+                            Padding="8,4"
+                            HorizontalAlignment="Stretch"
+                            Click="NewStamp_Click"
+                            ToolTip="Open the Height Stamp Creator to define and save a new custom stamp"/>
+                </StackPanel>
+            </StackPanel>
 
             <Separator Margin="0,8,0,8"/>
 
@@ -130,9 +185,85 @@
                         <TextBlock Text="Randomise" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Button>
+
+                <Button Margin="0,0,6,6" Padding="6,6"
+                        Click="RandomizeArea_Click"
+                        ToolTip="Drag a rectangle on the map to randomise terrain within just that area using the same fractal algorithm">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <Image Source="/Assets/Icons/randomizeterrain.ico" Width="24" Height="24" Stretch="Uniform"/>
+                        <TextBlock Text="Rnd Area" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Button>
             </WrapPanel>
 
             <Separator Margin="0,12,0,6"/>
+
+            <!-- ===================== PAP CELL FLAGS ===================== -->
+            <TextBlock Text="Set PAP Cell Flags" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="Select flags below, then drag an area on the map to apply them to all cells in the region."
+                       Opacity="0.6" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
+
+            <!-- Show Cell Flags layer toggle -->
+            <CheckBox Content="Show Cell Flags Layer"
+                      IsChecked="{Binding Map.ShowCellFlags}"
+                      Margin="0,0,0,6"
+                      ToolTip="Show flag icons on the map canvas. Gold = flags set. Double-click to edit a single cell."/>
+
+            <!-- Flag checkboxes in two columns -->
+            <Border Background="#2A2D32" CornerRadius="4" Padding="8" Margin="0,0,0,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <CheckBox x:Name="PapShadow1"    Content="Shadow1 (0x0001)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapShadow2"    Content="Shadow2 (0x0002)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapShadow3"    Content="Shadow3 (0x0004)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapReflective" Content="Reflective (0x0008)" Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapHidden"     Content="Hidden (0x0010)"     Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
+                        <CheckBox x:Name="PapSinkSquare" Content="SinkSquare (0x0020)" Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapSinkPoint"  Content="SinkPoint (0x0040)"  Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapNoUpper"    Content="NoUpper (0x0080)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <CheckBox x:Name="PapNoGo"       Content="NoGo (0x0100)"       Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapRoofExists" Content="Roof Exists (0x0200)" Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
+                        <CheckBox x:Name="PapZone1"      Content="Zone1 (0x0400)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapZone2"      Content="Zone2 (0x0800)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapZone3"      Content="Zone3 (0x1000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapZone4"      Content="Zone4 (0x2000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
+                        <CheckBox x:Name="PapFlatRoof"   Content="Flat Roof (0x4000)"  Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
+                        <CheckBox x:Name="PapWater"      Content="Water (0x8000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Flags hex summary -->
+            <TextBlock x:Name="TxtPapFlagsSummary" Text="Selected: 0x0000" FontFamily="Consolas"
+                       Foreground="#FF808080" FontSize="11" Margin="0,0,0,6"/>
+
+            <!-- Mode: Set or Clear -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <RadioButton x:Name="PapModeSet" Content="Set flags (OR)" IsChecked="True"
+                             Foreground="White" Margin="0,0,12,0"
+                             GroupName="PapFlagMode"/>
+                <RadioButton x:Name="PapModeClear" Content="Clear flags (AND NOT)"
+                             Foreground="White"
+                             GroupName="PapFlagMode"/>
+            </StackPanel>
+
+            <!-- Select Area button -->
+            <Button Margin="0,0,0,6"
+                    Padding="10,6"
+                    Content="Select Area on Map"
+                    Click="PapFlagsSelectArea_Click"
+                    ToolTip="Click, then drag a rectangle on the map. On release, the selected flags will be applied to all cells in the area."/>
+
+            <TextBlock x:Name="TxtPapFlagsStatus" Foreground="#FF4EC9B0" FontSize="11" Margin="0,0,0,4"
+                       TextWrapping="Wrap"/>
+
+            <Separator Margin="0,8,0,6"/>
 
             <TextBlock Text="Click in the map to apply. Ctrl+Wheel zooms. Ctrl+0 resets."
                        Opacity="0.7" TextWrapping="Wrap"/>

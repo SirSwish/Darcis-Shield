@@ -38,6 +38,12 @@ namespace UrbanChaosMapEditor.Views.Prims
 
             var selected = GetSelectedPrims();
 
+            // Sync SelectedPrims to the list selection so DeletePrimCommand can see all selected items.
+            // Skip if the change was triggered by canvas code setting SelectedPrim (binding update)
+            // to avoid clobbering a canvas multi-select.
+            if (!shell.Map.SuppressListToCanvasSync)
+                shell.Map.SetSelectedPrims(selected);
+
             if (selected.Count == 1)
             {
                 shell.Map.SelectedPrim = selected[0];
@@ -183,7 +189,7 @@ namespace UrbanChaosMapEditor.Views.Prims
             shell.Map.DragPreviewPrim = null;
 
             shell.StatusMessage =
-                $"Placing {primBtn.Number:D3} — {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
+                $"Placing {primBtn.Number:D3} ï¿½ {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
 
             var win = Window.GetWindow(this);
             var mapView = win != null

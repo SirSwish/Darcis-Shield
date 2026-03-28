@@ -143,6 +143,13 @@
                 <Separator/>
                 <MenuItem Header="_Copy Object" InputGestureText="Ctrl+C" Click="CopyPrim_Click"/>
                 <MenuItem Header="_Paste Object" InputGestureText="Ctrl+V" Click="PastePrim_Click"/>
+                <Separator/>
+                <MenuItem Header="Copy _Cells" InputGestureText="Ctrl+C"
+                          Command="{Binding Map.CopyTextureCellsCommand}"
+                          ToolTip="Copy selected texture area to clipboard (activate via Select Area in the Textures tab)"/>
+                <MenuItem Header="Paste C_ells" InputGestureText="Ctrl+V"
+                          Command="{Binding Map.PasteTextureCellsCommand}"
+                          ToolTip="Paste copied texture cells — click on the map to place"/>
                 <MenuItem Header="_Delete Selected Object"
                           Command="{Binding DeletePrimCommand}"
                           InputGestureText="Delete"
@@ -223,6 +230,8 @@
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="Help Documentation" Click="Help_Click"/>
+                <Separator/>
+                <MenuItem Header="_About" Click="About_Click"/>
             </MenuItem>
         </Menu>
 
@@ -397,13 +406,15 @@
                 </Expander.Header>
 
                 <Grid Background="#252526" VerticalAlignment="Stretch">
-                    <TabControl Background="#252526"
+                    <TabControl x:Name="EditorTabControl"
+                                Background="#252526"
                                 Foreground="White"
                                 SelectedIndex="0"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch"
                                 SnapsToDevicePixels="True"
-                                UseLayoutRounding="True">
+                                UseLayoutRounding="True"
+                                SelectionChanged="EditorTabs_SelectionChanged">
 
                         <TabControl.ItemContainerStyle>
                             <Style TargetType="TabItem">

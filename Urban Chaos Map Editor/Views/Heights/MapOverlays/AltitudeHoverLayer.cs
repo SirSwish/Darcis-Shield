@@ -238,8 +238,8 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             var selectionRect = new Rect(x, y, w, h);
             dc.DrawRectangle(SelectionFillBrush, SelectionPen, selectionRect);
 
-            // Draw altitude values for each cell in the selection
-            if (_altitude != null)
+            // Draw altitude values for each cell in the selection (not for PAP flags tool)
+            if (_altitude != null && _vm.SelectedTool != EditorTool.AreaSetPapFlags)
             {
                 DrawAltitudeValues(dc, minX, minY, maxX, maxY);
             }
@@ -265,6 +265,16 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                 string clearText = "Clear";
                 var ft = new FormattedText(clearText, CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight, typeface, 14, Brushes.Orange, ppd);
+                dc.DrawText(ft, new Point(x + 4, y - 20));
+            }
+            else if (_vm.SelectedTool == EditorTool.AreaSetPapFlags)
+            {
+                string papText = _vm.PapFlagsClearMode
+                    ? $"Clear 0x{_vm.PapFlagsMask:X4}"
+                    : $"Set 0x{_vm.PapFlagsMask:X4}";
+                Brush papColour = _vm.PapFlagsClearMode ? Brushes.Orange : Brushes.Lime;
+                var ft = new FormattedText(papText, CultureInfo.InvariantCulture,
+                    FlowDirection.LeftToRight, typeface, 14, papColour, ppd);
                 dc.DrawText(ft, new Point(x + 4, y - 20));
             }
 
@@ -356,7 +366,8 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             t == EditorTool.SetAltitude ||
             t == EditorTool.SampleAltitude ||
             t == EditorTool.ResetAltitude ||
-            t == EditorTool.DetectRoof;
+            t == EditorTool.DetectRoof ||
+            t == EditorTool.AreaSetPapFlags;
 
         /// <summary>
         /// Returns the hovered tile indices (tx, ty) in tile coords (0..127), or (-1,-1) when no hover.

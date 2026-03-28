@@ -397,9 +397,21 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 return;
 
             if (int.TryParse(tb.Text, out int altitude))
+            {
                 RawAltitudeDisplay.Text = (altitude >> 3).ToString();
+
+                // If Set Altitude tool is already active, update TargetAltitude immediately
+                // so the next map click uses the new value without re-clicking "Set Alt".
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm &&
+                    mainVm.Map.SelectedTool == EditorTool.SetAltitude)
+                {
+                    mainVm.Map.TargetAltitude = altitude;
+                }
+            }
             else
+            {
                 RawAltitudeDisplay.Text = "0";
+            }
         }
 
         private void ResetAltitude_Click(object sender, RoutedEventArgs e)

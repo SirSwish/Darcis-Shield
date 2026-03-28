@@ -30,6 +30,10 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private static readonly Brush AreaFill;
         private static readonly Pen AreaOutline;
 
+        // Distinct visuals for the randomise-area drag
+        private static readonly Brush RandomizeAreaFill;
+        private static readonly Pen RandomizeAreaOutline;
+
         private const double Radius = 14.0;
         private const double HitRadius = 12.0;
         private const double HitRadiusSq = HitRadius * HitRadius;
@@ -80,6 +84,16 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
             AreaOutline = new Pen(areaStrokeBrush, 1.5);
             AreaOutline.Freeze();
+
+            // Orange fill/outline for the randomise-area drag rectangle
+            var randFill = new SolidColorBrush(Color.FromArgb(60, 255, 140, 0));
+            randFill.Freeze();
+            RandomizeAreaFill = randFill;
+
+            var randStroke = new SolidColorBrush(Color.FromArgb(220, 255, 165, 0));
+            randStroke.Freeze();
+            RandomizeAreaOutline = new Pen(randStroke, 2.0);
+            RandomizeAreaOutline.Freeze();
 
             CircleGeometry = new EllipseGeometry(new Point(0, 0), Radius, Radius);
             CircleGeometry.Freeze();
@@ -186,7 +200,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                     _lastHoverVX = -1;
                     _lastHoverVZ = -1;
 
-                    if (_vm?.SelectedTool != EditorTool.AreaSetHeight)
+                    if (_vm == null || !IsAreaDragTool(_vm.SelectedTool))
                     {
                         _isAreaDragging = false;
                         _areaRectPx = Rect.Empty;
@@ -258,10 +272,13 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                     brushBounds, ppd, isHover: true);
             }
 
-            if (_isAreaDragging && !_areaRectPx.IsEmpty && _vm?.SelectedTool == EditorTool.AreaSetHeight)
+            if (_isAreaDragging && !_areaRectPx.IsEmpty)
             {
                 var r = NormalizeRect(_areaRectPx);
-                dc.DrawRectangle(AreaFill, AreaOutline, r);
+                if (_vm?.SelectedTool == EditorTool.AreaSetHeight)
+                    dc.DrawRectangle(AreaFill, AreaOutline, r);
+                else if (_vm?.SelectedTool == EditorTool.RandomizeHeightArea)
+                    dc.DrawRectangle(RandomizeAreaFill, RandomizeAreaOutline, r);
             }
         }
 
@@ -415,7 +432,11 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private static bool IsHeightTool(EditorTool t) =>
             t is EditorTool.RaiseHeight or EditorTool.LowerHeight or
                EditorTool.LevelHeight or EditorTool.FlattenHeight or
-               EditorTool.DitchTemplate or EditorTool.AreaSetHeight;
+               EditorTool.DitchTemplate or EditorTool.AreaSetHeight or
+               EditorTool.RandomizeHeightArea;
+
+        private static bool IsAreaDragTool(EditorTool t) =>
+            t == EditorTool.AreaSetHeight || t == EditorTool.RandomizeHeightArea;
 
         private (int vx, int vz) GetHoveredVertex()
         {
@@ -445,7 +466,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             base.OnMouseLeftButtonDown(e);
 
             if (_vm == null) return;
-            if (_vm.SelectedTool != EditorTool.AreaSetHeight) return;
+            if (!IsAreaDragTool(_vm.SelectedTool)) return;
 
             Focus();
             CaptureMouse();
@@ -464,7 +485,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             base.OnMouseMove(e);
 
             if (!_isAreaDragging) return;
-            if (_vm == null || _vm.SelectedTool != EditorTool.AreaSetHeight) return;
+            if (_vm == null || !IsAreaDragTool(_vm.SelectedTool)) return;
 
             _areaEnd = e.GetPosition(this);
             _areaRectPx = new Rect(_areaStart, _areaEnd);
@@ -481,12 +502,15 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
             try
             {
-                if (_vm != null && _vm.SelectedTool == EditorTool.AreaSetHeight)
+                if (_vm != null)
                 {
                     _areaEnd = e.GetPosition(this);
                     _areaRectPx = new Rect(_areaStart, _areaEnd);
 
-                    ApplyAreaSetHeight(_areaRectPx);
+                    if (_vm.SelectedTool == EditorTool.AreaSetHeight)
+                        ApplyAreaSetHeight(_areaRectPx);
+                    else if (_vm.SelectedTool == EditorTool.RandomizeHeightArea)
+                        ApplyAreaRandomize(_areaRectPx);
                 }
             }
             finally
@@ -534,8 +558,54 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             {
                 int width = tx1 - tx0 + 1;
                 int height = ty1 - ty0 + 1;
-                shell.StatusMessage = $"Set height {raw} on {width}×{height} vertices";
+                shell.StatusMessage = $"Set height {raw} on {width}ï¿½{height} vertices";
             }
+        }
+
+        private void ApplyAreaRandomize(Rect rectPx)
+        {
+            if (_vm == null) return;
+            if (!MapDataService.Instance.IsLoaded) return;
+
+            rectPx = NormalizeRect(rectPx);
+            if (rectPx.Width < 2 || rectPx.Height < 2) return;
+
+            int vx0 = ClampToVertexIndex((int)Math.Floor(rectPx.Left  / TileSize));
+            int vx1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Right  / TileSize));
+            int vz0 = ClampToVertexIndex((int)Math.Floor(rectPx.Top    / TileSize));
+            int vz1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Bottom / TileSize));
+
+            int minVX = Math.Min(vx0, vx1);
+            int maxVX = Math.Max(vx0, vx1);
+            int minVZ = Math.Min(vz0, vz1);
+            int maxVZ = Math.Max(vz0, vz1);
+
+            // Vertex index â†’ tile index (vertex vx sits at the corner of tile tx = vx-1)
+            int tx0 = Math.Clamp(minVX - 1, 0, TilesPerSide - 1);
+            int tx1 = Math.Clamp(maxVX - 1, 0, TilesPerSide - 1);
+            int ty0 = Math.Clamp(minVZ - 1, 0, TilesPerSide - 1);
+            int ty1 = Math.Clamp(maxVZ - 1, 0, TilesPerSide - 1);
+
+            int areaW = tx1 - tx0 + 1;
+            int areaH = ty1 - ty0 + 1;
+
+            int seed = Environment.TickCount;
+            const double roughness  = 0.60;
+            const int    blurPasses = 1;
+
+            // Generate coherent fractal terrain sized exactly to the selected area
+            sbyte[,] heights = Services.Heights.TerrainGenerator.GenerateHeightsArea(
+                seed, areaW, areaH, roughness, blurPasses);
+
+            for (int tx = tx0; tx <= tx1; tx++)
+                for (int ty = ty0; ty <= ty1; ty++)
+                    _accessor.WriteHeight(tx, ty, heights[tx - tx0, ty - ty0]);
+
+            HeightsChangeBus.Instance.NotifyRegion(tx0, ty0, tx1, ty1);
+            MapDataService.Instance.MarkDirty();
+
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.StatusMessage = $"Randomised {areaW}\u00d7{areaH} vertices (seed {seed})";
         }
 
         private static Rect NormalizeRect(Rect r)

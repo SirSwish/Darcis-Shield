@@ -278,11 +278,26 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
+            ApplySingleRf4();
+        }
+
+        private void BtnOk_Click(object sender, RoutedEventArgs e)
+        {
+            if (ApplySingleRf4())
+                Close();
+        }
+
+        // ====================================================================
+        // Apply to All — write Y, DY, DrawFlags, PAP flags to all RF4s in walkable
+        // ====================================================================
+
+        private bool ApplySingleRf4()
+        {
             var svc = MapDataService.Instance;
             if (!svc.IsLoaded)
             {
                 MessageBox.Show("No map loaded.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return false;
             }
 
             if (!TryParseRf4Fields(out var y, out var dy0, out var dy1, out var dy2,
@@ -290,7 +305,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             {
                 MessageBox.Show("Invalid RF4 field values.", "Validation Error",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return false;
             }
 
             TryParsePapFlags(out var papFlags);
@@ -301,7 +316,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             {
                 MessageBox.Show("Cannot locate walkables data.", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             var bytes = svc.GetBytesCopy();
@@ -312,7 +327,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             {
                 MessageBox.Show("RF4 offset out of range.", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             WriteRf4(bytes, rf4Off, y, dy0, dy1, dy2, drawFlags, rx, rz, next);
@@ -329,13 +344,9 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             RoofsChangeBus.Instance.NotifyChanged();
             BuildingsChangeBus.Instance.NotifyChanged();
 
-            MessageBox.Show($"RoofFace4 #{_index} updated.", "Applied",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            SetStatus($"Updated RoofFace4 #{_index}");
+            return true;
         }
-
-        // ====================================================================
-        // Apply to All — write Y, DY, DrawFlags, PAP flags to all RF4s in walkable
-        // ====================================================================
 
         private void BtnApplyToAll_Click(object sender, RoutedEventArgs e)
         {
@@ -447,6 +458,17 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             MessageBox.Show($"Updated {updated} RF4 tiles in Walkable #{walkableId}.", "Applied to All",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void SetStatus(string message)
+        {
+            if (Application.Current.MainWindow?.DataContext is UrbanChaosMapEditor.ViewModels.Core.MainWindowViewModel mainVm)
+                mainVm.StatusMessage = message;
+        }
+
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

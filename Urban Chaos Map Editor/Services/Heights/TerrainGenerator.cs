@@ -91,6 +91,82 @@ namespace UrbanChaosMapEditor.Services.Heights
             return outH;
         }
 
+        /// <summary>
+        /// Generate a width×height height field for a sub-area using the same Diamond-Square
+        /// algorithm as <see cref="GenerateHeights128"/>. Finds the smallest 2^n+1 buffer that
+        /// covers both dimensions, runs the full fractal algorithm on it, then crops to
+        /// width×height so the result looks like coherent terrain rather than random noise.
+        /// </summary>
+        public static sbyte[,] GenerateHeightsArea(int seed, int width, int height,
+            double roughness = 0.60, int blurPasses = 1)
+        {
+            if (width <= 0) width = 1;
+            if (height <= 0) height = 1;
+
+            // Find smallest power-of-two >= max(width, height), then add 1 for diamond-square.
+            int size = 1;
+            int maxDim = Math.Max(width, height);
+            while (size < maxDim) size <<= 1;
+            int n = size + 1;
+
+            var rng = new Random(seed);
+            var map = new double[n, n];
+
+            map[0, 0]         = NextRand(rng);
+            map[0, n - 1]     = NextRand(rng);
+            map[n - 1, 0]     = NextRand(rng);
+            map[n - 1, n - 1] = NextRand(rng);
+
+            int step = n - 1;
+            double scale = 1.0;
+
+            while (step > 1)
+            {
+                int half = step / 2;
+
+                // Diamond step
+                for (int y = half; y < n; y += step)
+                    for (int x = half; x < n; x += step)
+                    {
+                        double avg = 0.25 * (map[x - half, y - half] + map[x + half, y - half]
+                                           + map[x - half, y + half] + map[x + half, y + half]);
+                        map[x, y] = avg + Displace(rng, scale);
+                    }
+
+                // Square step
+                for (int y = 0; y < n; y += half)
+                {
+                    int shift = (y / half) % 2 == 0 ? half : 0;
+                    for (int x = shift; x < n; x += step)
+                    {
+                        double sum = 0.0; int cnt = 0;
+                        if (y - half >= 0) { sum += map[x, y - half]; cnt++; }
+                        if (y + half <  n) { sum += map[x, y + half]; cnt++; }
+                        if (x - half >= 0) { sum += map[x - half, y]; cnt++; }
+                        if (x + half <  n) { sum += map[x + half, y]; cnt++; }
+                        map[x, y] = (sum / cnt) + Displace(rng, scale);
+                    }
+                }
+
+                step  /= 2;
+                scale *= roughness;
+            }
+
+            NormalizeInPlace(map, -1.0, 1.0);
+            for (int i = 0; i < blurPasses; i++) BoxBlurInPlace(map);
+
+            // Crop the top-left width×height corner to the output array.
+            var outH = new sbyte[width, height];
+            for (int ty = 0; ty < height; ty++)
+                for (int tx = 0; tx < width; tx++)
+                {
+                    int scaled = (int)Math.Round(map[tx, ty] * 127.0);
+                    outH[tx, ty] = (sbyte)Math.Clamp(scaled, (int)sbyte.MinValue, (int)sbyte.MaxValue);
+                }
+
+            return outH;
+        }
+
         private static double NextRand(Random rng) => rng.NextDouble() * 2.0 - 1.0;
 
         private static double Displace(Random rng, double scale) => NextRand(rng) * scale;

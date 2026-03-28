@@ -8,15 +8,18 @@ namespace UrbanChaosMapEditor.Models.Core
         // Terrain Heights (vertex height offsets)
         RaiseHeight,
         AreaSetHeight,
+        RandomizeHeightArea,   // drag rectangle to randomise terrain in area
         LowerHeight,
         LevelHeight,
         FlattenHeight,
-        DitchTemplate,
+        DitchTemplate,     // kept for backward-compat; StampHeight supersedes it
+        StampHeight,       // apply currently-selected HeightStamp at click point
 
         // Cell Altitude (floor level)
         SetAltitude,       // Set cell altitude to target value
         SampleAltitude,    // Read cell altitude into target value
         ResetAltitude,     // Reset cell altitude to 0
+        AreaSetPapFlags,
 
         // Roof Building
         DetectRoof,        // Detect closed shapes near click point
@@ -24,6 +27,8 @@ namespace UrbanChaosMapEditor.Models.Core
         // Textures
         PaintTexture,
         EyedropTexture,
+        SelectTextureArea,  // drag to select a rect of cells; stays highlighted until cancelled
+        PasteTexture,       // paste clipboard cells — click to place at cursor top-left
 
         // Future expansion
         PlacePrim,

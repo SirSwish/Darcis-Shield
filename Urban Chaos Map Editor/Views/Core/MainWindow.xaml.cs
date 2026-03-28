@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -106,6 +107,14 @@ namespace UrbanChaosMapEditor.Views.Core
             System.Diagnostics.Debug.WriteLine($"[Recent] VM? {(vm != null)}  Count={(vm?.RecentFiles?.Count ?? -1)}");
         }
 
+        private void EditorTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only act on top-level tab changes (TabControls inside tabs also fire this event)
+            if (e.OriginalSource != EditorTabControl) return;
+            if (DataContext is MainWindowViewModel shell)
+                shell.Map.SelectedTool = EditorTool.None;
+        }
+
         private void EditorExpander_Expanded(object sender, RoutedEventArgs e)
         {
             EditorRailCol.Width = new GridLength(CollapsedRailWidth);
@@ -134,7 +143,7 @@ namespace UrbanChaosMapEditor.Views.Core
             map.SelectedTextureGroup = thumb.Group;
             map.SelectedTextureNumber = thumb.Number;
 
-            shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) — click a tile to apply";
+            shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) ï¿½ click a tile to apply";
         }
 
         private void RotateTexture_Click(object sender, RoutedEventArgs e)
@@ -172,7 +181,7 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
             map.SelectedRotationIndex = (map.SelectedRotationIndex + 3) % 4;
-            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180°, 1?90°, 2?0°, 3?270°)";
+            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180ï¿½, 1?90ï¿½, 2?0ï¿½, 3?270ï¿½)";
         }
 
         private void RotateRight_Click(object sender, RoutedEventArgs e)
@@ -180,7 +189,7 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
             map.SelectedRotationIndex = (map.SelectedRotationIndex + 1) % 4;
-            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180°, 1?90°, 2?0°, 3?270°)";
+            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180ï¿½, 1?90ï¿½, 2?0ï¿½, 3?270ï¿½)";
         }
 
         private void PrimsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -350,7 +359,7 @@ namespace UrbanChaosMapEditor.Views.Core
             shell.Map.DragPreviewPrim = null;
 
             shell.StatusMessage =
-                $"Placing {primBtn.Number:D3} — {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
+                $"Placing {primBtn.Number:D3} ï¿½ {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
         }
 
         private void CopyPrim_Click(object? sender, RoutedEventArgs e)
@@ -469,6 +478,16 @@ namespace UrbanChaosMapEditor.Views.Core
 
                     var map = shell.Map;
 
+                    // Texture area copy takes priority when SelectTextureArea is active
+                    if (map.SelectedTool == UrbanChaosMapEditor.Models.Core.EditorTool.SelectTextureArea
+                        && map.TextureAreaCommitted)
+                    {
+                        map.CopyTextureCellsCommand.Execute(null);
+                        shell.StatusMessage = $"Copied {map.TextureClipboard?.Width}\u00d7{map.TextureClipboard?.Height} cells. Ctrl+V to paste.";
+                        e.Handled = true;
+                        return;
+                    }
+
                     if (map.SelectedPrim != null)
                     {
                         CopySelectedPrim();
@@ -486,6 +505,17 @@ namespace UrbanChaosMapEditor.Views.Core
                 {
                     if (DataContext is not MainWindowViewModel shell || shell.Map == null)
                     {
+                        e.Handled = true;
+                        return;
+                    }
+
+                    var map = shell.Map;
+
+                    // Texture clipboard paste takes priority when we have cells
+                    if (map.TextureClipboard != null)
+                    {
+                        map.SelectedTool = UrbanChaosMapEditor.Models.Core.EditorTool.PasteTexture;
+                        shell.StatusMessage = "Click on the map to paste cells. Right-click to cancel.";
                         e.Handled = true;
                         return;
                     }
@@ -733,6 +763,23 @@ namespace UrbanChaosMapEditor.Views.Core
             var clear = new MenuItem { Header = "_Clear Recent" };
             clear.Click += ClearRecent_Click;
             m.Items.Add(clear);
+        }
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+
+            string version =
+                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? asm.GetName().Version?.ToString()
+                ?? "Unknown";
+
+            MessageBox.Show(
+                "Urban Chaos Map Editor\n\n" +
+                $"Version: 1.5 ({version})\n" +
+                "Urban Chaos Map Editor is a part of the Darcis Shield Editor Project",
+                "About",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
     }
 }

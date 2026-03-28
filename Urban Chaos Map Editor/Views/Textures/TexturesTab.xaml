@@ -228,9 +228,6 @@
                         <Setter Property="Background" Value="#333333"/>
                         <Setter Property="BorderBrush" Value="#444444"/>
                     </Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Foreground" Value="White"/>
-                    </Style>
                 </Grid.Resources>
 
                 <!-- World + Set -->
@@ -251,18 +248,12 @@
                 <WrapPanel Grid.Row="1" VerticalAlignment="Top" ItemHeight="28" ItemWidth="Auto">
                     <TextBlock Text="Rotation:" VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                    <Button Width="28" Height="24" Click="RotateLeft_Click" ToolTip="Rotate CCW (-90)"
-                            Background="#DDDDDD" BorderBrush="#666666">
-                        <TextBlock Text="&lt;" FontSize="14" Foreground="#111111"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Button>
+                    <Button Padding="10,6" Click="RotateLeft_Click" ToolTip="Rotate CCW (-90)"
+                            Content="&lt;"/>
 
-                    <Button Width="28" Height="24" Margin="6,0,0,0"
+                    <Button Padding="10,6" Margin="6,0,0,0"
                             Click="RotateRight_Click" ToolTip="Rotate CW (+90)"
-                            Background="#DDDDDD" BorderBrush="#666666">
-                        <TextBlock Text="&gt;" FontSize="14" Foreground="#111111"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Button>
+                            Content="&gt;"/>
 
                     <!-- Replaces the old helper text -->
                     <Border Margin="10,0,0,0"
@@ -293,14 +284,15 @@
                                TextAlignment="Right"/>
                     <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.85"
                                Text="(for click / Shift+drag)"/>
-                    <Button Margin="12,0,0,0"
-                            Padding="10,2"
-                            Foreground="#111111"
+                    <Button Margin="12,0,0,0" Padding="10,6"
                             Click="Eyedropper_Click"
-                            ToolTip="Sample a texture from the map">
-                                            <TextBlock Text="👁" Foreground="#111111"/>
-                    </Button>
+                            Content="&#x1F441;"
+                            ToolTip="Sample a texture from the map"/>
 
+                    <Button Margin="8,0,0,0" Padding="10,6"
+                            Click="SelectArea_Click"
+                            Content="Select Area"
+                            ToolTip="Select a rectangular area of cells. Then Ctrl+C to copy, Ctrl+V to paste."/>
 
                 </WrapPanel>
 
@@ -314,6 +306,8 @@
                         <Run FontWeight="SemiBold">Shift+Drag</Run><Run>: Stroke paint</Run>
                         <Run Text="  |  "/>
                         <Run FontWeight="SemiBold">Space</Run><Run>: Rotate</Run>
+                        <Run Text="  |  "/>
+                        <Run FontWeight="SemiBold">Select Area</Run><Run>: Ctrl+C copy, Ctrl+V paste</Run>
                     </TextBlock>
                 </StackPanel>
             </Grid>

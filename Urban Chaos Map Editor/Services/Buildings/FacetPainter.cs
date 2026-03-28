@@ -73,7 +73,7 @@ namespace UrbanChaosMapEditor.Services.Buildings
 
             Debug.WriteLine($"[FacetPainter] ===== ApplyPaint START =====");
             Debug.WriteLine($"[FacetPainter] Facet #{facetIndex1}: StyleIndex={facet.StyleIndex}, Flags=0x{(ushort)facet.Flags:X4}");
-            Debug.WriteLine($"[FacetPainter] Grid: {columnsCount} columns × {bandsCount} bands");
+            Debug.WriteLine($"[FacetPainter] Grid: {columnsCount} columns ï¿½ {bandsCount} bands");
 
             var bytes = _svc.GetBytesCopy();
             int blockStart = snap.StartOffset;
@@ -166,11 +166,27 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 }
             }
 
-            if (bandsToPaint.Count == 0)
+            // Determine which bands need clearing: currently have a DStorey reference (negative dstyle)
+            // but have no paint data â€” must restore them to their positive base style value.
+            var bandsToClear = new List<int>();
+            for (int band = 0; band < bandsCount; band++)
             {
-                Debug.WriteLine("[FacetPainter] No bands need painting.");
+                if (bandsToPaint.Contains(band)) continue;
+                int dstyleIdx = facetStyleStart + band * styleIndexStep;
+                if (dstyleIdx < 0 || dstyleIdx >= nextStyle) continue;
+                int fileOff = stylesOff + dstyleIdx * DStyleSize;
+                short currentVal = (short)(bytes[fileOff] | (bytes[fileOff + 1] << 8));
+                if (currentVal < 0)
+                    bandsToClear.Add(band);
+            }
+
+            if (bandsToPaint.Count == 0 && bandsToClear.Count == 0)
+            {
+                Debug.WriteLine("[FacetPainter] No bands need painting or clearing.");
                 return FacetPaintResult.Success(0, 0);
             }
+
+            Debug.WriteLine($"[FacetPainter] Bands to paint: {bandsToPaint.Count}, bands to clear: {bandsToClear.Count}");
 
             // Calculate new data sizes
             int newStoreysCount = bandsToPaint.Count;
@@ -226,6 +242,17 @@ namespace UrbanChaosMapEditor.Services.Buildings
 
                 currentStoreyId++;
                 currentPaintMemIndex += (ushort)columnsCount;
+            }
+
+            // Add clearing updates: restore negative dstyle entries to positive base style values.
+            // These bands had DStorey references from a prior paint; clearing removes the paint
+            // by pointing dstyles[] back at the raw TMA style (positive value).
+            foreach (int band in bandsToClear)
+            {
+                int dstyleIndex = facetStyleStart + band * styleIndexStep;
+                short baseStyle = baseStyles.ContainsKey(band) ? baseStyles[band] : (short)1;
+                dstylesUpdates[dstyleIndex] = baseStyle;
+                Debug.WriteLine($"[FacetPainter] Band {band}: clearing dstyles[{dstyleIndex}] -> {baseStyle}");
             }
 
             // === Build new file ===

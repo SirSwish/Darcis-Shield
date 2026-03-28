@@ -88,7 +88,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             int totalPixelsY = _facet.Height * 16 + _facet.FHeight;
             _panelsDown = Math.Max(1, (totalPixelsY + (PanelPx - 1)) / PanelPx);
 
-            FacetDimensionsText.Text = $"{_panelsAcross} columns × {_panelsDown} bands";
+            FacetDimensionsText.Text = $"{_panelsAcross} columns ï¿½ {_panelsDown} bands";
 
             // Initialize paint data from existing facet
             InitializePaintDataFromFacet();
@@ -225,7 +225,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 }
             }
 
-            Debug.WriteLine($"[FacetPainter] Initialized {_panelsDown} bands × {_panelsAcross} columns");
+            Debug.WriteLine($"[FacetPainter] Initialized {_panelsDown} bands ï¿½ {_panelsAcross} columns");
             for (int band = 0; band < _panelsDown; band++)
             {
                 Debug.WriteLine($"  Band {band}: BaseStyle={_baseStyles[band]}, PaintBytes=[{string.Join(",", _paintData[band].Select(b => b.ToString("X2")))}]");
@@ -597,15 +597,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 }
             }
 
-            if (bandsNeedingStorey.Count == 0)
-            {
-                Debug.WriteLine("[FacetPainter] No painted bands - nothing to save.");
-                return;
-            }
+            Debug.WriteLine($"[FacetPainter] Saving {bandsNeedingStorey.Count} painted band(s) (0 = clearing)...");
 
-            Debug.WriteLine($"[FacetPainter] Saving {bandsNeedingStorey.Count} painted bands...");
-
-            // Use the FacetPainter service to write the paint data
+            // Always call ApplyPaint â€” even when all bands are cleared it must restore
+            // any existing DStorey references in dstyles[] back to base style values.
             var painter = new FacetPainter(svc);
             var result = painter.ApplyPaint(_facetIndex1, _panelsAcross, _panelsDown, _paintData, _baseStyles);
 

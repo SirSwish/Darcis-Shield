@@ -96,6 +96,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
         {
             if (e.PropertyName == nameof(MapViewModel.Prims) ||
                 e.PropertyName == nameof(MapViewModel.SelectedPrim) ||
+                e.PropertyName == nameof(MapViewModel.SelectedPrims) ||
                 e.PropertyName == nameof(MapViewModel.DragPreviewPrim))
             {
                 Dispatcher.Invoke(InvalidateVisual);
@@ -131,18 +132,19 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             }
 
             const double twoPiOver256 = 2.0 * Math.PI / 256.0;
-            const double yawOffset = Math.PI / 2.0; // +90° so “right = 0” points UP
+            const double yawOffset = Math.PI / 2.0; // +90ï¿½ so ï¿½right = 0ï¿½ points UP
 
             // draw all dots + yaw arrows
+            var selectedSet = _vm.SelectedPrims;
             foreach (var p in _vm.Prims)
             {
                 var center = new Point(p.PixelX, p.PixelZ);
                 dc.DrawEllipse(RedFill, BlackPen, center, DotRadius, DotRadius);
 
-                if (ReferenceEquals(p, _vm.SelectedPrim))
+                if (selectedSet.Contains(p))
                     dc.DrawEllipse(null, Highlight, center, DotRadius + 4, DotRadius + 4);
 
-                double radians = p.Yaw * twoPiOver256 + yawOffset + Math.PI;   // +180°
+                double radians = p.Yaw * twoPiOver256 + yawOffset + Math.PI;   // +180ï¿½
                 DrawArrow(dc, center, radians, ArrowLength);
             }
 
@@ -179,6 +181,17 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             return (a < 0) ? a + twoPi : a;
         }
 
+        // Snap a raw yaw byte to the nearest 45Â° step (256/8 = 32 units per step).
+        private static byte SnapYawTo45(byte yaw)
+        {
+            const int step = 256 / 8; // 32 units = 45Â°
+            int snapped = (int)Math.Round(yaw / (double)step) * step;
+            return (byte)(snapped % 256);
+        }
+
+        private static bool IsShiftDown()
+            => Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+
         // Map a mouse position to a yaw byte (0..255) for a given prim center.
         private static byte YawFromMouse(Point mouse, Point center)
         {
@@ -189,8 +202,8 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             double angle = Math.Atan2(dy, dx); // [-p, p]
             angle = NormalizeRadians(angle);
 
-            // Render uses: radians = yaw*(2p/256) + 90°
-            // => yaw = (angle - 90°) * 256 / (2p)
+            // Render uses: radians = yaw*(2p/256) + 90ï¿½
+            // => yaw = (angle - 90ï¿½) * 256 / (2p)
             double yawOffset = Math.PI / 2.0;
             double twoPi = 2.0 * Math.PI;
             double raw = (angle - yawOffset - Math.PI) * 256.0 / twoPi;
@@ -235,11 +248,44 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             if (hit < 0 || dist > maxPick)
             {
                 Log($"[PrimsLayer] PMDown @ {pos.X},{pos.Y}, no hit");
+                // Clear selection when clicking empty space (unless Ctrl is held to preserve it)
+                bool isCtrlEmpty = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+                if (!isCtrlEmpty)
+                {
+                    vm.SetSelectedPrims(Array.Empty<PrimListItem>());
+                    vm.SelectedPrim = null;
+                }
                 return;
             }
 
             var prim = vm.Prims[hit];
+            bool isCtrl = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+            if (isCtrl)
+            {
+                // Toggle this prim in the multi-selection
+                var newSel = vm.SelectedPrims.ToList();
+                if (newSel.Contains(prim))
+                    newSel.Remove(prim);
+                else
+                    newSel.Add(prim);
+                // Suppress list SelectionChanged from overwriting the canvas multi-select
+                vm.SuppressListToCanvasSync = true;
+                vm.SetSelectedPrims(newSel);
+                vm.SelectedPrim = newSel.LastOrDefault();
+                vm.SuppressListToCanvasSync = false;
+                // Claim keyboard focus so the Delete key reaches the canvas handler
+                Focus();
+                Keyboard.Focus(this);
+                e.Handled = true;
+                return;
+            }
+
+            // Suppress list sync for single-prim canvas selection too
+            vm.SuppressListToCanvasSync = true;
             vm.SelectedPrim = prim;
+            vm.SetSelectedPrims(new[] { prim });
+            vm.SuppressListToCanvasSync = false;
 
             // Double-click remains reserved for properties (your other handler also handles this)
             if (e.ClickCount == 2)
@@ -267,6 +313,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
                 // Seed a yaw ghost for live preview
                 var yaw = YawFromMouse(pos, center);
+                if (IsShiftDown()) yaw = SnapYawTo45(yaw);
                 vm.DragPreviewPrim = new PrimListItem
                 {
                     Index = prim.Index,
@@ -286,7 +333,9 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                 };
 
                 var shell = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
-                if (shell != null) shell.StatusMessage = $"Adjusting yaw… ({yaw}/255)";
+                if (shell != null) shell.StatusMessage = IsShiftDown()
+                    ? $"Adjusting yaw... ({yaw}/255) [Shift: 45\u00b0 snap]"
+                    : $"Adjusting yaw... ({yaw}/255)";
 
                 e.Handled = true;
                 return;
@@ -319,11 +368,13 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
             var pos = e.GetPosition(this);
 
-            // --- Yaw editing live preview (unchanged) ---
+            // --- Yaw editing live preview ---
             if (_yawEditing && _pressedItem != null && e.LeftButton == MouseButtonState.Pressed)
             {
                 var center = new Point(_pressedItem.PixelX, _pressedItem.PixelZ);
                 var yaw = YawFromMouse(pos, center);
+                bool snap = IsShiftDown();
+                if (snap) yaw = SnapYawTo45(yaw);
 
                 vm.DragPreviewPrim = new PrimListItem
                 {
@@ -344,7 +395,9 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                 };
 
                 var shell = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
-                if (shell != null) shell.StatusMessage = $"Yaw: {yaw}/255";
+                if (shell != null) shell.StatusMessage = snap
+                    ? $"Yaw: {yaw}/255 [Shift: 45\u00b0 snap]"
+                    : $"Yaw: {yaw}/255";
 
                 InvalidateVisual();
                 return;
@@ -419,6 +472,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                 var pos = e.GetPosition(this);
                 var center = new Point(_pressedItem.PixelX, _pressedItem.PixelZ);
                 var finalYaw = YawFromMouse(pos, center);
+                if (IsShiftDown()) finalYaw = SnapYawTo45(finalYaw);
 
                 try
                 {
@@ -527,7 +581,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
         // Your existing OnMouseDown handler (dialog / selection) remains;
         // note that we mark e.Handled in PM LBD when starting yaw or move, so
-        // this block won’t run in those cases.
+        // this block wonï¿½t run in those cases.
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);

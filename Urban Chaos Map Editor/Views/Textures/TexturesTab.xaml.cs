@@ -71,6 +71,15 @@ namespace UrbanChaosMapEditor.Views.Textures
             shell.Map.SelectedTool = EditorTool.EyedropTexture;
             shell.StatusMessage = "Eyedropper: click a map tile to sample its texture";
         }
+
+        private void SelectArea_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel shell) return;
+
+            shell.Map.ClearTextureAreaSelection();
+            shell.Map.SelectedTool = EditorTool.SelectTextureArea;
+            shell.StatusMessage = "Drag a rectangle on the map to select cells. Ctrl+C to copy, right-click to cancel.";
+        }
     }
 
     public sealed class TextureSelectionConverter : IMultiValueConverter
