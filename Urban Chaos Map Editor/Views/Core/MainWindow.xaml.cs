@@ -468,6 +468,24 @@ namespace UrbanChaosMapEditor.Views.Core
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
+                if (e.Key == Key.Z)
+                {
+                    if (UndoService.Instance.TryUndo(out int remaining))
+                    {
+                        if (DataContext is MainWindowViewModel undoShell)
+                            undoShell.StatusMessage = remaining > 0
+                                ? $"Undo applied. {remaining} step(s) remaining."
+                                : "Undo applied. No more history.";
+                    }
+                    else
+                    {
+                        if (DataContext is MainWindowViewModel undoShell)
+                            undoShell.StatusMessage = "Nothing to undo.";
+                    }
+                    e.Handled = true;
+                    return;
+                }
+
                 if (e.Key == Key.C)
                 {
                     if (DataContext is not MainWindowViewModel shell || shell.Map == null)

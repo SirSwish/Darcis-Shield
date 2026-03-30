@@ -157,6 +157,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             MapDataService.Instance.MapLoaded += (_, e) =>
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    UndoService.Instance.Clear(); // fresh file = no prior history to undo
                     RecentFilesService.Instance.Add(e.Path);
                     StatusMessage = $"Loaded Map � {e.Path}";
                     CurrentMapPath = e.Path;
@@ -207,6 +208,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             MapDataService.Instance.MapCleared += (_, __) =>
                Application.Current.Dispatcher.Invoke(() =>
                {
+                   UndoService.Instance.Clear(); // no bytes to restore after a clear
                    Map.Prims.Clear();
                    StatusMessage = "Map cleared";
                    CurrentMapPath = null;

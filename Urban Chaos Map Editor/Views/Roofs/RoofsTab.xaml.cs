@@ -218,6 +218,24 @@ namespace UrbanChaosMapEditor.Views.Roofs
         // Delete Walkable
         // ====================================================================
 
+        private void WalkablesList_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                BtnDeleteWalkable_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
+        private void RoofFaces4List_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                BtnDeleteRoofFace4_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
         private void BtnDeleteWalkable_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not RoofsTabViewModel vm) return;

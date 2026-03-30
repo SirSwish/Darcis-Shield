@@ -29,6 +29,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private readonly int _facetIndex1;
         private readonly int _worldNumber;
         private readonly string? _variant;
+        // 0 = Side B (secondary/inner face), 1 = Side A (primary/outer face, default)
+        private readonly int _faceOffset;
 
         // Grid dimensions
         private int _panelsAcross;
@@ -54,12 +56,23 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         // Track if changes were made
         public bool ChangesMade { get; private set; } = false;
 
-        public FacetPainterWindow(DFacetRec facet, int facetIndex1)
+        public FacetPainterWindow(DFacetRec facet, int facetIndex1, int faceOffset = 1)
         {
             InitializeComponent();
 
             _facet = facet;
             _facetIndex1 = facetIndex1;
+            _faceOffset = faceOffset;
+
+            bool twoTextured = (facet.Flags & FacetFlags.TwoTextured) != 0;
+            bool twoSided    = (facet.Flags & FacetFlags.TwoSided)    != 0;
+            bool hugFloor    = (facet.Flags & FacetFlags.HugFloor)    != 0;
+            bool isDualFace  = !hugFloor && (twoTextured || twoSided);
+            bool isInside    = isDualFace && (facet.Flags & FacetFlags.Inside) != 0;
+            // Effective "Side B" (the visible interior face): faceOffset==0 normally, faceOffset==1 for Inside facets.
+            bool isPaintingSideB = isDualFace && (isInside ? faceOffset == 1 : faceOffset == 0);
+            if (isPaintingSideB)
+                Title = "Paint Facet — Side B";
 
             if (!TryResolveVariantAndWorld(out _variant, out _worldNumber))
             {
@@ -107,9 +120,17 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
             bool hugFloor = (_facet.Flags & FacetFlags.HugFloor) != 0;
 
-            int styleIndexStep = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
-            int styleIndexStart = _facet.StyleIndex;
-            if (twoTextured) styleIndexStart--;
+            bool isDualFace = (!hugFloor && (twoTextured || twoSided));
+            int styleIndexStep = isDualFace ? 2 : 1;
+            // Dual-face layout: [SideB_header=X+0, SideA_0=X+1, SideB_0=X+2, SideA_1=X+3, ...]
+            // _faceOffset selects which face to load:
+            //   1 = Side A (primary/outer): StyleIndex + 1
+            //   0 = Side B (secondary/inner): StyleIndex + styleIndexStep (= StyleIndex + 2)
+            int styleIndexStart;
+            if (isDualFace)
+                styleIndexStart = _facet.StyleIndex + (_faceOffset == 0 ? styleIndexStep : _faceOffset);
+            else
+                styleIndexStart = _facet.StyleIndex;
 
             // First pass: determine base style from band 0 (or first valid band)
             // This will be used as fallback for any new bands that don't have dstyle entries yet
@@ -199,7 +220,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
                         for (int col = 0; col < _panelsAcross; col++)
                         {
-                            int pos = _panelsAcross - 1 - col;  // Reverse: col 0 -> highest pos, col N-1 -> pos 0
+                            // Side A: reversed storage (pos = N-1-col). Side B: forward (pos = col).
+                            int pos = (isDualFace && _faceOffset == 0) ? col : _panelsAcross - 1 - col;
 
                             if (pos < paintCount)
                             {
@@ -482,6 +504,40 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             // Draw grid lines
             DrawGrid(GridCanvas, width, height, PanelPx, PanelPx);
 
+            // For Side B (the visible interior face), the topmost band never renders in-game.
+            // Draw a warning overlay so the user knows.
+            bool twoTexturedDraw = (_facet.Flags & FacetFlags.TwoTextured) != 0;
+            bool twoSidedDraw    = (_facet.Flags & FacetFlags.TwoSided)    != 0;
+            bool hugFloorDraw    = (_facet.Flags & FacetFlags.HugFloor)    != 0;
+            bool isDualFaceDraw  = !hugFloorDraw && (twoTexturedDraw || twoSidedDraw);
+            bool isInsideDraw    = isDualFaceDraw && (_facet.Flags & FacetFlags.Inside) != 0;
+            bool isPaintingSideBDraw = isDualFaceDraw && (isInsideDraw ? _faceOffset == 1 : _faceOffset == 0);
+            if (isPaintingSideBDraw)
+            {
+                var noRenderOverlay = new Rectangle
+                {
+                    Width = width,
+                    Height = PanelPx,
+                    Fill = new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0x60, 0x00)),
+                    ToolTip = "Top band of Side B does not render in-game (engine limitation)"
+                };
+                Canvas.SetLeft(noRenderOverlay, 0);
+                Canvas.SetTop(noRenderOverlay, 0);
+                GridCanvas.Children.Add(noRenderOverlay);
+
+                var noRenderLabel = new TextBlock
+                {
+                    Text = "Not rendered in-game",
+                    Foreground = Brushes.White,
+                    FontSize = 10,
+                    IsHitTestVisible = false
+                };
+                noRenderLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                Canvas.SetLeft(noRenderLabel, (width - noRenderLabel.DesiredSize.Width) / 2);
+                Canvas.SetTop(noRenderLabel, (PanelPx - noRenderLabel.DesiredSize.Height) / 2);
+                GridCanvas.Children.Add(noRenderLabel);
+            }
+
             // Draw outline
             var outline = new Rectangle
             {
@@ -602,7 +658,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             // Always call ApplyPaint — even when all bands are cleared it must restore
             // any existing DStorey references in dstyles[] back to base style values.
             var painter = new FacetPainter(svc);
-            var result = painter.ApplyPaint(_facetIndex1, _panelsAcross, _panelsDown, _paintData, _baseStyles);
+            var result = painter.ApplyPaint(_facetIndex1, _panelsAcross, _panelsDown, _paintData, _baseStyles, _faceOffset);
 
             if (!result.IsSuccess)
             {

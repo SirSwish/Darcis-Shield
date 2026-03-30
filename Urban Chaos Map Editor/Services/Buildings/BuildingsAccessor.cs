@@ -914,8 +914,8 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 int styleIndexStep = isWarehouse ? entriesPerBand + 1 : entriesPerBand;
 
                 // facetStyleStart: first dstyle slot for this facet
-                // (TwoTextured facets store StyleIndex pointing to slot 1, not slot 0)
-                int facetStyleStart = styleIndex - (twoTextured ? 1 : 0);
+                // StyleIndex always points to the first allocated dstyle slot for the facet
+                int facetStyleStart = styleIndex;
 
                 // Read header counters
                 ushort nextFacet    = ReadU16(bytes, blockStart + 4);
@@ -932,8 +932,11 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 int storeysOff      = paintMemOff + nextPaintMem;
                 int afterStoreysOff = storeysOff + nextStorey * DStoreyRecSize;
 
-                // Insertion point in dstyles[]: immediately after the last old-band slot
-                int insertAt    = facetStyleStart + oldBands * styleIndexStep;
+                // Insertion point in dstyles[]: immediately after the last old-band slot.
+                // Dual-face blocks have a header slot at facetStyleStart+0 before the band slots begin,
+                // so the first band starts at facetStyleStart+1. insertAt must account for this.
+                bool isDualFace = (!hugFloor && (twoTextured || twoSided));
+                int insertAt    = facetStyleStart + (isDualFace ? 1 : 0) + oldBands * styleIndexStep;
                 int extraSlots  = (newBands - oldBands) * styleIndexStep;
 
                 if (insertAt > nextStyle)
@@ -1009,9 +1012,8 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 {
                     int off = i * DFacetSize;
                     var fFlags = (FacetFlags)((ushort)(facetsData[off + 10] | (facetsData[off + 11] << 8)));
-                    bool fTwoTex = (fFlags & FacetFlags.TwoTextured) != 0;
                     ushort fStyleIdx = (ushort)(facetsData[off + 12] | (facetsData[off + 13] << 8));
-                    int fBlockStart = fStyleIdx - (fTwoTex ? 1 : 0);
+                    int fBlockStart = fStyleIdx;
                     if (fBlockStart >= insertAt)
                     {
                         ushort newSI = (ushort)(fStyleIdx + extraSlots);

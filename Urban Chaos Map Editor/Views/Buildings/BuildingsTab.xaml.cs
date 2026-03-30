@@ -493,6 +493,21 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (confirmResult != MessageBoxResult.Yes)
                 return;
 
+            // Capture the index of the facet within its group before deletion
+            int prevFacetIndexInGroup = -1;
+            if (!isCable && vm.SelectedFacetTypeGroup != null)
+            {
+                var facets = vm.SelectedFacetTypeGroup.Facets;
+                for (int i = 0; i < facets.Count; i++)
+                {
+                    if (facets[i].FacetId1 == facetId)
+                    {
+                        prevFacetIndexInGroup = i;
+                        break;
+                    }
+                }
+            }
+
             var deleter = new FacetDeleter(MapDataService.Instance);
             var result = deleter.TryDeleteFacet(facetId);
 
@@ -506,13 +521,12 @@ namespace UrbanChaosMapEditor.Views.Buildings
                         mainVm.StatusMessage = $"Deleted facet #{facetId} from building #{buildingId}.";
                 }
 
-                vm.SelectedFacet = null;
                 vm.Refresh();
 
                 // Only try to select next facet if it wasn't a cable
                 if (!isCable && buildingId > 0)
                 {
-                    SelectNextFacetInBuilding(vm, buildingId);
+                    SelectNextFacetInBuilding(vm, buildingId, prevFacetIndexInGroup);
                 }
             }
             else
@@ -587,6 +601,24 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             Focus();
             return true;
+        }
+
+        private void BuildingsList_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                BtnDeleteBuilding_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
+        private void FacetsList_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                BtnDeleteFacet_Click(sender, e);
+                e.Handled = true;
+            }
         }
 
         private void BtnDeleteBuilding_Click(object sender, RoutedEventArgs e)
@@ -675,7 +707,7 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         #region Helpers
 
-        private void SelectNextFacetInBuilding(BuildingsTabViewModel vm, int buildingId)
+        private void SelectNextFacetInBuilding(BuildingsTabViewModel vm, int buildingId, int deletedFacetIndex = -1)
         {
             var building = vm.Buildings.FirstOrDefault(b => b.Id == buildingId);
             if (building == null)
@@ -684,14 +716,18 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 return;
             }
 
-            // Find the first facet in this building via the facet groups
-            var firstGroup = vm.SelectedBuildingFacetGroups?.FirstOrDefault();
-            var firstFacet = firstGroup?.Facets?.FirstOrDefault();
+            // Refresh() already restored SelectedFacetTypeGroup to the previously selected group.
+            var group = vm.SelectedFacetTypeGroup ?? vm.SelectedBuildingFacetGroups?.FirstOrDefault();
+            var facets = group?.Facets;
 
-            if (firstFacet != null)
+            if (facets != null && facets.Count > 0)
             {
-                vm.SelectedFacetTypeGroup = firstGroup;
-                vm.SelectedFacet = firstFacet;
+                // Select the facet just before the deleted one; clamp to 0 if it was the first.
+                int targetIndex = deletedFacetIndex > 0 ? deletedFacetIndex - 1 : 0;
+                targetIndex = Math.Min(targetIndex, facets.Count - 1);
+
+                vm.SelectedFacetTypeGroup = group;
+                vm.SelectedFacet = facets[targetIndex];
                 vm.SelectedBuildingId = buildingId;
             }
             else

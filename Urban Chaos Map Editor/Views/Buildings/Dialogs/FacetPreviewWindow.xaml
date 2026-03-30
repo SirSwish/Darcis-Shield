@@ -219,6 +219,13 @@
                                 Style="{StaticResource ActionButton}"
                                 Click="BtnChangeSecondFaceStyle_Click"
                                 ToolTip="Select a new TMA style for the second face (interior/back)."/>
+
+                        <Button x:Name="BtnPaintFaceB"
+                                Content="🎨 Paint Side B..."
+                                Margin="0,8,0,0"
+                                Style="{StaticResource ActionButton}"
+                                Click="BtnPaintFaceB_Click"
+                                ToolTip="Open the texture painter for the secondary (inner) face of this facet."/>
                     </StackPanel>
                 </Border>
 

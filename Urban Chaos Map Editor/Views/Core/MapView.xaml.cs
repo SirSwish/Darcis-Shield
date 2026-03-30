@@ -179,8 +179,20 @@ namespace UrbanChaosMapEditor.Views.Core
             PreviewMouseWheel += OnPreviewMouseWheel;
             PreviewMouseRightButtonDown += OnPreviewMouseRightButtonDown;
 
-            MouseEnter += (_, __) => Focus();
-            PreviewMouseLeftButtonDown += (_, __) => Focus();
+            // Grab keyboard focus for map shortcuts, but never steal it from a text input
+            // control — that causes in-progress edits (altitude, facet fields, etc.) to be lost.
+            MouseEnter += (_, __) =>
+            {
+                if (Keyboard.FocusedElement is not TextBox)
+                    Focus();
+            };
+            PreviewMouseLeftButtonDown += (_, e) =>
+            {
+                // If the click target is a TextBox (e.g. an inline roof-face editor overlay),
+                // let it keep/take focus rather than overriding with the map canvas.
+                if (e.OriginalSource is not TextBox)
+                    Focus();
+            };
 
             DataContextChanged += MapView_DataContextChanged;
             Loaded += (_, __) =>

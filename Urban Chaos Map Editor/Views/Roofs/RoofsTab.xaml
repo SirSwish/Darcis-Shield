@@ -133,6 +133,7 @@
                           SelectedItem="{Binding SelectedWalkable, Mode=TwoWay}"
                           SelectionChanged="WalkablesList_OnSelectionChanged"
                           MouseDoubleClick="WalkablesList_OnMouseDoubleClick"
+                          PreviewKeyDown="WalkablesList_PreviewKeyDown"
                           Background="Transparent"
                           Foreground="White"
                           BorderThickness="0">
@@ -185,6 +186,7 @@
                           ItemsSource="{Binding RoofFaces4}"
                           SelectedItem="{Binding SelectedRoofFace4, Mode=TwoWay}"
                           MouseDoubleClick="RoofFaces4List_OnMouseDoubleClick"
+                          PreviewKeyDown="RoofFaces4List_PreviewKeyDown"
                           Background="Transparent"
                           Foreground="White"
                           BorderThickness="0">

@@ -86,6 +86,8 @@ namespace UrbanChaosMapEditor.Services.Core
         public void ReplaceBytes(byte[] bytes)
         {
             if (bytes is null) throw new ArgumentNullException(nameof(bytes));
+            // Snapshot the current bytes before overwriting so Ctrl+Z can restore them.
+            if (IsLoaded) UndoService.Instance.RecordSnapshot(GetBytesCopy());
             lock (_sync) { MapBytes = bytes; ClearWalkablesCache(); }
             MapBytesReset?.Invoke(this, new MapBytesResetEventArgs(bytes.Length)); // NEW
             MarkDirty();
@@ -99,6 +101,8 @@ namespace UrbanChaosMapEditor.Services.Core
             if (mutate is null) throw new ArgumentNullException(nameof(mutate));
             if (!IsLoaded) throw new InvalidOperationException("No map loaded.");
 
+            // Snapshot before mutating so Ctrl+Z can restore the prior state.
+            UndoService.Instance.RecordSnapshot(GetBytesCopy());
             lock (_sync) { mutate(MapBytes!); }
             ClearWalkablesCache();
             MarkDirty();
@@ -301,7 +305,7 @@ namespace UrbanChaosMapEditor.Services.Core
             int objectBytesFromHeader = BitConverter.ToInt32(bytes, 4);
             int sizeAdjustment = saveType >= 25 ? 2000 : 0;
 
-            // Where the object section begins (offset of NumObjects int32) — your V1 formula
+            // Where the object section begins (offset of NumObjects int32) ï¿½ your V1 formula
             int objectOffset = bytes.Length - 12 - sizeAdjustment - objectBytesFromHeader + 8;
 
             // -------- Strict finder (preferred) --------

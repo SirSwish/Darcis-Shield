@@ -503,6 +503,8 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             int prevBuildingId = forceSelectBuildingId ?? SelectedBuildingId;
             int prevStoreyId = SelectedStoreyId;
             int? prevFacetId = SelectedFacet?.FacetId1;
+            // Save group type now, before SelectedBuilding = null wipes SelectedFacetTypeGroup
+            FacetType? prevGroupType = isForced ? null : SelectedFacetTypeGroup?.Type;
 
             Buildings.Clear();
             SelectedBuildingFacetGroups.Clear();
@@ -752,6 +754,17 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                         SelectedStoreyId = restoredBuilding.Storeys
                             .OrderBy(s => s.StoreyId)
                             .First().StoreyId;
+                    }
+
+                    // Restore the facet type group — SelectedBuilding = restoredBuilding above
+                    // reset it to FirstOrDefault because SelectedFacetTypeGroup had already been
+                    // cleared before RefreshSelectedBuildingFacetGroups ran. Re-apply it here.
+                    if (prevGroupType.HasValue)
+                    {
+                        var restoredGroup = SelectedBuildingFacetGroups
+                            .FirstOrDefault(g => g.Type == prevGroupType.Value);
+                        if (restoredGroup != null)
+                            SelectedFacetTypeGroup = restoredGroup;
                     }
 
                     // Try to restore the exact facet if it still exists

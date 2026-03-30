@@ -33,8 +33,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
             var building = snap.Buildings[buildingId1 - 1];
 
-            // Collect exterior Normal + Door facets grouped by height
-            var facetsByHeight = new Dictionary<int, List<Edge>>();
+            // Collect exterior Normal + Door facets grouped by (height, y0).
+            // Y0 is the vertical offset of the polygon — it must be included in the
+            // walkable WorldY so the floor sits at the correct altitude.
+            var facetsByHeight = new Dictionary<(int height, int y0), List<Edge>>();
 
             for (int fIdx = building.StartFacet; fIdx < building.EndFacet && fIdx <= snap.Facets.Length; fIdx++)
             {
@@ -50,16 +52,16 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 if (facet.Building != buildingId1)
                     continue;
 
-                int h = facet.Height;
-                if (!facetsByHeight.ContainsKey(h))
-                    facetsByHeight[h] = new List<Edge>();
+                var key = (height: facet.Height, y0: facet.Y0);
+                if (!facetsByHeight.ContainsKey(key))
+                    facetsByHeight[key] = new List<Edge>();
 
-                facetsByHeight[h].Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
+                facetsByHeight[key].Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
 
-                Debug.WriteLine($"[RoofEnclosureService] Facet: ({facet.X0},{facet.Z0})->({facet.X1},{facet.Z1}) Height={h} Type={facet.Type}");
+                Debug.WriteLine($"[RoofEnclosureService] Facet: ({facet.X0},{facet.Z0})->({facet.X1},{facet.Z1}) Height={facet.Height} Y0={facet.Y0} Type={facet.Type}");
             }
 
-            Debug.WriteLine($"[RoofEnclosureService] Building #{buildingId1}: {facetsByHeight.Count} height level(s)");
+            Debug.WriteLine($"[RoofEnclosureService] Building #{buildingId1}: {facetsByHeight.Count} height+y0 level(s)");
 
             var altAcc = new AltitudeAccessor(svc);
             var texAcc = new TexturesAccessor(svc);
@@ -72,11 +74,11 @@ namespace UrbanChaosMapEditor.Services.Roofs
             var changedWpfTiles = new List<(int wpfTx, int wpfTy)>();
             var claimedInteriorTiles = new HashSet<(int tx, int ty)>();
 
-            // Try each height level (highest first)
-            foreach (var height in facetsByHeight.Keys.OrderByDescending(h => h))
+            // Try each height+y0 level (highest effective top first)
+            foreach (var (height, y0) in facetsByHeight.Keys.OrderByDescending(k => k.height * 64 + k.y0))
             {
-                var edges = facetsByHeight[height];
-                Debug.WriteLine($"[RoofEnclosureService] Trying height={height} with {edges.Count} edges");
+                var edges = facetsByHeight[(height, y0)];
+                Debug.WriteLine($"[RoofEnclosureService] Trying height={height} y0={y0} with {edges.Count} edges");
 
                 var components = SplitIntoConnectedComponents(edges);
                 Debug.WriteLine($"[RoofEnclosureService] Height={height} split into {components.Count} connected component(s)");
@@ -170,6 +172,11 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                         if (!walkableExists)
                         {
+                            // WorldY = top of the enclosed polygon = facet height contribution + Y offset.
+                            // Without y0, a polygon raised off the ground (y0 > 0) would create a
+                            // walkable floor too low by exactly the y0 amount.
+                            int walkableWorldY = height * 64 + y0;
+
                             var template = new WalkableTemplate
                             {
                                 BuildingId1 = buildingId1,
@@ -177,7 +184,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                                 Z1 = minZ,
                                 X2 = maxX,
                                 Z2 = maxZ,
-                                WorldY = height * 64,
+                                WorldY = walkableWorldY,
                                 StoreyY = 0
                             };
 
@@ -187,7 +194,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                             if (walkResult.Success)
                             {
                                 Debug.WriteLine($"[RoofEnclosureService] Auto-created walkable #{walkResult.WalkableId1} " +
-                                    $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) WorldY={height * 64}");
+                                    $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) Height={height} Y0={y0} WorldY={walkableWorldY}");
                                 RoofsChangeBus.Instance.NotifyChanged();
                             }
                             else

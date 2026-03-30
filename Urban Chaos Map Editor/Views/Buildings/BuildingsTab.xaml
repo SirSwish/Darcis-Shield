@@ -205,8 +205,8 @@
                     </Grid.Style>
 
                     <Grid.ColumnDefinitions>
-                        <!-- Narrower buildings/types columns so text wraps -->
-                        <ColumnDefinition Width="60" />
+                        <!-- Auto-size to content so dot + building label are never clipped -->
+                        <ColumnDefinition Width="Auto" MinWidth="80" />
                         <ColumnDefinition Width="4" />
                         <ColumnDefinition Width="90" />
                         <ColumnDefinition Width="4" />
@@ -228,14 +228,39 @@
                                      SelectionChanged="BuildingsList_SelectionChanged"
                                      MouseDoubleClick="BuildingsList_MouseDoubleClick"
                                      PreviewMouseRightButtonDown="BuildingsList_PreviewMouseRightButtonDown"
+                                     PreviewKeyDown="BuildingsList_PreviewKeyDown"
                                      ItemContainerStyle="{StaticResource SelectableListBoxItem}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                      Background="Transparent"
                                      BorderThickness="0">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate DataType="{x:Type vm:BuildingVM}">
-                                        <TextBlock Text="{Binding ShortDisplayName}"
-                                                   FontSize="11"
-                                                   TextWrapping="Wrap"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border x:Name="TypeDot"
+                                                    Width="16" Height="16" CornerRadius="8"
+                                                    Margin="0,0,5,0"
+                                                    Background="#CC3333"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock x:Name="TypeLetter"
+                                                           Text="H"
+                                                           FontSize="9" FontWeight="Bold"
+                                                           Foreground="White"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding ShortDisplayName}"
+                                                       FontSize="11"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding BuildingType}" Value="Warehouse">
+                                                <Setter TargetName="TypeDot" Property="Background" Value="#3366CC"/>
+                                                <Setter TargetName="TypeLetter" Property="Text" Value="W"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsCablesBucket}" Value="True">
+                                                <Setter TargetName="TypeDot" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -298,6 +323,7 @@
                                      SelectedItem="{Binding SelectedFacet, Mode=TwoWay}"
                                      SelectionChanged="FacetsList_SelectionChanged"
                                      MouseDoubleClick="FacetsList_MouseDoubleClick"
+                                     PreviewKeyDown="FacetsList_PreviewKeyDown"
                                      ItemContainerStyle="{StaticResource SelectableListBoxItem}"
                                      Background="Transparent"
                                      BorderThickness="0">
@@ -353,6 +379,7 @@
                                   ItemsSource="{Binding CableFacets}"
                                   SelectionChanged="CableList_OnSelectionChanged"
                                   MouseDoubleClick="CableList_OnMouseDoubleClick"
+                                  PreviewKeyDown="FacetsList_PreviewKeyDown"
                                   Background="Transparent"
                                   BorderThickness="0">
                             <ListView.View>
@@ -395,6 +422,7 @@
                   ItemsSource="{Binding CableFacets}"
                   SelectionChanged="CableList_OnSelectionChanged"
                   MouseDoubleClick="CableList_OnMouseDoubleClick"
+                  PreviewKeyDown="FacetsList_PreviewKeyDown"
                   Background="Transparent"
                   Foreground="White"
                   BorderThickness="0">
