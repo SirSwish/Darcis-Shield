@@ -659,9 +659,9 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             string message = $"Delete Building #{buildingId}?\n\n" +
                             $"This will remove:\n" +
-                            $"  � {facetCount} facet(s)\n" +
-                            $"  � {walkableCount} walkable(s)\n" +
-                            $"  � Associated roof faces\n\n" +
+                            $"  - {facetCount} facet(s)\n" +
+                            $"  - {walkableCount} walkable(s)\n" +
+                            $"  - Associated roof faces\n\n" +
                             $"This action cannot be undone.";
 
             var confirmResult = MessageBox.Show(message, "Confirm Delete Building",

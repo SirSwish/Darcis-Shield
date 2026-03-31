@@ -61,17 +61,17 @@
                 <TextBlock Text="ROOF TILE PROPERTIES" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
 
                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Y:"/>
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Y (SE):"/>
                     <TextBox x:Name="TxtY" Style="{StaticResource FieldBox}"/>
-                    <TextBlock Style="{StaticResource InfoText}" Text="Base altitude (S16)"/>
+                    <TextBlock Style="{StaticResource InfoText}" Text="SE base altitude (256 = 1 floor)"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="DY0:"/>
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="DY0 (SW):"/>
                     <TextBox x:Name="TxtDY0" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Text="DY1:" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                    <TextBlock Text="DY1 (NW):" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
                     <TextBox x:Name="TxtDY1" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Text="DY2:" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
+                    <TextBlock Text="DY2 (NE):" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
                     <TextBox x:Name="TxtDY2" Style="{StaticResource FieldBox}" Width="50"/>
                 </StackPanel>
 

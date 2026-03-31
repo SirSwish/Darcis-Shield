@@ -189,7 +189,7 @@ namespace UrbanChaosMapEditor.Views.Prims
             shell.Map.DragPreviewPrim = null;
 
             shell.StatusMessage =
-                $"Placing {primBtn.Number:D3} � {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
+                $"Placing {primBtn.Number:D3} - {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
 
             var win = Window.GetWindow(this);
             var mapView = win != null

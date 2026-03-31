@@ -7,14 +7,14 @@ using UrbanChaosMapEditor.Services.Core;
 namespace UrbanChaosMapEditor.Services.Buildings
 {
     /// <summary>
-    /// Primary accessor for the building (�super map�) block.
+    /// Primary accessor for the building (-super map-) block.
     /// Produces a BuildingArrays snapshot (DBuildings, DFacets, dstyles, paint_mem, dstoreys, cables).
     /// </summary>
     public sealed class BuildingsAccessor
     {
         private readonly MapDataService _svc;
 
-        // Fixed V1 layout we�re targeting (same as renderer):
+        // Fixed V1 layout we-re targeting (same as renderer):
         private const int HeaderSize = 48;
         private const int DBuildingSize = 24;
         private const int AfterBuildingsPad = 14;

@@ -531,6 +531,9 @@ namespace UrbanChaosMapEditor.Views.Core
                 if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide)
                     return;
 
+                // Snapshot once per gesture so the whole stroke/rect/click is one undo step.
+                UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
+
                 _textureMouseDownPos = mousePos;
                 _isTextureDragging = false;
                 _isTextureStrokePainting = false;
@@ -549,12 +552,12 @@ namespace UrbanChaosMapEditor.Views.Core
                     ApplyTextureBrush(tx, ty, vm);
 
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Stroke painting {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000} (brush {vm.BrushSize}�{vm.BrushSize})";
+                        mainVm.StatusMessage = $"Stroke painting {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000} (brush {vm.BrushSize}-{vm.BrushSize})";
                 }
                 else
                 {
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Click to paint (brush {vm.BrushSize}�{vm.BrushSize}), drag for rectangle, Shift+drag for stroke";
+                        mainVm.StatusMessage = $"Click to paint (brush {vm.BrushSize}-{vm.BrushSize}), drag for rectangle, Shift+drag for stroke";
                 }
 
                 CaptureMouse();
@@ -649,6 +652,7 @@ namespace UrbanChaosMapEditor.Views.Core
                 int ty = (int)Math.Floor(mousePos.Y / MapConstants.TileSize);
                 if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide) return;
 
+                UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
                 PasteTextureClipboard(tx, ty, vm);
                 e.Handled = true;
                 return;
@@ -746,7 +750,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) => ApplyHeightToTile(tx, ty, _levelSource));
 
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Level: picked {_levelSource} at vertex [{vx},{vy}] (brush {vm.BrushSize}�{vm.BrushSize})";
+                        mainVm.StatusMessage = $"Level: picked {_levelSource} at vertex [{vx},{vy}] (brush {vm.BrushSize}-{vm.BrushSize})";
 
                     e.Handled = true;
                     return;
@@ -781,7 +785,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     HeightsOverlay?.InvalidateVisual();
 
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Flattened to 0 at vertex [{vx},{vy}] (brush {vm.BrushSize}�{vm.BrushSize})";
+                        mainVm.StatusMessage = $"Flattened to 0 at vertex [{vx},{vy}] (brush {vm.BrushSize}-{vm.BrushSize})";
 
                     e.Handled = true;
                     return;
@@ -904,7 +908,7 @@ namespace UrbanChaosMapEditor.Views.Core
                 });
 
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                    shell.StatusMessage = $"Level: set #{_levelSource} at vertex [{vx2},{vy2}] (brush {(DataContext as MapViewModel)?.BrushSize ?? 1}�{(DataContext as MapViewModel)?.BrushSize ?? 1})";
+                    shell.StatusMessage = $"Level: set #{_levelSource} at vertex [{vx2},{vy2}] (brush {(DataContext as MapViewModel)?.BrushSize ?? 1}-{(DataContext as MapViewModel)?.BrushSize ?? 1})";
             }
 
             if (_isDrawingWalkableRect && e.LeftButton == MouseButtonState.Pressed && Surface != null)
@@ -930,7 +934,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     int tileCount = width * height;
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Walkable region: Max X = {rect.Value.MaxX} Min X = {rect.Value.MinX} | Max Y = {rect.Value.MaxY} Min Y = {rect.Value.MinY} | {width}�{height} ({tileCount} tiles)";
+                        shell.StatusMessage = $"Walkable region: Max X = {rect.Value.MaxX} Min X = {rect.Value.MinX} | Max Y = {rect.Value.MaxY} Min Y = {rect.Value.MinY} | {width}-{height} ({tileCount} tiles)";
                 }
             }
 
@@ -960,7 +964,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     {
                         bool isReset = vm.SelectedTool == EditorTool.ResetAltitude;
                         string action = isReset ? "Clear" : $"Set altitude {vm.TargetAltitude}";
-                        shell.StatusMessage = $"{action}: {width}�{height} ({tileCount} tiles)";
+                        shell.StatusMessage = $"{action}: {width}-{height} ({tileCount} tiles)";
                     }
                 }
             }
@@ -982,7 +986,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     ApplyTextureBrush(tx, ty, vm);
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Stroke painting at [{tx},{ty}] (brush {vm.BrushSize}�{vm.BrushSize})";
+                        shell.StatusMessage = $"Stroke painting at [{tx},{ty}] (brush {vm.BrushSize}-{vm.BrushSize})";
                     return;
                 }
 
@@ -1012,7 +1016,7 @@ namespace UrbanChaosMapEditor.Views.Core
 
                         if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                         {
-                            shell.StatusMessage = $"Rectangle: {width}�{height} ({tileCount} tiles) with {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000}";
+                            shell.StatusMessage = $"Rectangle: {width}-{height} ({tileCount} tiles) with {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000}";
                         }
                     }
                 }
@@ -1194,7 +1198,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     {
                         int width = rect.Value.MaxX - rect.Value.MinX + 1;
                         int height = rect.Value.MaxY - rect.Value.MinY + 1;
-                        shell.StatusMessage = $"Rectangle painted {width}�{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                        shell.StatusMessage = $"Rectangle painted {width}-{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                     }
                 }
                 else if (rect.HasValue)
@@ -1210,7 +1214,7 @@ namespace UrbanChaosMapEditor.Views.Core
                         if (brushSize == 1)
                             shell.StatusMessage = $"Painted tile [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                         else
-                            shell.StatusMessage = $"Brush painted {brushSize}�{brushSize} at [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                            shell.StatusMessage = $"Brush painted {brushSize}-{brushSize} at [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                     }
                 }
 

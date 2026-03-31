@@ -100,8 +100,8 @@
                              Style="{StaticResource EditableField}" 
                              Text="4"
                              PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Measured in 1/4 Storeys" 
-                               Foreground="{StaticResource Subtle}" 
+                    <TextBlock Text="¼-storey (4 = 1 floor)"
+                               Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
                 </StackPanel>
@@ -113,8 +113,8 @@
                              Width="60"
                              Text="0"
                              PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="256 = 1 storey" 
-                               Foreground="{StaticResource Subtle}" 
+                    <TextBlock Text="256 = 1 floor"
+                               Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
                 </StackPanel>

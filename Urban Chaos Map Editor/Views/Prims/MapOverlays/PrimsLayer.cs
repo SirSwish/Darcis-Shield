@@ -132,7 +132,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             }
 
             const double twoPiOver256 = 2.0 * Math.PI / 256.0;
-            const double yawOffset = Math.PI / 2.0; // +90� so �right = 0� points UP
+            const double yawOffset = Math.PI / 2.0; // +90- so -right = 0- points UP
 
             // draw all dots + yaw arrows
             var selectedSet = _vm.SelectedPrims;
@@ -144,7 +144,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                 if (selectedSet.Contains(p))
                     dc.DrawEllipse(null, Highlight, center, DotRadius + 4, DotRadius + 4);
 
-                double radians = p.Yaw * twoPiOver256 + yawOffset + Math.PI;   // +180�
+                double radians = p.Yaw * twoPiOver256 + yawOffset + Math.PI;   // +180-
                 DrawArrow(dc, center, radians, ArrowLength);
             }
 
@@ -202,8 +202,8 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             double angle = Math.Atan2(dy, dx); // [-p, p]
             angle = NormalizeRadians(angle);
 
-            // Render uses: radians = yaw*(2p/256) + 90�
-            // => yaw = (angle - 90�) * 256 / (2p)
+            // Render uses: radians = yaw*(2p/256) + 90-
+            // => yaw = (angle - 90-) * 256 / (2p)
             double yawOffset = Math.PI / 2.0;
             double twoPi = 2.0 * Math.PI;
             double raw = (angle - yawOffset - Math.PI) * 256.0 / twoPi;
@@ -581,7 +581,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
         // Your existing OnMouseDown handler (dialog / selection) remains;
         // note that we mark e.Handled in PM LBD when starting yaw or move, so
-        // this block won�t run in those cases.
+        // this block won-t run in those cases.
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);

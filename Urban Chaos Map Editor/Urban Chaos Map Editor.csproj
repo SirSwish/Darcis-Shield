@@ -5,6 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>UrbanChaosMapEditor</RootNamespace>
     <AssemblyName>UrbanChaosMapEditor</AssemblyName>
+    <Version>1.7.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

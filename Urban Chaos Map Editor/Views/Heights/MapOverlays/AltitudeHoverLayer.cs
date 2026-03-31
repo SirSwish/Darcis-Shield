@@ -190,7 +190,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             dc.DrawText(titleFt, new Point(x + 4, y - 40));
 
             // Size label
-            string sizeText = $"{width}�{height} ({tileCount} tiles)";
+            string sizeText = $"{width}-{height} ({tileCount} tiles)";
             var sizeFt = new FormattedText(sizeText, CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight, typeface, 12, Brushes.Yellow, ppd);
             dc.DrawText(sizeFt, new Point(x + 4, y - 20));
@@ -279,7 +279,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             }
 
             // Size label
-            string sizeText = $"{width}�{height} ({tileCount})";
+            string sizeText = $"{width}-{height} ({tileCount})";
             var sizeFt = new FormattedText(sizeText, CultureInfo.InvariantCulture,
                 FlowDirection.LeftToRight, typeface, 12, Brushes.Yellow, ppd);
             dc.DrawText(sizeFt, new Point(x + 4, y - 38));

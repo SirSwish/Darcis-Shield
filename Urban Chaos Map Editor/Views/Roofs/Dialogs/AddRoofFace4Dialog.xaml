@@ -121,7 +121,14 @@
 
             <StackPanel Grid.Column="0">
                 <TextBlock Text="Altitude (Y):" Style="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="TxtAltitude" Text="512"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="TxtAltitude" Text="512" Width="80"/>
+                    <TextBlock Text="256 = 1 floor"
+                               Foreground="{StaticResource Subtle}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
 
@@ -148,9 +155,9 @@
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="RX" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="RZ" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="DY0" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="DY1" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="8" Text="DY2" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="DY0 (SW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="DY1 (NW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="8" Text="DY2 (NE)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
 
                 <TextBox Grid.Row="2" Grid.Column="0" x:Name="TxtRX" Text="0"/>
                 <TextBox Grid.Row="2" Grid.Column="2" x:Name="TxtRZ" Text="0"/>
@@ -164,7 +171,7 @@
                       IsChecked="True"
                       Margin="0,8,0,0"/>
 
-            <TextBlock Text="Corner Layout: 0=NW, 1=NE, 2=SE, 3=SW(base)"
+            <TextBlock Text="Corner Layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE"
                        Foreground="{StaticResource Subtle}"
                        FontSize="10"
                        Margin="0,8,0,0"/>

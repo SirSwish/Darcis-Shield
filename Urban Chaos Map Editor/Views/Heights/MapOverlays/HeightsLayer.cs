@@ -558,7 +558,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             {
                 int width = tx1 - tx0 + 1;
                 int height = ty1 - ty0 + 1;
-                shell.StatusMessage = $"Set height {raw} on {width}�{height} vertices";
+                shell.StatusMessage = $"Set height {raw} on {width}-{height} vertices";
             }
         }
 

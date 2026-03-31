@@ -9,6 +9,7 @@ using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
+using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.ViewModels.Core;
 using UrbanChaosMapEditor.Views.Core.Dialogs;
 using UrbanChaosMapEditor.Views.Help;
@@ -143,7 +144,7 @@ namespace UrbanChaosMapEditor.Views.Core
             map.SelectedTextureGroup = thumb.Group;
             map.SelectedTextureNumber = thumb.Number;
 
-            shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) � click a tile to apply";
+            shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) - click a tile to apply";
         }
 
         private void RotateTexture_Click(object sender, RoutedEventArgs e)
@@ -181,7 +182,7 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
             map.SelectedRotationIndex = (map.SelectedRotationIndex + 3) % 4;
-            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180�, 1?90�, 2?0�, 3?270�)";
+            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180-, 1?90-, 2?0-, 3?270-)";
         }
 
         private void RotateRight_Click(object sender, RoutedEventArgs e)
@@ -189,7 +190,7 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             var map = shell.Map;
             map.SelectedRotationIndex = (map.SelectedRotationIndex + 1) % 4;
-            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180�, 1?90�, 2?0�, 3?270�)";
+            shell.StatusMessage = $"Rotation: {map.SelectedRotationIndex}  (0?180-, 1?90-, 2?0-, 3?270-)";
         }
 
         private void PrimsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -359,7 +360,7 @@ namespace UrbanChaosMapEditor.Views.Core
             shell.Map.DragPreviewPrim = null;
 
             shell.StatusMessage =
-                $"Placing {primBtn.Number:D3} � {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
+                $"Placing {primBtn.Number:D3} - {primBtn.Title}. Move mouse to choose location, click to place. Right-click to cancel.";
         }
 
         private void CopyPrim_Click(object? sender, RoutedEventArgs e)
@@ -472,6 +473,7 @@ namespace UrbanChaosMapEditor.Views.Core
                 {
                     if (UndoService.Instance.TryUndo(out int remaining))
                     {
+                        TexturesChangeBus.Instance.NotifyChanged();
                         if (DataContext is MainWindowViewModel undoShell)
                             undoShell.StatusMessage = remaining > 0
                                 ? $"Undo applied. {remaining} step(s) remaining."
@@ -793,7 +795,7 @@ namespace UrbanChaosMapEditor.Views.Core
 
             MessageBox.Show(
                 "Urban Chaos Map Editor\n\n" +
-                $"Version: 1.5 ({version})\n" +
+                $"Version: ({version})\n" +
                 "Urban Chaos Map Editor is a part of the Darcis Shield Editor Project",
                 "About",
                 MessageBoxButton.OK,

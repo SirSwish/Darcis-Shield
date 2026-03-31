@@ -159,7 +159,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 {
                     UndoService.Instance.Clear(); // fresh file = no prior history to undo
                     RecentFilesService.Instance.Add(e.Path);
-                    StatusMessage = $"Loaded Map � {e.Path}";
+                    StatusMessage = $"Loaded Map - {e.Path}";
                     CurrentMapPath = e.Path;
 
                     // Seed world number, refresh
@@ -224,7 +224,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             MapDataService.Instance.MapSaved += (_, e) =>
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    StatusMessage = $"Saved Map � {e.Path}";
+                    StatusMessage = $"Saved Map - {e.Path}";
                     // path may change after Save As
                     CurrentMapPath = e.Path;
                     CommandManager.InvalidateRequerySuggested();
@@ -446,7 +446,7 @@ _ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.Sel
             try
             {
                 IsBusy = true;
-                StatusMessage = "Saving all�";
+                StatusMessage = "Saving all-";
 
                 // Map
                 if (MapDataService.Instance.IsLoaded && MapDataService.Instance.HasChanges)
@@ -489,7 +489,7 @@ _ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.Sel
             try
             {
                 IsBusy = true;
-                StatusMessage = "Save All As�";
+                StatusMessage = "Save All As-";
 
                 // Map (if loaded)
                 if (MapDataService.Instance.IsLoaded)
@@ -753,7 +753,7 @@ _ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.Sel
             try
             {
                 IsBusy = true;
-                StatusMessage = "Generating terrain�";
+                StatusMessage = "Generating terrain-";
 
                 // Generate in background
                 var seed = Environment.TickCount;

@@ -168,7 +168,7 @@
                              Style="{StaticResource EditableField}"
                              Text="4"
                              PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Measured in 1/4 Storeys"
+                    <TextBlock Text="¼-storey (4 = 1 floor)"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
@@ -180,7 +180,7 @@
                              Style="{StaticResource EditableField}"
                              Text="16"
                              PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Measured in lots of 4px"
+                    <TextBlock Text="4px each (16 = 1 floor)"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
@@ -193,7 +193,7 @@
                              Width="60"
                              Text="0"
                              PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="256 / Storey"
+                    <TextBlock Text="256 = 1 floor"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>

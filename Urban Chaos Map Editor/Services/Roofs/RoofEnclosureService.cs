@@ -107,8 +107,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
                         continue;
                     }
 
-                    int worldAltitude = height << AltitudeAccessor.PAP_ALT_SHIFT;
-                    Debug.WriteLine($"[RoofEnclosureService] Found {interiorTiles.Count} interior tiles, applying roof at Height={height} (world={worldAltitude})");
+                    int worldAltitude = (height << AltitudeAccessor.PAP_ALT_SHIFT) + (y0 >> AltitudeAccessor.PAP_ALT_SHIFT);
+                    Debug.WriteLine($"[RoofEnclosureService] Found {interiorTiles.Count} interior tiles, applying roof at Height={height} Y0={y0} (world={worldAltitude})");
 
                     int appliedCount = 0;
 

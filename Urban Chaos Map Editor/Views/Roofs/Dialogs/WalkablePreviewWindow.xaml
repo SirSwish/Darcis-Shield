@@ -106,12 +106,18 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Y:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtEditY" 
-                                         Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="TxtEditY" Width="60"
+                                             Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
+                                    <TextBlock Text="(8 = 1 floor)" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </StackPanel>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="StoreyY:" VerticalAlignment="Center" Margin="0,2"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtEditStoreyY" 
-                                         Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="TxtEditStoreyY" Width="60"
+                                             Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
+                                    <TextBlock Text="(4 = 1 floor)" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </StackPanel>
                             </Grid>
 
                             <Button x:Name="BtnApply" Content="Apply Changes" 

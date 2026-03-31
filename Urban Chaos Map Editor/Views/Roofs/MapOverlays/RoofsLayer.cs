@@ -191,26 +191,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             double uiX = tile.UiX;
             double uiZ = tile.UiZ;
 
-            // Tile background — yellow highlight if selected
+            // Tile background ï¿½ yellow highlight if selected
             bool isSelected = tile.Rf4Idx == SelectedRf4Id;
             dc.DrawRectangle(
                 isSelected ? SelectedTileFillBrush : TileFillBrush,
                 isSelected ? SelectedTileBorderPen : TileBorderPen,
                 new Rect(uiX, uiZ, 64, 64));
 
-            var yRect = new Rect(uiX + 12, uiZ + 24, 40, 16);
-            var dy0Rect = new Rect(uiX + 2, uiZ + 2, 24, 14);
-            var dy1Rect = new Rect(uiX + 38, uiZ + 2, 24, 14);
-            var dy2Rect = new Rect(uiX + 38, uiZ + 48, 24, 14);
-            var swRect = new Rect(uiX + 2, uiZ + 48, 24, 14);
+            // Corner layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE
+            var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left
+            var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right
+            var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left
+            var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right
 
-            DrawInputField(dc, yRect, $"{tile.Y}", tile.Rf4Idx, EditField.Y, dpi, Brushes.White);
-            DrawInputField(dc, dy0Rect, $"{tile.DY0}", tile.Rf4Idx, EditField.DY0, dpi, GetDyColor(tile.DY0));
             DrawInputField(dc, dy1Rect, $"{tile.DY1}", tile.Rf4Idx, EditField.DY1, dpi, GetDyColor(tile.DY1));
             DrawInputField(dc, dy2Rect, $"{tile.DY2}", tile.Rf4Idx, EditField.DY2, dpi, GetDyColor(tile.DY2));
-
-            DrawReadOnlyValue(dc, swRect, "0", dpi);
-            DrawLabel(dc, "Y:", uiX + 4, uiZ + 26, 8, dpi);
+            DrawInputField(dc, dy0Rect, $"{tile.DY0}", tile.Rf4Idx, EditField.DY0, dpi, GetDyColor(tile.DY0));
+            DrawInputField(dc, yRect,   $"{tile.Y}",   tile.Rf4Idx, EditField.Y,   dpi, Brushes.White);
         }
 
         private void DrawInputField(DrawingContext dc, Rect rect, string value, int rf4Idx, EditField field, double dpi, Brush textBrush)
@@ -292,15 +289,16 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 if (pos.X < uiX || pos.X > uiX + 64 || pos.Y < uiZ || pos.Y > uiZ + 64)
                     continue;
 
-                var yRect = new Rect(uiX + 12, uiZ + 24, 40, 16);
-                var dy0Rect = new Rect(uiX + 2, uiZ + 2, 24, 14);
-                var dy1Rect = new Rect(uiX + 38, uiZ + 2, 24, 14);
-                var dy2Rect = new Rect(uiX + 38, uiZ + 48, 24, 14);
+                // Corner layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE
+                var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left
+                var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right
+                var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left
+                var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right
 
-                if (yRect.Contains(pos)) return (tile.Rf4Idx, EditField.Y, tile.Y, yRect);
-                if (dy0Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY0, tile.DY0, dy0Rect);
                 if (dy1Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY1, tile.DY1, dy1Rect);
                 if (dy2Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY2, tile.DY2, dy2Rect);
+                if (dy0Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY0, tile.DY0, dy0Rect);
+                if (yRect.Contains(pos))   return (tile.Rf4Idx, EditField.Y,   tile.Y,   yRect);
             }
             return null;
         }

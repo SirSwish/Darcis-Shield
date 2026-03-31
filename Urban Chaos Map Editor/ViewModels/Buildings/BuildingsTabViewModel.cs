@@ -65,7 +65,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
-        // Auto-build options � relay to MapViewModel
+        // Auto-build options - relay to MapViewModel
         private static MapViewModel? GetMapVm()
         {
             var shell = System.Windows.Application.Current.MainWindow?.DataContext as MainWindowViewModel;
@@ -302,7 +302,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
-        /// <summary>Optional free text filter (not wired up right now � kept for future search).</summary>
+        /// <summary>Optional free text filter (not wired up right now - kept for future search).</summary>
         private string _filterText = string.Empty;
         public string FilterText
         {
@@ -323,7 +323,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         public int PaintMemCount { get; private set; }
         public string PaintMemPreview { get; private set; } = string.Empty;
 
-        public int DStoreysNext { get; private set; }          // raw �next�
+        public int DStoreysNext { get; private set; }          // raw -next-
         public int DStoreysTotal => Math.Max(0, DStoreysNext - 1);
 
         private short[] _lastDstyles = Array.Empty<short>();
@@ -782,7 +782,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 else
                 {
                     // Forced selection (e.g., newly added building):
-                    // Don�t restore previous facet/storey. Keep facet null; storey set if exists.
+                    // Don-t restore previous facet/storey. Keep facet null; storey set if exists.
                     if (restoredBuilding.Storeys.Count > 0)
                     {
                         SelectedStoreyId = restoredBuilding.Storeys

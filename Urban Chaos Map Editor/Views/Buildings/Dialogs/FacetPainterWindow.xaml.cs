@@ -101,7 +101,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             int totalPixelsY = _facet.Height * 16 + _facet.FHeight;
             _panelsDown = Math.Max(1, (totalPixelsY + (PanelPx - 1)) / PanelPx);
 
-            FacetDimensionsText.Text = $"{_panelsAcross} columns � {_panelsDown} bands";
+            FacetDimensionsText.Text = $"{_panelsAcross} columns - {_panelsDown} bands";
 
             // Initialize paint data from existing facet
             InitializePaintDataFromFacet();
@@ -247,7 +247,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 }
             }
 
-            Debug.WriteLine($"[FacetPainter] Initialized {_panelsDown} bands � {_panelsAcross} columns");
+            Debug.WriteLine($"[FacetPainter] Initialized {_panelsDown} bands - {_panelsAcross} columns");
             for (int band = 0; band < _panelsDown; band++)
             {
                 Debug.WriteLine($"  Band {band}: BaseStyle={_baseStyles[band]}, PaintBytes=[{string.Join(",", _paintData[band].Select(b => b.ToString("X2")))}]");

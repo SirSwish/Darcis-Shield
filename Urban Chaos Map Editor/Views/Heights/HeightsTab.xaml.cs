@@ -85,7 +85,7 @@ namespace UrbanChaosMapEditor.Views.Heights
             ushort flags = GetSelectedPapFlags();
             if (flags == 0)
             {
-                TxtPapFlagsStatus.Text = "No flags selected � tick at least one flag above.";
+                TxtPapFlagsStatus.Text = "No flags selected - tick at least one flag above.";
                 return;
             }
 

@@ -53,14 +53,15 @@
 
             <TextBlock Grid.Column="0" Text="Altitude (Y):" Foreground="White" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox x:Name="txtAltitude" Grid.Column="1" Text="768" Background="#333" Foreground="White" BorderBrush="#555"/>
+            <TextBlock Grid.Column="8" Text="256 = 1 floor" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"/>
 
-            <TextBlock Grid.Column="2" Text="DY0 (NW):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBlock Grid.Column="2" Text="DY0 (SW):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox x:Name="txtDY0" Grid.Column="3" Text="0" Background="#333" Foreground="White" BorderBrush="#555"/>
 
-            <TextBlock Grid.Column="4" Text="DY1 (NE):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBlock Grid.Column="4" Text="DY1 (NW):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox x:Name="txtDY1" Grid.Column="5" Text="0" Background="#333" Foreground="White" BorderBrush="#555"/>
 
-            <TextBlock Grid.Column="6" Text="DY2 (SE):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBlock Grid.Column="6" Text="DY2 (NE):" Foreground="White" VerticalAlignment="Center" Margin="15,0,5,0"/>
             <TextBox x:Name="txtDY2" Grid.Column="7" Text="0" Background="#333" Foreground="White" BorderBrush="#555"/>
         </Grid>
 

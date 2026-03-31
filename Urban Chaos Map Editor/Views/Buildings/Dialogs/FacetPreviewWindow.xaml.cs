@@ -177,6 +177,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _txtHeight.PreviewTextInput += NumericOnly_PreviewTextInput;
             _txtHeight.LostFocus += Height_LostFocus;
             hRow1.Children.Add(_txtHeight);
+            hRow1.Children.Add(new TextBlock { Text = "¼-storey (4 = 1 floor)", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             var hRow2 = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
             hRow2.Children.Add(MakeLabel("Y0", toolTip: "Altitude offset to the base of the facet"));
@@ -184,6 +185,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _txtY0.PreviewTextInput += SignedNumericOnly_PreviewTextInput;
             _txtY0.LostFocus += Height_LostFocus;
             hRow2.Children.Add(_txtY0);
+            hRow2.Children.Add(new TextBlock { Text = "256 = 1 floor", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             var hRow3 = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
             hRow3.Children.Add(MakeLabel("Block Height", toolTip: "Height of each facet storey (Measured in lots of 4px)"));
@@ -191,6 +193,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _txtBlockHeight.PreviewTextInput += NumericOnly_PreviewTextInput;
             _txtBlockHeight.LostFocus += Height_LostFocus;
             hRow3.Children.Add(_txtBlockHeight);
+            hRow3.Children.Add(new TextBlock { Text = "4px each (16 = 1 floor)", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             HeightPanel.Children.Add(hRow1);
             HeightPanel.Children.Add(hRow2);

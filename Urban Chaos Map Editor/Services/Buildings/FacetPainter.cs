@@ -74,7 +74,7 @@ namespace UrbanChaosMapEditor.Services.Buildings
 
             Debug.WriteLine($"[FacetPainter] ===== ApplyPaint START =====");
             Debug.WriteLine($"[FacetPainter] Facet #{facetIndex1}: StyleIndex={facet.StyleIndex}, Flags=0x{(ushort)facet.Flags:X4}");
-            Debug.WriteLine($"[FacetPainter] Grid: {columnsCount} columns � {bandsCount} bands");
+            Debug.WriteLine($"[FacetPainter] Grid: {columnsCount} columns - {bandsCount} bands");
 
             var bytes = _svc.GetBytesCopy();
             int blockStart = snap.StartOffset;

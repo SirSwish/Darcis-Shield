@@ -269,6 +269,11 @@ namespace UrbanChaosMapEditor.Services.Core
         public bool TryWriteU16_LE(int offset, ushort value)
         {
             // Write into the live backing buffer (MapBytes), mark dirty, and notify listeners.
+            if (!IsLoaded) return false;
+
+            // Snapshot before mutating so Ctrl+Z can restore the prior state.
+            UndoService.Instance.RecordSnapshot(GetBytesCopy());
+
             int length;
             lock (_sync)
             {
@@ -305,7 +310,7 @@ namespace UrbanChaosMapEditor.Services.Core
             int objectBytesFromHeader = BitConverter.ToInt32(bytes, 4);
             int sizeAdjustment = saveType >= 25 ? 2000 : 0;
 
-            // Where the object section begins (offset of NumObjects int32) � your V1 formula
+            // Where the object section begins (offset of NumObjects int32) - your V1 formula
             int objectOffset = bytes.Length - 12 - sizeAdjustment - objectBytesFromHeader + 8;
 
             // -------- Strict finder (preferred) --------

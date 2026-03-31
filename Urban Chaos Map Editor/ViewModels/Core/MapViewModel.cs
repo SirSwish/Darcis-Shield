@@ -92,6 +92,9 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public ICommand SampleAltitudeCommand { get; }
         public ICommand ResetAltitudeCommand { get; }
         public ICommand DetectRoofCommand { get; }
+        public ICommand ZoomInCommand { get; }
+        public ICommand ZoomOutCommand { get; }
+        public ICommand ResetZoomCommand { get; }
 
         private IFacetMultiDrawWindow? _facetMultiDrawWindow;
 
@@ -973,7 +976,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             get => _selectedStoreyId;
             set { if (_selectedStoreyId != value) { _selectedStoreyId = value; OnPropertyChanged(); } }
         }
-        private int? _selectedFacetId;  // null = don�t facet-highlight
+        private int? _selectedFacetId;  // null = don-t facet-highlight
         public int? SelectedFacetId
         {
             get => _selectedFacetId;
@@ -996,17 +999,17 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         public ObservableCollection<PrimButton> PrimButtons { get; } = new();
 
-        // NEW: constructor � put the two lines here
+        // NEW: constructor - put the two lines here
         public MapViewModel()
         {
-            System.Diagnostics.Debug.WriteLine("[MapVM] ctor: starting up�");
+            System.Diagnostics.Debug.WriteLine("[MapVM] ctor: starting up-");
 
             var mapSvc = MapDataService.Instance;
             IsMapLoaded = mapSvc.IsLoaded;
 
             mapSvc.MapLoaded += (_, __) => IsMapLoaded = true;
             mapSvc.MapCleared += (_, __) => IsMapLoaded = false;
-            // if bytes reset implies �still loaded�, reflect it:
+            // if bytes reset implies -still loaded-, reflect it:
             mapSvc.MapBytesReset += (_, __) => IsMapLoaded = mapSvc.IsLoaded;
 
             RaiseHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.RaiseHeight, _ => IsMapLoaded);
@@ -1058,6 +1061,10 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             SampleAltitudeCommand = new RelayCommand(_ => SelectedTool = EditorTool.SampleAltitude, _ => IsMapLoaded);
             ResetAltitudeCommand = new RelayCommand(_ => SelectedTool = EditorTool.ResetAltitude, _ => IsMapLoaded);
             DetectRoofCommand = new RelayCommand(_ => SelectedTool = EditorTool.DetectRoof, _ => IsMapLoaded);
+
+            ZoomInCommand  = new RelayCommand(_ => Zoom = Math.Min(8.00, Zoom * 1.10), _ => IsMapLoaded);
+            ZoomOutCommand = new RelayCommand(_ => Zoom = Math.Max(0.10, Zoom / 1.10), _ => IsMapLoaded);
+            ResetZoomCommand = new RelayCommand(_ => Zoom = 1.0, _ => IsMapLoaded);
 
             PropertyChanged += (_, e) =>
             {
@@ -1805,7 +1812,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 }
                 catch (System.IO.IOException)
                 {
-                    // Resource not found � not an error for missing worlds
+                    // Resource not found - not an error for missing worlds
                 }
 
                 if (sri?.Stream != null)

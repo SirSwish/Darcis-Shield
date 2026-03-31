@@ -1,8 +1,8 @@
-<Window x:Class="UrbanChaosMapEditor.Views.Buildings.Dialogs.AddDoorWindow"
+<Window x:Class="UrbanChaosMapEditor.Views.Roofs.Dialogs.AddWalkableWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add Door" 
-        Width="400"
+        Title="Add Walkable Region"
+        Width="420"
         SizeToContent="Height"
         Background="#202225"
         WindowStartupLocation="CenterOwner"
@@ -39,11 +39,11 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="DrawButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
-            <Setter Property="Background" Value="#5865F2"/>
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#2D5A27"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#6875F3"/>
+                    <Setter Property="Background" Value="#3D7A37"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -62,50 +62,71 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Add Door to Building" 
-                       FontWeight="Bold" 
+            <TextBlock Text="Add Walkable Region"
+                       FontWeight="Bold"
                        FontSize="16"/>
-            <TextBlock x:Name="TxtBuildingInfo"
-                       Text="Building #0"
+            <TextBlock x:Name="TxtBuilding"
                        Foreground="{StaticResource Subtle}"
                        FontSize="12"
                        Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Y Height -->
+        <!-- Bounds info -->
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Base Y Height (world units, 256 = 1 floor):" Style="{StaticResource FieldLabel}"/>
-            <TextBox x:Name="TxtY0" Text="0" Width="100" HorizontalAlignment="Left"/>
-            <TextBlock Text="Set to match the floor level where the door sits"
-                       Foreground="{StaticResource Subtle}"
-                       FontSize="10"
-                       Margin="0,4,0,0"/>
+            <TextBlock Text="Tile Bounds:" Style="{StaticResource FieldLabel}"/>
+            <TextBlock x:Name="TxtBounds" Foreground="{StaticResource Subtle}" Margin="0,0,0,8"/>
+            <TextBlock Text="Size:" Style="{StaticResource FieldLabel}"/>
+            <TextBlock x:Name="TxtSize" Foreground="{StaticResource Subtle}"/>
         </StackPanel>
 
-        <!-- Draw on Map -->
+        <!-- Height -->
         <StackPanel Grid.Row="4">
-            <TextBlock Text="Position:" Style="{StaticResource FieldLabel}"/>
-            <Button x:Name="BtnDrawOnMap"
-                    Content="Draw on Map"
-                    Style="{StaticResource DrawButton}"
-                    Click="BtnDrawOnMap_Click"
-                    HorizontalAlignment="Left"
-                    ToolTip="Click to draw the door segment on the map"/>
+            <TextBlock Text="World Y:" Style="{StaticResource FieldLabel}"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBox x:Name="TxtWorldY"
+                         Width="80"
+                         PreviewTextInput="SignedNumericOnly_PreviewTextInput"
+                         TextChanged="TxtWorldY_TextChanged"/>
+                <TextBlock Text="256 = 1 floor"
+                           Foreground="{StaticResource Subtle}"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="8,0,0,0"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtInfo"
+                       Foreground="{StaticResource Subtle}"
+                       FontSize="11"
+                       FontStyle="Italic"
+                       TextWrapping="Wrap"/>
         </StackPanel>
+
+        <!-- Help text -->
+        <TextBlock Grid.Row="6"
+                   TextWrapping="Wrap"
+                   Foreground="{StaticResource Subtle}"
+                   FontSize="10"
+                   Text="The walkable region defines the roof surface characters can walk on. Set the height to match the top of the building's walls."/>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="6" 
-                    Orientation="Horizontal" 
+        <StackPanel Grid.Row="8"
+                    Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button Content="Cancel" 
+            <Button Content="Cancel"
                     Style="{StaticResource ActionButton}"
-                    Click="BtnCancel_Click"/>
+                    Click="BtnCancel_Click"
+                    Margin="0,0,8,0"/>
+            <Button Content="Add Walkable"
+                    Style="{StaticResource PrimaryButton}"
+                    Click="BtnOk_Click"
+                    IsDefault="True"/>
         </StackPanel>
     </Grid>
 </Window>
