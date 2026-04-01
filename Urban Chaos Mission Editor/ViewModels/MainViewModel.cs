@@ -196,6 +196,9 @@ public class MainViewModel : BaseViewModel
         ReadOnlyLightsDataService.Instance.LightsLoaded += (s, e) => OnPropertyChanged(nameof(IsLightsLoaded));
         ReadOnlyLightsDataService.Instance.LightsCleared += (s, e) => OnPropertyChanged(nameof(IsLightsLoaded));
 
+        // Start external file watcher so map/lights reload automatically when changed on disk
+        ExternalFileWatcherService.Instance.Start();
+
         // Initialize commands
         NewFileCommand = new RelayCommand(ExecuteNewFile);
         OpenFileCommand = new RelayCommand(ExecuteOpenFile);
@@ -1474,6 +1477,7 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged(nameof(LoadedMapFileName));
             OnPropertyChanged(nameof(IsMapLoaded));
             StatusMessage = $"Loaded map: {Path.GetFileName(path)}";
+            ExternalFileWatcherService.Instance.ResetTimestamps();
         }
         catch (Exception ex)
         {
@@ -1491,6 +1495,7 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged(nameof(LoadedLightsFileName));
             OnPropertyChanged(nameof(IsLightsLoaded));
             StatusMessage = $"Loaded lights: {Path.GetFileName(path)}";
+            ExternalFileWatcherService.Instance.ResetTimestamps();
         }
         catch (Exception ex)
         {

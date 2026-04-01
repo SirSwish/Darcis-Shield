@@ -122,11 +122,11 @@ public class EventPointsLayer : FrameworkElement
         // 0 = North (up), increases clockwise
         double angleRadians = (ep.Direction / 255.0) * 2 * Math.PI;
 
-        // Calculate arrow endpoint (start from edge of circle)
-        // Note: In screen coordinates, Y increases downward, so we negate the Y component
-        double startX = center.X + Math.Sin(angleRadians) * PointRadius;
+        // Game tile axes are both inverted relative to screen (tile 0,0 = screen bottom-right),
+        // so game East (+X) points screen-left. Negate the sin (X) component throughout.
+        double startX = center.X - Math.Sin(angleRadians) * PointRadius;
         double startY = center.Y - Math.Cos(angleRadians) * PointRadius;
-        double endX = center.X + Math.Sin(angleRadians) * (PointRadius + ArrowLength);
+        double endX = center.X - Math.Sin(angleRadians) * (PointRadius + ArrowLength);
         double endY = center.Y - Math.Cos(angleRadians) * (PointRadius + ArrowLength);
 
         var pen = isSelected ? SelectedArrowPen : ArrowPen;
@@ -139,10 +139,10 @@ public class EventPointsLayer : FrameworkElement
         double headAngle2 = angleRadians + Math.PI * 0.75;
 
         var head1 = new Point(
-            endX + Math.Sin(headAngle1) * ArrowHeadSize,
+            endX - Math.Sin(headAngle1) * ArrowHeadSize,
             endY - Math.Cos(headAngle1) * ArrowHeadSize);
         var head2 = new Point(
-            endX + Math.Sin(headAngle2) * ArrowHeadSize,
+            endX - Math.Sin(headAngle2) * ArrowHeadSize,
             endY - Math.Cos(headAngle2) * ArrowHeadSize);
 
         dc.DrawLine(pen, new Point(endX, endY), head1);
@@ -186,7 +186,7 @@ public class EventPointsLayer : FrameworkElement
     {
         double angleRadians = (ep.Direction / 255.0) * 2 * Math.PI;
         return new Point(
-            ep.PixelX + Math.Sin(angleRadians) * (PointRadius + ArrowLength),
+            ep.PixelX - Math.Sin(angleRadians) * (PointRadius + ArrowLength),
             ep.PixelZ - Math.Cos(angleRadians) * (PointRadius + ArrowLength));
     }
 
@@ -195,18 +195,13 @@ public class EventPointsLayer : FrameworkElement
     /// </summary>
     public static byte CalculateDirectionFromPoints(Point center, Point target)
     {
-        double dx = target.X - center.X;
-        double dy = center.Y - target.Y; // Invert Y since screen Y is down
+        // Negate dx: game tile X is inverted relative to screen X, so screen-right = game West.
+        double dx = -(target.X - center.X);
+        double dy = center.Y - target.Y; // Invert Y: screen Y increases downward
 
-        // Calculate angle in radians (0 = up, clockwise positive)
         double angleRadians = Math.Atan2(dx, dy);
         if (angleRadians < 0) angleRadians += 2 * Math.PI;
 
-        // Subtract PI to account for the arrow inversion in rendering
-        angleRadians -= Math.PI;
-        if (angleRadians < 0) angleRadians += 2 * Math.PI;
-
-        // Convert to 0-255 range
         return (byte)((angleRadians / (2 * Math.PI)) * 255);
     }
 

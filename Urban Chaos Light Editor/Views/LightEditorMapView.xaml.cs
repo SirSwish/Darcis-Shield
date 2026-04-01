@@ -28,15 +28,30 @@ namespace UrbanChaosLightEditor.Views
             // Ctrl+Wheel for zoom
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
-                if (e.Delta > 0)
+                double oldZoom = vm.Zoom;
+                double newZoom = e.Delta > 0
+                    ? System.Math.Clamp(oldZoom * 1.15, 0.1, 4.0)
+                    : System.Math.Clamp(oldZoom / 1.15, 0.1, 4.0);
+
+                if (newZoom != oldZoom)
                 {
-                    // Scroll up = zoom in
-                    vm.Zoom = System.Math.Clamp(vm.Zoom * 1.15, 0.1, 4.0);
-                }
-                else if (e.Delta < 0)
-                {
-                    // Scroll down = zoom out
-                    vm.Zoom = System.Math.Clamp(vm.Zoom / 1.15, 0.1, 4.0);
+                    // Cursor position in viewport space
+                    var mouseInViewport = e.GetPosition(Scroller);
+
+                    // Unscaled surface point under the cursor
+                    double surfaceX = (Scroller.HorizontalOffset + mouseInViewport.X) / oldZoom;
+                    double surfaceY = (Scroller.VerticalOffset + mouseInViewport.Y) / oldZoom;
+
+                    vm.Zoom = newZoom;
+
+                    // After layout recalculates (LayoutTransform), reposition scroll so the
+                    // same surface point stays under the cursor
+                    Scroller.Dispatcher.BeginInvoke(
+                        System.Windows.Threading.DispatcherPriority.Render, () =>
+                        {
+                            Scroller.ScrollToHorizontalOffset(surfaceX * newZoom - mouseInViewport.X);
+                            Scroller.ScrollToVerticalOffset(surfaceY * newZoom - mouseInViewport.Y);
+                        });
                 }
 
                 e.Handled = true;

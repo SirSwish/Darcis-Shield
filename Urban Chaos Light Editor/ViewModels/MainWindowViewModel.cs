@@ -53,6 +53,9 @@ namespace UrbanChaosLightEditor.ViewModels
             ZoomOutCommand = new RelayCommand(_ => Zoom = Math.Max(0.1, Zoom / 1.25));
             ResetZoomCommand = new RelayCommand(_ => Zoom = 1.0);
 
+            // Start external file watcher so map reloads automatically when changed on disk
+            ExternalFileWatcherService.Instance.Start();
+
             // Subscribe to service events
             _lightsSvc.LightsBytesReset += (_, __) =>
             {
@@ -423,6 +426,7 @@ namespace UrbanChaosLightEditor.ViewModels
 
                 LoadedMapFileName = Path.GetFileName(ofd.FileName);
                 IsMapViewLoaded = true;
+                ExternalFileWatcherService.Instance.ResetTimestamps();
 
                 StatusMessage = $"Loaded map: {LoadedMapFileName}";
                 Debug.WriteLine($"[OpenMapAsync] Map loaded successfully: {LoadedMapFileName}");

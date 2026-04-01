@@ -239,6 +239,12 @@ public class EventPointEditorViewModel : BaseViewModel
         set { _model.EPRef = value; OnPropertyChanged(); }
     }
 
+    public ushort EPRefBool
+    {
+        get => _model.EPRefBool;
+        set { _model.EPRefBool = value; OnPropertyChanged(); }
+    }
+
     public int Radius
     {
         get => _model.Radius;
