@@ -25,6 +25,21 @@ namespace UrbanChaosLightEditor.Views
             if (e.Key == Key.Delete) { DeleteLight_Click(sender, new RoutedEventArgs()); e.Handled = true; }
         }
 
+        private void LightsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var light = ViewModel?.SelectedLight;
+            if (light == null) return;
+
+            var win = Window.GetWindow(this);
+            if (win == null) return;
+
+            var mapView = LogicalTreeHelper.FindLogicalNode(win, "MapView") as LightEditorMapView;
+            if (mapView == null) return;
+
+            if (!mapView.IsPixelInView(light.X, light.Z))
+                mapView.CenterOnPixel(light.X, light.Z);
+        }
+
         private void LightsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel?.HasSelectedLight == true)
@@ -70,6 +85,10 @@ namespace UrbanChaosLightEditor.Views
             var light = vm.SelectedLight;
             if (light == null) return;
 
+            // Use light.Index (the real accessor index, 1-255) not SelectedLightIndex
+            // (which is the 0-based position in the Lights collection, excluding the sentinel).
+            int accIndex = light.Index;
+
             var dlg = new AddEditLightDialog(
                 initialHeight: light.Y,
                 initialRange: light.Range,
@@ -78,7 +97,7 @@ namespace UrbanChaosLightEditor.Views
                 initialBlue: light.Blue)
             {
                 Owner = Window.GetWindow(this),
-                Title = "Edit Light"
+                Title = $"Edit Light #{accIndex}"
             };
 
             if (dlg.ShowDialog() == true)
@@ -86,7 +105,7 @@ namespace UrbanChaosLightEditor.Views
                 try
                 {
                     var acc = new Services.LightsAccessor(Services.LightsDataService.Instance);
-                    var entry = acc.ReadEntry(vm.SelectedLightIndex);
+                    var entry = acc.ReadEntry(accIndex);
 
                     entry.Range = (byte)dlg.ResultRange;
                     entry.Red = (sbyte)dlg.ResultRed;
@@ -94,8 +113,8 @@ namespace UrbanChaosLightEditor.Views
                     entry.Blue = (sbyte)dlg.ResultBlue;
                     entry.Y = dlg.ResultHeight;
 
-                    acc.WriteEntry(vm.SelectedLightIndex, entry);
-                    vm.StatusMessage = $"Updated light #{vm.SelectedLightIndex}.";
+                    acc.WriteEntry(accIndex, entry);
+                    vm.StatusMessage = $"Updated light #{accIndex}.";
                 }
                 catch (Exception ex)
                 {

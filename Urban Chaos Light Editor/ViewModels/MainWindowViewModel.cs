@@ -324,6 +324,29 @@ namespace UrbanChaosLightEditor.ViewModels
                 Debug.WriteLine($"[OpenLightsAsync] RefreshLightsList complete. Light count: {LightCount}");
 
                 StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights.";
+
+                // Auto-load the companion .iam map if no map is currently loaded.
+                // Convention: the .iam lives one folder up from the .lgt file and shares the same stem.
+                if (!IsMapViewLoaded)
+                {
+                    var lgtDir = Path.GetDirectoryName(ofd.FileName);
+                    var parentDir = lgtDir != null ? Directory.GetParent(lgtDir)?.FullName : null;
+                    if (parentDir != null)
+                    {
+                        var stem = Path.GetFileNameWithoutExtension(ofd.FileName);
+                        var iamPath = Path.Combine(parentDir, stem + ".iam");
+                        if (File.Exists(iamPath))
+                        {
+                            Debug.WriteLine($"[OpenLightsAsync] Auto-loading companion map: {iamPath}");
+                            await ReadOnlyMapDataService.Instance.LoadAsync(iamPath);
+                            LoadedMapFileName = Path.GetFileName(iamPath);
+                            IsMapViewLoaded = true;
+                            ExternalFileWatcherService.Instance.ResetTimestamps();
+                            StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights  |  Map: {LoadedMapFileName}";
+                            Debug.WriteLine("[OpenLightsAsync] Companion map loaded.");
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

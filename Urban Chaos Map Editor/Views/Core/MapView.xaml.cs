@@ -104,11 +104,21 @@ namespace UrbanChaosMapEditor.Views.Core
                 var f = snap.Facets[i];
                 int facetId1 = i + 1;
 
-                if (f.Building <= 0)
-                    continue;
+                int buildingId1;
+                if (f.IsCable)
+                {
+                    // For cables the Building field stores step_angle2, not the owning building ID.
+                    // Scan building ranges to find the true owner.
+                    buildingId1 = FindOwningBuilding(snap.Buildings, facetId1);
+                    if (buildingId1 <= 0) continue;
+                }
+                else
+                {
+                    if (f.Building <= 0) continue;
+                    buildingId1 = f.Building;
+                }
 
                 // Convert facet tile coords to UI pixel coords.
-                // This matches your existing facet redraw conversion.
                 double x0 = (128 - f.X0) * 64.0;
                 double z0 = (128 - f.Z0) * 64.0;
                 double x1 = (128 - f.X1) * 64.0;
@@ -120,7 +130,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     hits.Add(new FacetHitCandidate
                     {
                         FacetId1 = facetId1,
-                        BuildingId1 = f.Building,
+                        BuildingId1 = buildingId1,
                         StoreyId = f.Storey,
                         Type = f.Type,
                         X0 = f.X0,
@@ -132,11 +142,33 @@ namespace UrbanChaosMapEditor.Views.Core
                 }
             }
 
-            return hits
+            var sorted = hits
                 .OrderBy(h => h.DistancePx)
                 .ThenBy(h => h.BuildingId1)
                 .ThenBy(h => h.FacetId1)
                 .ToList();
+
+            // If the closest hit is a cable, return only that cable.
+            // Cables should not compete with overlapping walls/doors in the disambiguation dialog.
+            if (sorted.Count > 0 && sorted[0].Type == FacetType.Cable)
+                return new List<FacetHitCandidate> { sorted[0] };
+
+            return sorted;
+        }
+
+        /// <summary>
+        /// Returns the 1-based building ID whose facet range contains <paramref name="facetId1"/>,
+        /// or 0 if no match.  Used for cables whose Building field stores step_angle2, not an owner ID.
+        /// </summary>
+        private static int FindOwningBuilding(DBuildingRec[] buildings, int facetId1)
+        {
+            for (int b = 0; b < buildings.Length; b++)
+            {
+                var bld = buildings[b];
+                if (bld.StartFacet > 0 && facetId1 >= bld.StartFacet && facetId1 < bld.EndFacet)
+                    return b + 1; // buildings array is 0-based; building IDs are 1-based
+            }
+            return 0;
         }
 
         private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -1704,6 +1736,23 @@ namespace UrbanChaosMapEditor.Views.Core
 
             Scroller.ScrollToHorizontalOffset(targetX);
             Scroller.ScrollToVerticalOffset(targetY);
+        }
+
+        /// <summary>
+        /// Returns true if the given surface pixel coordinate is currently visible in the viewport.
+        /// </summary>
+        public bool IsPixelInView(int px, int pz)
+        {
+            if (Scroller == null || DataContext is not MapViewModel vm) return false;
+
+            double z = vm.Zoom;
+            double screenX = px * z;
+            double screenZ = pz * z;
+
+            return screenX >= Scroller.HorizontalOffset
+                && screenX <= Scroller.HorizontalOffset + Scroller.ViewportWidth
+                && screenZ >= Scroller.VerticalOffset
+                && screenZ <= Scroller.VerticalOffset + Scroller.ViewportHeight;
         }
 
         private static void SnapUiToVertexIfCtrl(ref int uiX, ref int uiZ)

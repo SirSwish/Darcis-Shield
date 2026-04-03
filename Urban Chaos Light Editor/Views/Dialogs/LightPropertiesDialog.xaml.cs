@@ -47,10 +47,10 @@ namespace UrbanChaosLightEditor.Views.Dialogs
                 SliderSpecGreen.Value = _props.SpecularGreen;
                 SliderSpecBlue.Value = _props.SpecularBlue;
 
-                // Ambient RGB
-                SliderAmbRed.Value = _props.NightAmbRed;
-                SliderAmbGreen.Value = _props.NightAmbGreen;
-                SliderAmbBlue.Value = _props.NightAmbBlue;
+                // Ambient — expand engine-scaled internal value to UI 0-255: ui = internal * 820 / 256
+                SliderAmbRed.Value   = Math.Clamp(_props.NightAmbRed   * 820 / 256, 0, 255);
+                SliderAmbGreen.Value = Math.Clamp(_props.NightAmbGreen * 820 / 256, 0, 255);
+                SliderAmbBlue.Value  = Math.Clamp(_props.NightAmbBlue  * 820 / 256, 0, 255);
 
                 // Lamppost RGB + Radius (lamp values are sbyte, shift to 0-255 for slider)
                 SliderLampRed.Value = _props.NightLampostRed + 128;
@@ -63,8 +63,10 @@ namespace UrbanChaosLightEditor.Views.Dialogs
                 SliderSkyGreen.Value = _nightColour.Green;
                 SliderSkyBlue.Value = _nightColour.Blue;
 
-                // Night flag checkbox
-                ChkNightEnabled.IsChecked = (_props.NightFlag & 1) != 0;
+                // Night flags: bit 2 (0x04) = DAYTIME. Night = DAYTIME bit clear.
+                ChkNightEnabled.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DAYTIME) == 0;
+                ChkLampsOn.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS) != 0;
+                ChkDarkenWalls.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS) != 0;
 
                 UpdateAllPreviews();
             }
@@ -129,14 +131,10 @@ namespace UrbanChaosLightEditor.Views.Dialogs
 
         private void UpdateAmbientPreview()
         {
-            int r = (int)SliderAmbRed.Value;
-            int g = (int)SliderAmbGreen.Value;
-            int b = (int)SliderAmbBlue.Value;
-
-            // Clamp for display (ambient can be negative in game, but we show absolute for preview)
-            byte rb = (byte)Math.Clamp(r + 128, 0, 255);
-            byte gb = (byte)Math.Clamp(g + 128, 0, 255);
-            byte bb = (byte)Math.Clamp(b + 128, 0, 255);
+            // Scale UI 0-255 to engine range (ui * 80 / 256) for accurate mood preview
+            byte rb = (byte)((int)SliderAmbRed.Value   * 80 / 256);
+            byte gb = (byte)((int)SliderAmbGreen.Value * 80 / 256);
+            byte bb = (byte)((int)SliderAmbBlue.Value  * 80 / 256);
             AmbientPreview.Fill = new SolidColorBrush(Color.FromRgb(rb, gb, bb));
         }
 
@@ -173,9 +171,10 @@ namespace UrbanChaosLightEditor.Views.Dialogs
                 byte specG = (byte)SliderSpecGreen.Value;
                 byte specB = (byte)SliderSpecBlue.Value;
 
-                int ambR = (int)SliderAmbRed.Value;
-                int ambG = (int)SliderAmbGreen.Value;
-                int ambB = (int)SliderAmbBlue.Value;
+                // Compress UI 0-255 back to engine-scaled internal value: internal = ui * 80 / 256
+                int ambR = (int)SliderAmbRed.Value   * 80 / 256;
+                int ambG = (int)SliderAmbGreen.Value * 80 / 256;
+                int ambB = (int)SliderAmbBlue.Value  * 80 / 256;
 
                 sbyte lampR = (sbyte)((int)SliderLampRed.Value - 128);
                 sbyte lampG = (sbyte)((int)SliderLampGreen.Value - 128);
@@ -196,12 +195,15 @@ namespace UrbanChaosLightEditor.Views.Dialogs
                 Debug.WriteLine($"[OK_Click] Lamp RGB=({lampR},{lampG},{lampB}), Radius={lampRadius}");
                 Debug.WriteLine($"[OK_Click] Sky RGB=({skyR},{skyG},{skyB})");
 
-                // Night flag
-                uint nightFlag = _props.NightFlag;
-                if (ChkNightEnabled.IsChecked == true)
-                    nightFlag |= 1;
-                else
-                    nightFlag &= ~1u;
+                // Build night flags from checkboxes.
+                // Night checked = night mode = DAYTIME bit clear. Night unchecked = daytime = DAYTIME bit set.
+                uint nightFlag = 0;
+                if (ChkNightEnabled.IsChecked != true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_DAYTIME;
+                if (ChkLampsOn.IsChecked == true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS;
+                if (ChkDarkenWalls.IsChecked == true)
+                    nightFlag |= LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS;
 
                 var newProps = new LightProperties
                 {

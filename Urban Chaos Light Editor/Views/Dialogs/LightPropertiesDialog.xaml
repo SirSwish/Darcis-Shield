@@ -125,37 +125,21 @@
                 <!-- Night Flags -->
                 <GroupBox Header="Night Flags" Margin="0,6,0,10">
                     <StackPanel Orientation="Vertical" Margin="8,4,8,6">
-
-                        <!-- This one is used by your code-behind (NightFlag bit 0) -->
-                        <CheckBox x:Name="ChkNightEnabled"
-                                  Style="{StaticResource WhiteTickCheckBox}"
-                                  Content="Night Enabled"
-                                  Margin="0,0,0,8"/>
-
-                        <!-- These can remain VM-bound if you use them elsewhere -->
                         <WrapPanel>
-                            <CheckBox Style="{StaticResource WhiteTickCheckBox}"
+                            <CheckBox x:Name="ChkNightEnabled"
+                                      Style="{StaticResource WhiteTickCheckBox}"
+                                      Content="Night Enabled"
+                                      Margin="0,0,16,0"/>
+                            <CheckBox x:Name="ChkLampsOn"
+                                      Style="{StaticResource WhiteTickCheckBox}"
                                       Content="Lamps On"
-                                      Margin="0,0,16,0"
-                                      IsChecked="{Binding FlagLampsOn, Mode=TwoWay}"/>
-
-                            <CheckBox Style="{StaticResource WhiteTickCheckBox}"
-                                      Content="Darken Walls"
-                                      Margin="0,0,16,0"
-                                      IsChecked="{Binding FlagDarkenWalls, Mode=TwoWay}"/>
-
-                            <CheckBox Style="{StaticResource WhiteTickCheckBox}"
-                                      Content="Day"
-                                      IsChecked="{Binding FlagDay, Mode=TwoWay}"/>
+                                      Margin="0,0,16,0"/>
+                            <CheckBox x:Name="ChkDarkenWalls"
+                                      Style="{StaticResource WhiteTickCheckBox}"
+                                      Content="Darken Walls"/>
                         </WrapPanel>
                     </StackPanel>
                 </GroupBox>
-
-                <TextBlock Margin="0,6,0,0"
-                           Foreground="#99FFFFFF"
-                           FontStyle="Italic"
-                           FontSize="11"
-                           Text="{Binding FlagsDebug}"/>
 
                 <!-- D3D + Specular -->
                 <GroupBox Header="D3D and Specular Color" Padding="8">
@@ -283,7 +267,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="R" VerticalAlignment="Center"/>
                         <Slider x:Name="SliderAmbRed"
                                 Grid.Row="0" Grid.Column="1"
-                                Minimum="-127" Maximum="127"
+                                Minimum="0" Maximum="255"
                                 ValueChanged="OnAmbientChanged"/>
                         <TextBlock Grid.Row="0" Grid.Column="2"
                                    Text="{Binding ElementName=SliderAmbRed, Path=Value, StringFormat=F0}"
@@ -292,7 +276,7 @@
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="G" VerticalAlignment="Center"/>
                         <Slider x:Name="SliderAmbGreen"
                                 Grid.Row="1" Grid.Column="1"
-                                Minimum="-127" Maximum="127"
+                                Minimum="0" Maximum="255"
                                 ValueChanged="OnAmbientChanged"/>
                         <TextBlock Grid.Row="1" Grid.Column="2"
                                    Text="{Binding ElementName=SliderAmbGreen, Path=Value, StringFormat=F0}"
@@ -301,7 +285,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="B" VerticalAlignment="Center"/>
                         <Slider x:Name="SliderAmbBlue"
                                 Grid.Row="2" Grid.Column="1"
-                                Minimum="-127" Maximum="127"
+                                Minimum="0" Maximum="255"
                                 ValueChanged="OnAmbientChanged"/>
                         <TextBlock Grid.Row="2" Grid.Column="2"
                                    Text="{Binding ElementName=SliderAmbBlue, Path=Value, StringFormat=F0}"

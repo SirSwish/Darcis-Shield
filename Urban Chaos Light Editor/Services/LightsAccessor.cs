@@ -46,11 +46,10 @@ namespace UrbanChaosLightEditor.Services
         public const int NightColourSize = 3;
         public const int TotalSize = NightColourOffset + NightColourSize;           // 5171
 
-        // Night flag bit definitions (from C++ night.h, verified via ed.cpp usage)
-        // CRITICAL: Bit 0 is DAYTIME, not "night"! Night = when DAYTIME bit is CLEAR.
-        public const uint NIGHT_FLAG_DAYTIME = 0x01;                // Bit 0: If SET = daytime, if CLEAR = night
-        public const uint NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS = 0x02;  // Bit 1: Lamppost lights enabled
-        public const uint NIGHT_FLAG_DARKEN_BUILDING_POINTS = 0x04; // Bit 2: Darken wall bottoms
+        // Night flag bit definitions (from C++ night.h)
+        public const uint NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS = 1 << 0;   // Bit 0 (0x01): Lamppost lights enabled
+        public const uint NIGHT_FLAG_DARKEN_BUILDING_POINTS = 1 << 1;  // Bit 1 (0x02): Darken wall bottoms
+        public const uint NIGHT_FLAG_DAYTIME = 1 << 2;                 // Bit 2 (0x04): SET = daytime, CLEAR = night
 
         private byte[] GetBytesArray()
         {
@@ -271,7 +270,7 @@ namespace UrbanChaosLightEditor.Services
 
         /// <summary>
         /// Check if it's night time.
-        /// Night = when DAYTIME flag is NOT set (bit 0 clear).
+        /// Night = DAYTIME bit (bit 2) is CLEAR.
         /// </summary>
         public bool IsNightTime()
         {
@@ -287,9 +286,9 @@ namespace UrbanChaosLightEditor.Services
         {
             var props = ReadProperties();
             if (isNight)
-                props.NightFlag &= ~NIGHT_FLAG_DAYTIME;  // Clear daytime bit = night
+                props.NightFlag &= ~NIGHT_FLAG_DAYTIME;  // Clear DAYTIME bit = night
             else
-                props.NightFlag |= NIGHT_FLAG_DAYTIME;   // Set daytime bit = day
+                props.NightFlag |= NIGHT_FLAG_DAYTIME;   // Set DAYTIME bit = day
             WriteProperties(props);
         }
 

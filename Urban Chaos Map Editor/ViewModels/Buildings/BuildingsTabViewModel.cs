@@ -824,6 +824,20 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
         public bool TrySelectFacetFromMap(int facetId1, int buildingId1)
         {
+            // Cables live in the flat CableFacets list, not in the storey/group tree.
+            // Handle them first so we switch to cable-list view and avoid a false-not-found.
+            var cable = CableFacets.FirstOrDefault(c => c.FacetId1 == facetId1);
+            if (cable != null)
+            {
+                // Set building BEFORE facet — the SelectedBuilding setter clears SelectedFacet.
+                var cableBuilding = Buildings.FirstOrDefault(b => b.Id == buildingId1);
+                if (cableBuilding != null && !ReferenceEquals(SelectedBuilding, cableBuilding))
+                    SelectedBuilding = cableBuilding;
+                SelectedFacet = cable;
+                SyncSelectionIntoMapVm();
+                return true;
+            }
+
             var building = Buildings.FirstOrDefault(b => b.Id == buildingId1);
             if (building == null)
                 return false;
@@ -865,6 +879,16 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         {
             if (selection is FacetVM f)
             {
+                // Cables live in the flat CableFacets list, not the building/storey tree.
+                // Skip the group/storey sync to avoid RefreshSelectedBuildingFacetGroups clearing
+                // SelectedFacet (cables are not in SelectedBuildingFacetGroups).
+                if (f.Type == FacetType.Cable)
+                {
+                    SelectedFacet = f;
+                    SyncSelectionIntoMapVm();
+                    return;
+                }
+
                 // 1) Ensure the building matches the facet (for non-cable facets)
                 //    SelectedBuilding setter clears SelectedFacetTypeGroup and SelectedFacet,
                 //    so we do this first and re-apply them below.
@@ -1117,7 +1141,11 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
             if (SelectedFacet != null)
             {
-                buildingId = SelectedFacet.BuildingId;
+                // Cables store step_angle2 in BuildingId (not the real owner building).
+                // Use SelectedBuilding?.Id for the correct map highlight.
+                buildingId = (SelectedFacet.Type == FacetType.Cable)
+                    ? (SelectedBuilding?.Id ?? 0)
+                    : SelectedFacet.BuildingId;
                 storeyId = SelectedFacet.StoreyId;
             }
             else

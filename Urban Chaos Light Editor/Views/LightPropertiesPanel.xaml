@@ -69,29 +69,58 @@
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="8">
             <StackPanel>
 
-                <!-- Night Flags - FIXED: Removed ChkDay (bit 0x08 doesn't exist in C++ format) -->
                 <GroupBox Header="Night Flags">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Night Mode = DAYTIME bit CLEAR (inverted logic)" 
-                                   FontSize="10" Foreground="#888" Margin="0,0,0,4"/>
+                    <WrapPanel>
                         <CheckBox x:Name="ChkNightEnabled"
                                   Style="{StaticResource WhiteTickCheckBox}"
-                                  Content="Night Enabled (unchecked = Daytime)"
-                                  Margin="0,0,0,8"/>
-                        <WrapPanel>
-                            <CheckBox x:Name="ChkLampsOn"
-                                      Style="{StaticResource WhiteTickCheckBox}"
-                                      Content="Lamps On"
-                                      Margin="0,0,16,0"/>
-                            <CheckBox x:Name="ChkDarkenWalls"
-                                      Style="{StaticResource WhiteTickCheckBox}"
-                                      Content="Darken Walls"/>
-                        </WrapPanel>
-                    </StackPanel>
+                                  Content="Night Enabled"
+                                  Checked="OnCheckChanged" Unchecked="OnCheckChanged"
+                                  Margin="0,0,16,0"/>
+                        <CheckBox x:Name="ChkLampsOn"
+                                  Style="{StaticResource WhiteTickCheckBox}"
+                                  Content="Lamps On"
+                                  Checked="OnCheckChanged" Unchecked="OnCheckChanged"
+                                  Margin="0,0,16,0"/>
+                        <CheckBox x:Name="ChkDarkenWalls"
+                                  Style="{StaticResource WhiteTickCheckBox}"
+                                  Content="Darken Walls"
+                                  Checked="OnCheckChanged" Unchecked="OnCheckChanged"/>
+                    </WrapPanel>
+                </GroupBox>
+
+                <!-- Ambient -->
+                <GroupBox Header="Ambient">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="35"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="R"/>
+                        <Slider x:Name="SliderAmbRed" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" ValueChanged="OnPropertyChanged"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ElementName=SliderAmbRed, Path=Value, StringFormat=F0}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="G"/>
+                        <Slider x:Name="SliderAmbGreen" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" ValueChanged="OnPropertyChanged"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ElementName=SliderAmbGreen, Path=Value, StringFormat=F0}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="B"/>
+                        <Slider x:Name="SliderAmbBlue" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" ValueChanged="OnPropertyChanged"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding ElementName=SliderAmbBlue, Path=Value, StringFormat=F0}"/>
+
+                        <Rectangle x:Name="AmbientPreview" Grid.Row="3" Grid.ColumnSpan="3" Height="16" Margin="0,4,0,0" RadiusX="2" RadiusY="2"/>
+                    </Grid>
                 </GroupBox>
 
                 <!-- D3D Color -->
-                <GroupBox Header="D3D Color (ARGB)">
+                <GroupBox Header="D3D Color">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -127,7 +156,7 @@
                 </GroupBox>
 
                 <!-- Specular Color -->
-                <GroupBox Header="Specular Color (ARGB)">
+                <GroupBox Header="Specular Color">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -162,39 +191,8 @@
                     </Grid>
                 </GroupBox>
 
-                <!-- Night Ambient -->
-                <GroupBox Header="Night Ambient (RGB)">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="35"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="R"/>
-                        <Slider x:Name="SliderAmbRed" Grid.Row="0" Grid.Column="1" Minimum="-127" Maximum="127" ValueChanged="OnPropertyChanged"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ElementName=SliderAmbRed, Path=Value, StringFormat=F0}"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="G"/>
-                        <Slider x:Name="SliderAmbGreen" Grid.Row="1" Grid.Column="1" Minimum="-127" Maximum="127" ValueChanged="OnPropertyChanged"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ElementName=SliderAmbGreen, Path=Value, StringFormat=F0}"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="B"/>
-                        <Slider x:Name="SliderAmbBlue" Grid.Row="2" Grid.Column="1" Minimum="-127" Maximum="127" ValueChanged="OnPropertyChanged"/>
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding ElementName=SliderAmbBlue, Path=Value, StringFormat=F0}"/>
-
-                        <Rectangle x:Name="AmbientPreview" Grid.Row="3" Grid.ColumnSpan="3" Height="16" Margin="0,4,0,0" RadiusX="2" RadiusY="2"/>
-                    </Grid>
-                </GroupBox>
-
-                <!-- Lamppost Color -->
-                <GroupBox Header="Lamppost Color + Radius">
+                <!-- Prim Lighting -->
+                <GroupBox Header="Prim Lighting">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -222,7 +220,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding ElementName=SliderLampBlue, Path=Value, StringFormat=F0}"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Radius"/>
-                        <Slider x:Name="SliderLampRadius" Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="1024" ValueChanged="OnPropertyChanged"/>
+                        <Slider x:Name="SliderLampRadius" Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="255" ValueChanged="OnPropertyChanged"/>
                         <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding ElementName=SliderLampRadius, Path=Value, StringFormat=F0}"/>
 
                         <Rectangle x:Name="LampPreview" Grid.Row="4" Grid.ColumnSpan="3" Height="16" Margin="0,4,0,0" RadiusX="2" RadiusY="2"/>
@@ -263,9 +261,11 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Apply Button -->
-        <Button Grid.Row="1" Content="Apply Changes" Margin="8" Padding="8,4"
-                Click="Apply_Click"
-                Background="#0078D4" Foreground="White" BorderBrush="#005A9E"/>
+        <!-- Buttons -->
+        <Border Grid.Row="1" Margin="8">
+            <Button Content="Preview D3D Lighting" Padding="8,4"
+                    Click="PreviewLighting_Click"
+                    Background="#2D5A27" Foreground="White" BorderThickness="0"/>
+        </Border>
     </Grid>
 </UserControl>

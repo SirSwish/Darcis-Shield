@@ -294,6 +294,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         // Facet redraw mode state
         private bool _isRedrawingFacet;
         private FacetPreviewWindow? _facetRedrawWindow;
+        private CableFacetEditorWindow? _cableRedrawWindow;
         private int _facetRedrawId1;
         private (byte x, byte z)? _facetRedrawFirstPoint;
         private (int uiX0, int uiZ0, int uiX1, int uiZ1)? _facetRedrawPreviewLine;
@@ -1432,6 +1433,21 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public void BeginFacetRedraw(FacetPreviewWindow window, int facetId1)
         {
             _facetRedrawWindow = window;
+            _cableRedrawWindow = null;
+            _facetRedrawId1 = facetId1;
+            _facetRedrawFirstPoint = null;
+            FacetRedrawPreviewLine = null;
+            IsRedrawingFacet = true;
+        }
+
+        /// <summary>
+        /// Begins cable endpoint redraw mode. Called by CableFacetEditorWindow when user clicks "Redraw on Map".
+        /// Reuses the same two-click map interaction as facet redraw.
+        /// </summary>
+        public void BeginCableRedraw(CableFacetEditorWindow window, int facetId1)
+        {
+            _cableRedrawWindow = window;
+            _facetRedrawWindow = null;
             _facetRedrawId1 = facetId1;
             _facetRedrawFirstPoint = null;
             FacetRedrawPreviewLine = null;
@@ -1474,8 +1490,9 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 byte x1 = tileX;
                 byte z1 = tileZ;
 
-                // Apply the new coordinates
-                _facetRedrawWindow.ApplyRedrawCoords(x0, z0, x1, z1);
+                // Apply the new coordinates to whichever window initiated the redraw
+                _facetRedrawWindow?.ApplyRedrawCoords(x0, z0, x1, z1);
+                _cableRedrawWindow?.ApplyRedrawCoords(x0, z0, x1, z1);
 
                 // End redraw mode and show window
                 EndFacetRedraw(completed: true);
@@ -1526,13 +1543,17 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
             if (_facetRedrawWindow != null)
             {
-                if (completed)
-                    _facetRedrawWindow.OnRedrawCompleted();
-                else
-                    _facetRedrawWindow.OnRedrawCancelled();
+                if (completed) _facetRedrawWindow.OnRedrawCompleted();
+                else           _facetRedrawWindow.OnRedrawCancelled();
+            }
+            else if (_cableRedrawWindow != null)
+            {
+                if (completed) _cableRedrawWindow.OnRedrawCompleted();
+                else           _cableRedrawWindow.OnRedrawCancelled();
             }
 
             _facetRedrawWindow = null;
+            _cableRedrawWindow = null;
             _facetRedrawId1 = 0;
         }
 

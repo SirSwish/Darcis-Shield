@@ -41,6 +41,7 @@
                   Background="#2B2B2B"
                   BorderBrush="#444"
                   ItemContainerStyle="{StaticResource LightListItemStyle}"
+                  SelectionChanged="LightsList_SelectionChanged"
                   MouseDoubleClick="LightsList_MouseDoubleClick"
                   PreviewKeyDown="LightsList_PreviewKeyDown">
 

@@ -19,7 +19,7 @@ namespace UrbanChaosLightEditor
         private void About_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Urban Chaos Light Editor\n\n" +
+                "Urban Chaos Light Editor v1.9\n\n" +
                 "Part of the Darci's Shield modding toolkit.\n\n" +
                 "Edit .lgt light files for Urban Chaos maps.",
                 "About",

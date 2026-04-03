@@ -7,14 +7,20 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<NuGetAudit>False</NuGetAudit>
 		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+		<Version>1.9.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Remove="Assets\Icons\app.ico" />
+		<None Remove="Assets\Images\Preview-1.PNG" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Assets\Icons\app.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -23,15 +29,14 @@
 
 	<ItemGroup>
 		<Resource Include="Assets\Icons\app.ico" />
+		<Resource Include="Assets\Images\Preview-1.PNG" />
 	</ItemGroup>
 	<ItemGroup>
-		<Resource Include="..\Urban Chaos Map Editor\Assets\Textures\**\*.png"
-				  Link="Assets\Textures\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Resource Include="..\Urban Chaos Map Editor\Assets\Textures\**\*.png" Link="Assets\Textures\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 	<!-- Link PrimGraphics Assets from Map Editor -->
 	<ItemGroup>
 		<!-- Link PrimGraphics from Map Editor -->
-		<Resource Include="..\Urban Chaos Map Editor\Assets\Images\PrimGraphics\*.png"
-				  Link="Assets\Images\PrimGraphics\%(Filename)%(Extension)" />
+		<Resource Include="..\Urban Chaos Map Editor\Assets\Images\PrimGraphics\*.png" Link="Assets\Images\PrimGraphics\%(Filename)%(Extension)" />
 	</ItemGroup>
 </Project>

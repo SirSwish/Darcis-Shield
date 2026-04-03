@@ -242,8 +242,11 @@
                     Click="BtnDelete_Click" ToolTip="Delete this cable from the map"/>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="Redraw on Map" Style="{StaticResource ActionButton}" Click="BtnRedraw_Click"
+                        Margin="0,0,8,0"
+                        ToolTip="Click two points on the map to set new cable endpoints (X0,Z0 then X1,Z1)"/>
                 <Button Content="Close" Style="{StaticResource ActionButton}" Click="BtnClose_Click" Margin="0,0,8,0"/>
-                <Button x:Name="BtnSave" Content="?? Save Changes" Style="{StaticResource SaveButton}" 
+                <Button x:Name="BtnSave" Content="?? Save Changes" Style="{StaticResource SaveButton}"
                         Click="BtnSave_Click" IsEnabled="False"/>
             </StackPanel>
         </Grid>

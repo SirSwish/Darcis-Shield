@@ -93,33 +93,36 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
                     int uiX = LightsAccessor.WorldXToUiX(e.X);
                     int uiZ = LightsAccessor.WorldZToUiZ(e.Z);
 
-                    double size = 64.0 * (e.Range / 255.0);
-                    if (size < 8) size = 8;
+                    // Range in world units; 4 world units = 1 UI pixel, 256 world = 1 tile = 64 UI px
+                    double uiRadius = Math.Max(8.0, e.Range / 4.0);
 
-                    var fill = new SolidColorBrush(Color.FromArgb(
-                        128,
-                        unchecked((byte)(e.Red + 128)),
-                        unchecked((byte)(e.Green + 128)),
-                        unchecked((byte)(e.Blue + 128))));
+                    byte r = unchecked((byte)(e.Red + 128));
+                    byte g = unchecked((byte)(e.Green + 128));
+                    byte b = unchecked((byte)(e.Blue + 128));
+
+                    // Radial gradient: opaque at centre, fully transparent at edge
+                    var fill = new RadialGradientBrush(
+                        Color.FromArgb(210, r, g, b),
+                        Color.FromArgb(0,   r, g, b));
 
                     var ellipse = new Ellipse
                     {
-                        Width = size,
-                        Height = size,
+                        Width = uiRadius * 2,
+                        Height = uiRadius * 2,
                         Fill = fill,
-                        Stroke = Brushes.Black,
+                        Stroke = new SolidColorBrush(Color.FromArgb(100, r, g, b)),
                         StrokeThickness = 1.0,
                         Tag = i
                     };
 
-                    SetLeft(ellipse, uiX - size / 2);
-                    SetTop(ellipse, uiZ - size / 2);
+                    SetLeft(ellipse, uiX - uiRadius);
+                    SetTop(ellipse, uiZ - uiRadius);
                     Children.Add(ellipse);
 
                     // Selected ring
-                    if (_vm != null && _vm.SelectedLightIndex == i)
+                    if (_vm != null && _vm.SelectedLight?.Index == i)
                     {
-                        double ringSize = size + 8;
+                        double ringSize = uiRadius * 2 + 8;
                         var ring = new Ellipse
                         {
                             Width = ringSize,
@@ -134,24 +137,22 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
                         Children.Add(ring);
                     }
 
-                    // Range circle (if ShowLightRanges is true)
+                    // Range outline ring at exact world radius (no minimum clamp)
                     if (_vm?.ShowLightRanges == true)
                     {
-                        double rangeSize = e.Range * 2; // Scale for visibility
+                        double exactRadius = e.Range / 4.0;
+                        double rangeSize = exactRadius * 2;
                         var rangeCircle = new Ellipse
                         {
                             Width = rangeSize,
                             Height = rangeSize,
-                            Stroke = new SolidColorBrush(Color.FromArgb(64,
-                                unchecked((byte)(e.Red + 128)),
-                                unchecked((byte)(e.Green + 128)),
-                                unchecked((byte)(e.Blue + 128)))),
+                            Stroke = new SolidColorBrush(Color.FromArgb(140, r, g, b)),
                             StrokeThickness = 1.0,
                             Fill = Brushes.Transparent,
                             IsHitTestVisible = false
                         };
-                        SetLeft(rangeCircle, uiX - rangeSize / 2);
-                        SetTop(rangeCircle, uiZ - rangeSize / 2);
+                        SetLeft(rangeCircle, uiX - exactRadius);
+                        SetTop(rangeCircle, uiZ - exactRadius);
                         Children.Add(rangeCircle);
                     }
                 }
@@ -182,7 +183,7 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
             {
                 if (_vm != null)
                 {
-                    _vm.SelectedLightIndex = idx;
+                    SetSelectedByAccessorIndex(_vm, idx);
                     OpenEditDialog(idx);
                 }
                 e.Handled = true;
@@ -245,13 +246,15 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
                     int uiZ = (int)Math.Round(p.Y);
 
                     _vm?.MoveLightTo(_dragIndex, uiX, uiZ);
+                    if (_vm != null)
+                        SetSelectedByAccessorIndex(_vm, _dragIndex);
                 }
                 else
                 {
                     // Pure click → select
                     if (_vm != null && _pressedIndex >= 0)
                     {
-                        _vm.SelectedLightIndex = _pressedIndex;
+                        SetSelectedByAccessorIndex(_vm, _pressedIndex);
                         Redraw();
                     }
                 }
@@ -268,6 +271,20 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
             }
 
             e.Handled = true;
+        }
+
+        private static void SetSelectedByAccessorIndex(MainWindowViewModel vm, int accessorIndex)
+        {
+            int collectionIdx = -1;
+            for (int i = 0; i < vm.Lights.Count; i++)
+            {
+                if (vm.Lights[i].Index == accessorIndex)
+                {
+                    collectionIdx = i;
+                    break;
+                }
+            }
+            vm.SelectedLightIndex = collectionIdx;
         }
 
         private void HookVm()

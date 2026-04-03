@@ -162,6 +162,42 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             TxtStepAngle2.Text = step2.ToString();
         }
 
+        private void BtnRedraw_Click(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+            {
+                mainVm.Map.BeginCableRedraw(this, _facetId1);
+                Hide();
+                mainVm.StatusMessage = "Click start point (X0,Z0), then end point (X1,Z1). Right-click or Escape to cancel.";
+            }
+        }
+
+        /// <summary>
+        /// Called by MapViewModel when the user places both endpoints on the map.
+        /// Updates the coordinate fields with the new tile positions.
+        /// </summary>
+        public void ApplyRedrawCoords(byte x0, byte z0, byte x1, byte z1)
+        {
+            TxtX0.Text = x0.ToString();
+            TxtZ0.Text = z0.ToString();
+            TxtX1.Text = x1.ToString();
+            TxtZ1.Text = z1.ToString();
+        }
+
+        /// <summary>Called by MapViewModel after a successful two-click redraw.</summary>
+        public void OnRedrawCompleted()
+        {
+            Show();
+            Activate();
+        }
+
+        /// <summary>Called by MapViewModel when the redraw is cancelled (Escape / right-click).</summary>
+        public void OnRedrawCancelled()
+        {
+            Show();
+            Activate();
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             if (SaveChanges())

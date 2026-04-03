@@ -574,7 +574,7 @@ public partial class CutsceneEditorControl : UserControl
     private static string[] GetPersonTypes() => new[]
     {
         "Darci", "Roper", "Cop", "Civilian", "Rasta Thug",
-        "Grey Thug", "Red Thug", "Prostitute", "Fat Prostitute",
+        "Grey Thug", "Red Thug", "Woman", "Fat Woman",
         "Hostage", "Mechanic", "Tramp", "MIB 1", "MIB 2", "MIB 3"
     };
 

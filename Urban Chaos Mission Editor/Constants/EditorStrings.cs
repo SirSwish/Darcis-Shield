@@ -152,8 +152,8 @@ public static class EditorStrings
     {
         "Old Civilian",                    // ET_CIV = 1
         "Young Civilian",       // ET_CIV_BALLOON = 2
-        "Prostitute",                  // ET_SLAG = 3
-        "Fat Prostitute",         // ET_UGLY_FAT_SLAG = 4
+        "Woman",                  // ET_SLAG = 3
+        "Fat Woman",         // ET_UGLY_FAT_SLAG = 4
         "Workman",                     // ET_WORKMAN = 5
         "Mako",                  // ET_GANG_RASTA = 6
         "Bish",                    // ET_GANG_RED = 7

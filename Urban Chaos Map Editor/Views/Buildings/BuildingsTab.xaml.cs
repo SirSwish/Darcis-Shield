@@ -116,6 +116,7 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.FacetVM facet)
             {
                 vm.HandleTreeSelection(facet);
+                CenterOnFacet(facet);
             }
 
             // Buildings tab should never own walkable highlighting.
@@ -162,6 +163,7 @@ namespace UrbanChaosMapEditor.Views.Buildings
             {
                 vm.SelectedFacet = fvm;
                 vm.HandleTreeSelection(fvm);
+                CenterOnFacet(fvm);
             }
             else if (sender is ListView lv2 && lv2.SelectedItem == null)
             {
@@ -578,25 +580,36 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                 shell.Map.SelectedWalkableId1 = 0;
 
-            if (vm.SelectedBuilding != null)
-                BuildingsList?.ScrollIntoView(vm.SelectedBuilding);
+            // Capture before any ListView.SelectedItem assignment — setting SelectedItem fires
+            // CableList_OnSelectionChanged → HandleTreeSelection → SelectedBuilding setter which
+            // clears SelectedFacet as a side-effect if the building changes.
+            var selectedFacet = vm.SelectedFacet;
 
-            if (vm.SelectedFacetTypeGroup != null)
-                FacetTypesList?.ScrollIntoView(vm.SelectedFacetTypeGroup);
-
-            if (vm.SelectedFacet != null)
-                FacetsList?.ScrollIntoView(vm.SelectedFacet);
+            if (selectedFacet?.Type == FacetType.Cable)
+            {
+                // Only sync the permanent bottom list; the full-screen CableList is not used here.
+                CableListPermanent.SelectedItem = selectedFacet;
+                CableListPermanent?.ScrollIntoView(selectedFacet);
+            }
+            else
+            {
+                if (vm.SelectedBuilding != null)
+                    BuildingsList?.ScrollIntoView(vm.SelectedBuilding);
+                if (vm.SelectedFacetTypeGroup != null)
+                    FacetTypesList?.ScrollIntoView(vm.SelectedFacetTypeGroup);
+                if (vm.SelectedFacet != null)
+                    FacetsList?.ScrollIntoView(vm.SelectedFacet);
+            }
 
             if (openEditor)
             {
-                var fvm = vm.SelectedFacet;
-                if (fvm == null)
+                if (selectedFacet == null)
                     return false;
 
-                if (fvm.Type == FacetType.Cable)
-                    OpenCableEditor(fvm);
+                if (selectedFacet.Type == FacetType.Cable)
+                    OpenCableEditor(selectedFacet);
                 else
-                    OpenFacetPreview(fvm);
+                    OpenFacetPreview(selectedFacet);
             }
 
             Focus();
@@ -736,6 +749,42 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 vm.SelectedFacetTypeGroup = null;
                 vm.SelectedBuildingId = buildingId;
             }
+        }
+
+        /// <summary>
+        /// Centers the map on a facet's midpoint only if that point is not already in the viewport.
+        /// Not called when a facet is selected via map click (it's already visible).
+        /// </summary>
+        private void CenterOnFacet(BuildingsTabViewModel.FacetVM fvm)
+        {
+            var raw = fvm.Raw;
+
+            // Skip degenerate facets with no real position.
+            if (raw.X0 == 0 && raw.Z0 == 0 && raw.X1 == 0 && raw.Z1 == 0)
+                return;
+
+            // Midpoint in tile-space → UI pixels: uiPixel = (128 - tileCoord) * 64
+            double midTileX = (raw.X0 + raw.X1) * 0.5;
+            double midTileZ = (raw.Z0 + raw.Z1) * 0.5;
+            int pixelX = (int)((128 - midTileX) * 64);
+            int pixelZ = (int)((128 - midTileZ) * 64);
+
+            var win = Window.GetWindow(this);
+            if (win == null) return;
+
+            var mapView = LogicalTreeHelper.FindLogicalNode(win, "MapViewControl");
+            if (mapView == null) return;
+
+            var mapViewType = mapView.GetType();
+
+            // Only scroll if the midpoint is outside the current viewport.
+            var isInView = mapViewType.GetMethod("IsPixelInView")
+                               ?.Invoke(mapView, new object[] { pixelX, pixelZ }) as bool?;
+            if (isInView == true)
+                return;
+
+            mapViewType.GetMethod("CenterOnPixel")
+                       ?.Invoke(mapView, new object[] { pixelX, pixelZ });
         }
 
         private static T? FindAncestor<T>(DependencyObject current)

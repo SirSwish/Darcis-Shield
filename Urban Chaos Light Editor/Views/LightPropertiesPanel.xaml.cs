@@ -1,11 +1,4 @@
 ﻿// /Views/LightPropertiesPanel.xaml.cs
-// FIXED: Correct night flag interpretation based on C++ source
-//
-// KEY FIX: The C++ code uses NIGHT_FLAG_DAYTIME (bit 0) as follows:
-//   - Bit SET (1) = Daytime
-//   - Bit CLEAR (0) = Night
-// This is the OPPOSITE of what the old code assumed!
-//
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -92,10 +85,10 @@ namespace UrbanChaosLightEditor.Views
                 SliderSpecGreen.Value = _props.SpecularGreen;
                 SliderSpecBlue.Value = _props.SpecularBlue;
 
-                // Ambient
-                SliderAmbRed.Value = _props.NightAmbRed;
-                SliderAmbGreen.Value = _props.NightAmbGreen;
-                SliderAmbBlue.Value = _props.NightAmbBlue;
+                // Ambient — expand engine-scaled internal value to UI 0-255: ui = internal * 820 / 256
+                SliderAmbRed.Value   = Math.Clamp(_props.NightAmbRed   * 820 / 256, 0, 255);
+                SliderAmbGreen.Value = Math.Clamp(_props.NightAmbGreen * 820 / 256, 0, 255);
+                SliderAmbBlue.Value  = Math.Clamp(_props.NightAmbBlue  * 820 / 256, 0, 255);
 
                 // Lamppost (sbyte shifted to 0-255)
                 SliderLampRed.Value = _props.NightLampostRed + 128;
@@ -108,12 +101,9 @@ namespace UrbanChaosLightEditor.Views
                 SliderSkyGreen.Value = _nightColour.Green;
                 SliderSkyBlue.Value = _nightColour.Blue;
 
-                // === CRITICAL FIX: Night flag interpretation ===
-                // C++ NIGHT_FLAG_DAYTIME (0x01): If SET = daytime, if CLEAR = night
-                // So: Night = when bit 0 is CLEAR
+                // DAYTIME bit (bit 2): SET = daytime, CLEAR = night. Night checkbox = inverse of DAYTIME bit.
                 bool isDaytime = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DAYTIME) != 0;
-                ChkNightEnabled.IsChecked = !isDaytime;  // Night = NOT daytime
-
+                ChkNightEnabled.IsChecked = !isDaytime;
                 ChkLampsOn.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS) != 0;
                 ChkDarkenWalls.IsChecked = (_props.NightFlag & LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS) != 0;
 
@@ -135,6 +125,13 @@ namespace UrbanChaosLightEditor.Views
         {
             if (_isLoading) return;
             UpdateAllPreviews();
+            ApplyChanges();
+        }
+
+        private void OnCheckChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading) return;
+            ApplyChanges();
         }
 
         private void UpdateAllPreviews()
@@ -153,11 +150,10 @@ namespace UrbanChaosLightEditor.Views
             byte specB = (byte)SliderSpecBlue.Value;
             SpecPreview.Fill = new SolidColorBrush(Color.FromArgb(specA, specR, specG, specB));
 
-            // Ambient Preview
-            byte ambR = (byte)Math.Clamp((int)SliderAmbRed.Value + 128, 0, 255);
-            byte ambG = (byte)Math.Clamp((int)SliderAmbGreen.Value + 128, 0, 255);
-            byte ambB = (byte)Math.Clamp((int)SliderAmbBlue.Value + 128, 0, 255);
-            AmbientPreview.Fill = new SolidColorBrush(Color.FromRgb(ambR, ambG, ambB));
+            AmbientPreview.Fill = new SolidColorBrush(Color.FromRgb(
+                (byte)SliderAmbRed.Value,
+                (byte)SliderAmbGreen.Value,
+                (byte)SliderAmbBlue.Value));
 
             // Lamp Preview
             byte lampR = (byte)SliderLampRed.Value;
@@ -172,13 +168,39 @@ namespace UrbanChaosLightEditor.Views
             SkyPreview.Fill = new SolidColorBrush(Color.FromRgb(skyR, skyG, skyB));
         }
 
-        private void Apply_Click(object sender, RoutedEventArgs e)
+        private void PreviewLighting_Click(object sender, RoutedEventArgs e)
+        {
+            var d3dColor = Color.FromArgb(
+                (byte)SliderD3DAlpha.Value,
+                (byte)SliderD3DRed.Value,
+                (byte)SliderD3DGreen.Value,
+                (byte)SliderD3DBlue.Value);
+
+            var specColor = Color.FromArgb(
+                (byte)SliderSpecAlpha.Value,
+                (byte)SliderSpecRed.Value,
+                (byte)SliderSpecGreen.Value,
+                (byte)SliderSpecBlue.Value);
+
+            var ambColor = Color.FromRgb(
+                (byte)SliderAmbRed.Value,
+                (byte)SliderAmbGreen.Value,
+                (byte)SliderAmbBlue.Value);
+
+            var dlg = new Dialogs.LightingPreviewDialog(d3dColor, specColor, ambColor)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            dlg.ShowDialog();
+        }
+
+        private void ApplyChanges()
         {
             if (!LightsDataService.Instance.IsLoaded) return;
 
             try
             {
-                Debug.WriteLine("[LightPropertiesPanel.Apply] Saving properties...");
+                Debug.WriteLine("[LightPropertiesPanel.ApplyChanges] Saving properties...");
 
                 // Build packed colors
                 uint d3dColor = ((uint)(byte)SliderD3DAlpha.Value << 24) |
@@ -191,22 +213,21 @@ namespace UrbanChaosLightEditor.Views
                                  ((uint)(byte)SliderSpecGreen.Value << 8) |
                                  (byte)SliderSpecBlue.Value;
 
-                // === CRITICAL FIX: Build night flags correctly ===
-                // C++ logic: Night = CLEAR the DAYTIME bit, Day = SET the DAYTIME bit
+                // DAYTIME bit (bit 2): SET = daytime, CLEAR = night.
+                // Night checkbox checked = night = leave DAYTIME bit clear.
+                // Night checkbox unchecked = daytime = set DAYTIME bit.
                 uint nightFlag = 0;
 
-                // If Night is NOT checked (meaning daytime), SET the DAYTIME flag
                 if (ChkNightEnabled.IsChecked != true)
                     nightFlag |= LightsAccessor.NIGHT_FLAG_DAYTIME;
 
-                // Lamps and darken walls work normally (set if checked)
                 if (ChkLampsOn.IsChecked == true)
                     nightFlag |= LightsAccessor.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS;
 
                 if (ChkDarkenWalls.IsChecked == true)
                     nightFlag |= LightsAccessor.NIGHT_FLAG_DARKEN_BUILDING_POINTS;
 
-                Debug.WriteLine($"[LightPropertiesPanel.Apply] NightFlag=0x{nightFlag:X2} (Night={ChkNightEnabled.IsChecked}, Lamps={ChkLampsOn.IsChecked}, Darken={ChkDarkenWalls.IsChecked})");
+                Debug.WriteLine($"[LightPropertiesPanel.ApplyChanges] NightFlag=0x{nightFlag:X2} (Night={ChkNightEnabled.IsChecked}, Lamps={ChkLampsOn.IsChecked}, Darken={ChkDarkenWalls.IsChecked})");
 
                 var newProps = new LightProperties
                 {
@@ -214,9 +235,9 @@ namespace UrbanChaosLightEditor.Views
                     NightFlag = nightFlag,
                     NightAmbD3DColour = d3dColor,
                     NightAmbD3DSpecular = specColor,
-                    NightAmbRed = (int)SliderAmbRed.Value,
-                    NightAmbGreen = (int)SliderAmbGreen.Value,
-                    NightAmbBlue = (int)SliderAmbBlue.Value,
+                    NightAmbRed   = (int)SliderAmbRed.Value   * 80 / 256,
+                    NightAmbGreen = (int)SliderAmbGreen.Value * 80 / 256,
+                    NightAmbBlue  = (int)SliderAmbBlue.Value  * 80 / 256,
                     NightLampostRed = (sbyte)((int)SliderLampRed.Value - 128),
                     NightLampostGreen = (sbyte)((int)SliderLampGreen.Value - 128),
                     NightLampostBlue = (sbyte)((int)SliderLampBlue.Value - 128),
@@ -237,11 +258,11 @@ namespace UrbanChaosLightEditor.Views
                 _props = newProps;
                 _nightColour = newNightColour;
 
-                Debug.WriteLine("[LightPropertiesPanel.Apply] Done!");
+                Debug.WriteLine("[LightPropertiesPanel.ApplyChanges] Done!");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[LightPropertiesPanel.Apply] ERROR: {ex.Message}");
+                Debug.WriteLine($"[LightPropertiesPanel.ApplyChanges] ERROR: {ex.Message}");
                 MessageBox.Show($"Failed to apply properties:\n{ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
