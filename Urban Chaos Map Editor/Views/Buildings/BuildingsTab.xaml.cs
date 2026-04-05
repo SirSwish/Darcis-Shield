@@ -37,8 +37,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.BuildingVM building)
             {
-                // Building selection should ONLY affect building/facet selection state.
-                // It must NOT imply any walkable selection/highlight.
                 if (vm.SelectedFacet == null)
                 {
                     vm.HandleBuildingTreeSelection(building);
@@ -47,10 +45,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
                         vm.SelectedFacetTypeGroup = vm.SelectedBuildingFacetGroups[0];
                 }
             }
-
-            // Explicitly clear walkable highlight whenever Buildings tab selection changes.
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                shell.Map.SelectedWalkableId1 = 0;
         }
 
         private void BuildingsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)

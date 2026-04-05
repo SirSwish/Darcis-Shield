@@ -7,6 +7,8 @@ using System.Windows.Threading;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosMapEditor.Services.Roofs;
+using UrbanChaosMapEditor.Views.Roofs.Dialogs;
 
 namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 {
@@ -24,12 +26,19 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private static readonly Typeface LabelTypeface;
         private static readonly Brush SelectedTileFillBrush;
         private static readonly Pen SelectedTileBorderPen;
+        private static readonly Brush SelectionFill;
+        private static readonly Pen SelectionPen;
 
         private TextBox? _editBox;
         private int _editingRf4Idx;
         private EditField _editingField;
         private int _hoverRf4Idx = -1;
         private EditField _hoverField = EditField.None;
+
+        // Tile-based selection state (col/row = floor(uiPixel / 64), matches texture drag approach)
+        private bool _isDraggingTileSelection;
+        private int _selStartCol = -1, _selStartRow = -1;
+        private int _selHoverCol = -1, _selHoverRow = -1;
 
         private record struct TileInfo(int Rf4Idx, double UiX, double UiZ, short Y, sbyte DY0, sbyte DY1, sbyte DY2);
         private List<TileInfo>? _cachedTiles;
@@ -93,6 +102,14 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
             SelectedTileBorderPen = new Pen(Brushes.Yellow, 3.0);
             SelectedTileBorderPen.Freeze();
+
+            SelectionFill = new SolidColorBrush(Color.FromArgb(50, 0, 200, 255));
+            SelectionFill.Freeze();
+
+            var selStroke = new SolidColorBrush(Color.FromArgb(255, 0, 220, 255));
+            selStroke.Freeze();
+            SelectionPen = new Pen(selStroke, 2) { DashStyle = DashStyles.Dash };
+            SelectionPen.Freeze();
         }
 
         public RoofsLayer()
@@ -108,8 +125,21 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             BuildingsChangeBus.Instance.Changed += (s, e) => RefreshOnUiThread();
 
             MouseLeftButtonDown += OnMouseLeftButtonDown;
+            MouseLeftButtonUp += OnMouseLeftButtonUp;
             MouseMove += OnMouseMove;
             MouseLeave += OnMouseLeave;
+            KeyDown += OnKeyDown;
+            Focusable = true;
+
+            var sel = RoofTileSelectionService.Instance;
+            sel.SelectionBegan += (_, __) => Dispatcher.BeginInvoke(() => { Cursor = Cursors.Cross; InvalidateVisual(); });
+            sel.SelectionEnded += (_, __) => Dispatcher.BeginInvoke(() =>
+            {
+                _isDraggingTileSelection = false;
+                _selStartCol = _selStartRow = _selHoverCol = _selHoverRow = -1;
+                Cursor = Cursors.Arrow;
+                InvalidateVisual();
+            });
         }
 
         private void RefreshOnUiThread()
@@ -184,6 +214,22 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
             foreach (var tile in _cachedTiles)
                 DrawTile(dc, tile, dpi);
+
+            if (RoofTileSelectionService.Instance.IsSelecting && _selHoverCol >= 0 && _cachedTiles != null)
+            {
+                int minCol = Math.Min(_selStartCol < 0 ? _selHoverCol : _selStartCol, _selHoverCol);
+                int maxCol = Math.Max(_selStartCol < 0 ? _selHoverCol : _selStartCol, _selHoverCol);
+                int minRow = Math.Min(_selStartRow < 0 ? _selHoverRow : _selStartRow, _selHoverRow);
+                int maxRow = Math.Max(_selStartRow < 0 ? _selHoverRow : _selStartRow, _selHoverRow);
+
+                foreach (var t in _cachedTiles)
+                {
+                    int col = (int)(t.UiX / 64);
+                    int row = (int)(t.UiZ / 64);
+                    if (col >= minCol && col <= maxCol && row >= minRow && row <= maxRow)
+                        dc.DrawRectangle(SelectionFill, SelectionPen, new Rect(t.UiX, t.UiZ, 64, 64));
+                }
+            }
         }
 
         private void DrawTile(DrawingContext dc, TileInfo tile, double dpi)
@@ -245,6 +291,21 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
+            if (RoofTileSelectionService.Instance.IsSelecting)
+            {
+                var pos = e.GetPosition(this);
+                int col = (int)Math.Floor(pos.X / 64);
+                int row = (int)Math.Floor(pos.Y / 64);
+                Cursor = Cursors.Cross;
+                if (col != _selHoverCol || row != _selHoverRow)
+                {
+                    _selHoverCol = col;
+                    _selHoverRow = row;
+                    InvalidateVisual();
+                }
+                return;
+            }
+
             var hit = HitTestCached(e.GetPosition(this));
             int newIdx = hit?.idx ?? -1;
             EditField newField = hit?.field ?? EditField.None;
@@ -260,6 +321,12 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
+            if (RoofTileSelectionService.Instance.IsSelecting)
+            {
+                if (_selHoverCol >= 0) { _selHoverCol = _selHoverRow = -1; InvalidateVisual(); }
+                return;
+            }
+
             if (_hoverRf4Idx != -1)
             {
                 _hoverRf4Idx = -1;
@@ -271,10 +338,102 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (RoofTileSelectionService.Instance.IsSelecting)
+            {
+                var pos = e.GetPosition(this);
+                _selStartCol = _selHoverCol = (int)Math.Floor(pos.X / 64);
+                _selStartRow = _selHoverRow = (int)Math.Floor(pos.Y / 64);
+                _isDraggingTileSelection = true;
+                CaptureMouse();
+                Focus();
+                InvalidateVisual();
+                e.Handled = true;
+                return;
+            }
+
+            if (e.ClickCount == 2)
+            {
+                var tile = HitTestTile(e.GetPosition(this));
+                if (tile.HasValue)
+                {
+                    CancelEdit();
+                    OpenRoofFace4Preview(tile.Value);
+                    e.Handled = true;
+                    return;
+                }
+            }
+
             var hit = HitTestCached(e.GetPosition(this));
             if (hit == null) { CancelEdit(); return; }
             StartEdit(hit.Value.idx, hit.Value.field, hit.Value.value, hit.Value.rect);
             e.Handled = true;
+        }
+
+        private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!_isDraggingTileSelection) return;
+
+            _isDraggingTileSelection = false;
+            ReleaseMouseCapture();
+
+            var bounds = GetTileSelectionBounds();
+
+            if (bounds.HasValue)
+                RoofTileSelectionService.Instance.CompleteSelection(bounds.Value);
+            else
+                RoofTileSelectionService.Instance.Cancel();
+
+            e.Handled = true;
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape && (_isDraggingTileSelection || RoofTileSelectionService.Instance.IsSelecting))
+            {
+                _isDraggingTileSelection = false;
+                ReleaseMouseCapture();
+                RoofTileSelectionService.Instance.Cancel();
+                e.Handled = true;
+            }
+        }
+
+        private TileInfo? HitTestTile(Point pos)
+        {
+            if (_cachedTiles == null) return null;
+            foreach (var tile in _cachedTiles)
+            {
+                if (pos.X >= tile.UiX && pos.X <= tile.UiX + 64 &&
+                    pos.Y >= tile.UiZ && pos.Y <= tile.UiZ + 64)
+                    return tile;
+            }
+            return null;
+        }
+
+        private Rect? GetTileSelectionBounds()
+        {
+            if (_selHoverCol < 0) return null;
+            int startCol = _selStartCol >= 0 ? _selStartCol : _selHoverCol;
+            int startRow = _selStartRow >= 0 ? _selStartRow : _selHoverRow;
+            int minCol = Math.Min(startCol, _selHoverCol);
+            int maxCol = Math.Max(startCol, _selHoverCol);
+            int minRow = Math.Min(startRow, _selHoverRow);
+            int maxRow = Math.Max(startRow, _selHoverRow);
+            return new Rect(minCol * 64, minRow * 64, (maxCol - minCol + 1) * 64, (maxRow - minRow + 1) * 64);
+        }
+
+        private void OpenRoofFace4Preview(TileInfo tile)
+        {
+            var svc = MapDataService.Instance;
+            if (!svc.IsLoaded) return;
+
+            var snap = new BuildingsAccessor(svc).ReadSnapshot();
+            if (snap.RoofFaces4 == null || tile.Rf4Idx < 0 || tile.Rf4Idx >= snap.RoofFaces4.Length) return;
+
+            var dlg = new RoofFace4PreviewWindow(tile.Rf4Idx, snap.RoofFaces4[tile.Rf4Idx], SelectedWalkableId1)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            dlg.Show();
         }
 
         private (int idx, EditField field, int value, Rect rect)? HitTestCached(Point pos)

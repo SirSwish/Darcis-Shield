@@ -154,13 +154,16 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+            <Button Content="Apply to Selection" Padding="10,6" Margin="0,0,8,0"
+                    Click="BtnApplyToSelection_Click" Background="#4A2D5A" Foreground="White" BorderBrush="#7A4A8A"
+                    ToolTip="Drag a rectangle on the map to apply Y and DY values to all tiles in that area"/>
             <Button Content="Apply to All Tiles" Padding="10,6" Margin="0,0,8,0"
                     Click="BtnApplyToAll_Click" Background="#2D4A5A" Foreground="White" BorderBrush="#4A7A8A"
                     ToolTip="Apply Y, DY, DrawFlags and PAP flags to ALL RF4 tiles in the parent walkable"/>
             <Button Content="Apply" Width="80" Margin="0,0,8,0" Click="BtnApply_Click"
                     ToolTip="Write changes to this single RF4 tile"/>
             <Button Content="OK" Width="80" Margin="0,0,8,0" IsDefault="True" Click="BtnOk_Click"
-            ToolTip="Apply changes and close"/>
+                    ToolTip="Apply changes and close"/>
             <Button Content="Cancel" Width="80" IsCancel="True" Click="BtnClose_Click"/>
         </StackPanel>
     </Grid>

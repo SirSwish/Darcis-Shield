@@ -2,11 +2,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.ViewModels.Core;
+using UrbanChaosMapEditor.Views.Roofs.Dialogs;
 
 namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 {
@@ -36,6 +38,10 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
         private MapViewModel? _vm;
         private int _selWalkableId1;
+
+        // Cached bubble geometry for hit-testing
+        private Point? _bubbleCenter;
+        private double _bubbleRadius;
 
         static WalkablesLayer()
         {
@@ -95,7 +101,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         {
             Width = MapConstants.MapPixels;
             Height = MapConstants.MapPixels;
-            IsHitTestVisible = false;
+            IsHitTestVisible = true;
 
             var glowOuter = new SolidColorBrush(Color.FromArgb(120, 255, 255, 255)); glowOuter.Freeze();
             var glowInner = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255)); glowInner.Freeze();
@@ -167,6 +173,9 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         {
             base.OnRender(dc);
 
+            _bubbleCenter = null;
+            _bubbleRadius = 0;
+
             if (_walkables is null)
             {
                 SeedFromService();
@@ -181,6 +190,14 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
             bool hasFaces = w.EndFace4 > w.StartFace4;
             Rect r = ToMapRect(w.X1, w.Z1, w.X2, w.Z2);
+
+            // Cache bubble geometry for hit-testing
+            double minDim = r.Width < r.Height ? r.Width : r.Height;
+            if (minDim >= 28)
+            {
+                _bubbleCenter = new Point(r.Left + r.Width * 0.5, r.Top + r.Height * 0.5);
+                _bubbleRadius = Math.Clamp(minDim * 0.18, 12, 26);
+            }
 
             dc.DrawRectangle(hasFaces ? FillUsed : FillUnused, null, r);
             dc.DrawRectangle(hasFaces ? HatchUsed : HatchUnused, null, r);
@@ -213,6 +230,43 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             if (h < 0) { top += h; h = -h; }
 
             return new Rect(left, top, w, h);
+        }
+
+        protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters)
+        {
+            if (_bubbleCenter.HasValue)
+            {
+                Point pos = hitTestParameters.HitPoint;
+                double dx = pos.X - _bubbleCenter.Value.X;
+                double dy = pos.Y - _bubbleCenter.Value.Y;
+                if (dx * dx + dy * dy <= _bubbleRadius * _bubbleRadius)
+                    return new PointHitTestResult(this, pos);
+            }
+            return null!;
+        }
+
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+
+            if (e.ClickCount != 2) return;
+            if (!_bubbleCenter.HasValue) return;
+
+            Point pos = e.GetPosition(this);
+            double dx = pos.X - _bubbleCenter.Value.X;
+            double dy = pos.Y - _bubbleCenter.Value.Y;
+            if (dx * dx + dy * dy > _bubbleRadius * _bubbleRadius) return;
+
+            var svc = MapDataService.Instance;
+            if (!svc.TryGetWalkables(out var walkables, out var roofFaces4)) return;
+            if (_selWalkableId1 < 1 || _selWalkableId1 >= walkables.Length) return;
+
+            var dlg = new WalkablePreviewWindow(_selWalkableId1, walkables[_selWalkableId1], roofFaces4)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            dlg.Show();
+            e.Handled = true;
         }
 
         private static void DrawHeightBubble(DrawingContext dc, Visual visual, Rect r, int y)

@@ -82,7 +82,25 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
         public MapViewModel? MapViewModel
         {
             get => _mapViewModel;
-            set { _mapViewModel = value; OnPropertyChanged(); }
+            set
+            {
+                if (_mapViewModel != null)
+                    _mapViewModel.PropertyChanged -= OnMapVmPropertyChanged;
+                _mapViewModel = value;
+                if (_mapViewModel != null)
+                    _mapViewModel.PropertyChanged += OnMapVmPropertyChanged;
+                OnPropertyChanged();
+            }
+        }
+
+        private void OnMapVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(UrbanChaosMapEditor.ViewModels.Core.MapViewModel.SelectedBuildingId))
+            {
+                int buildingId = _mapViewModel?.SelectedBuildingId ?? 0;
+                if (buildingId > 0)
+                    SyncFromBuildingSelection(buildingId);
+            }
         }
 
         public RoofsTabViewModel()

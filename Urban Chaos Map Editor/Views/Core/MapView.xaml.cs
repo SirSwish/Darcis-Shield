@@ -1655,7 +1655,7 @@ namespace UrbanChaosMapEditor.Views.Core
         private static void ForEachVertexInBrush(int vx, int vy, int brushSize, Action<int, int> applyByTile)
         {
             int size = Math.Clamp(brushSize, 1, 10);
-            int half = size / 2;
+            int half = (size - 1) / 2;
 
             int startTx = (vx - 1) - half;
             int startTy = (vy - 1) - half;

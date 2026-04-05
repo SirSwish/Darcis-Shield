@@ -31,7 +31,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowTextures, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="0"
+                        Panel.ZIndex="1"
                         IsHitTestVisible="False"/>
 
                     <!-- Grid -->
@@ -56,7 +56,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowHeights, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="3">
+                        Panel.ZIndex="4">
                         <hgtOvl:HeightsLayer.Style>
                             <Style TargetType="{x:Type hgtOvl:HeightsLayer}">
                                 <Setter Property="IsHitTestVisible" Value="False"/>
@@ -75,7 +75,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowCellFlags, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="98"
+                        Panel.ZIndex="11"
                         IsHitTestVisible="True"/>
 
                     <!-- Buildings -->
@@ -84,7 +84,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowBuildings, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="4"
+                        Panel.ZIndex="7"
                         IsHitTestVisible="False"/>
 
                     <!-- Prim graphics -->
@@ -121,8 +121,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowWalkables, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="6"
-                        IsHitTestVisible="False"/>
+                        Panel.ZIndex="8"/>
                     
                     <!-- Altitude hover -->
                     <hgtOvl:AltitudeHoverLayer
@@ -138,14 +137,14 @@
                         Visibility="{Binding ShowRoofs, Converter={StaticResource BoolToVis}}"
                         SelectedWalkableId1="{Binding SelectedWalkableId1}"
                         SelectedRf4Id="{Binding SelectedRf4Id}"
-                        Panel.ZIndex="51"/>
+                        Panel.ZIndex="9"/>
 
                     <rfOvl:RoofAltitudesLayer
                         x:Name="RoofAltitudesOverlay"
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowRoofAltitudes, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="52"
+                        Panel.ZIndex="10"
                         IsHitTestVisible="False"/>
 
                     <!-- Ghost preview for texture painting -->

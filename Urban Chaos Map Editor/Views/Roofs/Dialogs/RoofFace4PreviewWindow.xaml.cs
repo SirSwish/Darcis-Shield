@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using UrbanChaosMapEditor.Models.Buildings;
+using System.Windows;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Roofs;
@@ -54,7 +55,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 ChkPap12, ChkPap13, ChkPap14, ChkPap15
             };
 
-            Title = $"RoofFace4 Editor — #{index}";
+            Title = $"RoofFace4 Editor ï¿½ #{index}";
             HeaderTextBlock.Text = $"RoofFace4 #{index}";
 
             bool anyDy = rf.DY0 != 0 || rf.DY1 != 0 || rf.DY2 != 0;
@@ -98,7 +99,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             if (gameX < 0 || gameX >= PAP_TILES || gameZ < 0 || gameZ >= PAP_TILES)
             {
-                TxtPapFlags.Text = "—";
+                TxtPapFlags.Text = "ï¿½";
                 return;
             }
 
@@ -108,7 +109,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             if (offset + PAP_TILE_SIZE > bytes.Length)
             {
-                TxtPapFlags.Text = "—";
+                TxtPapFlags.Text = "ï¿½";
                 return;
             }
 
@@ -273,7 +274,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         }
 
         // ====================================================================
-        // Apply — write single RF4 + PAP_HI flags
+        // Apply ï¿½ write single RF4 + PAP_HI flags
         // ====================================================================
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)
@@ -288,7 +289,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         }
 
         // ====================================================================
-        // Apply to All — write Y, DY, DrawFlags, PAP flags to all RF4s in walkable
+        // Apply to All ï¿½ write Y, DY, DrawFlags, PAP flags to all RF4s in walkable
         // ====================================================================
 
         private bool ApplySingleRf4()
@@ -346,6 +347,121 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             SetStatus($"Updated RoofFace4 #{_index}");
             return true;
+        }
+
+        private void BtnApplyToSelection_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show("No map loaded.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!TryParseRf4Fields(out var y, out var dy0, out var dy1, out var dy2,
+                                    out _, out _, out _, out var drawFlags))
+            {
+                MessageBox.Show("Invalid RF4 field values.", "Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            TryParsePapFlags(out var papFlags);
+
+            WindowState = WindowState.Minimized;
+
+            // Restore window whether selection completes or is cancelled
+            void onEnded(object? s, EventArgs a)
+            {
+                RoofTileSelectionService.Instance.SelectionEnded -= onEnded;
+                Dispatcher.Invoke(() => WindowState = WindowState.Normal);
+            }
+            RoofTileSelectionService.Instance.SelectionEnded += onEnded;
+
+            RoofTileSelectionService.Instance.BeginSelection(rect =>
+                Dispatcher.Invoke(() => ApplyToSelectionRect(rect, y, dy0, dy1, dy2, drawFlags, papFlags)));
+        }
+
+        private void ApplyToSelectionRect(Rect selRect, short y, sbyte dy0, sbyte dy1, sbyte dy2,
+                                           byte drawFlags, ushort papFlags)
+        {
+            var svc = MapDataService.Instance;
+            if (!svc.IsLoaded) return;
+
+            var acc = new BuildingsAccessor(svc);
+            var snap = acc.ReadSnapshot();
+            if (snap.WalkablesStart < 0 || snap.Walkables == null || snap.RoofFaces4 == null) return;
+
+            // Resolve walkable range (same logic as Apply to All)
+            int startFace4 = -1, endFace4 = -1, walkableId = _walkableId1;
+            if (walkableId > 0 && walkableId < snap.Walkables.Length)
+            {
+                startFace4 = snap.Walkables[walkableId].StartFace4;
+                endFace4   = snap.Walkables[walkableId].EndFace4;
+            }
+            else
+            {
+                for (int i = 1; i < snap.Walkables.Length; i++)
+                {
+                    var w = snap.Walkables[i];
+                    if (_index >= w.StartFace4 && _index < w.EndFace4)
+                    {
+                        startFace4 = w.StartFace4; endFace4 = w.EndFace4; walkableId = i; break;
+                    }
+                }
+            }
+
+            if (startFace4 < 0 || endFace4 <= startFace4)
+            {
+                MessageBox.Show("Cannot determine parent walkable.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var bytes = svc.GetBytesCopy();
+            int rf4DataOff = GetRf4DataOffset(bytes, snap.WalkablesStart);
+            int updated = 0;
+
+            for (int i = startFace4; i < endFace4 && i < snap.RoofFaces4.Length; i++)
+            {
+                if (i < 1) continue;
+                var rf4 = snap.RoofFaces4[i];
+
+                int tileX = rf4.RX & 0x7F;
+                int tileZ = rf4.RZ - 128;
+                if (tileX < 0 || tileX > 127 || tileZ < 0 || tileZ > 127) continue;
+
+                // Tile center in map UI coordinates â€” matches col/row grid used by selection.
+                double cx = (128 - tileX - 1) * 64.0 + 32;
+                double cz = (128 - tileZ - 1) * 64.0 + 32;
+                if (!selRect.Contains(new Point(cx, cz))) continue;
+
+                int rf4Off = rf4DataOff + i * RF4_SIZE;
+                if (rf4Off + RF4_SIZE > bytes.Length) continue;
+
+                byte existingRX   = bytes[rf4Off + 6];
+                byte existingRZ   = bytes[rf4Off + 7];
+                short existingNext = (short)(bytes[rf4Off + 8] | (bytes[rf4Off + 9] << 8));
+
+                WriteRf4(bytes, rf4Off, y, dy0, dy1, dy2, drawFlags, existingRX, existingRZ, existingNext);
+                WritePapFlags(bytes, tileX, tileZ, papFlags);
+                updated++;
+            }
+
+            if (updated == 0)
+            {
+                MessageBox.Show("No tiles found in the selected area.", "Apply to Selection",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            svc.ReplaceBytes(bytes);
+            svc.MarkDirty();
+            RoofsChangeBus.Instance.NotifyChanged();
+            BuildingsChangeBus.Instance.NotifyChanged();
+
+            SetStatus($"Applied to {updated} RF4 tile(s) in selection");
+            MessageBox.Show($"Updated {updated} RF4 tile(s) in the selection.", "Apply to Selection",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void BtnApplyToAll_Click(object sender, RoutedEventArgs e)
@@ -432,7 +548,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 int rf4Off = rf4DataOff + (i * RF4_SIZE);
                 if (rf4Off + RF4_SIZE > bytes.Length) continue;
 
-                // Read existing RX, RZ, Next — keep them per-tile
+                // Read existing RX, RZ, Next ï¿½ keep them per-tile
                 byte existingRX = bytes[rf4Off + 6];
                 byte existingRZ = bytes[rf4Off + 7];
                 short existingNext = (short)(bytes[rf4Off + 8] | (bytes[rf4Off + 9] << 8));

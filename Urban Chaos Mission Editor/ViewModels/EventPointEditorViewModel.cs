@@ -1962,8 +1962,11 @@ public class EventPointEditorViewModel : BaseViewModel
     public int EnemyAIType
     {
         get => _model.Data[5] & 0xFFFF;
-        set { _model.Data[5] = (_model.Data[5] & unchecked((int)0xFFFF0000)) | (value & 0xFFFF); OnPropertyChanged(); }
+        set { _model.Data[5] = (_model.Data[5] & unchecked((int)0xFFFF0000)) | (value & 0xFFFF); OnPropertyChanged(); OnPropertyChanged(nameof(IsFightTestDummy)); }
     }
+
+    // Fight-test dummy is AI index 12 — only this AI type uses Combat Abilities
+    public bool IsFightTestDummy => EnemyAIType == 12;
 
     // Ability level (HIWORD of Data[5])
     public int EnemyAbilityLevel
@@ -1993,6 +1996,38 @@ public class EventPointEditorViewModel : BaseViewModel
     public bool CombatGrapple { get => (EnemyCombatFlags & (1 << 4)) != 0; set { EnemyCombatFlags = value ? EnemyCombatFlags | (1 << 4) : EnemyCombatFlags & ~(1 << 4); OnPropertyChanged(); } }
     public bool CombatSideKick { get => (EnemyCombatFlags & (1 << 5)) != 0; set { EnemyCombatFlags = value ? EnemyCombatFlags | (1 << 5) : EnemyCombatFlags & ~(1 << 5); OnPropertyChanged(); } }
     public bool CombatBackKick { get => (EnemyCombatFlags & (1 << 6)) != 0; set { EnemyCombatFlags = value ? EnemyCombatFlags | (1 << 6) : EnemyCombatFlags & ~(1 << 6); OnPropertyChanged(); } }
+
+    // Weapon drops (Data[8]) — wweaponitem_strings bitmask
+    private int EnemyWeapFlags
+    {
+        get => _model.Data[8];
+        set { _model.Data[8] = value; }
+    }
+
+    public bool DropKey         { get => (EnemyWeapFlags & (1 << 0))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 0)  : EnemyWeapFlags & ~(1 << 0);  OnPropertyChanged(); } }
+    public bool DropGun         { get => (EnemyWeapFlags & (1 << 1))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 1)  : EnemyWeapFlags & ~(1 << 1);  OnPropertyChanged(); } }
+    public bool DropHealth      { get => (EnemyWeapFlags & (1 << 2))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 2)  : EnemyWeapFlags & ~(1 << 2);  OnPropertyChanged(); } }
+    public bool DropBomb        { get => (EnemyWeapFlags & (1 << 3))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 3)  : EnemyWeapFlags & ~(1 << 3);  OnPropertyChanged(); } }
+    public bool DropShotgun     { get => (EnemyWeapFlags & (1 << 4))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 4)  : EnemyWeapFlags & ~(1 << 4);  OnPropertyChanged(); } }
+    public bool DropKnife       { get => (EnemyWeapFlags & (1 << 5))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 5)  : EnemyWeapFlags & ~(1 << 5);  OnPropertyChanged(); } }
+    public bool DropExplosives  { get => (EnemyWeapFlags & (1 << 6))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 6)  : EnemyWeapFlags & ~(1 << 6);  OnPropertyChanged(); } }
+    public bool DropGrenade     { get => (EnemyWeapFlags & (1 << 7))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 7)  : EnemyWeapFlags & ~(1 << 7);  OnPropertyChanged(); } }
+    public bool DropAK47        { get => (EnemyWeapFlags & (1 << 8))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 8)  : EnemyWeapFlags & ~(1 << 8);  OnPropertyChanged(); } }
+    public bool DropMine        { get => (EnemyWeapFlags & (1 << 9))  != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 9)  : EnemyWeapFlags & ~(1 << 9);  OnPropertyChanged(); } }
+    public bool DropThermodroid { get => (EnemyWeapFlags & (1 << 10)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 10) : EnemyWeapFlags & ~(1 << 10); OnPropertyChanged(); } }
+    public bool DropBat         { get => (EnemyWeapFlags & (1 << 11)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 11) : EnemyWeapFlags & ~(1 << 11); OnPropertyChanged(); } }
+    public bool DropAmmoPistol  { get => (EnemyWeapFlags & (1 << 12)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 12) : EnemyWeapFlags & ~(1 << 12); OnPropertyChanged(); } }
+    public bool DropAmmoShotgun { get => (EnemyWeapFlags & (1 << 13)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 13) : EnemyWeapFlags & ~(1 << 13); OnPropertyChanged(); } }
+    public bool DropAmmoAK47    { get => (EnemyWeapFlags & (1 << 14)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 14) : EnemyWeapFlags & ~(1 << 14); OnPropertyChanged(); } }
+    public bool DropKeycard     { get => (EnemyWeapFlags & (1 << 15)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 15) : EnemyWeapFlags & ~(1 << 15); OnPropertyChanged(); } }
+    public bool DropFile        { get => (EnemyWeapFlags & (1 << 16)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 16) : EnemyWeapFlags & ~(1 << 16); OnPropertyChanged(); } }
+    public bool DropFloppyDisk  { get => (EnemyWeapFlags & (1 << 17)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 17) : EnemyWeapFlags & ~(1 << 17); OnPropertyChanged(); } }
+    public bool DropCrowbar     { get => (EnemyWeapFlags & (1 << 18)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 18) : EnemyWeapFlags & ~(1 << 18); OnPropertyChanged(); } }
+    public bool DropGasmask     { get => (EnemyWeapFlags & (1 << 19)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 19) : EnemyWeapFlags & ~(1 << 19); OnPropertyChanged(); } }
+    public bool DropWrench      { get => (EnemyWeapFlags & (1 << 20)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 20) : EnemyWeapFlags & ~(1 << 20); OnPropertyChanged(); } }
+    public bool DropVideo       { get => (EnemyWeapFlags & (1 << 21)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 21) : EnemyWeapFlags & ~(1 << 21); OnPropertyChanged(); } }
+    public bool DropGloves      { get => (EnemyWeapFlags & (1 << 22)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 22) : EnemyWeapFlags & ~(1 << 22); OnPropertyChanged(); } }
+    public bool DropWeedaway    { get => (EnemyWeapFlags & (1 << 23)) != 0; set { EnemyWeapFlags = value ? EnemyWeapFlags | (1 << 23) : EnemyWeapFlags & ~(1 << 23); OnPropertyChanged(); } }
 
     // ============================================================
     // Item-specific properties (WPT_CREATE_ITEM)

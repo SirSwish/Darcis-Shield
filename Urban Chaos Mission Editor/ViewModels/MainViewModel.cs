@@ -1026,7 +1026,7 @@ public class MainViewModel : BaseViewModel
         // Step 4: Create new EventPoint with the selected type
         var newEventPoint = new Models.EventPoint
         {
-            Index = freeIndex + 1, // 1-based index
+            Index = freeIndex, // array position = display index (same as loader: Index = i)
             WaypointType = selectedType,
             Used = true,
             Group = 0, // Default to group A
@@ -1040,39 +1040,83 @@ public class MainViewModel : BaseViewModel
             Z = initialZ,
         };
 
-        // Step 5: Open the editor for the new EventPoint
+        // Step 5: Open the editor for the new EventPoint (loop handles "Select Position on Map")
         var editorVm = new EventPointEditorViewModel(newEventPoint);
-        var editorWindow = new Views.EventPointEditorWindow
+
+        while (true)
         {
-            DataContext = editorVm,
-            Owner = System.Windows.Application.Current.MainWindow
-        };
+            var editorWindow = new Views.EventPointEditorWindow
+            {
+                DataContext = editorVm,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
 
-        var result = editorWindow.ShowDialog();
+            var result = editorWindow.ShowDialog();
 
-        if (result == true)
-        {
-            // Step 5: Add to mission and refresh
-            _currentMission.EventPoints[freeIndex] = newEventPoint;
+            if (editorWindow.NeedsPositionSelection)
+            {
+                var mainWindow = System.Windows.Application.Current.MainWindow as Views.MainWindow;
+                if (mainWindow?.MapViewControl != null)
+                {
+                    var positionSelected = false;
+                    var selectedX = 0;
+                    var selectedZ = 0;
 
-            // Update linked list pointers (simplified - just mark as used)
-            // In a full implementation, we'd update FreeEPoints/UsedEPoints linked lists
+                    mainWindow.MapViewControl.EnterPositionSelectionMode((worldX, worldZ) =>
+                    {
+                        selectedX = worldX;
+                        selectedZ = worldZ;
+                        positionSelected = true;
+                    });
 
-            // Add to our observable collection
-            var viewModel = new EventPointViewModel(newEventPoint);
-            EventPoints.Add(viewModel);
+                    void OnKeyDown(object s, System.Windows.Input.KeyEventArgs e)
+                    {
+                        if (e.Key == System.Windows.Input.Key.Escape)
+                        {
+                            mainWindow.MapViewControl.ExitPositionSelectionMode();
+                            positionSelected = false;
+                            e.Handled = true;
+                        }
+                    }
+                    mainWindow.PreviewKeyDown += OnKeyDown;
 
-            // Update category counts
-            UpdateCategoryCounts();
-            ApplyFilters();
+                    while (mainWindow.MapViewControl.IsInPositionSelectionMode)
+                    {
+                        System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
+                            System.Windows.Threading.DispatcherPriority.Background,
+                            new Action(delegate { }));
+                        System.Threading.Thread.Sleep(10);
+                    }
 
-            // Select the new event point
-            SelectedEventPoint = viewModel;
+                    mainWindow.PreviewKeyDown -= OnKeyDown;
 
-            StatusMessage = $"Created new EventPoint {freeIndex + 1}: {Constants.EditorStrings.GetWaypointTypeName(selectedType)}";
-            IsDirty = true;
+                    if (positionSelected)
+                    {
+                        editorVm.WorldX = selectedX;
+                        editorVm.WorldZ = selectedZ;
+                    }
+                }
+                continue; // Reopen editor with updated position
+            }
+
+            if (result == true)
+            {
+                _currentMission.EventPoints[freeIndex] = newEventPoint;
+
+                var viewModel = new EventPointViewModel(newEventPoint);
+                EventPoints.Add(viewModel);
+
+                UpdateCategoryCounts();
+                ApplyFilters();
+
+                SelectedEventPoint = viewModel;
+
+                StatusMessage = $"Created new EventPoint {freeIndex + 1}: {Constants.EditorStrings.GetWaypointTypeName(selectedType)}";
+                IsDirty = true;
+            }
+            // If cancelled, we don't add anything
+            break;
         }
-        // If cancelled, we don't add anything
     }
 
     /// <summary>
@@ -1306,7 +1350,7 @@ public class MainViewModel : BaseViewModel
         IsDirty = true;
     }
 
-    private void ExecuteMissionProperties()
+    private async void ExecuteMissionProperties()
     {
         if (_currentMission == null) return;
 
@@ -1326,6 +1370,7 @@ public class MainViewModel : BaseViewModel
             OnPropertyChanged(nameof(LightMapName));
             StatusMessage = "Mission properties updated";
             IsDirty = true;
+            await TryAutoLoadMapAndLightsAsync(CurrentFilePath ?? string.Empty);
         }
         else
         {
@@ -1372,8 +1417,8 @@ public class MainViewModel : BaseViewModel
     {
         if (_currentMission == null) return;
 
-        var ucmDir = Path.GetDirectoryName(ucmFilePath);
-        if (ucmDir == null) return;
+        // For unsaved new missions ucmFilePath may be empty — use "" so absolute paths still resolve.
+        var ucmDir = Path.GetDirectoryName(ucmFilePath) ?? string.Empty;
 
         // Try to find the game root (parent of 'levels' folder)
         var gameRoot = FindGameRoot(ucmDir);

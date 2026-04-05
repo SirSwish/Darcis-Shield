@@ -13,7 +13,7 @@ public static class EditorStrings
         "None",                 // 0
         "Simple Waypoint",      // 1
         "Create Player",        // 2
-        "Create Enemies",       // 3
+        "Create NPC",           // 3
         "Create Vehicle",       // 4
         "Create Item",          // 5
         "Create Creature",      // 6
@@ -32,7 +32,7 @@ public static class EditorStrings
         "Shout",                // 19
         "Activate Prim",        // 20
         "Create Trap",          // 21
-        "Adjust Enemy",         // 22
+        "Adjust NPC",           // 22
         "Link Platform",        // 23
         "Create Bomb",          // 24
         "Burn Prim",            // 25
@@ -312,6 +312,37 @@ public static class EditorStrings
         "Shockwave",
         "Smoke Trails",
         "Bonfire"
+    };
+
+    /// <summary>
+    /// wweaponitem_strings — weapon items dropped by enemies (Data[8] bitmask)
+    /// </summary>
+    public static readonly string[] EnemyWeaponDropNames =
+    {
+        "Key",
+        "Gun",
+        "Health",
+        "Bomb",
+        "Shotgun",
+        "Knife",
+        "Explosives",
+        "Grenade",
+        "AK47",
+        "Mine",
+        "Thermodroid",
+        "Baseball Bat",
+        "Ammo Pistol",
+        "Ammo Shotgun",
+        "Ammo AK47",
+        "Keycard",
+        "File",
+        "Floppy Disk",
+        "Crowbar",
+        "Gasmask",
+        "Wrench",
+        "Video",
+        "Gloves",
+        "Weedaway",
     };
 
     /// <summary>

@@ -108,7 +108,7 @@ public class EventPointViewModel : BaseViewModel
     public string WaypointTypeName => EditorStrings.GetWaypointTypeName(_model.WaypointType);
     public string TriggerTypeName => EditorStrings.GetTriggerTypeName(_model.TriggeredBy);
     public string ColorName => WaypointColors.GetColorName(_model.Colour);
-    public string CategoryName => _model.Category.ToString();
+    public string CategoryName => _model.Category == WaypointCategory.Enemies ? "NPCs" : _model.Category.ToString();
 
     // Position display string
     public string PositionString => $"({MapX}, {MapZ})";

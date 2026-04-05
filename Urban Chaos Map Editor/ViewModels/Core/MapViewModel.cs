@@ -505,6 +505,27 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             }
         }
 
+        private int _randomizeMaxHeight = 127;
+        public int RandomizeMaxHeight
+        {
+            get => _randomizeMaxHeight;
+            set { var v = Math.Clamp(value, 0, 127); if (_randomizeMaxHeight != v) { _randomizeMaxHeight = v; OnPropertyChanged(); } }
+        }
+
+        private int _randomizeMaxDepth = 127;
+        public int RandomizeMaxDepth
+        {
+            get => _randomizeMaxDepth;
+            set { var v = Math.Clamp(value, 0, 127); if (_randomizeMaxDepth != v) { _randomizeMaxDepth = v; OnPropertyChanged(); } }
+        }
+
+        private int _randomizeMaxSlope = 0;
+        public int RandomizeMaxSlope
+        {
+            get => _randomizeMaxSlope;
+            set { var v = Math.Clamp(value, 0, 127); if (_randomizeMaxSlope != v) { _randomizeMaxSlope = v; OnPropertyChanged(); } }
+        }
+
         // ===== Cell Altitude editing =====
         private int _targetAltitude = 0; // world altitude value
         public int TargetAltitude

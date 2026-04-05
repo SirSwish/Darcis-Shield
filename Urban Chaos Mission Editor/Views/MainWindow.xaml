@@ -582,7 +582,7 @@
                                                 <Ellipse Width="8" Height="8" 
                                          Fill="{Binding DisplayBrush}" 
                                          Margin="0,0,4,0"/>
-                                                <TextBlock Text="{Binding Category}"/>
+                                                <TextBlock Text="{Binding Name}"/>
                                                 <TextBlock Text="{Binding Count, StringFormat=' ({0})'}" 
                                            Foreground="#666" FontSize="9"/>
                                             </StackPanel>

@@ -15,7 +15,11 @@ public class CategoryFilterViewModel : BaseViewModel
     public CategoryFilterViewModel(WaypointCategory category)
     {
         Category = category;
-        Name = category.ToString();
+        Name = category switch
+        {
+            WaypointCategory.Enemies => "NPCs",
+            _ => category.ToString()
+        };
         Color = WaypointColors.GetCategoryColor(category);
         Brush = new SolidColorBrush(Color);
     }

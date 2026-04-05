@@ -535,20 +535,10 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             if (rectPx.Width < 2 || rectPx.Height < 2)
                 return;
 
-            int vx0 = ClampToVertexIndex((int)Math.Floor(rectPx.Left / TileSize));
-            int vx1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Right / TileSize));
-            int vz0 = ClampToVertexIndex((int)Math.Floor(rectPx.Top / TileSize));
-            int vz1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Bottom / TileSize));
-
-            int minVX = Math.Min(vx0, vx1);
-            int maxVX = Math.Max(vx0, vx1);
-            int minVZ = Math.Min(vz0, vz1);
-            int maxVZ = Math.Max(vz0, vz1);
-
-            int tx0 = Math.Clamp(minVX - 1, 0, TilesPerSide - 1);
-            int tx1 = Math.Clamp(maxVX - 1, 0, TilesPerSide - 1);
-            int ty0 = Math.Clamp(minVZ - 1, 0, TilesPerSide - 1);
-            int ty1 = Math.Clamp(maxVZ - 1, 0, TilesPerSide - 1);
+            int tx0 = Math.Clamp((int)Math.Floor(rectPx.Left          / TileSize), 0, TilesPerSide - 1);
+            int tx1 = Math.Clamp((int)Math.Floor((rectPx.Right  - 1.0) / TileSize), 0, TilesPerSide - 1);
+            int ty0 = Math.Clamp((int)Math.Floor(rectPx.Top           / TileSize), 0, TilesPerSide - 1);
+            int ty1 = Math.Clamp((int)Math.Floor((rectPx.Bottom - 1.0) / TileSize), 0, TilesPerSide - 1);
 
             int raw = Math.Clamp(_vm.AreaSetHeightValue, -127, 127);
 
@@ -570,36 +560,91 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             rectPx = NormalizeRect(rectPx);
             if (rectPx.Width < 2 || rectPx.Height < 2) return;
 
-            int vx0 = ClampToVertexIndex((int)Math.Floor(rectPx.Left  / TileSize));
-            int vx1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Right  / TileSize));
-            int vz0 = ClampToVertexIndex((int)Math.Floor(rectPx.Top    / TileSize));
-            int vz1 = ClampToVertexIndex((int)Math.Ceiling(rectPx.Bottom / TileSize));
-
-            int minVX = Math.Min(vx0, vx1);
-            int maxVX = Math.Max(vx0, vx1);
-            int minVZ = Math.Min(vz0, vz1);
-            int maxVZ = Math.Max(vz0, vz1);
-
-            // Vertex index → tile index (vertex vx sits at the corner of tile tx = vx-1)
-            int tx0 = Math.Clamp(minVX - 1, 0, TilesPerSide - 1);
-            int tx1 = Math.Clamp(maxVX - 1, 0, TilesPerSide - 1);
-            int ty0 = Math.Clamp(minVZ - 1, 0, TilesPerSide - 1);
-            int ty1 = Math.Clamp(maxVZ - 1, 0, TilesPerSide - 1);
+            int tx0 = Math.Clamp((int)Math.Floor(rectPx.Left          / TileSize), 0, TilesPerSide - 1);
+            int tx1 = Math.Clamp((int)Math.Floor((rectPx.Right  - 1.0) / TileSize), 0, TilesPerSide - 1);
+            int ty0 = Math.Clamp((int)Math.Floor(rectPx.Top           / TileSize), 0, TilesPerSide - 1);
+            int ty1 = Math.Clamp((int)Math.Floor((rectPx.Bottom - 1.0) / TileSize), 0, TilesPerSide - 1);
 
             int areaW = tx1 - tx0 + 1;
             int areaH = ty1 - ty0 + 1;
 
-            int seed = Environment.TickCount;
+            int seed        = Environment.TickCount;
             const double roughness  = 0.60;
             const int    blurPasses = 1;
 
+            int maxH     = Math.Clamp(_vm.RandomizeMaxHeight, 0, 127);
+            int maxD     = Math.Clamp(_vm.RandomizeMaxDepth,  0, 127);
+            int maxSlope = Math.Clamp(_vm.RandomizeMaxSlope,  1, 127);
+
             // Generate coherent fractal terrain sized exactly to the selected area
-            sbyte[,] heights = Services.Heights.TerrainGenerator.GenerateHeightsArea(
+            sbyte[,] raw = Services.Heights.TerrainGenerator.GenerateHeightsArea(
                 seed, areaW, areaH, roughness, blurPasses);
 
-            for (int tx = tx0; tx <= tx1; tx++)
-                for (int ty = ty0; ty <= ty1; ty++)
-                    _accessor.WriteHeight(tx, ty, heights[tx - tx0, ty - ty0]);
+            // Scale from [-127,127] to [-maxD, maxH]
+            var hf = new int[areaW, areaH];
+            for (int lx = 0; lx < areaW; lx++)
+                for (int ly = 0; ly < areaH; ly++)
+                {
+                    double norm = raw[lx, ly] / 127.0; // [-1, 1]
+                    hf[lx, ly] = (int)Math.Round(norm >= 0.0 ? norm * maxH : norm * maxD);
+                }
+
+            // Slope relaxation — only applied when the user has set a max slope value.
+            // Run enough passes so the constraint fully propagates across the entire area
+            // (a constraint at one edge needs up to max(areaW,areaH) passes to reach the far side).
+            // Outside-boundary neighbors use the existing map height as a fixed constraint.
+            if (maxSlope > 0)
+            {
+                // Pre-read the one-tile border around the selection from the existing map
+                // so boundary lookups are free of repeated accessor calls inside the loop.
+                var borderL = new int[areaH];
+                var borderR = new int[areaH];
+                var borderT = new int[areaW];
+                var borderB = new int[areaW];
+                for (int ly = 0; ly < areaH; ly++)
+                {
+                    borderL[ly] = (tx0 - 1 >= 0)           ? _accessor.ReadHeight(tx0 - 1, ty0 + ly) : int.MinValue;
+                    borderR[ly] = (tx1 + 1 < TilesPerSide)  ? _accessor.ReadHeight(tx1 + 1, ty0 + ly) : int.MinValue;
+                }
+                for (int lx = 0; lx < areaW; lx++)
+                {
+                    borderT[lx] = (ty0 - 1 >= 0)           ? _accessor.ReadHeight(tx0 + lx, ty0 - 1) : int.MinValue;
+                    borderB[lx] = (ty1 + 1 < TilesPerSide)  ? _accessor.ReadHeight(tx0 + lx, ty1 + 1) : int.MinValue;
+                }
+
+                int passes = Math.Max(areaW, areaH);
+                for (int pass = 0; pass < passes; pass++)
+                {
+                    for (int lx = 0; lx < areaW; lx++)
+                    for (int ly = 0; ly < areaH; ly++)
+                    {
+                        int h = hf[lx, ly];
+
+                        // Left neighbor
+                        int nl = lx > 0 ? hf[lx - 1, ly] : borderL[ly];
+                        if (nl != int.MinValue) h = Math.Clamp(h, nl - maxSlope, nl + maxSlope);
+
+                        // Right neighbor
+                        int nr = lx < areaW - 1 ? hf[lx + 1, ly] : borderR[ly];
+                        if (nr != int.MinValue) h = Math.Clamp(h, nr - maxSlope, nr + maxSlope);
+
+                        // Top neighbor
+                        int nt = ly > 0 ? hf[lx, ly - 1] : borderT[lx];
+                        if (nt != int.MinValue) h = Math.Clamp(h, nt - maxSlope, nt + maxSlope);
+
+                        // Bottom neighbor
+                        int nb = ly < areaH - 1 ? hf[lx, ly + 1] : borderB[lx];
+                        if (nb != int.MinValue) h = Math.Clamp(h, nb - maxSlope, nb + maxSlope);
+
+                        hf[lx, ly] = h;
+                    }
+                }
+            }
+
+            // Write clamped heights to the map
+            for (int lx = 0; lx < areaW; lx++)
+                for (int ly = 0; ly < areaH; ly++)
+                    _accessor.WriteHeight(tx0 + lx, ty0 + ly, (sbyte)Math.Clamp(hf[lx, ly], -127, 127));
 
             HeightsChangeBus.Instance.NotifyRegion(tx0, ty0, tx1, ty1);
             MapDataService.Instance.MarkDirty();
@@ -627,6 +672,8 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private VertexBounds GetBrushBounds(int centerVX, int centerVZ)
         {
             if (centerVX < 0 || centerVZ < 0)
+                return VertexBounds.Empty;
+            if (_vm != null && IsAreaDragTool(_vm.SelectedTool))
                 return VertexBounds.Empty;
 
             int n = Math.Max(1, _vm?.BrushSize ?? 1);

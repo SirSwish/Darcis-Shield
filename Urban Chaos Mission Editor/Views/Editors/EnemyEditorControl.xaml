@@ -175,20 +175,55 @@
             <CheckBox Content="Magenta Zone" IsChecked="{Binding FlagMagentaZone}" Width="105"/>
         </WrapPanel>
 
+        <!-- Combat Abilities — only shown for Fight-test dummy AI (index 12) -->
+        <Separator Background="#FF555555" Margin="0,8,0,8"
+                   Visibility="{Binding IsFightTestDummy, Converter={StaticResource BoolToVis}}"/>
+        <StackPanel Visibility="{Binding IsFightTestDummy, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="Combat Abilities" FontWeight="SemiBold" Margin="0,0,0,5"/>
+            <WrapPanel Margin="0,0,0,3">
+                <CheckBox Content="Slide Attack" IsChecked="{Binding CombatSlide}" Width="100" ToolTip="Can perform slide attack"/>
+                <CheckBox Content="PPP Combo" IsChecked="{Binding CombatComboPPP}" Width="100" ToolTip="Punch-Punch-Punch combo"/>
+                <CheckBox Content="KKK Combo" IsChecked="{Binding CombatComboKKK}" Width="100" ToolTip="Kick-Kick-Kick combo"/>
+            </WrapPanel>
+            <WrapPanel>
+                <CheckBox Content="Any Combo" IsChecked="{Binding CombatComboAny}" Width="100" ToolTip="Mixed combos"/>
+                <CheckBox Content="Grapple" IsChecked="{Binding CombatGrapple}" Width="80" ToolTip="Grappling attacks"/>
+                <CheckBox Content="Side Kick" IsChecked="{Binding CombatSideKick}" Width="90" ToolTip="Side kick attack"/>
+                <CheckBox Content="Back Kick" IsChecked="{Binding CombatBackKick}" Width="90" ToolTip="Back kick attack"/>
+            </WrapPanel>
+        </StackPanel>
+
         <Separator Background="#FF555555" Margin="0,8,0,8"/>
 
-        <!-- Combat Abilities -->
-        <TextBlock Text="Combat Abilities" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <!-- Item Drops (Data[8] — wweaponitem_strings bitmask) -->
+        <TextBlock Text="Item Drops" FontWeight="SemiBold" Margin="0,0,0,5"/>
         <WrapPanel Margin="0,0,0,3">
-            <CheckBox Content="Slide Attack" IsChecked="{Binding CombatSlide}" Width="100" ToolTip="Can perform slide attack"/>
-            <CheckBox Content="PPP Combo" IsChecked="{Binding CombatComboPPP}" Width="100" ToolTip="Punch-Punch-Punch combo"/>
-            <CheckBox Content="KKK Combo" IsChecked="{Binding CombatComboKKK}" Width="100" ToolTip="Kick-Kick-Kick combo"/>
+            <CheckBox Content="Key"         IsChecked="{Binding DropKey}"         Width="100"/>
+            <CheckBox Content="Gun"         IsChecked="{Binding DropGun}"         Width="100"/>
+            <CheckBox Content="Health"      IsChecked="{Binding DropHealth}"      Width="100"/>
+            <CheckBox Content="Bomb"        IsChecked="{Binding DropBomb}"        Width="100"/>
+            <CheckBox Content="Shotgun"     IsChecked="{Binding DropShotgun}"     Width="100"/>
+            <CheckBox Content="Knife"       IsChecked="{Binding DropKnife}"       Width="100"/>
         </WrapPanel>
-        <WrapPanel>
-            <CheckBox Content="Any Combo" IsChecked="{Binding CombatComboAny}" Width="100" ToolTip="Mixed combos"/>
-            <CheckBox Content="Grapple" IsChecked="{Binding CombatGrapple}" Width="80" ToolTip="Grappling attacks"/>
-            <CheckBox Content="Side Kick" IsChecked="{Binding CombatSideKick}" Width="90" ToolTip="Side kick attack"/>
-            <CheckBox Content="Back Kick" IsChecked="{Binding CombatBackKick}" Width="90" ToolTip="Back kick attack"/>
+        <WrapPanel Margin="0,0,0,3">
+            <CheckBox Content="Explosives"  IsChecked="{Binding DropExplosives}"  Width="100"/>
+            <CheckBox Content="Grenade"     IsChecked="{Binding DropGrenade}"     Width="100"/>
+            <CheckBox Content="M16"        IsChecked="{Binding DropAK47}"        Width="100"/>
+            <CheckBox Content="Mine"        IsChecked="{Binding DropMine}"        Width="100"/>
+            <CheckBox Content="Thermodroid" IsChecked="{Binding DropThermodroid}" Width="100"/>
+            <CheckBox Content="Baseball Bat" IsChecked="{Binding DropBat}"        Width="105"/>
+        </WrapPanel>
+        <WrapPanel Margin="0,0,0,3">
+            <CheckBox Content="Ammo Pistol"  IsChecked="{Binding DropAmmoPistol}"  Width="105"/>
+            <CheckBox Content="Ammo Shotgun" IsChecked="{Binding DropAmmoShotgun}" Width="115"/>
+            <CheckBox Content="Ammo M16"    IsChecked="{Binding DropAmmoAK47}"    Width="100"/>
+            <CheckBox Content="Napkin"      IsChecked="{Binding DropKeycard}"      Width="100"/>
+            <CheckBox Content="File"         IsChecked="{Binding DropFile}"         Width="100"/>
+        </WrapPanel>
+        <WrapPanel Margin="0,0,0,3">
+            <CheckBox Content="Floppy Disk" IsChecked="{Binding DropFloppyDisk}" Width="105"/>
+            <CheckBox Content="Weed Away"       IsChecked="{Binding DropVideo}"       Width="100"/>
+            <CheckBox Content="Treasure"      IsChecked="{Binding DropGloves}"      Width="100"/>
         </WrapPanel>
 
         <Separator Background="#FF555555" Margin="0,8,0,8"/>
