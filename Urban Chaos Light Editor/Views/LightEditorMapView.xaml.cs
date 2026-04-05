@@ -85,7 +85,8 @@ namespace UrbanChaosLightEditor.Views
             int uiX = (int)pos.X;
             int uiZ = (int)pos.Y;
 
-            // Update cursor position display
+            vm.CursorUiX = uiX;
+            vm.CursorUiZ = uiZ;
             vm.CursorPosition = $"X: {uiX}, Z: {uiZ}";
         }
 

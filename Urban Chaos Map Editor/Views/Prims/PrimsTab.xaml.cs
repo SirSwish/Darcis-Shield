@@ -288,9 +288,23 @@ namespace UrbanChaosMapEditor.Views.Prims
 
         private bool IsPrimAlreadyVisible(PrimListItem p)
         {
-            // Keep your existing visibility logic here if you already added one.
-            // Returning false preserves centering behavior from list clicks only.
-            return false;
+            var win = Window.GetWindow(this);
+            if (win == null) return false;
+
+            var mapView = LogicalTreeHelper.FindLogicalNode(win, "MapViewControl");
+            if (mapView == null) return false;
+
+            try
+            {
+                var result = mapView.GetType()
+                    .GetMethod("IsPixelInView")
+                    ?.Invoke(mapView, new object[] { p.PixelX, p.PixelZ });
+                return result is true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -199,32 +199,36 @@
             <!-- Rnd Area parameters -->
             <Grid Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="70"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="70"/>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="70"/>
-                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Max Height:" VerticalAlignment="Center" FontSize="11"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Max Height:" VerticalAlignment="Center" FontSize="11"
                            ToolTip="Maximum height above zero (0–127)"/>
-                <TextBox   Grid.Column="1"
+                <TextBox   Grid.Row="0" Grid.Column="1"
                            Text="{Binding Map.RandomizeMaxHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalContentAlignment="Right"
                            PreviewTextInput="Units_PreviewTextInput"
                            DataObject.Pasting="Units_OnPaste"
                            ToolTip="Maximum height above zero (0–127)"/>
-                <TextBlock Grid.Column="2" Text="  Max Depth:" VerticalAlignment="Center" FontSize="11"
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Max Depth:" VerticalAlignment="Center" FontSize="11"
                            ToolTip="Maximum depth below zero (0–127)"/>
-                <TextBox   Grid.Column="3"
+                <TextBox   Grid.Row="1" Grid.Column="1"
                            Text="{Binding Map.RandomizeMaxDepth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalContentAlignment="Right"
                            PreviewTextInput="Units_PreviewTextInput"
                            DataObject.Pasting="Units_OnPaste"
                            ToolTip="Maximum depth below zero (0–127)"/>
-                <TextBlock Grid.Column="4" Text="  Max Slope:" VerticalAlignment="Center" FontSize="11"
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Max Slope:" VerticalAlignment="Center" FontSize="11"
                            ToolTip="Maximum height difference between adjacent vertices (0 = disabled, 1–127 = enforced). Also applied at the boundary with surrounding terrain."/>
-                <TextBox   Grid.Column="5"
+                <TextBox   Grid.Row="2" Grid.Column="1"
                            Text="{Binding Map.RandomizeMaxSlope, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                            HorizontalContentAlignment="Right"
                            PreviewTextInput="Units_PreviewTextInput"

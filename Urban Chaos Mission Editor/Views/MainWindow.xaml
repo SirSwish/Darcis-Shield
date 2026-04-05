@@ -293,10 +293,14 @@
                 <!-- File operations -->
                 <Button Style="{StaticResource ToolbarButtonStyle}" Content="📁 Open" 
                 Command="{Binding OpenFileCommand}" ToolTip="Open UCM File (Ctrl+O)"/>
-                <Button Style="{StaticResource ToolbarButtonStyle}" Content="🗺️ Map" 
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="🗺️ Map"
                 Command="{Binding OpenMapCommand}" ToolTip="Open Map File"/>
-                <Button Style="{StaticResource ToolbarButtonStyle}" Content="💡 Lights" 
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="✏️ Edit Map"
+                Command="{Binding EditMapCommand}" ToolTip="Open loaded map in Map Editor"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="💡 Lights"
                 Command="{Binding OpenLightsCommand}" ToolTip="Open Lights File"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="✏️ Edit Lights"
+                Command="{Binding EditLightsCommand}" ToolTip="Open loaded lights in Light Editor"/>
 
                 <Separator Margin="8,0" Background="#555"/>
 

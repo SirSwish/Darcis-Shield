@@ -131,6 +131,9 @@ namespace UrbanChaosLightEditor.ViewModels
             set { _cursorPosition = value; OnPropertyChanged(); }
         }
 
+        public int CursorUiX { get; set; }
+        public int CursorUiZ { get; set; }
+
         // ===== Layer Visibility =====
         private bool _showTextures = true;
         public bool ShowTextures
@@ -325,28 +328,7 @@ namespace UrbanChaosLightEditor.ViewModels
 
                 StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights.";
 
-                // Auto-load the companion .iam map if no map is currently loaded.
-                // Convention: the .iam lives one folder up from the .lgt file and shares the same stem.
-                if (!IsMapViewLoaded)
-                {
-                    var lgtDir = Path.GetDirectoryName(ofd.FileName);
-                    var parentDir = lgtDir != null ? Directory.GetParent(lgtDir)?.FullName : null;
-                    if (parentDir != null)
-                    {
-                        var stem = Path.GetFileNameWithoutExtension(ofd.FileName);
-                        var iamPath = Path.Combine(parentDir, stem + ".iam");
-                        if (File.Exists(iamPath))
-                        {
-                            Debug.WriteLine($"[OpenLightsAsync] Auto-loading companion map: {iamPath}");
-                            await ReadOnlyMapDataService.Instance.LoadAsync(iamPath);
-                            LoadedMapFileName = Path.GetFileName(iamPath);
-                            IsMapViewLoaded = true;
-                            ExternalFileWatcherService.Instance.ResetTimestamps();
-                            StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights  |  Map: {LoadedMapFileName}";
-                            Debug.WriteLine("[OpenLightsAsync] Companion map loaded.");
-                        }
-                    }
-                }
+                await TryLoadCompanionMapAsync(ofd.FileName);
             }
             catch (Exception ex)
             {
@@ -361,6 +343,87 @@ namespace UrbanChaosLightEditor.ViewModels
             {
                 IsLoading = false;
                 Debug.WriteLine("[OpenLightsAsync] Complete");
+            }
+        }
+
+        /// <summary>
+        /// Always attempts to load the companion .iam map for a given .lgt file path.
+        /// Looks one directory up from the .lgt file for a file with the same stem and .iam extension.
+        /// </summary>
+        private async Task TryLoadCompanionMapAsync(string lgtFilePath)
+        {
+            var lgtDir = Path.GetDirectoryName(lgtFilePath);
+            var parentDir = lgtDir != null ? Directory.GetParent(lgtDir)?.FullName : null;
+
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] lgtFilePath={lgtFilePath}");
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] lgtDir={lgtDir}");
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] parentDir={parentDir}");
+
+            if (parentDir == null)
+            {
+                Debug.WriteLine("[TryLoadCompanionMapAsync] parentDir is null, cannot search for companion map.");
+                return;
+            }
+
+            var stem = Path.GetFileNameWithoutExtension(lgtFilePath);
+            var iamPath = Path.Combine(parentDir, stem + ".iam");
+
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] Looking for: {iamPath}");
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] File.Exists={File.Exists(iamPath)}");
+
+            if (!File.Exists(iamPath))
+            {
+                Debug.WriteLine("[TryLoadCompanionMapAsync] Companion .iam not found, skipping map load.");
+                return;
+            }
+
+            Debug.WriteLine("[TryLoadCompanionMapAsync] Loading companion map...");
+            await ReadOnlyMapDataService.Instance.LoadAsync(iamPath);
+            LoadedMapFileName = Path.GetFileName(iamPath);
+            IsMapViewLoaded = true;
+            ExternalFileWatcherService.Instance.ResetTimestamps();
+            StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights  |  Map: {LoadedMapFileName}";
+            Debug.WriteLine($"[TryLoadCompanionMapAsync] Companion map loaded: {LoadedMapFileName}");
+        }
+
+        /// <summary>
+        /// Load a lights file from a known path (e.g. passed via command-line argument).
+        /// Replicates the full open flow: sets FileName, IsLoaded, refreshes list, auto-loads companion map.
+        /// </summary>
+        public async Task OpenLightsFromPathAsync(string filePath)
+        {
+            Debug.WriteLine($"[OpenLightsFromPathAsync] Called with: {filePath}");
+
+            if (!File.Exists(filePath))
+            {
+                Debug.WriteLine($"[OpenLightsFromPathAsync] File not found, aborting.");
+                return;
+            }
+
+            IsLoading = true;
+            StatusMessage = "Loading lights file...";
+
+            try
+            {
+                await _lightsSvc.LoadAsync(filePath);
+
+                LightsFileName = Path.GetFileName(filePath);
+                IsLightsLoaded = true;
+
+                RefreshLightsList();
+
+                StatusMessage = $"Loaded {LightsFileName} with {LightCount} lights.";
+
+                await TryLoadCompanionMapAsync(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[OpenLightsFromPathAsync] EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+                StatusMessage = "Load failed.";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -624,10 +687,13 @@ namespace UrbanChaosLightEditor.ViewModels
         {
             if (_selectedLightIndex < 0) return;
 
+            var light = SelectedLight;
+            if (light == null) return;
+
             try
             {
                 var acc = new LightsAccessor(_lightsSvc);
-                acc.DeleteLight(_selectedLightIndex);
+                acc.DeleteLight(light.Index);
                 SelectedLightIndex = -1;
                 StatusMessage = "Deleted light.";
             }
@@ -641,10 +707,13 @@ namespace UrbanChaosLightEditor.ViewModels
         {
             if (_selectedLightIndex < 0) return;
 
+            var light = SelectedLight;
+            if (light == null) return;
+
             try
             {
                 var acc = new LightsAccessor(_lightsSvc);
-                _copiedLight = acc.ReadEntry(_selectedLightIndex);
+                _copiedLight = acc.ReadEntry(light.Index);
                 OnPropertyChanged(nameof(CanPasteLight));
                 StatusMessage = "Copied light to clipboard.";
             }
@@ -668,7 +737,7 @@ namespace UrbanChaosLightEditor.ViewModels
                     return;
                 }
 
-                // Paste with same properties but offset position slightly
+                // Paste at current cursor position with the same appearance/height
                 var entry = new LightEntry
                 {
                     Range = _copiedLight.Range,
@@ -676,9 +745,9 @@ namespace UrbanChaosLightEditor.ViewModels
                     Green = _copiedLight.Green,
                     Blue = _copiedLight.Blue,
                     Used = 1,
-                    X = _copiedLight.X + 256, // Offset by 1 tile
+                    X = LightsAccessor.UiXToWorldX(CursorUiX),
                     Y = _copiedLight.Y,
-                    Z = _copiedLight.Z + 256
+                    Z = LightsAccessor.UiZToWorldZ(CursorUiZ)
                 };
 
                 acc.WriteEntry(freeIdx, entry);

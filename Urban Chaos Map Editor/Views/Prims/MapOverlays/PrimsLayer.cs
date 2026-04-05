@@ -33,7 +33,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
         private const double DotRadius = 4.0;
         private const double HitGrow = 4.0;
         private const double DragThreshold = 4.0; // pixels
-        private const double PrimSnapGrid = 64.0; // UI pixels per big tile vertex
+        private const double PrimSnapGrid = 32.0; // half-tile: covers corners, edge midpoints, and cell centres
 
         // --- Move drag state (unchanged semantics) ---
         private bool _mouseDown;

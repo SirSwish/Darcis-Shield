@@ -117,10 +117,13 @@ namespace UrbanChaosLightEditor.Views.Dialogs
             return r;
         }
 
+        // Canvas height in pixels — must match Wall Height in XAML.
+        private const double WallCanvasHeight = 64.0;
+
         private void UpdateHeightUi()
         {
-            // dot position: offset measured up from bottom; Canvas Y grows down
-            double yFromTop = 256 - _offset - Dot.Height / 2.0;
+            // Scale offset (0-255) to canvas height (0-64px); dot moves up as offset increases.
+            double yFromTop = WallCanvasHeight - (_offset * WallCanvasHeight / 256.0) - Dot.Height / 2.0;
             double xCenter = (Wall.Width - Dot.Width) / 2.0;
             Canvas.SetLeft(Dot, xCenter);
             Canvas.SetTop(Dot, yFromTop);
@@ -128,7 +131,9 @@ namespace UrbanChaosLightEditor.Views.Dialogs
             int total = _storey * 256 + _offset;
             LblStorey.Text = _storey.ToString();
             LblOffset.Text = _offset.ToString();
-            LblTotal.Text = total.ToString();
+            // Only update if the box isn't currently focused to avoid clobbering a manual edit.
+            if (!TxtTotal.IsFocused)
+                TxtTotal.Text = total.ToString();
         }
 
         private void Wall_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -146,7 +151,8 @@ namespace UrbanChaosLightEditor.Views.Dialogs
             double dy = y - _lastY;
             _lastY = y;
 
-            int delta = (int)Math.Round(-dy);
+            // Each canvas pixel = 256/64 = 4 offset units so the full 0-255 range fills the canvas.
+            int delta = (int)Math.Round(-dy * 256.0 / WallCanvasHeight);
             if (delta != 0)
             {
                 _offset += delta;
@@ -176,6 +182,48 @@ namespace UrbanChaosLightEditor.Views.Dialogs
             PreviewBrush = brush;
 
             PreviewInfo = $"ARGB({a},{r},{g},{b})";
+        }
+
+        // ----- Total TextBox manual entry -----
+        private void TxtTotal_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CommitTotalText();
+                e.Handled = true;
+            }
+        }
+
+        private void TxtTotal_LostFocus(object sender, RoutedEventArgs e)
+        {
+            CommitTotalText();
+        }
+
+        private void CommitTotalText()
+        {
+            if (int.TryParse(TxtTotal.Text, out int total))
+            {
+                FromHeight(total);
+                UpdateHeightUi();
+            }
+            else
+            {
+                // Revert to current value on invalid input
+                TxtTotal.Text = (_storey * 256 + _offset).ToString();
+            }
+        }
+
+        // ----- Storey buttons -----
+        private void StoreyUp_Click(object sender, RoutedEventArgs e)
+        {
+            _storey++;
+            UpdateHeightUi();
+        }
+
+        private void StoreyDown_Click(object sender, RoutedEventArgs e)
+        {
+            _storey--;
+            UpdateHeightUi();
         }
 
         // ----- OK -----

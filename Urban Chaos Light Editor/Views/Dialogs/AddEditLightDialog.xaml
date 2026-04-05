@@ -34,15 +34,25 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" BorderBrush="#444" BorderThickness="1" Padding="6" HorizontalAlignment="Center">
-            <Canvas x:Name="Wall"
-                    Width="64" Height="256"
-                    Background="#3a3a3a"
-                    MouseLeftButtonDown="Wall_MouseLeftButtonDown"
-                    MouseMove="Wall_MouseMove"
-                    MouseLeftButtonUp="Wall_MouseLeftButtonUp">
-                <!-- Red dot (draggable) -->
-                <Ellipse x:Name="Dot" Width="8" Height="8" Fill="Red" Stroke="Black" StrokeThickness="1"/>
-            </Canvas>
+            <StackPanel>
+                <Canvas x:Name="Wall"
+                        Width="64" Height="64"
+                        Background="#3a3a3a"
+                        MouseLeftButtonDown="Wall_MouseLeftButtonDown"
+                        MouseMove="Wall_MouseMove"
+                        MouseLeftButtonUp="Wall_MouseLeftButtonUp">
+                    <!-- Red dot (draggable) -->
+                    <Ellipse x:Name="Dot" Width="8" Height="8" Fill="Red" Stroke="Black" StrokeThickness="1"/>
+                </Canvas>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                    <Button x:Name="BtnStoreyDown" Content="-256" Width="60" Padding="2,4"
+                            Background="#3D3D3D" Foreground="White" BorderBrush="#555"
+                            Click="StoreyDown_Click" ToolTip="Down one floor (-256)"/>
+                    <Button x:Name="BtnStoreyUp" Content="+256" Width="60" Padding="2,4"
+                            Background="#3D3D3D" Foreground="White" BorderBrush="#555"
+                            Margin="4,0,0,0" Click="StoreyUp_Click" ToolTip="Up one floor (+256)"/>
+                </StackPanel>
+            </StackPanel>
         </Border>
 
         <!-- Appearance -->
@@ -110,7 +120,15 @@
                 <StackPanel Grid.Row="4" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock><Run Text="Storey: "/><Run x:Name="LblStorey"/></TextBlock>
                     <TextBlock Margin="12,0,0,0"><Run Text="Offset: "/><Run x:Name="LblOffset"/><Run Text=" px"/></TextBlock>
-                    <TextBlock Margin="12,0,0,0"><Run Text="Total: "/><Run x:Name="LblTotal"/><Run Text=" px"/></TextBlock>
+                    <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
+                        <TextBlock Text="Total: " VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtTotal" Width="60"
+                                 Background="#3a3a3a" Foreground="White" BorderBrush="#555"
+                                 VerticalAlignment="Center" Padding="2,1"
+                                 LostFocus="TxtTotal_LostFocus"
+                                 KeyDown="TxtTotal_KeyDown"/>
+                        <TextBlock Text=" px" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

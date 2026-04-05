@@ -35,8 +35,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private static readonly Pen RandomizeAreaOutline;
 
         private const double Radius = 14.0;
-        private const double HitRadius = 12.0;
-        private const double HitRadiusSq = HitRadius * HitRadius;
         private const double TileSize = 64.0;
         private const int TilesPerSide = 128;
         private const int MapPixels = 8192;
@@ -252,9 +250,9 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             var (centerVX, centerVZ) = GetHoveredVertex();
             var brushBounds = GetBrushBounds(centerVX, centerVZ);
 
-            int minVX = Math.Max(1, (int)Math.Floor(clipBounds.Left / TileSize));
+            int minVX = Math.Max(0, (int)Math.Floor(clipBounds.Left / TileSize));
             int maxVX = Math.Min(TilesPerSide, (int)Math.Ceiling(clipBounds.Right / TileSize));
-            int minVZ = Math.Max(1, (int)Math.Floor(clipBounds.Top / TileSize));
+            int minVZ = Math.Max(0, (int)Math.Floor(clipBounds.Top / TileSize));
             int maxVZ = Math.Min(TilesPerSide, (int)Math.Ceiling(clipBounds.Bottom / TileSize));
 
             if (minVX > maxVX || minVZ > maxVZ)
@@ -307,8 +305,8 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
                     double cy = vz * TileSize;
 
-                    int tx = vx - 1;
-                    int ty = vz - 1;
+                    int tx = Math.Max(0, vx - 1);
+                    int ty = Math.Max(0, vz - 1);
 
                     int h = _accessor.ReadHeight(tx, ty);
 
@@ -438,6 +436,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
         private static bool IsAreaDragTool(EditorTool t) =>
             t == EditorTool.AreaSetHeight || t == EditorTool.RandomizeHeightArea;
 
+        // Any canvas position snaps to the nearest vertex — same logic as TryGetVertexIndexFromHit.
         private (int vx, int vz) GetHoveredVertex()
         {
             if (_vm == null || !IsHeightTool(_vm.SelectedTool))
@@ -452,14 +451,11 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             if (vx < 0 || vx > TilesPerSide || vz < 0 || vz > TilesPerSide)
                 return (-1, -1);
 
-            double cx = vx * TileSize;
-            double cz = vz * TileSize;
-            double dx = uiX - cx;
-            double dz = uiZ - cz;
-            double distSq = dx * dx + dz * dz;
-
-            return distSq <= HitRadiusSq ? (vx, vz) : (-1, -1);
+            return (vx, vz);
         }
+
+        protected override HitTestResult HitTestCore(PointHitTestParameters p)
+            => new PointHitTestResult(this, p.HitPoint);
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
@@ -664,7 +660,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
         private static int ClampToVertexIndex(int v)
         {
-            if (v < 1) return 1;
+            if (v < 0) return 0;
             if (v > TilesPerSide) return TilesPerSide;
             return v;
         }
@@ -680,9 +676,9 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             int left = (n - 1) / 2;
             int right = n / 2;
 
-            int minX = Math.Max(1, centerVX - left);
+            int minX = Math.Max(0, centerVX - left);
             int maxX = Math.Min(TilesPerSide, centerVX + right);
-            int minZ = Math.Max(1, centerVZ - left);
+            int minZ = Math.Max(0, centerVZ - left);
             int maxZ = Math.Min(TilesPerSide, centerVZ + right);
 
             return (minX > maxX || minZ > maxZ)

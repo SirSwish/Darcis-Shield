@@ -20,6 +20,14 @@ namespace UrbanChaosMapEditor
             var window = new MainWindow { DataContext = vm };
             this.MainWindow = window;
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+            // Subscribe before Show() so the Loaded event is not missed
+            if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
+            {
+                var path = e.Args[0];
+                window.Loaded += (_, __) => vm.OpenMapFromPath(path);
+            }
+
             window.Show();
 
             // Kick off background preload of textures
@@ -28,7 +36,7 @@ namespace UrbanChaosMapEditor
                 // marshal to UI to update status bar
                 Dispatcher.Invoke(() =>
                 {
-                    vm.StatusMessage = $"Caching textures… {args.Done}/{args.Total} ({args.Percent:0}%)";
+                    vm.StatusMessage = $"Caching textures... {args.Done}/{args.Total} ({args.Percent:0}%)";
                 });
             };
 
@@ -38,10 +46,16 @@ namespace UrbanChaosMapEditor
                 {
                     vm.IsBusy = false; // stop spinner
                     vm.StatusMessage = $"Textures cached: {TextureCacheService.Instance.Count}";
+
+                    // If a map was pre-loaded via command-line arg, the texture cache was still
+                    // filling when MapLoaded fired, so the texture lists came up empty.
+                    // Now that the cache is complete, refresh them.
+                    if (vm.Map.IsMapLoaded)
+                        vm.Map.RefreshTextureLists();
                 });
             };
 
-            // Don’t block UI — fire and forget
+            // Don't block UI - fire and forget
             vm.IsBusy = true;
             _ = TextureCacheService.Instance.PreloadAllAsync(decodeSize: 64);
         }

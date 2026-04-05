@@ -189,16 +189,17 @@
                                Margin="8,0,0,0"/>
                 </StackPanel>
 
-                <!-- Y0 only -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <!-- Y0 only — enabled only when On Building is checked -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8"
+                            IsEnabled="{Binding IsChecked, ElementName=ChkOnBuilding}">
                     <TextBlock Text="Y Offset:" Style="{StaticResource FieldLabel}"/>
                     <TextBox x:Name="TxtY0"
                              Style="{StaticResource EditableField}"
                              Width="60"
                              Text="0"
                              PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="256 = 1 floor" 
-                               Foreground="{StaticResource Subtle}" 
+                    <TextBlock Text="256 = 1 floor"
+                               Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
                 </StackPanel>

@@ -24,6 +24,7 @@
                 <Grid x:Name="Surface"
                       Width="8192"
                       Height="8192"
+                      Margin="256"
                       Background="Transparent">
 
                     <!-- Textures -->
@@ -56,7 +57,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowHeights, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="4">
+                        Panel.ZIndex="8">
                         <hgtOvl:HeightsLayer.Style>
                             <Style TargetType="{x:Type hgtOvl:HeightsLayer}">
                                 <Setter Property="IsHitTestVisible" Value="False"/>
@@ -102,18 +103,8 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowObjects, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="6">
-                        <prmOvl:PrimsLayer.Style>
-                            <Style TargetType="{x:Type prmOvl:PrimsLayer}">
-                                <Setter Property="IsHitTestVisible" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedTool}" Value="{x:Static models:EditorTool.AreaSetHeight}">
-                                        <Setter Property="IsHitTestVisible" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </prmOvl:PrimsLayer.Style>
-                    </prmOvl:PrimsLayer>
+                        IsHitTestVisible="{Binding IsPrimsHitTestVisible}"
+                        Panel.ZIndex="6"/>
 
                     <!-- Walkables -->
                     <rfOvl:WalkablesLayer

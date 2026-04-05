@@ -421,9 +421,19 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                     CancelActiveToolState();
                     _selectedTool = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsPrimsHitTestVisible));
                 }
             }
         }
+
+        /// <summary>
+        /// False when any height tool is active so PrimsLayer does not intercept height clicks.
+        /// </summary>
+        public bool IsPrimsHitTestVisible => _selectedTool is not (
+            EditorTool.RaiseHeight or EditorTool.LowerHeight or
+            EditorTool.LevelHeight or EditorTool.FlattenHeight or
+            EditorTool.DitchTemplate or EditorTool.StampHeight or
+            EditorTool.AreaSetHeight or EditorTool.RandomizeHeightArea);
 
         /// <summary>
         /// Clears all in-progress tool state without changing SelectedTool.
@@ -1115,17 +1125,44 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             }
         }
 
+        // When pasting a copied prim, this holds the source properties to carry over (Y, Yaw, Flags, InsideIndex).
+        // Null during palette placement.
+        public PrimListItem? PrimPasteTemplate { get; private set; }
+
+        // Yaw value used for the placement ghost; writable so spacebar can rotate it.
+        private byte _placementYaw;
+        public byte PlacementYaw
+        {
+            get => _placementYaw;
+            set { if (_placementYaw != value) { _placementYaw = value; OnPropertyChanged(); } }
+        }
+
         // Called when you click a palette button
         public void BeginPlacePrim(int primNumber)
         {
+            PrimPasteTemplate = null;
             PrimNumberToPlace = primNumber;
+            PlacementYaw = 0;
             IsPlacingPrim = true;
             DragPreviewPrim = null;   // ghost will be driven by MapView mouse move
         }
+
+        // Called when Ctrl+V pastes a copied prim (ghost follows cursor until click)
+        public void BeginPastePrim(PrimListItem template)
+        {
+            PrimPasteTemplate = template;
+            PrimNumberToPlace = template.PrimNumber;
+            PlacementYaw = template.Yaw;
+            IsPlacingPrim = true;
+            DragPreviewPrim = null;
+        }
+
         // Cancel placement (Esc / right-click)
         public void CancelPlacePrim()
         {
+            PrimPasteTemplate = null;
             PrimNumberToPlace = -1;
+            PlacementYaw = 0;
             IsPlacingPrim = false;
             DragPreviewPrim = null;
         }

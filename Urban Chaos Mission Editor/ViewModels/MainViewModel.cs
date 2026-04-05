@@ -209,6 +209,8 @@ public class MainViewModel : BaseViewModel
 
         OpenMapCommand = new RelayCommand(ExecuteOpenMap);
         OpenLightsCommand = new RelayCommand(ExecuteOpenLights);
+        EditMapCommand = new RelayCommand(ExecuteEditMap, () => IsMapLoaded);
+        EditLightsCommand = new RelayCommand(ExecuteEditLights, () => IsLightsLoaded);
         MissionPropertiesCommand = new RelayCommand(ExecuteMissionProperties, () => HasMission);
 
         ZoomInCommand = new RelayCommand(ExecuteZoomIn);
@@ -267,6 +269,8 @@ public class MainViewModel : BaseViewModel
     public ICommand ExitCommand { get; }
     public ICommand OpenMapCommand { get; }
     public ICommand OpenLightsCommand { get; }
+    public ICommand EditMapCommand { get; }
+    public ICommand EditLightsCommand { get; }
     public ICommand MissionPropertiesCommand { get; }
     public ICommand ZoomInCommand { get; }
     public ICommand ZoomOutCommand { get; }
@@ -850,6 +854,47 @@ public class MainViewModel : BaseViewModel
         if (filePath != null)
         {
             await LoadLightsFileAsync(filePath);
+        }
+    }
+
+    private void ExecuteEditMap()
+    {
+        var path = ReadOnlyMapDataService.Instance.CurrentPath;
+        if (path == null) return;
+        LaunchEditor("UrbanChaosMapEditor.exe", path);
+    }
+
+    private void ExecuteEditLights()
+    {
+        var path = ReadOnlyLightsDataService.Instance.CurrentPath;
+        if (path == null) return;
+        LaunchEditor("Urban Chaos Light Editor.exe", path);
+    }
+
+    private void LaunchEditor(string exeName, string filePath)
+    {
+        try
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var exePath = Path.Combine(baseDir, exeName);
+
+            if (!File.Exists(exePath))
+            {
+                StatusMessage = $"Editor not found: {exeName}";
+                return;
+            }
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = $"\"{filePath}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[MainViewModel] Failed to launch editor: {ex.Message}");
+            StatusMessage = $"Failed to launch editor: {ex.Message}";
         }
     }
 

@@ -286,24 +286,23 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MapViewModel vm)
                 return;
 
+            bool isHeightTool = !vm.IsPrimsHitTestVisible;
             bool isAreaHeightTool = vm.SelectedTool == EditorTool.AreaSetHeight
                                  || vm.SelectedTool == EditorTool.RandomizeHeightArea;
 
+            // HeightsLayer handles area-drag tools (AreaSetHeight/RandomizeHeightArea) directly via
+            // OnMouseLeftButtonDown.  For all other height tools the tunneling PreviewMouseLeftButtonDown
+            // on MapView handles the click — but HeightsLayer still needs IsHitTestVisible=true so that
+            // it absorbs the hit and guarantees mouse events fire even in empty canvas space.
             if (HeightsOverlay != null)
-            {
-                HeightsOverlay.IsHitTestVisible = isAreaHeightTool && vm.ShowHeights;
-            }
+                HeightsOverlay.IsHitTestVisible = isHeightTool && vm.ShowHeights;
 
+            // Restore original PrimsLayer behaviour: only suppress during area-drag height tools.
             if (PrimsOverlay != null)
-            {
                 PrimsOverlay.IsHitTestVisible = !isAreaHeightTool && vm.ShowObjects;
-            }
 
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-            {
-                System.Diagnostics.Debug.WriteLine(
-                    $"[MapView] UpdateOverlayHitTesting: Tool={vm.SelectedTool}, HeightsHit={HeightsOverlay?.IsHitTestVisible}, PrimsHit={PrimsOverlay?.IsHitTestVisible}");
-            }
+            System.Diagnostics.Debug.WriteLine(
+                $"[MapView] UpdateOverlayHitTesting: Tool={vm.SelectedTool}, HeightsHit={HeightsOverlay?.IsHitTestVisible}, PrimsHit={PrimsOverlay?.IsHitTestVisible}");
         }
 
         private static bool IsCtrlDown()
@@ -515,6 +514,7 @@ namespace UrbanChaosMapEditor.Views.Core
 
                 try
                 {
+                    var tmpl = vm.PrimPasteTemplate;
                     var acc = new PrimsAccessor(MapDataService.Instance);
                     var prim = new PrimsAccessor.PrimEntry
                     {
@@ -522,10 +522,10 @@ namespace UrbanChaosMapEditor.Views.Core
                         MapWhoIndex = mapWhoIndex,
                         X = gameX,
                         Z = gameZ,
-                        Y = (short)0,
-                        Yaw = (byte)0,
-                        Flags = (byte)0,
-                        InsideIndex = (byte)0
+                        Y = tmpl != null ? tmpl.Y : (short)0,
+                        Yaw = vm.PlacementYaw,
+                        Flags = tmpl?.Flags ?? 0,
+                        InsideIndex = tmpl?.InsideIndex ?? 0
                     };
 
                     acc.AddPrim(prim);
@@ -853,15 +853,19 @@ namespace UrbanChaosMapEditor.Views.Core
             var target = Math.Max(MinZoom, Math.Min(MaxZoom, current * factor));
             if (Math.Abs(target - current) < 0.0001) return;
 
+            // Position relative to Surface (excludes the Surface margin).
+            // The scroll content starts margin pixels before the Surface origin, so add
+            // the margin back to convert to scroll-content coordinates before scaling.
             Point mouseOnContent = e.GetPosition(Surface);
             Point mouseOnViewport = e.GetPosition(Scroller);
+            const double SurfaceMargin = 256.0;
 
             vm.Zoom = target;
 
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                double newOffsetX = mouseOnContent.X * target - mouseOnViewport.X;
-                double newOffsetY = mouseOnContent.Y * target - mouseOnViewport.Y;
+                double newOffsetX = (mouseOnContent.X + SurfaceMargin) * target - mouseOnViewport.X;
+                double newOffsetY = (mouseOnContent.Y + SurfaceMargin) * target - mouseOnViewport.Y;
 
                 newOffsetX = Clamp(newOffsetX, 0, Math.Max(0, Scroller.ExtentWidth - Scroller.ViewportWidth));
                 newOffsetY = Clamp(newOffsetY, 0, Math.Max(0, Scroller.ExtentHeight - Scroller.ViewportHeight));
@@ -1078,6 +1082,7 @@ namespace UrbanChaosMapEditor.Views.Core
                 ObjectSpace.GamePrimToUiPixels(mapWhoIndex, cellX, cellZ, out int uiX, out int uiZ);
                 ObjectSpace.GameIndexToUiRowCol(mapWhoIndex, out int uiRow, out int uiCol);
 
+                var tmpl = vm.PrimPasteTemplate;
                 vm.DragPreviewPrim = new PrimListItem
                 {
                     Index = -1,
@@ -1086,12 +1091,12 @@ namespace UrbanChaosMapEditor.Views.Core
                     MapWhoCol = uiCol,
                     PrimNumber = (byte)Math.Clamp(vm.PrimNumberToPlace, 0, 255),
                     Name = PrimCatalog.GetName(vm.PrimNumberToPlace),
-                    Y = 0,
+                    Y = tmpl != null ? tmpl.Y : (short)0,
                     X = cellX,
                     Z = cellZ,
-                    Yaw = 0,
-                    Flags = 0,
-                    InsideIndex = 0,
+                    Yaw = vm.PlacementYaw,
+                    Flags = tmpl?.Flags ?? 0,
+                    InsideIndex = tmpl?.InsideIndex ?? 0,
                     PixelX = uiX,
                     PixelZ = uiZ
                 };
@@ -1301,6 +1306,92 @@ namespace UrbanChaosMapEditor.Views.Core
                 e.Handled = true;
             }
 
+            if (vm.IsPlacingPrim && e.Key == Key.Space)
+            {
+                // Rotate 90° clockwise: 256 units per full turn, so 64 per quarter
+                vm.PlacementYaw = (byte)((vm.PlacementYaw + 64) % 256);
+
+                // Rebuild the ghost immediately so the arrow updates without requiring mouse movement.
+                if (Surface != null)
+                {
+                    Point pos = Mouse.GetPosition(Surface);
+                    int clampedX = Math.Clamp((int)pos.X, 0, MapConstants.MapPixels - 1);
+                    int clampedZ = Math.Clamp((int)pos.Y, 0, MapConstants.MapPixels - 1);
+                    SnapUiToVertexIfCtrl(ref clampedX, ref clampedZ);
+                    ObjectSpace.UiPixelsToGamePrim(clampedX, clampedZ, out int mwIdx, out byte cX, out byte cZ);
+                    ObjectSpace.GamePrimToUiPixels(mwIdx, cX, cZ, out int pxX, out int pxZ);
+                    ObjectSpace.GameIndexToUiRowCol(mwIdx, out int uRow, out int uCol);
+                    var tmpl = vm.PrimPasteTemplate;
+                    vm.DragPreviewPrim = new PrimListItem
+                    {
+                        Index = -1,
+                        MapWhoIndex = mwIdx,
+                        MapWhoRow = uRow,
+                        MapWhoCol = uCol,
+                        PrimNumber = (byte)Math.Clamp(vm.PrimNumberToPlace, 0, 255),
+                        Name = PrimCatalog.GetName(vm.PrimNumberToPlace),
+                        Y = tmpl != null ? tmpl.Y : (short)0,
+                        X = cX,
+                        Z = cZ,
+                        Yaw = vm.PlacementYaw,
+                        Flags = tmpl?.Flags ?? 0,
+                        InsideIndex = tmpl?.InsideIndex ?? 0,
+                        PixelX = pxX,
+                        PixelZ = pxZ
+                    };
+                }
+
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellSp)
+                    shellSp.StatusMessage = $"Prim yaw: {vm.PlacementYaw}/255 ({vm.PlacementYaw * 360 / 256}\u00b0)";
+                e.Handled = true;
+            }
+
+            // Rotate selected prim(s) 90° in place when spacebar is pressed and nothing else is active.
+            if (!vm.IsPlacingPrim &&
+                vm.SelectedTool != EditorTool.PaintTexture &&
+                e.Key == Key.Space &&
+                vm.SelectedPrim != null)
+            {
+                var toRotate = vm.SelectedPrims.Count > 0
+                    ? vm.SelectedPrims.ToList()
+                    : new List<PrimListItem> { vm.SelectedPrim };
+
+                var acc = new PrimsAccessor(MapDataService.Instance);
+                foreach (var sel in toRotate)
+                {
+                    var newYaw = (byte)((sel.Yaw + 64) % 256);
+                    acc.EditPrim(sel.Index, p => { p.Yaw = newYaw; return p; });
+                }
+
+                // Capture indices before rebuild — object references become stale after RefreshPrimsList.
+                var rotatedIndices = toRotate.Select(p => p.Index).ToHashSet();
+                int primaryIndex = vm.SelectedPrim?.Index ?? -1;
+
+                vm.RefreshPrimsList();
+
+                // Restore the full multi-selection and the primary selected prim by index.
+                var reselected = vm.Prims.Where(p => rotatedIndices.Contains(p.Index)).ToList();
+                vm.SetSelectedPrims(reselected);
+                vm.SelectedPrim = primaryIndex >= 0 && primaryIndex < vm.Prims.Count
+                    ? vm.Prims[primaryIndex]
+                    : reselected.FirstOrDefault();
+
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellRot)
+                {
+                    if (toRotate.Count == 1)
+                    {
+                        var p = vm.SelectedPrim ?? toRotate[0];
+                        shellRot.StatusMessage = $"Rotated {p.Name} to yaw {p.Yaw}/255 ({p.Yaw * 360 / 256}\u00b0)";
+                    }
+                    else
+                    {
+                        shellRot.StatusMessage = $"Rotated {toRotate.Count} prims 90\u00b0.";
+                    }
+                }
+
+                e.Handled = true;
+            }
+
             bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
             if (ctrl && e.Key == Key.C && vm.SelectedTool == EditorTool.SelectTextureArea && vm.TextureAreaCommitted)
@@ -1322,9 +1413,10 @@ namespace UrbanChaosMapEditor.Views.Core
             }
             if (e.Key == Key.Escape && vm.IsPlacingPrim)
             {
+                bool wasPaste = vm.PrimPasteTemplate != null;
                 vm.CancelPlacePrim();
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                    shell.StatusMessage = "Add Prim canceled.";
+                    shell.StatusMessage = wasPaste ? "Paste Prim canceled." : "Add Prim canceled.";
                 e.Handled = true;
                 return;
             }
@@ -1516,9 +1608,10 @@ namespace UrbanChaosMapEditor.Views.Core
 
             if (DataContext is MapViewModel vm0 && vm0.IsPlacingPrim)
             {
+                bool wasPaste0 = vm0.PrimPasteTemplate != null;
                 vm0.CancelPlacePrim();
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell0)
-                    shell0.StatusMessage = "Add Prim canceled.";
+                    shell0.StatusMessage = wasPaste0 ? "Paste Prim canceled." : "Add Prim canceled.";
                 e.Handled = true;
                 return;
             }
@@ -1628,8 +1721,8 @@ namespace UrbanChaosMapEditor.Views.Core
             }), System.Windows.Threading.DispatcherPriority.Render);
         }
 
-        private const double VertexHitRadius = 16.0;
-
+        // Snap any canvas click to the nearest height vertex within map bounds.
+        // No proximity check: when a height tool is active every click should affect the nearest vertex.
         private static bool TryGetVertexIndexFromHit(Point p, out int vx, out int vy)
         {
             vx = vy = -1;
@@ -1638,13 +1731,6 @@ namespace UrbanChaosMapEditor.Views.Core
             int candVy = (int)Math.Round(p.Y / MapConstants.TileSize);
 
             if (candVx < 1 || candVy < 1 || candVx > MapConstants.TilesPerSide || candVy > MapConstants.TilesPerSide)
-                return false;
-
-            double cx = candVx * MapConstants.TileSize;
-            double cy = candVy * MapConstants.TileSize;
-
-            double dx = p.X - cx, dy = p.Y - cy;
-            if ((dx * dx + dy * dy) > (VertexHitRadius * VertexHitRadius))
                 return false;
 
             vx = candVx;
@@ -1657,8 +1743,8 @@ namespace UrbanChaosMapEditor.Views.Core
             int size = Math.Clamp(brushSize, 1, 10);
             int half = (size - 1) / 2;
 
-            int startTx = (vx - 1) - half;
-            int startTy = (vy - 1) - half;
+            int startTx = Math.Max(0, vx - 1) - half;
+            int startTy = Math.Max(0, vy - 1) - half;
 
             for (int dy = 0; dy < size; dy++)
             {
@@ -1760,7 +1846,11 @@ namespace UrbanChaosMapEditor.Views.Core
             if (!IsCtrlDown())
                 return;
 
-            int size = MapConstants.TileSize;
+            // Snap to half-tile grid (32px), which covers all three node types:
+            //   Corner vertices  — both axes are multiples of TileSize (64)
+            //   Edge midpoints   — one axis at TileSize/2 offset, other at TileSize multiple
+            //   Cell centres     — both axes at TileSize/2 offset within the cell
+            int size = MapConstants.TileSize / 2;
 
             uiX = (int)(Math.Round(uiX / (double)size) * size);
             uiZ = (int)(Math.Round(uiZ / (double)size) * size);

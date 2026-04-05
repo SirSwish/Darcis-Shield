@@ -21,6 +21,7 @@ namespace UrbanChaosMapEditor.Views.Core
     {
         private bool _heightHotkeyLatched;
         private PrimListItem? _copiedPrim;
+        private bool _lastCopyWasPrim;
         private const double MinExpandedEditorWidth = 300;
         private const double CollapsedRailWidth = 28;
         private double _lastDrawerWidth = MinExpandedEditorWidth;
@@ -401,65 +402,19 @@ namespace UrbanChaosMapEditor.Views.Core
                 PixelX = sel.PixelX,
                 PixelZ = sel.PixelZ
             };
+            _lastCopyWasPrim = true;
 
-            shell.StatusMessage = $"Copied \"{sel.Name}\" (#{sel.PrimNumber:000}).";
+            shell.StatusMessage = $"Copied \"{sel.Name}\" (#{sel.PrimNumber:000}). Ctrl+V to paste.";
         }
 
         private void PastePrimAtCursor()
         {
             if (_copiedPrim == null) { if (DataContext is MainWindowViewModel s1) s1.StatusMessage = "Clipboard is empty."; return; }
             if (DataContext is not MainWindowViewModel shell) return;
-            var map = shell.Map;
 
-            int uiX = MapConstants.MapPixels - map.CursorX;
-            int uiY = MapConstants.MapPixels - map.CursorZ;
-
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                uiX = (int)(Math.Round(uiX / 64.0) * 64.0);
-                uiY = (int)(Math.Round(uiY / 64.0) * 64.0);
-
-                uiX = Math.Clamp(uiX, 0, MapConstants.MapPixels - 1);
-                uiY = Math.Clamp(uiY, 0, MapConstants.MapPixels - 1);
-            }
-
-            ObjectSpace.UiPixelsToGamePrim(uiX, uiY, out int mapWhoIndex, out byte gameX, out byte gameZ);
-
-            var clip = _copiedPrim;
-            var newEntry = new PrimsAccessor.PrimEntry
-            {
-                PrimNumber = (byte)clip.PrimNumber,
-                MapWhoIndex = mapWhoIndex,
-                X = gameX,
-                Z = gameZ,
-                Y = clip.Y,
-                Yaw = clip.Yaw,
-                Flags = clip.Flags,
-                InsideIndex = clip.InsideIndex
-            };
-
-            try
-            {
-                var acc = new PrimsAccessor(MapDataService.Instance);
-                acc.AddPrim(newEntry);
-
-                map.RefreshPrimsList();
-
-                var inserted = map.Prims.LastOrDefault(p =>
-                    p.MapWhoIndex == mapWhoIndex &&
-                    p.X == gameX && p.Z == gameZ &&
-                    p.PrimNumber == clip.PrimNumber);
-
-                map.SelectedPrim = inserted ?? map.SelectedPrim;
-
-                shell.StatusMessage = $"Pasted \"{clip.Name}\" (#{clip.PrimNumber:000}) at cell {mapWhoIndex} (X:{gameX}, Z:{gameZ}).";
-            }
-            catch (System.Exception ex)
-            {
-                shell.StatusMessage = "Error: failed to paste object.";
-                MessageBox.Show($"Failed to paste object.\n\n{ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            shell.Map.BeginPastePrim(_copiedPrim);
+            MapViewControl.Focus();
+            shell.StatusMessage = $"Pasting \"{_copiedPrim.Name}\" \u2014 move to position and click to place. Space to rotate. Right-click or Esc to cancel.";
         }
 
         private void MainWindow_PreviewKeyDown(object? sender, KeyEventArgs e)
@@ -503,6 +458,7 @@ namespace UrbanChaosMapEditor.Views.Core
                         && map.TextureAreaCommitted)
                     {
                         map.CopyTextureCellsCommand.Execute(null);
+                        _lastCopyWasPrim = false;
                         shell.StatusMessage = $"Copied {map.TextureClipboard?.Width}\u00d7{map.TextureClipboard?.Height} cells. Ctrl+V to paste.";
                         e.Handled = true;
                         return;
@@ -531,7 +487,16 @@ namespace UrbanChaosMapEditor.Views.Core
 
                     var map = shell.Map;
 
-                    // Texture clipboard paste takes priority when we have cells
+                    // Paste whichever was copied most recently.
+                    // If a prim was the last thing copied, paste the prim.
+                    // Only fall through to texture paste if no prim has been copied since the last texture copy.
+                    if (_lastCopyWasPrim && _copiedPrim != null)
+                    {
+                        PastePrimAtCursor();
+                        e.Handled = true;
+                        return;
+                    }
+
                     if (map.TextureClipboard != null)
                     {
                         map.SelectedTool = UrbanChaosMapEditor.Models.Core.EditorTool.PasteTexture;
