@@ -154,6 +154,13 @@
                         Panel.ZIndex="100"
                         DataContext="{Binding}"
                         IsHitTestVisible="False"/>
+
+                    <!-- Facet endpoint handles (drag to reposition XZ0 / XZ1) -->
+                    <bldOvl:FacetHandlesLayer
+                        x:Name="FacetHandlesOverlay"
+                        Width="8192"
+                        Height="8192"
+                        Panel.ZIndex="101"/>
                 </Grid>
             </Grid>
         </ScrollViewer>

@@ -242,7 +242,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         // Auto-build options (checked by RoofEnclosureService)
         private bool _autoDetectRoofs = true;
-        private bool _autoPaintRoofTextures = false;  // Off by default per user feedback
+        private bool _autoPaintRoofTextures = true;
         private bool _autoCreateWalkables = true;
 
         public bool AutoDetectRoofs
@@ -382,6 +382,9 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             get => _isMultiDrawingFacets;
             set { if (_isMultiDrawingFacets != value) { _isMultiDrawingFacets = value; OnPropertyChanged(); } }
         }
+
+        /// <summary>The facet type being drawn in the current multi-draw session (null when not active).</summary>
+        public FacetType? MultiDrawFacetType => _facetTemplate?.Type;
 
         /// <summary>Preview line for multi-draw mode (same rendering as single redraw).</summary>
         public (int uiX0, int uiZ0, int uiX1, int uiZ1)? MultiDrawPreviewLine
@@ -1129,6 +1132,13 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         // Null during palette placement.
         public PrimListItem? PrimPasteTemplate { get; private set; }
 
+        private bool _autoSnapToFloor = true;
+        public bool AutoSnapToFloor
+        {
+            get => _autoSnapToFloor;
+            set { if (_autoSnapToFloor != value) { _autoSnapToFloor = value; OnPropertyChanged(); } }
+        }
+
         // Yaw value used for the placement ghost; writable so spacebar can rotate it.
         private byte _placementYaw;
         public byte PlacementYaw
@@ -1548,6 +1558,16 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 byte x1 = tileX;
                 byte z1 = tileZ;
 
+                if (x0 != x1 && z0 != z1)
+                {
+                    // Reset to first-click so the user can pick a new second point
+                    _facetRedrawFirstPoint = null;
+                    FacetRedrawPreviewLine = null;
+                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel diagVm1)
+                        diagVm1.StatusMessage = "Diagonal facets are not allowed — facets must be axis-aligned.";
+                    return false;
+                }
+
                 // Apply the new coordinates to whichever window initiated the redraw
                 _facetRedrawWindow?.ApplyRedrawCoords(x0, z0, x1, z1);
                 _cableRedrawWindow?.ApplyRedrawCoords(x0, z0, x1, z1);
@@ -1705,6 +1725,16 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 byte z0 = _multiDrawFirstPoint.Value.z;
                 byte x1 = tileX;
                 byte z1 = tileZ;
+
+                if (x0 != x1 && z0 != z1)
+                {
+                    // Reset to let the user pick a new second point
+                    _multiDrawFirstPoint = null;
+                    MultiDrawPreviewLine = null;
+                    if (Application.Current.MainWindow?.DataContext is MainWindowViewModel diagVm2)
+                        diagVm2.StatusMessage = "Diagonal facets are not allowed — facets must be axis-aligned.";
+                    return false;
+                }
 
                 // Commit this facet immediately
                 var adder = new BuildingAdder(MapDataService.Instance);

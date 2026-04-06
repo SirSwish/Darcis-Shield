@@ -18,6 +18,7 @@
         <SolidColorBrush x:Key="FacetFenceBrush"  Color="#FFFF00"/>
         <SolidColorBrush x:Key="FacetCableBrush"  Color="#FF0000"/>
         <SolidColorBrush x:Key="FacetDoorBrush"   Color="#A020F0"/>
+        <SolidColorBrush x:Key="FacetGateBrush"   Color="#1E90FF"/>
         <SolidColorBrush x:Key="FacetLadderBrush" Color="#FFA500"/>
         <SolidColorBrush x:Key="FacetOtherBrush"  Color="#7FD4FF"/>
 
@@ -170,10 +171,25 @@
                 </ToggleButton>
 
                 <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
+                              Background="{StaticResource FacetGateBrush}"
+                              IsChecked="{Binding FilterGates}">
+                    <TextBlock Text="Gates" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </ToggleButton>
+
+                <ToggleButton Style="{StaticResource LegendTogglePillCompact}"
                               Background="{StaticResource FacetLadderBrush}"
                               IsChecked="{Binding FilterLadders}">
                     <TextBlock Text="Ladders" Style="{StaticResource LegendPillTextStyleCompact}"/>
                 </ToggleButton>
+
+                <!-- Cable colour indicator — display only, not a filter toggle -->
+                <Border Background="{StaticResource FacetCableBrush}"
+                        CornerRadius="8"
+                        Padding="6,2"
+                        Margin="0,0,4,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="Cables" Style="{StaticResource LegendPillTextStyleCompact}"/>
+                </Border>
             </WrapPanel>
 
         </Grid>
@@ -296,6 +312,7 @@
                                                         <Binding Source="{StaticResource FacetDoorBrush}"/>
                                                         <Binding Source="{StaticResource FacetLadderBrush}"/>
                                                         <Binding Source="{StaticResource FacetOtherBrush}"/>
+                                                        <Binding Source="{StaticResource FacetGateBrush}"/>
                                                     </MultiBinding>
                                                 </Ellipse.Fill>
                                             </Ellipse>

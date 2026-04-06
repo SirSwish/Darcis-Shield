@@ -565,11 +565,21 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         public bool SelectFacetFromMap(int facetId1, int buildingId1, bool openEditor)
         {
+            System.Diagnostics.Debug.WriteLine($"[BuildingsTab] SelectFacetFromMap facet#{facetId1} bld#{buildingId1}, DataContext={DataContext?.GetType().Name ?? "null"}");
+
             if (DataContext is not BuildingsTabViewModel vm)
+            {
+                System.Diagnostics.Debug.WriteLine("[BuildingsTab] FAIL: DataContext is not BuildingsTabViewModel");
                 return false;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[BuildingsTab] vm.Buildings.Count={vm.Buildings.Count}");
 
             if (!vm.TrySelectFacetFromMap(facetId1, buildingId1))
+            {
+                System.Diagnostics.Debug.WriteLine($"[BuildingsTab] FAIL: TrySelectFacetFromMap returned false (building found={vm.Buildings.Any(b => b.Id == buildingId1)})");
                 return false;
+            }
 
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                 shell.Map.SelectedWalkableId1 = 0;

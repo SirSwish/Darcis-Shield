@@ -107,6 +107,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
                         continue;
                     }
 
+                    // Fast lookup set for smart texture classification (built from full polygon extent).
+                    var interiorTileSet = new HashSet<(int, int)>(interiorTiles);
+                    bool oneWide = IsOneWidePolygon(interiorTileSet);
+
                     int worldAltitude = (height << AltitudeAccessor.PAP_ALT_SHIFT) + (y0 >> AltitudeAccessor.PAP_ALT_SHIFT);
                     Debug.WriteLine($"[RoofEnclosureService] Found {interiorTiles.Count} interior tiles, applying roof at Height={height} Y0={y0} (world={worldAltitude})");
 
@@ -140,7 +144,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                         if (applyRoofTextures)
                         {
-                            texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.World, 50, 0, currentWorld);
+                            var (texNum, rot) = ClassifyRoofTile(tx, ty, interiorTileSet, oneWide);
+                            texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.Shared, texNum, rot, currentWorld);
                             anyTextureChanged = true;
                         }
                     }
@@ -535,6 +540,124 @@ namespace UrbanChaosMapEditor.Services.Roofs
             }
 
             return inside;
+        }
+
+        /// <summary>
+        /// Classifies a roof tile and returns the texture number and rotation to use.
+        ///
+        /// Coordinate note: tile coords are in game/facet space. The WPF render flips
+        /// both axes (wpfTx = 127-tx, wpfTy = 127-ty), so on-screen directions are:
+        ///   Screen Right  = lower tx  (tx - 1)
+        ///   Screen Left   = higher tx (tx + 1)
+        ///   Screen Bottom = lower ty  (ty - 1)
+        ///   Screen Top    = higher ty (ty + 1)
+        ///
+        /// Textures:
+        ///   tex420 – centre (fully surrounded, no concave diagonal)
+        ///   tex414 – edge (one side open); rot 0=right, 1=bottom, 2=left, 3=top
+        ///   tex415 – outer corner (two adjacent sides open);
+        ///            rot 0=bottom-right, 1=top-right, 2=top-left, 3=bottom-left
+        ///   tex416 – concave inner-corner dot (all cardinals present, one diagonal missing);
+        ///            rot 0=top-right missing, 1=bottom-right, 2=bottom-left, 3=top-left
+        /// </summary>
+        private static bool IsOneWidePolygon(HashSet<(int, int)> tileSet)
+        {
+            foreach (var (tx, ty) in tileSet)
+            {
+                int count = (tileSet.Contains((tx - 1, ty)) ? 1 : 0)
+                          + (tileSet.Contains((tx + 1, ty)) ? 1 : 0)
+                          + (tileSet.Contains((tx, ty - 1)) ? 1 : 0)
+                          + (tileSet.Contains((tx, ty + 1)) ? 1 : 0);
+                if (count >= 3)
+                    return false;
+            }
+            return true;
+        }
+
+        private static (int texNum, int rotation) ClassifyRoofTile(int tx, int ty, HashSet<(int, int)> tileSet, bool isOneWide)
+        {
+            bool hasRight  = tileSet.Contains((tx - 1, ty));
+            bool hasLeft   = tileSet.Contains((tx + 1, ty));
+            bool hasBottom = tileSet.Contains((tx, ty - 1));
+            bool hasTop    = tileSet.Contains((tx, ty + 1));
+
+            int neighbourCount = (hasRight ? 1 : 0) + (hasLeft ? 1 : 0)
+                               + (hasBottom ? 1 : 0) + (hasTop ? 1 : 0);
+
+            if (isOneWide)
+            {
+                if (neighbourCount <= 1)
+                {
+                    // End piece — open end faces away from the single neighbour (or all sides if isolated).
+                    if (hasRight)  return (418, 1);
+                    if (hasLeft)   return (418, 3);
+                    if (hasTop)    return (418, 2);
+                    if (hasBottom) return (418, 0);
+                    return (418, 3); // isolated single tile
+                }
+
+                if (neighbourCount == 2)
+                {
+                    // Straight piece — two opposite neighbours.
+                    if (hasRight && hasLeft)   return (417, 0); // horizontal run
+                    if (hasTop   && hasBottom) return (417, 1); // vertical run
+
+                    // Bend/corner piece — two adjacent neighbours.
+                    if (hasRight && hasTop)    return (419, 1);
+                    if (hasRight && hasBottom) return (419, 1);
+                    if (hasLeft  && hasBottom) return (419, 2);
+                    return (419, 2); // hasLeft && hasTop
+                }
+
+                // Fallback (shouldn't occur in a true 1-wide polygon).
+                return (417, 0);
+            }
+
+            int missing = (!hasRight ? 1 : 0) + (!hasLeft ? 1 : 0)
+                        + (!hasBottom ? 1 : 0) + (!hasTop ? 1 : 0);
+
+            if (missing == 0)
+            {
+                // All four cardinal neighbours are inside — check diagonals for concave corners.
+                bool hasTopRight    = tileSet.Contains((tx - 1, ty + 1));
+                bool hasBottomRight = tileSet.Contains((tx - 1, ty - 1));
+                bool hasBottomLeft  = tileSet.Contains((tx + 1, ty - 1));
+                bool hasTopLeft     = tileSet.Contains((tx + 1, ty + 1));
+
+                // Only assign a dot when exactly one diagonal is missing — a well-defined bend.
+                int missingDiag = (!hasTopRight ? 1 : 0) + (!hasBottomRight ? 1 : 0)
+                                + (!hasBottomLeft ? 1 : 0) + (!hasTopLeft ? 1 : 0);
+
+                if (missingDiag == 1)
+                {
+                    if (!hasTopRight)    return (416, 3);
+                    if (!hasBottomRight) return (416, 2);
+                    if (!hasBottomLeft)  return (416, 1);
+                    return (416, 0); // !hasTopLeft
+                }
+
+                return (420, 0); // true centre
+            }
+
+            if (missing == 1)
+            {
+                if (!hasRight)  return (414, 3);
+                if (!hasBottom) return (414, 2);
+                if (!hasLeft)   return (414, 1);
+                return (414, 0); // !hasTop
+            }
+
+            if (missing == 2)
+            {
+                if (!hasRight && !hasBottom) return (415, 2); // bottom-right corner
+                if (!hasRight && !hasTop)    return (415, 3); // top-right corner
+                if (!hasLeft  && !hasTop)    return (415, 0); // top-left corner
+                if (!hasLeft  && !hasBottom) return (415, 1); // bottom-left corner
+                // Opposite sides missing (degenerate narrow strip) — fall through to centre.
+            }
+
+            // 3+ sides missing or degenerate: default to centre tile.
+            return (420, 0);
         }
 
         #endregion

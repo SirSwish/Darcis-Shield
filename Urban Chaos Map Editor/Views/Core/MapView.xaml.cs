@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -186,22 +187,151 @@ namespace UrbanChaosMapEditor.Views.Core
             return null;
         }
 
+        private static T? FindLogicalChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>())
+            {
+                if (child is T found)
+                    return found;
+                var result = FindLogicalChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
         private bool TrySelectFacetInBuildingsTab(int facetId1, int buildingId1, bool openEditor)
         {
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow == null)
                 return false;
 
-            var buildingsTab = FindVisualChild<BuildingsTab>(mainWindow);
+            // Use logical tree — inactive tabs are not in the visual tree.
+            var buildingsTab = FindLogicalChild<BuildingsTab>(mainWindow);
+            System.Diagnostics.Debug.WriteLine($"[MapView] FindLogicalChild<BuildingsTab> = {(buildingsTab == null ? "null" : "found")}");
             if (buildingsTab == null)
                 return false;
 
-            return buildingsTab.SelectFacetFromMap(facetId1, buildingId1, openEditor);
+            if (!buildingsTab.SelectFacetFromMap(facetId1, buildingId1, openEditor))
+                return false;
+
+            // Switch to the Buildings tab so the selection is visible regardless of which tab was active.
+            var tabControl = mainWindow.FindName("EditorTabControl") as System.Windows.Controls.TabControl;
+            if (tabControl != null)
+            {
+                foreach (var item in tabControl.Items)
+                {
+                    if (item is System.Windows.Controls.TabItem ti && ti.Header?.ToString() == "Buildings")
+                    {
+                        tabControl.SelectedItem = ti;
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Bubbling MouseLeftButtonDown — fires only after all child elements have had a chance
+        /// to handle the click. If a child (PrimsLayer, FacetHandlesLayer, etc.) set e.Handled,
+        /// this handler is never called, giving correct priority ordering.
+        /// </summary>
+        private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MapView] OnMouseLeftButtonDown fired. Handled={e.Handled}");
+
+            if (DataContext is not MapViewModel vm || Surface == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MapView] Early exit: DataContext={DataContext?.GetType().Name ?? "null"}, Surface={Surface}");
+                return;
+            }
+
+            if (!vm.ShowBuildings)
+            {
+                System.Diagnostics.Debug.WriteLine("[MapView] Early exit: ShowBuildings=false");
+                return;
+            }
+
+            if (vm.IsDrawingWalkable || vm.IsRedrawingFacet || vm.IsMultiDrawingFacets ||
+                vm.IsPlacingLadder || vm.IsPlacingCable || vm.IsPlacingDoor || vm.IsPlacingPrim)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MapView] Early exit: placement mode active (DrawWalkable={vm.IsDrawingWalkable}, Redraw={vm.IsRedrawingFacet}, MultiDraw={vm.IsMultiDrawingFacets}, Ladder={vm.IsPlacingLadder}, Cable={vm.IsPlacingCable}, Door={vm.IsPlacingDoor}, Prim={vm.IsPlacingPrim})");
+                return;
+            }
+
+            var mainVm = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
+            Point pos = e.GetPosition(Surface);
+            int uiX = (int)Math.Clamp(pos.X, 0, MapConstants.MapPixels);
+            int uiZ = (int)Math.Clamp(pos.Y, 0, MapConstants.MapPixels);
+
+            System.Diagnostics.Debug.WriteLine($"[MapView] Facet hit-test at uiX={uiX}, uiZ={uiZ} (raw={pos.X:F1},{pos.Y:F1})");
+
+            var hits = FindFacetHits(uiX, uiZ, maxDistancePx: 8.0);
+            System.Diagnostics.Debug.WriteLine($"[MapView] FindFacetHits returned {hits.Count} hit(s)");
+            if (hits.Count == 0) return;
+
+            FacetHitCandidate chosen;
+            bool openEditor;
+
+            if (hits.Count == 1)
+            {
+                chosen = hits[0];
+                openEditor = e.ClickCount >= 2;
+            }
+            else
+            {
+                var dialogItems = hits.Select(h => new FacetSelectionDialog.CandidateVm
+                {
+                    FacetId1 = h.FacetId1,
+                    BuildingId1 = h.BuildingId1,
+                    StoreyId = h.StoreyId,
+                    TypeName = h.Type.ToString(),
+                    Coords = $"({h.X0},{h.Z0}) -> ({h.X1},{h.Z1})"
+                }).ToList();
+
+                var dlg = new FacetSelectionDialog(dialogItems)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+
+                if (dlg.ShowDialog() != true || dlg.SelectedCandidate == null)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                var sel = dlg.SelectedCandidate;
+                chosen = hits.First(h => h.FacetId1 == sel.FacetId1 && h.BuildingId1 == sel.BuildingId1);
+                openEditor = dlg.OpenEditor;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[MapView] Trying to select facet #{chosen.FacetId1} building #{chosen.BuildingId1} openEditor={openEditor}");
+            if (TrySelectFacetInBuildingsTab(chosen.FacetId1, chosen.BuildingId1, openEditor))
+            {
+                System.Diagnostics.Debug.WriteLine($"[MapView] Facet #{chosen.FacetId1} selected successfully.");
+                if (mainVm != null)
+                {
+                    mainVm.StatusMessage = openEditor
+                        ? $"Opened facet #{chosen.FacetId1} from building #{chosen.BuildingId1}."
+                        : $"Selected facet #{chosen.FacetId1} from building #{chosen.BuildingId1}.";
+                }
+
+                e.Handled = true;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[MapView] TrySelectFacetInBuildingsTab returned false for facet #{chosen.FacetId1}.");
+            }
         }
 
         public MapView()
         {
             InitializeComponent();
+
+            // Subscribe to MouseLeftButtonDown on Surface (inside the ScrollViewer) so the event
+            // is received before ScrollViewer.OnMouseLeftButtonDown intercepts it and sets Handled=true.
+            Surface.MouseLeftButtonDown += OnMouseLeftButtonDown;
 
             PreviewMouseMove += OnPreviewMouseMove;
             MouseLeave += OnMouseLeave;
@@ -331,100 +461,9 @@ namespace UrbanChaosMapEditor.Views.Core
             Point mouseDownPos = e.GetPosition(Surface);
             var mainVm = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
 
-            // Facet pick/select from map when no special placement/draw tool is active.
-            // Skip if a prim is within click range — prim selection (handled by PrimsLayer) takes priority.
-            const double PrimPickRadius = 34.0; // matches PrimsLayer.maxPick (YawRingOuter = 34 px)
-            bool hasPrimNearClick = vm.ShowObjects && vm.Prims.Any(p =>
-            {
-                double dx = mouseDownPos.X - p.PixelX;
-                double dz = mouseDownPos.Y - p.PixelZ;
-                return dx * dx + dz * dz <= PrimPickRadius * PrimPickRadius;
-            });
-
-            if (vm.ShowBuildings &&
-                !hasPrimNearClick &&
-                !vm.IsDrawingWalkable &&
-                !vm.IsRedrawingFacet &&
-                !vm.IsMultiDrawingFacets &&
-                !vm.IsPlacingLadder &&
-                !vm.IsPlacingCable &&
-                !vm.IsPlacingDoor &&
-                !vm.IsPlacingPrim &&
-                vm.SelectedTool == EditorTool.None)
-            {
-                int uiX = (int)Math.Clamp(mouseDownPos.X, 0, MapConstants.MapPixels);
-                int uiZ = (int)Math.Clamp(mouseDownPos.Y, 0, MapConstants.MapPixels);
-
-                var hits = FindFacetHits(uiX, uiZ, maxDistancePx: 8.0);
-                if (hits.Count > 0)
-                {
-                    FacetHitCandidate chosen;
-                    bool openEditor = false;
-
-                    if (hits.Count == 1)
-                    {
-                        chosen = hits[0];
-                        openEditor = e.ClickCount >= 2;
-                    }
-                    else
-                    {
-                        var dialogItems = hits.Select(h => new FacetSelectionDialog.CandidateVm
-                        {
-                            FacetId1 = h.FacetId1,
-                            BuildingId1 = h.BuildingId1,
-                            StoreyId = h.StoreyId,
-                            TypeName = h.Type.ToString(),
-                            Coords = $"({h.X0},{h.Z0}) -> ({h.X1},{h.Z1})"
-                        }).ToList();
-
-                        var dlg = new FacetSelectionDialog(dialogItems)
-                        {
-                            Owner = Application.Current.MainWindow
-                        };
-
-                        if (dlg.ShowDialog() != true || dlg.SelectedCandidate == null)
-                        {
-                            e.Handled = true;
-                            return;
-                        }
-
-                        var sel = dlg.SelectedCandidate;
-
-                        chosen = hits.First(h =>
-                            h.FacetId1 == sel.FacetId1 &&
-                            h.BuildingId1 == sel.BuildingId1);
-
-                        // IMPORTANT: use the dialog's intent, not the map click count
-                        openEditor = dlg.OpenEditor;
-                    }
-
-                    if (TrySelectFacetInBuildingsTab(chosen.FacetId1, chosen.BuildingId1, openEditor))
-                    {
-                        if (mainVm != null)
-                        {
-                            mainVm.StatusMessage = openEditor
-                                ? $"Opened facet #{chosen.FacetId1} from building #{chosen.BuildingId1}."
-                                : $"Selected facet #{chosen.FacetId1} from building #{chosen.BuildingId1}.";
-                        }
-
-                        e.Handled = true;
-                        return;
-                    }
-
-                    if (TrySelectFacetInBuildingsTab(chosen.FacetId1, chosen.BuildingId1, openEditor))
-                    {
-                        if (mainVm != null)
-                        {
-                            mainVm.StatusMessage = openEditor
-                                ? $"Opened facet #{chosen.FacetId1} from building #{chosen.BuildingId1}."
-                                : $"Selected facet #{chosen.FacetId1} from building #{chosen.BuildingId1}.";
-                        }
-
-                        e.Handled = true;
-                        return;
-                    }
-                }
-            }
+            // If click lands on a facet endpoint handle, let FacetHandlesOverlay take it.
+            if (FacetHandlesOverlay != null && FacetHandlesOverlay.IsHandleAt(mouseDownPos))
+                return;
 
 
             if (vm.IsDrawingWalkable)
@@ -516,13 +555,16 @@ namespace UrbanChaosMapEditor.Views.Core
                 {
                     var tmpl = vm.PrimPasteTemplate;
                     var acc = new PrimsAccessor(MapDataService.Instance);
+                    short placedY = vm.AutoSnapToFloor
+                        ? FloorSnapService.CalculateSnapY(mapWhoIndex, gameX, gameZ)
+                        : (tmpl != null ? tmpl.Y : (short)0);
                     var prim = new PrimsAccessor.PrimEntry
                     {
                         PrimNumber = (byte)vm.PrimNumberToPlace,
                         MapWhoIndex = mapWhoIndex,
                         X = gameX,
                         Z = gameZ,
-                        Y = tmpl != null ? tmpl.Y : (short)0,
+                        Y = placedY,
                         Yaw = vm.PlacementYaw,
                         Flags = tmpl?.Flags ?? 0,
                         InsideIndex = tmpl?.InsideIndex ?? 0
@@ -1392,6 +1434,17 @@ namespace UrbanChaosMapEditor.Views.Core
                 e.Handled = true;
             }
 
+            // Rotate selected facet 90° clockwise around its midpoint.
+            if (!vm.IsPlacingPrim &&
+                vm.SelectedTool != EditorTool.PaintTexture &&
+                e.Key == Key.Space &&
+                vm.SelectedFacetId.HasValue &&
+                vm.SelectedPrim == null)
+            {
+                RotateSelectedFacet90(vm);
+                e.Handled = true;
+            }
+
             bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 
             if (ctrl && e.Key == Key.C && vm.SelectedTool == EditorTool.SelectTextureArea && vm.TextureAreaCommitted)
@@ -1474,6 +1527,37 @@ namespace UrbanChaosMapEditor.Views.Core
                 e.Handled = true;
                 return;
             }
+        }
+
+        /// <summary>
+        /// Rotates the selected facet 90° clockwise (on screen) around its midpoint.
+        /// Only the X/Z coordinates are changed; height and all other fields are preserved.
+        /// </summary>
+        private static void RotateSelectedFacet90(MapViewModel vm)
+        {
+            if (!vm.SelectedFacetId.HasValue) return;
+            int facetId1 = vm.SelectedFacetId.Value;
+
+            var acc  = new BuildingsAccessor(MapDataService.Instance);
+            var snap = acc.ReadSnapshot();
+            int idx0 = facetId1 - 1;
+            if (idx0 < 0 || idx0 >= snap.Facets.Length) return;
+
+            var f = snap.Facets[idx0];
+
+            // Rotate 90° CW around P0 (X0,Z0) — P0 is the pivot so it never moves.
+            // For P1: new_X1 = X0 + (Z1 - Z0),  new_Z1 = Z0 - (X1 - X0)
+            static byte Clamp(int v) => (byte)Math.Clamp(v, 0, 127);
+
+            byte newX0 = f.X0;
+            byte newZ0 = f.Z0;
+            byte newX1 = Clamp(f.X0 + (f.Z1 - f.Z0));
+            byte newZ1 = Clamp(f.Z0 - (f.X1 - f.X0));
+
+            if (!acc.TryUpdateFacetCoords(facetId1, newX0, newZ0, newX1, newZ1)) return;
+
+            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
+                shell.StatusMessage = $"Facet #{facetId1} rotated 90\u00b0 \u2192 ({newX0},{newZ0}) \u2192 ({newX1},{newZ1})";
         }
 
         private void OnLostMouseCapture(object? sender, MouseEventArgs e)

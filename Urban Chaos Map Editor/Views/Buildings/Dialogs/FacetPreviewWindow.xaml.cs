@@ -355,16 +355,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         #region Redraw / Delete
 
-        private void BtnRedraw_Click(object sender, RoutedEventArgs e)
-        {
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-            {
-                mainVm.Map.BeginFacetRedraw(this, _facetIndex1);
-                Hide();
-                mainVm.StatusMessage = "Click start point (X0,Z0), then end point (X1,Z1). Right-click to cancel.";
-            }
-        }
-
         private void BtnApplyDStorey_Click(object sender, RoutedEventArgs e)
         {
             if (!ushort.TryParse(TxtDStorey.Text.Trim(), out ushort newStorey))

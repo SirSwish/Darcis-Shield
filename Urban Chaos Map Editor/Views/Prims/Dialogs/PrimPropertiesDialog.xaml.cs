@@ -1,9 +1,13 @@
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using UrbanChaosEditor.Shared.Services.Textures;
+using UrbanChaosMapEditor.Services.Core;
+using UrbanChaosMapEditor.Services.Heights;
+using UrbanChaosMapEditor.Services.Roofs;
 
 namespace UrbanChaosMapEditor.Views.Prims.Dialogs
 {
@@ -32,9 +36,19 @@ namespace UrbanChaosMapEditor.Views.Prims.Dialogs
         private int _storey;
         private int _offset; // 0..255
 
-        public PrimPropertiesDialog(byte flags, byte insideIndex, int initialHeight)
+        // Prim position for Snap to Floor (MapWho cell + sub-cell coords)
+        private readonly int _mapWhoIndex;
+        private readonly byte _primX;
+        private readonly byte _primZ;
+
+        public PrimPropertiesDialog(byte flags, byte insideIndex, int initialHeight,
+            int mapWhoIndex = -1, byte primX = 0, byte primZ = 0)
         {
             InitializeComponent();
+            _mapWhoIndex = mapWhoIndex;
+            _primX = primX;
+            _primZ = primZ;
+            BtnSnapToFloor.IsEnabled = mapWhoIndex >= 0 && MapDataService.Instance.IsLoaded;
 
             OnFloor = (flags & (1 << 0)) != 0;
             Searchable = (flags & (1 << 1)) != 0;
@@ -194,6 +208,52 @@ namespace UrbanChaosMapEditor.Views.Prims.Dialogs
         private void HeightTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ApplyManualHeight();
+        }
+
+        private void SnapToFloor_Click(object sender, RoutedEventArgs e)
+        {
+            if (_mapWhoIndex < 0 || !MapDataService.Instance.IsLoaded) return;
+
+            // Convert MapWho cell + sub-cell coords to UI tile coordinates.
+            // MapWhoIndex: column-major 0..1023 in game space (gameCol = idx/32, gameRow = idx%32).
+            // UI flips both axes: uiCol = 31 - gameCol, uiRow = 31 - gameRow.
+            // Within cell: game X/Z origin is bottom-right, UI is top-left → cellPixelX = 255 - X.
+            // Each tile = 64 px, so tileX = uiCol * 4 + cellPixelX / 64.
+            int gameCol = _mapWhoIndex / 32;
+            int gameRow = _mapWhoIndex % 32;
+            int uiCol   = 31 - gameCol;
+            int uiRow   = 31 - gameRow;
+            int tileX   = uiCol * 4 + (255 - _primX) / 64;
+            int tileZ   = uiRow * 4 + (255 - _primZ) / 64;
+
+            // Clamp to valid tile range [0, 127]
+            tileX = Math.Clamp(tileX, 0, 127);
+            tileZ = Math.Clamp(tileZ, 0, 127);
+
+            var altAcc = new AltitudeAccessor(MapDataService.Instance);
+            var hgtAcc = new HeightsAccessor(MapDataService.Instance);
+
+            // Floor altitude: stored divided by 8 (PAP_ALT_SHIFT), so scale back up to compare
+            // with vertex heights which are stored at face value.
+            int altEffective = altAcc.ReadAltRaw(tileX, tileZ) * (1 << AltitudeAccessor.PAP_ALT_SHIFT);
+
+            // Four surrounding vertex heights (stored at face value, 1 unit = 8 Y pixels)
+            int tx1 = Math.Clamp(tileX + 1, 0, 127);
+            int tz1 = Math.Clamp(tileZ + 1, 0, 127);
+            int v00 = hgtAcc.ReadHeight(tileX, tileZ);
+            int v10 = hgtAcc.ReadHeight(tx1,   tileZ);
+            int v01 = hgtAcc.ReadHeight(tileX, tz1);
+            int v11 = hgtAcc.ReadHeight(tx1,   tz1);
+
+            // Exclude zeros so altitude=0 (unset) doesn't win over negative terrain.
+            // Among remaining values, Max gives the one closest to 0 for negative terrain.
+            int[] candidates = new[] { altEffective, v00, v10, v01, v11 };
+            int[] nonZero = candidates.Where(v => v != 0).ToArray();
+            int floorHeight = nonZero.Length > 0 ? nonZero.Max() : 0;
+
+            // 1 unit of height = 8 pixels of Y
+            FromHeight(floorHeight * 8);
+            UpdateUi();
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)

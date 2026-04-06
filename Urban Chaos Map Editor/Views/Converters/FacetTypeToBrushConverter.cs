@@ -19,19 +19,21 @@ namespace UrbanChaosMapEditor.Views.Converters
                 _ => (byte)0
             };
 
-            var wall = values.ElementAtOrDefault(1) as Brush ?? Brushes.Lime;
-            var fence = values.ElementAtOrDefault(2) as Brush ?? Brushes.Yellow;
-            var cable = values.ElementAtOrDefault(3) as Brush ?? Brushes.Red;
-            var door = values.ElementAtOrDefault(4) as Brush ?? Brushes.MediumPurple;
+            var wall   = values.ElementAtOrDefault(1) as Brush ?? Brushes.Lime;
+            var fence  = values.ElementAtOrDefault(2) as Brush ?? Brushes.Yellow;
+            var cable  = values.ElementAtOrDefault(3) as Brush ?? Brushes.Red;
+            var door   = values.ElementAtOrDefault(4) as Brush ?? Brushes.MediumPurple;
             var ladder = values.ElementAtOrDefault(5) as Brush ?? Brushes.Orange;
-            var other = values.ElementAtOrDefault(6) as Brush ?? Brushes.LightSkyBlue;
+            var other  = values.ElementAtOrDefault(6) as Brush ?? Brushes.LightSkyBlue;
+            var gate   = values.ElementAtOrDefault(7) as Brush ?? Brushes.DodgerBlue;
 
             return type switch
             {
                 3 => wall,
                 10 or 11 or 13 => fence,
                 9 => cable,
-                18 or 19 or 21 => door,
+                18 or 19 => door,
+                21 => gate,
                 12 => ladder,
                 _ => other
             };

@@ -280,7 +280,8 @@ namespace UrbanChaosMapEditor.Views.Core
             System.Diagnostics.Debug.WriteLine(
                 $"[PrimProps] Open for index={sel.Index}, flags=0x{sel.Flags:X2}, inside={sel.InsideIndex}, y={sel.Y}");
 
-            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y)
+            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y,
+                sel.MapWhoIndex, sel.X, sel.Z)
             {
                 Owner = this
             };
@@ -309,24 +310,12 @@ namespace UrbanChaosMapEditor.Views.Core
 
             shell.Map.RefreshPrimsList();
 
-            PrimListItem? toSelect = null;
-            if (sel.Index >= 0 && sel.Index < shell.Map.Prims.Count)
-            {
-                toSelect = shell.Map.Prims[sel.Index];
-                if (toSelect.MapWhoIndex != sel.MapWhoIndex ||
-                    toSelect.X != sel.X ||
-                    toSelect.Z != sel.Z ||
-                    toSelect.PrimNumber != sel.PrimNumber)
-                {
-                    toSelect = null;
-                }
-            }
-
-            toSelect ??= shell.Map.Prims.FirstOrDefault(p =>
-                p.MapWhoIndex == sel.MapWhoIndex &&
-                p.X == sel.X &&
-                p.Z == sel.Z &&
-                p.PrimNumber == sel.PrimNumber);
+            var toSelect = shell.Map.Prims.FirstOrDefault(p => p.Index == sel.Index)
+                ?? shell.Map.Prims.FirstOrDefault(p =>
+                    p.MapWhoIndex == sel.MapWhoIndex &&
+                    p.X == sel.X &&
+                    p.Z == sel.Z &&
+                    p.PrimNumber == sel.PrimNumber);
 
             shell.Map.SelectedPrim = toSelect;
 
@@ -551,6 +540,12 @@ namespace UrbanChaosMapEditor.Views.Core
                     var acc = new PrimsAccessor(MapDataService.Instance);
                     acc.MovePrim(sel.Index, mapWhoIndex, gameX, gameZ);
 
+                    if (map.AutoSnapToFloor)
+                    {
+                        short snapY = FloorSnapService.CalculateSnapY(mapWhoIndex, gameX, gameZ);
+                        acc.EditPrim(sel.Index, p => p with { Y = snapY });
+                    }
+
                     map.RefreshPrimsList();
 
                     PrimListItem? toSelect = null;
@@ -595,7 +590,8 @@ namespace UrbanChaosMapEditor.Views.Core
             var sel = shell.Map.SelectedPrim;
             if (sel == null) return;
 
-            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y)
+            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y,
+                sel.MapWhoIndex, sel.X, sel.Z)
             {
                 Owner = this
             };
@@ -649,7 +645,8 @@ namespace UrbanChaosMapEditor.Views.Core
 
         private void OpenPrimHeightDialog(PrimListItem sel)
         {
-            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y)
+            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y,
+                sel.MapWhoIndex, sel.X, sel.Z)
             {
                 Owner = this
             };

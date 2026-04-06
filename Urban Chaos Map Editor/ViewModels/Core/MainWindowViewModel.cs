@@ -846,7 +846,8 @@ _ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.Sel
 
             var p = Map.SelectedPrim;
 
-            var dlg = new PrimPropertiesDialog(p.Flags, p.InsideIndex, p.Y)
+            var dlg = new PrimPropertiesDialog(p.Flags, p.InsideIndex, p.Y,
+                p.MapWhoIndex, p.X, p.Z)
             {
                 Owner = Application.Current.MainWindow
             };
@@ -868,24 +869,12 @@ _ => MapDataService.Instance.IsLoaded && (Map.SelectedPrims.Count > 0 || Map.Sel
 
             Map.RefreshPrimsList();
 
-            PrimListItem? toSelect = null;
-            if (p.Index >= 0 && p.Index < Map.Prims.Count)
-            {
-                toSelect = Map.Prims[p.Index];
-                if (toSelect.PrimNumber != p.PrimNumber ||
-                    toSelect.MapWhoIndex != p.MapWhoIndex ||
-                    toSelect.X != p.X ||
-                    toSelect.Z != p.Z)
-                {
-                    toSelect = null;
-                }
-            }
-
-            toSelect ??= Map.Prims.FirstOrDefault(x =>
-                x.MapWhoIndex == p.MapWhoIndex &&
-                x.X == p.X &&
-                x.Z == p.Z &&
-                x.PrimNumber == p.PrimNumber);
+            var toSelect = Map.Prims.FirstOrDefault(x => x.Index == p.Index)
+                ?? Map.Prims.FirstOrDefault(x =>
+                    x.MapWhoIndex == p.MapWhoIndex &&
+                    x.X == p.X &&
+                    x.Z == p.Z &&
+                    x.PrimNumber == p.PrimNumber);
 
             Map.SelectedPrim = toSelect;
 

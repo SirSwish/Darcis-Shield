@@ -531,6 +531,12 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                     var acc = new PrimsAccessor(MapDataService.Instance);
                     acc.MovePrim(ghost.Index, ghost.MapWhoIndex, ghost.X, ghost.Z);
 
+                    if (vm.AutoSnapToFloor)
+                    {
+                        short snapY = FloorSnapService.CalculateSnapY(ghost.MapWhoIndex, ghost.X, ghost.Z);
+                        acc.EditPrim(ghost.Index, p => p with { Y = snapY });
+                    }
+
                     vm.RefreshPrimsList();
                     Log("[PrimsLayer] RefreshPrimsList after move.");
                 }
@@ -599,7 +605,8 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                     {
                         vm.SelectedPrim = prim;
 
-                        var dlg = new PrimPropertiesDialog(prim.Flags, prim.InsideIndex, prim.Y)
+                        var dlg = new PrimPropertiesDialog(prim.Flags, prim.InsideIndex, prim.Y,
+                            prim.MapWhoIndex, prim.X, prim.Z)
                         {
                             Owner = Application.Current.MainWindow
                         };
@@ -617,8 +624,12 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
                             vm.RefreshPrimsList();
 
-                            if (prim.Index >= 0 && prim.Index < vm.Prims.Count)
-                                vm.SelectedPrim = vm.Prims[prim.Index];
+                            // Find by data index, not collection position (gaps from deletions shift positions).
+                            vm.SelectedPrim = vm.Prims.FirstOrDefault(p => p.Index == prim.Index)
+                                ?? vm.Prims.FirstOrDefault(p =>
+                                    p.MapWhoIndex == prim.MapWhoIndex &&
+                                    p.X == prim.X && p.Z == prim.Z &&
+                                    p.PrimNumber == prim.PrimNumber);
 
                             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                                 shell.StatusMessage =

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
+using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.ViewModels.Core;
 
@@ -32,6 +33,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
 
         private static readonly Pen CablePen;
         private static readonly Brush CableDotFill;
+
+        private static readonly Pen WallArrowPen;
 
         static FacetRedrawPreviewLayer()
         {
@@ -111,6 +114,14 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
 
             DotPen = new Pen(Brushes.Black, 2.0);
             DotPen.Freeze();
+
+            var wallGreen = new SolidColorBrush(Color.FromRgb(102, 255, 0)); wallGreen.Freeze();
+            WallArrowPen = new Pen(wallGreen, 3.0)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap   = PenLineCap.Round
+            };
+            WallArrowPen.Freeze();
         }
 
         public FacetRedrawPreviewLayer()
@@ -176,6 +187,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
                 var line = _vm.MultiDrawPreviewLine.Value;
                 DrawPreviewLine(dc, line.uiX0, line.uiZ0, line.uiX1, line.uiZ1,
                                MultiDrawPen, MultiDrawDotFill, "Start", "End");
+
+                // Facing arrow for Wall / Normal facet types
+                var t = _vm.MultiDrawFacetType;
+                if (t == FacetType.Wall || t == FacetType.Normal)
+                    DrawFacingArrow(dc, line.uiX0, line.uiZ0, line.uiX1, line.uiZ1);
             }
 
             // Ladder placement mode - with direction arrow
@@ -243,8 +259,37 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
             }
         }
         /// <summary>
+        /// Draws a perpendicular green arrow at the midpoint indicating the primary facing side
+        /// of a wall/normal facet (right-hand side of the P0→P1 travel direction).
+        /// </summary>
+        private void DrawFacingArrow(DrawingContext dc, int x0, int z0, int x1, int z1)
+        {
+            double dx = x1 - x0, dz = z1 - z0;
+            double len = Math.Sqrt(dx * dx + dz * dz);
+            if (len < 1.0) return;
+
+            dx /= len; dz /= len;
+            double perpX = dz, perpZ = -dx;
+
+            double midX = (x0 + x1) / 2.0, midZ = (z0 + z1) / 2.0;
+
+            const double arrowLen = 30.0, headSize = 12.0;
+            double tipX = midX + perpX * arrowLen, tipZ = midZ + perpZ * arrowLen;
+
+            dc.DrawLine(WallArrowPen, new Point(midX, midZ), new Point(tipX, tipZ));
+
+            double bx = -perpX * headSize * 0.7, bz = -perpZ * headSize * 0.7;
+            double sx =    dx  * headSize * 0.5, sz =    dz  * headSize * 0.5;
+
+            dc.DrawLine(WallArrowPen, new Point(tipX, tipZ),
+                new Point(tipX + bx + sx, tipZ + bz + sz));
+            dc.DrawLine(WallArrowPen, new Point(tipX, tipZ),
+                new Point(tipX + bx - sx, tipZ + bz - sz));
+        }
+
+        /// <summary>
         /// Draws the ladder preview line with a direction arrow showing which way the ladder faces.
-        /// The arrow points to the "right" of the travel direction (start ? end).
+        /// The arrow points to the "right" of the travel direction (start → end).
         /// </summary>
         private void DrawDirectionPreviewLine(DrawingContext dc, int x0, int z0, int x1, int z1,
             Pen linePen, Pen arrowPen, Brush dotBrush, Brush labelBrush, string dirLabel)

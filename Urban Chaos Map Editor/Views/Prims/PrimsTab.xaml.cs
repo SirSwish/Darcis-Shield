@@ -201,7 +201,8 @@ namespace UrbanChaosMapEditor.Views.Prims
 
         private void OpenMergedPrimDialog(MainWindowViewModel shell, PrimListItem sel)
         {
-            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y)
+            var dlg = new PrimPropertiesDialog(sel.Flags, sel.InsideIndex, sel.Y,
+                sel.MapWhoIndex, sel.X, sel.Z)
             {
                 Owner = Window.GetWindow(this)
             };
@@ -241,28 +242,13 @@ namespace UrbanChaosMapEditor.Views.Prims
 
         private static PrimListItem? ReselectPrim(MainWindowViewModel shell, PrimListItem original)
         {
-            PrimListItem? toSelect = null;
-
-            if (original.Index >= 0 && original.Index < shell.Map.Prims.Count)
-            {
-                toSelect = shell.Map.Prims[original.Index];
-
-                if (toSelect.MapWhoIndex != original.MapWhoIndex ||
-                    toSelect.X != original.X ||
-                    toSelect.Z != original.Z ||
-                    toSelect.PrimNumber != original.PrimNumber)
-                {
-                    toSelect = null;
-                }
-            }
-
-            toSelect ??= shell.Map.Prims.FirstOrDefault(p =>
-                p.MapWhoIndex == original.MapWhoIndex &&
-                p.X == original.X &&
-                p.Z == original.Z &&
-                p.PrimNumber == original.PrimNumber);
-
-            return toSelect;
+            // Match by data index first; fall back to position search for edge cases.
+            return shell.Map.Prims.FirstOrDefault(p => p.Index == original.Index)
+                ?? shell.Map.Prims.FirstOrDefault(p =>
+                    p.MapWhoIndex == original.MapWhoIndex &&
+                    p.X == original.X &&
+                    p.Z == original.Z &&
+                    p.PrimNumber == original.PrimNumber);
         }
 
         private void CenterOnPrim(PrimListItem p, MainWindowViewModel shell)

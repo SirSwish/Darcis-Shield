@@ -31,6 +31,7 @@ public class SharedBuildingLayer : MapOverlayBase
     protected static readonly Pen PenFenceYellow;
     protected static readonly Pen PenLadderOrange;
     protected static readonly Pen PenDoorPurple;
+    protected static readonly Pen PenGateBlue;
     protected static readonly Pen PenRoofBlue;
     protected static readonly Pen PenInsideGray;
     protected static readonly Pen PenDefault;
@@ -58,6 +59,7 @@ public class SharedBuildingLayer : MapOverlayBase
         PenFenceYellow = MakePen(Brushes.Yellow, 5.0);
         PenLadderOrange = MakePen(Brushes.Orange, 8.0);
         PenDoorPurple = MakePen(Brushes.MediumPurple, 7.0);
+        PenGateBlue   = MakePen(Brushes.DodgerBlue, 7.0);
         PenRoofBlue = MakePen(Brushes.DeepSkyBlue, 4.5);
         PenInsideGray = MakePen(Brushes.SlateGray, 4.5);
         PenDefault = MakePen(fluoroGreen, 4.5);
@@ -328,7 +330,8 @@ public class SharedBuildingLayer : MapOverlayBase
         9 => PenCableRed,            // Cable
         10 or 11 or 13 => PenFenceYellow, // Fence variants
         12 => PenLadderOrange,       // Ladder
-        18 or 19 or 21 => PenDoorPurple,  // Door variants
+        18 or 19 => PenDoorPurple,           // Door, InsideDoor
+        21 => PenGateBlue,                   // Gate (OutsideDoor)
         2 or 4 => PenRoofBlue,       // Roof
         15 or 16 or 17 => PenInsideGray,  // Inside variants
         _ => PenDefault

@@ -528,13 +528,14 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 
             rectPx = NormalizeRect(rectPx);
 
-            if (rectPx.Width < 2 || rectPx.Height < 2)
+            var vb = RectToVertexBounds(rectPx);
+            if (vb.IsEmpty || vb.MinX == vb.MaxX || vb.MinZ == vb.MaxZ)
                 return;
 
-            int tx0 = Math.Clamp((int)Math.Floor(rectPx.Left          / TileSize), 0, TilesPerSide - 1);
-            int tx1 = Math.Clamp((int)Math.Floor((rectPx.Right  - 1.0) / TileSize), 0, TilesPerSide - 1);
-            int ty0 = Math.Clamp((int)Math.Floor(rectPx.Top           / TileSize), 0, TilesPerSide - 1);
-            int ty1 = Math.Clamp((int)Math.Floor((rectPx.Bottom - 1.0) / TileSize), 0, TilesPerSide - 1);
+            int tx0 = Math.Clamp(vb.MinX - 1, 0, TilesPerSide - 1);
+            int tx1 = Math.Clamp(vb.MaxX - 1, 0, TilesPerSide - 1);
+            int ty0 = Math.Clamp(vb.MinZ - 1, 0, TilesPerSide - 1);
+            int ty1 = Math.Clamp(vb.MaxZ - 1, 0, TilesPerSide - 1);
 
             int raw = Math.Clamp(_vm.AreaSetHeightValue, -127, 127);
 
@@ -554,12 +555,14 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             if (!MapDataService.Instance.IsLoaded) return;
 
             rectPx = NormalizeRect(rectPx);
-            if (rectPx.Width < 2 || rectPx.Height < 2) return;
 
-            int tx0 = Math.Clamp((int)Math.Floor(rectPx.Left          / TileSize), 0, TilesPerSide - 1);
-            int tx1 = Math.Clamp((int)Math.Floor((rectPx.Right  - 1.0) / TileSize), 0, TilesPerSide - 1);
-            int ty0 = Math.Clamp((int)Math.Floor(rectPx.Top           / TileSize), 0, TilesPerSide - 1);
-            int ty1 = Math.Clamp((int)Math.Floor((rectPx.Bottom - 1.0) / TileSize), 0, TilesPerSide - 1);
+            var vb = RectToVertexBounds(rectPx);
+            if (vb.IsEmpty || vb.MinX == vb.MaxX || vb.MinZ == vb.MaxZ) return;
+
+            int tx0 = Math.Clamp(vb.MinX - 1, 0, TilesPerSide - 1);
+            int tx1 = Math.Clamp(vb.MaxX - 1, 0, TilesPerSide - 1);
+            int ty0 = Math.Clamp(vb.MinZ - 1, 0, TilesPerSide - 1);
+            int ty1 = Math.Clamp(vb.MaxZ - 1, 0, TilesPerSide - 1);
 
             int areaW = tx1 - tx0 + 1;
             int areaH = ty1 - ty0 + 1;
@@ -665,11 +668,31 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             return v;
         }
 
+        /// <summary>
+        /// Snaps a pixel rectangle to the nearest vertex grid and returns the vertex-index bounds.
+        /// Each edge rounds to the nearest multiple of TileSize (64 px), away from zero at midpoints.
+        /// </summary>
+        private static VertexBounds RectToVertexBounds(Rect r)
+        {
+            int vxMin = Math.Clamp((int)Math.Round(r.Left   / TileSize, MidpointRounding.AwayFromZero), 0, TilesPerSide);
+            int vxMax = Math.Clamp((int)Math.Round(r.Right  / TileSize, MidpointRounding.AwayFromZero), 0, TilesPerSide);
+            int vzMin = Math.Clamp((int)Math.Round(r.Top    / TileSize, MidpointRounding.AwayFromZero), 0, TilesPerSide);
+            int vzMax = Math.Clamp((int)Math.Round(r.Bottom / TileSize, MidpointRounding.AwayFromZero), 0, TilesPerSide);
+            return (vxMin > vxMax || vzMin > vzMax)
+                ? VertexBounds.Empty
+                : new VertexBounds(vxMin, vxMax, vzMin, vzMax);
+        }
+
         private VertexBounds GetBrushBounds(int centerVX, int centerVZ)
         {
-            if (centerVX < 0 || centerVZ < 0)
-                return VertexBounds.Empty;
             if (_vm != null && IsAreaDragTool(_vm.SelectedTool))
+            {
+                // Highlight exactly the vertices that the operation will touch.
+                return (_isAreaDragging && !_areaRectPx.IsEmpty)
+                    ? RectToVertexBounds(NormalizeRect(_areaRectPx))
+                    : VertexBounds.Empty;
+            }
+            if (centerVX < 0 || centerVZ < 0)
                 return VertexBounds.Empty;
 
             int n = Math.Max(1, _vm?.BrushSize ?? 1);

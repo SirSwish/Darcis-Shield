@@ -47,34 +47,41 @@
 
         <!-- Action buttons -->
         <Border Grid.Row="1" Background="#2b2b2b" Padding="6" Margin="0,6,0,6">
-            <WrapPanel Orientation="Horizontal" ItemHeight="Auto" ItemWidth="Auto">
+            <StackPanel Orientation="Vertical">
+                <WrapPanel Orientation="Horizontal" ItemHeight="Auto" ItemWidth="Auto">
 
-                <!-- Properties -->
-                <Button x:Name="BtnPrimProps" Width="45" Height="40" Click="PrimProperties_Click">
-                    <Button.ToolTip>
-                        <TextBlock Text="Properties"/>
-                    </Button.ToolTip>
-                    <Image Source="/Assets/Icons/objectproperties.ico" Width="32" Height="32" Stretch="Uniform"/>
-                </Button>
-                <!-- Delete -->
-                <Button x:Name="DeletePrimBtn"
-                        Width="45"
-                        Height="40"
-                        Margin="6,0,0,0"
-                        Click="DeletePrim_Click">
+                    <!-- Properties -->
+                    <Button x:Name="BtnPrimProps" Width="45" Height="40" Click="PrimProperties_Click">
+                        <Button.ToolTip>
+                            <TextBlock Text="Properties"/>
+                        </Button.ToolTip>
+                        <Image Source="/Assets/Icons/objectproperties.ico" Width="32" Height="32" Stretch="Uniform"/>
+                    </Button>
 
-                                    <Button.ToolTip>
-                                        <TextBlock Text="Delete selected prim"/>
-                                    </Button.ToolTip>
+                    <!-- Delete -->
+                    <Button x:Name="DeletePrimBtn"
+                            Width="45"
+                            Height="40"
+                            Margin="6,0,0,0"
+                            Click="DeletePrim_Click">
+                        <Button.ToolTip>
+                            <TextBlock Text="Delete selected prim"/>
+                        </Button.ToolTip>
+                        <Image Source="/Assets/Icons/delete.ico"
+                               Width="32"
+                               Height="32"
+                               Stretch="Uniform"/>
+                    </Button>
 
-                                    <Image Source="/Assets/Icons/delete.ico"
-                           Width="32"
-                           Height="32"
-                           Stretch="Uniform"/>
+                </WrapPanel>
 
-                </Button>
-
-            </WrapPanel>
+                <!-- Auto Snap to Floor -->
+                <CheckBox x:Name="ChkAutoSnap"
+                          Content="Auto Snap to Floor"
+                          IsChecked="{Binding Map.AutoSnapToFloor, Mode=TwoWay}"
+                          Foreground="White"
+                          Margin="0,6,0,0"/>
+            </StackPanel>
         </Border>
 
         <!-- Prim palette by category -->

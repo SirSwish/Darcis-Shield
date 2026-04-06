@@ -145,6 +145,19 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
         }
 
+        private bool _filterGates;
+        public bool FilterGates
+        {
+            get => _filterGates;
+            set
+            {
+                if (_filterGates == value) return;
+                _filterGates = value;
+                OnPropertyChanged();
+                RefreshSelectedBuildingFacetGroups();
+            }
+        }
+
         private bool _filterLadders;
         public bool FilterLadders
         {
@@ -161,7 +174,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
         // Convenience: is *any* facet filter active?
         private bool AnyFacetFilterActive =>
-            _filterWalls || _filterFences || _filterDoors || _filterLadders;
+            _filterWalls || _filterFences || _filterDoors || _filterGates || _filterLadders;
 
         // ---------- Selection state ----------
 
@@ -840,7 +853,10 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
             var building = Buildings.FirstOrDefault(b => b.Id == buildingId1);
             if (building == null)
+            {
+                Debug.WriteLine($"[BuildingsTabVM] TrySelectFacetFromMap: building#{buildingId1} not found in Buildings (count={Buildings.Count}, ids=[{string.Join(",", Buildings.Select(b => b.Id))}])");
                 return false;
+            }
 
             ShowCablesList = false;
 
@@ -853,7 +869,10 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 .FirstOrDefault(f => f.FacetId1 == facetId1);
 
             if (facet == null)
+            {
+                Debug.WriteLine($"[BuildingsTabVM] TrySelectFacetFromMap: facet#{facetId1} not found in building#{buildingId1} storeys/groups");
                 return false;
+            }
 
             SelectedStoreyId = facet.StoreyId;
 
@@ -1179,7 +1198,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
         private static string FacetTypeName(FacetType code) => code switch
         {
-            FacetType.Normal => "Normal",
+            FacetType.Normal => "Wall",
             FacetType.Roof => "Roof",
             FacetType.Wall => "Wall",
             FacetType.RoofQuad => "RoofQuad",
@@ -1249,13 +1268,19 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                     return true;
             }
 
-            // Doors pill: all door-ish types
+            // Doors pill: door types (not gates)
             if (_filterDoors)
             {
                 if (type == FacetType.Door ||
                     type == FacetType.InsideDoor ||
-                    type == FacetType.OutsideDoor ||
                     type == FacetType.OInside)
+                    return true;
+            }
+
+            // Gates pill: fence gate type
+            if (_filterGates)
+            {
+                if (type == FacetType.OutsideDoor)
                     return true;
             }
 
