@@ -107,53 +107,27 @@ namespace UrbanChaosMapEditor.Services.Buildings
             bool twoTextured = (facet.Flags & FacetFlags.TwoTextured) != 0;
             bool twoSided = (facet.Flags & FacetFlags.TwoSided) != 0;
             bool hugFloor = (facet.Flags & FacetFlags.HugFloor) != 0;
-            bool isInside = (facet.Flags & FacetFlags.Inside) != 0;
 
-            int entriesPerBand = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+            // 2TEXTURED = warehouse-style paired opposing facets, emitted as two separate DFacetRec
+            //   entries (outside + inside). Each facet's StyleIndex already points directly at its
+            //   own style stream. The two streams are interleaved in dstyles (outside at even slots,
+            //   inside at odd), so each facet steps by 2 across multi-band walls to skip the partner.
+            //
+            // 2SIDED = single-channel. The game source does use StyleIndex+1 for the back-face render
+            //   but the editor treats 2SIDED as single-channel: we only paint StyleIndex+0.
+            //   HugFloor is auto-set based on whether the building forms a closed polygon.
+            //
+            // Plain / 2SIDED + HugFloor = single-channel, step of 1.
 
-            // Detect warehouse: check if the building type is Warehouse
-            // For warehouse walls, dstyles are interleaved: [outside, inside, outside, inside, ...]
-            // So the step between outside bands is (entriesPerBand + 1) instead of entriesPerBand.
-            // In practice, warehouses are always Height=4 (single band), so step doesn't matter.
-            bool isWarehouseBuilding = false;
-            if (facet.Building >= 1 && snap.Buildings != null && facet.Building <= snap.Buildings.Length)
-            {
-                isWarehouseBuilding = snap.Buildings[facet.Building - 1].BuildingType == BuildingType.Warehouse;
-            }
+            int entriesPerBand = twoTextured ? 2 : 1;
+            int styleIndexStep = entriesPerBand;
 
-            int styleIndexStep;
-            if (isWarehouseBuilding && !isInside)
-            {
-                // Warehouse outside face: step over the interleaved inside dstyle
-                styleIndexStep = entriesPerBand + 1;
-            }
-            else if (isWarehouseBuilding && isInside)
-            {
-                // Warehouse inside face: same step (skip the interleaved outside dstyle)
-                styleIndexStep = entriesPerBand + 1;
-            }
-            else
-            {
-                // Regular building: step by entriesPerBand
-                styleIndexStep = entriesPerBand;
-            }
+            // 2TEXTURED: each paired facet has its own StyleIndex — no sub-slot offset needed.
+            // All other cases (including 2SIDED): stream starts at facet.StyleIndex directly.
+            bool isDualFace = false;
+            int facetStyleStart = facet.StyleIndex;
 
-            // Calculate the starting dstyle index for band 0.
-            // Dual-face dstyle layout: [SideB_header=X+0, SideA_0=X+1, SideB_0=X+2, SideA_1=X+3, SideB_1=X+4, ...]
-            //   X+0 is a non-rendered base-style reference for Side B (not a paint band).
-            //   Side A bands start at X+1 (step 2).
-            //   Side B bands start at X+2 (step 2); the engine reads them FORWARD (pos = col).
-            // faceOffset selects which face to paint:
-            //   1 = Side A (primary/outer): StyleIndex + 1
-            //   0 = Side B (secondary/inner): StyleIndex + styleIndexStep (= StyleIndex + 2)
-            bool isDualFace = (!hugFloor && (twoTextured || twoSided));
-            int facetStyleStart;
-            if (isDualFace)
-                facetStyleStart = facet.StyleIndex + (faceOffset == 0 ? styleIndexStep : faceOffset);
-            else
-                facetStyleStart = facet.StyleIndex;
-
-            Debug.WriteLine($"[FacetPainter] twoTextured={twoTextured}, isWarehouse={isWarehouseBuilding}, isInside={isInside}");
+            Debug.WriteLine($"[FacetPainter] twoTextured={twoTextured}, twoSided={twoSided}, hugFloor={hugFloor}, isDualFace={isDualFace}");
             Debug.WriteLine($"[FacetPainter] styleIndexStep={styleIndexStep}, facetStyleStart={facetStyleStart}");
 
             // Dump current dstyle values
@@ -240,10 +214,10 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 Debug.WriteLine($"[FacetPainter]   DStorey #{currentStoreyId}: Style={baseStyle}, PaintIndex={currentPaintMemIndex}, Count={columnsCount}");
 
                 // Write paint bytes.
-                // Side A (and single-face): reversed — engine reads pos = panelsAcross-1-col.
-                // Side B: forward — the engine reads Side B bands with pos = col (interior face).
+                // 2SIDED walls: stored forward — game reads Side A with pos = col.
+                // All other walls (single-channel, non-2SIDED): stored reversed — game reads with pos = N-1-col.
                 var bandPaintBytes = paintData[band];
-                if (isDualFace && faceOffset == 0)
+                if (twoSided)
                 {
                     for (int col = 0; col < columnsCount; col++)
                         newPaintBytes.Add(col < bandPaintBytes.Length ? bandPaintBytes[col] : (byte)0);

@@ -586,9 +586,65 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 bytes[off + 1] = (byte)((newRawStyleId >> 8) & 0xFF);
             });
 
-            // If you have notifications, do them here:
-            // BuildingsChangeBus.Instance.NotifyChanged();
+            BuildingsChangeBus.Instance.NotifyChanged();
 
+            return true;
+        }
+
+        /// <summary>
+        /// Writes <paramref name="baseStyleValue"/> (a positive TMA style number) into every
+        /// dstyle slot owned by this facet — covering all height bands and both faces when the
+        /// facet is TwoSided / TwoTextured.
+        /// </summary>
+        public bool TryUpdateFacetBaseStyle(int facetId1, short baseStyleValue)
+        {
+            if (!_svc.IsLoaded) return false;
+            if (!TryGetFacetOffset(facetId1, out int facet0)) return false;
+
+            _svc.ComputeAndCacheBuildingRegion();
+            if (!_svc.TryGetBuildingRegion(out int start, out _)) return false;
+
+            var bytes = _svc.GetBytesCopy();
+
+            ushort nextDBuilding = ReadU16(bytes, start + 2);
+            ushort nextDFacet    = ReadU16(bytes, start + 4);
+            ushort nextDStyle    = ReadU16(bytes, start + 6);
+
+            int totalBuildings = Math.Max(0, nextDBuilding - 1);
+            int totalFacets    = Math.Max(0, nextDFacet - 1);
+
+            // Read the fields we need from the raw facet record
+            byte height         = bytes[facet0 + 1];
+            var  flags          = (FacetFlags)ReadU16(bytes, facet0 + 10);
+            ushort styleIndex   = ReadU16(bytes, facet0 + 12);
+
+            // Compute how many dstyle slots this facet owns
+            int bands = (height == 0) ? 1 : (height / 4) + 1;
+            bool twoTextured = (flags & FacetFlags.TwoTextured) != 0;
+            bool twoSided    = (flags & FacetFlags.TwoSided)    != 0;
+            bool hugFloor    = (flags & FacetFlags.HugFloor)    != 0;
+            int entriesPerBand = (!hugFloor && (twoTextured || twoSided)) ? 2 : 1;
+            int totalSlots = bands * entriesPerBand;
+
+            int buildingsOff = start + HeaderSize;
+            int facetsOff    = buildingsOff + totalBuildings * DBuildingSize + AfterBuildingsPad;
+            int stylesOff    = facetsOff + totalFacets * DFacetSize;
+
+            // Validate all slots fit within the declared dstyle range
+            if (styleIndex + totalSlots > nextDStyle) return false;
+
+            _svc.Edit(raw =>
+            {
+                for (int i = 0; i < totalSlots; i++)
+                {
+                    int off = stylesOff + (styleIndex + i) * 2;
+                    raw[off + 0] = (byte)(baseStyleValue & 0xFF);
+                    raw[off + 1] = (byte)((baseStyleValue >> 8) & 0xFF);
+                }
+            });
+
+            BuildingsChangeBus.Instance.NotifyFacetChanged(facetId1);
+            BuildingsChangeBus.Instance.NotifyChanged();
             return true;
         }
 

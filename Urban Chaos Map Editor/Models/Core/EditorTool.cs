@@ -33,5 +33,6 @@ namespace UrbanChaosMapEditor.Models.Core
         // Future expansion
         PlacePrim,
         PlaceBuilding,
+        MoveBuilding,    // Drag-place a captured building snapshot at a new position
     }
 }

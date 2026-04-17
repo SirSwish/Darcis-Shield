@@ -125,7 +125,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         }
 
         // ===== View / overlays =====
-        private double _zoom = 1.0;
+        private double _zoom = 0.30;
         public double Zoom { get => _zoom; set { if (_zoom != value) { _zoom = value; OnPropertyChanged(); } } }
 
         private bool _showTextures = true;
@@ -140,7 +140,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         private bool _showObjects = true;
         public bool ShowWalkables { get => _showWalkables; set { if (_showWalkables != value) { _showWalkables = value; OnPropertyChanged(); } } }
 
-        private bool _showWalkables = true;
+        private bool _showWalkables = false;
         public bool ShowObjects { get => _showObjects; set { if (_showObjects != value) { _showObjects = value; OnPropertyChanged(); } } }
 
         private bool _showPrimGraphics = true;
@@ -1018,6 +1018,35 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             set { if (_selectedFacetId != value) { _selectedFacetId = value; OnPropertyChanged(); } }
         }
 
+        // ===== Move Building clipboard / ghost state =====
+        private Models.Buildings.BuildingSnapshot? _buildingMoveClipboard;
+        public Models.Buildings.BuildingSnapshot? BuildingMoveClipboard
+        {
+            get => _buildingMoveClipboard;
+            set
+            {
+                _buildingMoveClipboard = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasBuildingMoveClipboard));
+            }
+        }
+        public bool HasBuildingMoveClipboard => _buildingMoveClipboard != null;
+
+        // Ghost cursor position in UI pixels (updated on mouse move while MoveBuilding tool is active)
+        private int _moveGhostUiX;
+        public int MoveGhostUiX
+        {
+            get => _moveGhostUiX;
+            set { if (_moveGhostUiX != value) { _moveGhostUiX = value; OnPropertyChanged(); } }
+        }
+
+        private int _moveGhostUiZ;
+        public int MoveGhostUiZ
+        {
+            get => _moveGhostUiZ;
+            set { if (_moveGhostUiZ != value) { _moveGhostUiZ = value; OnPropertyChanged(); } }
+        }
+
         // ===== Texture palettes shown in the Textures tab =====
         public ObservableCollection<TextureThumb> WorldTextures { get; } = new();
         public ObservableCollection<TextureThumb> SharedTextures { get; } = new();
@@ -1558,7 +1587,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 byte x1 = tileX;
                 byte z1 = tileZ;
 
-                if (x0 != x1 && z0 != z1)
+                if (x0 != x1 && z0 != z1 && _cableRedrawWindow == null)
                 {
                     // Reset to first-click so the user can pick a new second point
                     _facetRedrawFirstPoint = null;
@@ -1657,7 +1686,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public void ApplyPapFlagsToArea(int tx1, int ty1, int tx2, int ty2)
         {
             if (!MapDataService.Instance.IsLoaded) return;
-            if (PapFlagsMask == 0) return;
 
             int minX = Math.Max(0, Math.Min(tx1, tx2));
             int maxX = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(tx1, tx2));
@@ -1665,28 +1693,24 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             int maxZ = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(ty1, ty2));
 
             var accessor = new AltitudeAccessor(MapDataService.Instance);
-            var flagsToApply = (PapFlags)PapFlagsMask;
+            var flagsToWrite = (PapFlags)PapFlagsMask;
             int count = 0;
 
             for (int tx = minX; tx <= maxX; tx++)
             {
                 for (int ty = minZ; ty <= maxZ; ty++)
                 {
-                    if (PapFlagsClearMode)
-                        accessor.ClearFlags(tx, ty, flagsToApply);
-                    else
-                        accessor.SetFlags(tx, ty, flagsToApply);
+                    accessor.WriteFlags(tx, ty, flagsToWrite);
                     count++;
                 }
             }
 
             MapDataService.Instance.MarkDirty();
 
-            string mode = PapFlagsClearMode ? "Cleared" : "Set";
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-                mainVm.StatusMessage = $"{mode} flags 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ}) to ({maxX},{maxZ})";
+                mainVm.StatusMessage = $"Wrote flags 0x{PapFlagsMask:X4} to {count} cells ({minX},{minZ}) to ({maxX},{maxZ})";
 
-            Debug.WriteLine($"[PapFlags] {mode} 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ})-({maxX},{maxZ})");
+            Debug.WriteLine($"[PapFlags] Wrote 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ})-({maxX},{maxZ})");
         }
 
         /// <summary>
@@ -1726,7 +1750,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                 byte x1 = tileX;
                 byte z1 = tileZ;
 
-                if (x0 != x1 && z0 != z1)
+                if (x0 != x1 && z0 != z1 && _facetTemplate?.Type != FacetType.Cable)
                 {
                     // Reset to let the user pick a new second point
                     _multiDrawFirstPoint = null;
@@ -1828,11 +1852,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             int totalAdded = _facetsAddedCount;
             EndFacetMultiDraw(totalAdded);
 
-            if (totalAdded > 0)
-            {
-                MessageBox.Show($"Successfully added {totalAdded} facet(s) to Building #{_facetTemplate?.BuildingId1}.",
-                    "Facets Added", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
 
         /// <summary>

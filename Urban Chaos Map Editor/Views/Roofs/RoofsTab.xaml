@@ -65,6 +65,8 @@
             <!-- Action buttons -->
             <RowDefinition Height="Auto"/>
             <!-- Altitude tools -->
+            <RowDefinition Height="Auto"/>
+            <!-- PAP flags tools -->
         </Grid.RowDefinitions>
 
         <!-- Header with building filter -->
@@ -72,39 +74,32 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0"
-                           Text="Building:"
-                           VerticalAlignment="Center"
-                           Margin="0,0,6,0"/>
+                <!-- Building filter ComboBox -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Filter:"
+                               VerticalAlignment="Center"
+                               Foreground="#AAA"
+                               Margin="0,0,6,0"/>
+                    <ComboBox ItemsSource="{Binding BuildingFilterOptions}"
+                              SelectedItem="{Binding SelectedBuildingOption, Mode=TwoWay}"
+                              DisplayMemberPath="Label"
+                              Width="130"
+                              Background="#333"
+                              Foreground="White"
+                              BorderBrush="#555"
+                              VerticalContentAlignment="Center"/>
+                </StackPanel>
 
-                <TextBox Grid.Column="1"
-                         x:Name="TxtBuildingFilter"
-                         Width="60"
-                         Text="{Binding SelectedBuildingId, UpdateSourceTrigger=PropertyChanged}"
-                         Background="#333"
-                         Foreground="White"
-                         BorderBrush="#555"
-                         VerticalContentAlignment="Center"
-                         Padding="4,2"
-                         ToolTip="Enter building ID to filter walkables (0 = show all)"/>
-
-                <TextBlock Grid.Column="2"
-                           Text="{Binding StatusText}"
-                           VerticalAlignment="Center"
-                           Margin="12,0,0,0"
-                           Foreground="#AAA"
-                           FontSize="11"/>
-
-                <Button Grid.Column="3"
-                        Content="Refresh"
+                <Button Grid.Column="2"
+                        Content="Clear Filter"
                         Padding="8,2"
-                        Click="BtnRefresh_Click"
-                        ToolTip="Reload walkable and RF4 data"/>
+                        IsEnabled="{Binding IsFilterActive}"
+                        Click="BtnClearFilter_Click"
+                        ToolTip="Show walkables for all buildings"/>
             </Grid>
         </Border>
 
@@ -185,6 +180,7 @@
                           x:Name="RoofFaces4List"
                           ItemsSource="{Binding RoofFaces4}"
                           SelectedItem="{Binding SelectedRoofFace4, Mode=TwoWay}"
+                          SelectionChanged="RoofFaces4List_OnSelectionChanged"
                           MouseDoubleClick="RoofFaces4List_OnMouseDoubleClick"
                           PreviewKeyDown="RoofFaces4List_PreviewKeyDown"
                           Background="Transparent"
@@ -336,6 +332,66 @@
                         </StackPanel>
                     </Button>
                 </WrapPanel>
+            </StackPanel>
+        </Border>
+        <!-- PAP Cell Flags -->
+        <Border Grid.Row="6"
+                BorderBrush="#333"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="10,8"
+                Margin="8,4,8,8"
+                Background="#1A1D20">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="PAP Cell Flags" FontWeight="SemiBold" FontSize="11"
+                               Foreground="#CFCFCF" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="TxtPapFlagsSummary" Text="0x0000" FontFamily="Consolas"
+                               Foreground="#888" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Expander Header="Flags" Foreground="White" FontSize="11" Margin="0,0,0,6">
+                    <Border Background="#2A2D32" CornerRadius="4" Padding="6,4" Margin="0,4,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <CheckBox x:Name="PapShadow1"    Content="Shadow1"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapShadow2"    Content="Shadow2"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapShadow3"    Content="Shadow3"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapReflective" Content="Reflective" Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapHidden"     Content="Hidden"     Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapSinkSquare" Content="SinkSquare" Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapSinkPoint"  Content="SinkPoint"  Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapNoUpper"    Content="NoUpper"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <CheckBox x:Name="PapNoGo"       Content="NoGo"       Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapRoofExists" Content="RoofExists" Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone1"      Content="Zone1"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone2"      Content="Zone2"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone3"      Content="Zone3"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone4"      Content="Zone4"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapFlatRoof"   Content="FlatRoof"   Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapWater"      Content="Water"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Expander>
+
+                <Button Padding="8,5" Click="PapFlagsDragArea_Click"
+                        ToolTip="Drag a rectangle on the map to overwrite flags on all cells in the area.">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid Width="16" Height="16" Margin="0,0,4,0">
+                            <Rectangle Fill="#886622" RadiusX="2" RadiusY="2"/>
+                            <TextBlock Text="F" FontWeight="Bold" FontSize="9"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="Drag Area" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Border>
     </Grid>

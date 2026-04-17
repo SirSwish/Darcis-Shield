@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -181,118 +180,59 @@ namespace UrbanChaosStyleEditor.ViewModels
                 }
             }
 
-            // Load style.tma if present, otherwise extract default.tma from embedded resources
+            // Load style.tma if present; otherwise seed with 199 blank default entries.
             string tmaPath = Path.Combine(world.FolderPath, "style.tma");
-            Debug.WriteLine($"[TMA] Checking for style.tma at: {tmaPath}");
-            Debug.WriteLine($"[TMA] File exists: {File.Exists(tmaPath)}");
 
-            if (!File.Exists(tmaPath))
-            {
-                Debug.WriteLine("[TMA] No style.tma found, attempting to extract default.tma from resources...");
-
-                // List all resources in the assembly to help debug
-                try
-                {
-                    var asm = System.Reflection.Assembly.GetExecutingAssembly();
-                    Debug.WriteLine($"[TMA] Assembly: {asm.FullName}");
-                    var resNames = asm.GetManifestResourceNames();
-                    Debug.WriteLine($"[TMA] Manifest resources ({resNames.Length}):");
-                    foreach (var rn in resNames)
-                        Debug.WriteLine($"[TMA]   {rn}");
-
-                    // Try to enumerate .g.resources to find the actual key
-                    var gRes = resNames.FirstOrDefault(n => n.EndsWith(".g.resources", StringComparison.OrdinalIgnoreCase));
-                    if (gRes != null)
-                    {
-                        using var resStream = asm.GetManifestResourceStream(gRes);
-                        if (resStream != null)
-                        {
-                            using var reader = new System.Resources.ResourceReader(resStream);
-                            Debug.WriteLine("[TMA] Keys in .g.resources:");
-                            int count = 0;
-                            foreach (System.Collections.DictionaryEntry entry in reader)
-                            {
-                                if (entry.Key is string k && (k.Contains("default") || k.Contains("tma") || k.Contains("assets")))
-                                    Debug.WriteLine($"[TMA]   MATCH: {k}");
-                                count++;
-                            }
-                            Debug.WriteLine($"[TMA]   Total keys: {count}");
-                        }
-                    }
-                }
-                catch (Exception dbgEx)
-                {
-                    Debug.WriteLine($"[TMA] Debug enumeration failed: {dbgEx.Message}");
-                }
-
-                try
-                {
-                    var uri = new Uri("pack://application:,,,/UrbanChaosStyleEditor;component/Assets/Defaults/default.tma", UriKind.Absolute);
-                    Debug.WriteLine($"[TMA] Trying pack URI: {uri}");
-                    var sri = System.Windows.Application.GetResourceStream(uri);
-                    Debug.WriteLine($"[TMA] GetResourceStream returned: sri={sri != null}, stream={sri?.Stream != null}");
-
-                    if (sri?.Stream != null)
-                    {
-                        Debug.WriteLine($"[TMA] Stream length: {sri.Stream.Length}");
-                        using (var stream = sri.Stream)
-                        using (var fs = File.Create(tmaPath))
-                        {
-                            stream.CopyTo(fs);
-                        }
-                        Debug.WriteLine($"[TMA] Extracted default.tma to {tmaPath}, size={new FileInfo(tmaPath).Length} bytes");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("[TMA] ERROR: default.tma resource not found in assembly");
-                        tmaPath = null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[TMA] EXCEPTION extracting default.tma: {ex.GetType().Name}: {ex.Message}");
-                    tmaPath = null;
-                }
-            }
-
-            if (tmaPath != null && File.Exists(tmaPath))
+            if (File.Exists(tmaPath))
             {
                 try
                 {
-                    Debug.WriteLine($"[TMA] Reading TMA file: {tmaPath} ({new FileInfo(tmaPath).Length} bytes)");
                     var tma = TMAFile.ReadTMAFile(tmaPath);
-                    Debug.WriteLine($"[TMA] TMA parsed: SaveType={tma.SaveType}, StyleCount={tma.TextureStyles.Count}");
 
-                    foreach (var style in tma.TextureStyles)
+                    // Skip raw row 0 (dummy) when building the editable project model.
+                    for (int i = 1; i < tma.TextureStyles.Count; i++)
                     {
+                        var style = tma.TextureStyles[i];
+
                         var entry = new StyleEntry
                         {
                             Index = project.Styles.Count,
                             Name = style.Name ?? ""
                         };
-                        foreach (var piece in style.Entries)
+
+                        for (int j = 0; j < style.Entries.Count; j++)
                         {
+                            var piece = style.Entries[j];
+                            byte flag = (j < style.Flags.Count) ? (byte)style.Flags[j] : (byte)0x03;
+
                             entry.Pieces.Add(new StylePiece
                             {
                                 Page = piece.Page,
                                 Tx = piece.Tx,
                                 Ty = piece.Ty,
-                                Flip = piece.Flip
+                                Flip = piece.Flip,
+                                Flag = flag
                             });
                         }
+
+                        while (entry.Pieces.Count < 5)
+                            entry.Pieces.Add(new StylePiece { Flag = 0x03 });
+
                         project.Styles.Add(entry);
                     }
-                    Debug.WriteLine($"[TMA] Loaded {project.Styles.Count} styles into project");
+
+                    // Ensure exactly 199 editable rows (pad if the file had fewer).
+                    PadStylesTo199(project);
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[TMA] EXCEPTION reading style.tma: {ex.GetType().Name}: {ex.Message}");
-                    Debug.WriteLine($"[TMA] Stack: {ex.StackTrace}");
+                    PopulateDefaultStyles(project);
                 }
             }
             else
             {
-                Debug.WriteLine($"[TMA] No TMA to load. tmaPath={tmaPath}, exists={tmaPath != null && File.Exists(tmaPath)}");
+                PopulateDefaultStyles(project);
             }
 
             // Load textype.txt if present
@@ -366,32 +306,13 @@ namespace UrbanChaosStyleEditor.ViewModels
             // Create the folder
             Directory.CreateDirectory(worldPath);
 
-            // Extract default.tma from embedded resources into the new world folder
-            try
-            {
-                var uri = new Uri("pack://application:,,,/UrbanChaosStyleEditor;component/Assets/Defaults/default.tma", UriKind.Absolute);
-                var sri = System.Windows.Application.GetResourceStream(uri);
-                if (sri?.Stream != null)
-                {
-                    var destPath = Path.Combine(worldPath, "style.tma");
-                    using (var stream = sri.Stream)
-                    using (var fs = File.Create(destPath))
-                    {
-                        stream.CopyTo(fs);
-                    }
-                    Debug.WriteLine($"[StyleEditor] Extracted default.tma to {destPath}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[StyleEditor] Failed to extract default.tma: {ex.Message}");
-            }
-
             var project = new StyleProject
             {
                 WorldNumber = worldNum,
                 ProjectName = $"World {worldNum}"
             };
+
+            PopulateDefaultStyles(project);
 
             Project = project;
             SelectedSlot = null;
@@ -531,33 +452,91 @@ namespace UrbanChaosStyleEditor.ViewModels
             StatusMessage = "Sky cleared.";
         }
 
-        public void AddStyle()
+        /// <summary>
+        /// Fills a project with 199 blank default StyleEntry rows (all values 0, flags POLY_GT 0x03).
+        /// This is the correct starting state for a new TMA — no default.tma file needed.
+        /// </summary>
+        private static void PopulateDefaultStyles(StyleProject project)
         {
-            var entry = new StyleEntry
+            for (int i = project.Styles.Count; i < 199; i++)
             {
-                Index = _project.Styles.Count,
-                Name = $"Style {_project.Styles.Count}"
-            };
-
-            for (int i = 0; i < 5; i++)
-                entry.Pieces.Add(new StylePiece());
-
-            _project.Styles.Add(entry);
-            SelectedStyle = entry;
-            StatusMessage = $"Added {entry.DisplayName}";
+                var entry = new StyleEntry { Index = i };
+                for (int j = 0; j < 5; j++)
+                    entry.Pieces.Add(new StylePiece()); // all zeros, Flag defaults to 0x03
+                project.Styles.Add(entry);
+            }
         }
 
-        public void RemoveStyle()
+        /// <summary>
+        /// Pads an existing style list up to 199 rows with blank default entries.
+        /// </summary>
+        private static void PadStylesTo199(StyleProject project)
         {
-            if (_selectedStyle == null) return;
-            var name = _selectedStyle.DisplayName;
-            _project.Styles.Remove(_selectedStyle);
+            for (int i = project.Styles.Count; i < 199; i++)
+            {
+                var entry = new StyleEntry { Index = i };
+                for (int j = 0; j < 5; j++)
+                    entry.Pieces.Add(new StylePiece());
+                project.Styles.Add(entry);
+            }
+        }
 
-            for (int i = 0; i < _project.Styles.Count; i++)
-                _project.Styles[i].Index = i;
+        public void LoadTmaFromFile()
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Load TMA file",
+                Filter = "TMA Style Files|*.tma|All Files|*.*",
+                Multiselect = false
+            };
 
-            SelectedStyle = null;
-            StatusMessage = $"Removed {name}";
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                var tma = UrbanChaosEditor.Shared.Models.Styles.TMAFile.ReadTMAFile(dlg.FileName);
+
+                _project.Styles.Clear();
+
+                // Skip row 0 (dummy) when building the editable model.
+                for (int i = 1; i < tma.TextureStyles.Count; i++)
+                {
+                    var style = tma.TextureStyles[i];
+                    var entry = new StyleEntry
+                    {
+                        Index = _project.Styles.Count,
+                        Name = style.Name ?? ""
+                    };
+
+                    for (int j = 0; j < style.Entries.Count; j++)
+                    {
+                        var piece = style.Entries[j];
+                        byte flag = (j < style.Flags.Count) ? (byte)style.Flags[j] : (byte)0x03;
+                        entry.Pieces.Add(new StylePiece
+                        {
+                            Page = piece.Page,
+                            Tx = piece.Tx,
+                            Ty = piece.Ty,
+                            Flip = piece.Flip,
+                            Flag = flag
+                        });
+                    }
+
+                    while (entry.Pieces.Count < 5)
+                        entry.Pieces.Add(new StylePiece { Flag = 0x03 });
+
+                    _project.Styles.Add(entry);
+                }
+
+                PadStylesTo199(_project);
+
+                SelectedStyle = null;
+                StatusMessage = $"Loaded {Path.GetFileName(dlg.FileName)}: {_project.Styles.Count} styles";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Failed to load TMA: {ex.Message}";
+            }
         }
 
         private string? _lastExportRoot;

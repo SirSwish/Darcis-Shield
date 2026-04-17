@@ -161,6 +161,15 @@
                         Width="8192"
                         Height="8192"
                         Panel.ZIndex="101"/>
+
+                    <!-- Move Building ghost outline -->
+                    <bldOvl:MoveBuildingGhostLayer
+                        x:Name="MoveBuildingGhostOverlay"
+                        Width="8192"
+                        Height="8192"
+                        Panel.ZIndex="102"
+                        DataContext="{Binding}"
+                        IsHitTestVisible="False"/>
                 </Grid>
             </Grid>
         </ScrollViewer>

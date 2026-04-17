@@ -142,6 +142,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
         public void WriteWorldAltitude(int tx, int ty, int worldAltitude)
         {
             int rawAlt = worldAltitude >> PAP_ALT_SHIFT;
+            rawAlt = rawAlt >> PAP_ALT_SHIFT;
             rawAlt = Math.Clamp(rawAlt, sbyte.MinValue, sbyte.MaxValue);
             WriteAltRaw(tx, ty, (sbyte)rawAlt);
         }

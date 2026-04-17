@@ -74,10 +74,6 @@
                 <MenuItem Header="_Import Sky..." Click="ImportSky_Click"/>
                 <MenuItem Header="_Clear Sky" Click="ClearSky_Click"/>
             </MenuItem>
-            <MenuItem Header="_Styles">
-                <MenuItem Header="_Add Style" Click="AddStyle_Click"/>
-                <MenuItem Header="_Remove Style" Click="RemoveStyle_Click"/>
-            </MenuItem>
         </Menu>
 
         <!-- Toolbar -->
@@ -313,13 +309,11 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-                                <TextBlock Text="TMA Styles" FontWeight="Bold" Foreground="#7AD7FF"/>
-                                <Button Style="{StaticResource ActionBtn}" Content="+" Padding="6,2"
-                                        Click="AddStyle_Click" Margin="8,0,0,0" FontWeight="Bold"
-                                        Background="#2D5A2D" BorderBrush="#4A8A4A"/>
-                                <Button Style="{StaticResource ActionBtn}" Content="-" Padding="6,2"
-                                        Click="RemoveStyle_Click" Margin="4,0,0,0" FontWeight="Bold"
-                                        Background="#5A2D2D" BorderBrush="#8A4A4A"/>
+                                <TextBlock Text="TMA Styles" FontWeight="Bold" Foreground="#7AD7FF" VerticalAlignment="Center"/>
+                                <Button Style="{StaticResource ActionBtn}" Content="Load TMA" Padding="8,2"
+                                        Click="LoadTma_Click" Margin="8,0,0,0"
+                                        Background="#2D4A6A" BorderBrush="#4A6A9A"
+                                        ToolTip="Import styles from an existing .tma file"/>
                             </StackPanel>
 
                             <ListBox Grid.Row="1" x:Name="StylesList"

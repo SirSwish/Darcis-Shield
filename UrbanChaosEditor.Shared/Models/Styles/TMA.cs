@@ -114,10 +114,10 @@ namespace UrbanChaosEditor.Shared.Models.Styles
         Gouraud = 0x01,
         Textured = 0x02,
         Masked = 0x04,
-        Transparent = 0x08,
+        SemiTransparent = 0x08,
         Alpha = 0x10,
         Tiled = 0x20,
-        TwoSided = 0x40
-        // bit7 unused
+        TwoSided = 0x40,
+        Walkable = 0x80
     }
 }

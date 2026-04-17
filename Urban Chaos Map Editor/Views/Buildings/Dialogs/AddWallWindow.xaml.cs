@@ -68,19 +68,27 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             ChkFenceCut.Checked += OnFlagChanged;
             ChkFenceCut.Unchecked += OnFlagChanged;
 
-            // Auto-enable TwoTextured + Unclimbable for warehouse buildings
+            // TwoTextured is only valid for warehouse buildings.
+            // For non-warehouse buildings, lock the checkbox off and disable it.
             try
             {
                 var acc = new BuildingsAccessor(MapDataService.Instance);
                 var snap = acc.ReadSnapshot();
-                if (snap.Buildings != null && _buildingId1 >= 1 && _buildingId1 <= snap.Buildings.Length)
+                bool isWarehouse = snap.Buildings != null
+                    && _buildingId1 >= 1
+                    && _buildingId1 <= snap.Buildings.Length
+                    && snap.Buildings[_buildingId1 - 1].Type == (byte)BuildingType.Warehouse;
+
+                if (isWarehouse)
                 {
-                    var bld = snap.Buildings[_buildingId1 - 1];
-                    if (bld.Type == (byte)BuildingType.Warehouse)
-                    {
-                        ChkTwoTextured.IsChecked = true;
-                        ChkUnclimbable.IsChecked = true;
-                    }
+                    ChkTwoTextured.IsChecked = true;
+                    ChkUnclimbable.IsChecked = true;
+                }
+                else
+                {
+                    ChkTwoTextured.IsChecked = false;
+                    ChkTwoTextured.IsEnabled = false;
+                    ChkTwoTextured.ToolTip = "Two Textured is only available on Warehouse buildings.";
                 }
             }
             catch { /* non-critical */ }

@@ -160,6 +160,30 @@
                 </Setter>
             </Style>
 
+            <!-- ContextMenu - dark popup container -->
+            <Style TargetType="ContextMenu">
+                <Setter Property="Background"       Value="{StaticResource BackgroundMedium}"/>
+                <Setter Property="Foreground"       Value="{StaticResource TextPrimary}"/>
+                <Setter Property="BorderBrush"      Value="{StaticResource BorderBrush}"/>
+                <Setter Property="BorderThickness"  Value="1"/>
+                <Setter Property="Padding"          Value="2"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ContextMenu">
+                            <Border x:Name="Border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <StackPanel IsItemsHost="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <!-- Separator in menus -->
             <Style TargetType="Separator">
                 <Setter Property="Height" Value="1"/>

@@ -43,9 +43,9 @@ namespace UrbanChaosMapEditor.Views.Roofs
         // Refresh
         // ====================================================================
 
-        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
         {
-            (DataContext as RoofsTabViewModel)?.Refresh();
+            (DataContext as RoofsTabViewModel)?.ClearFilter();
         }
 
         // ====================================================================
@@ -64,7 +64,13 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 shell.Map.SelectedWalkableId1 =
                     (lv.SelectedItem as WalkableVM)?.WalkableId1 ?? 0;
             }
+
         }
+
+        private void RoofFaces4List_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+        }
+
 
         private void WalkablesList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -122,7 +128,7 @@ namespace UrbanChaosMapEditor.Views.Roofs
             int buildingId = vm.SelectedBuildingId;
             if (buildingId <= 0)
             {
-                MessageBox.Show("Enter a building ID in the filter box first.",
+                MessageBox.Show("Select a building first — walkables must belong to a specific building.",
                     "Add Walkable", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -373,6 +379,38 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 MessageBox.Show($"Failed to delete roof face:\n\n{result.ErrorMessage}",
                     "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // ====================================================================
+        // PAP Cell Flags
+        // ====================================================================
+
+        private ushort GetSelectedPapFlags()
+        {
+            CheckBox[] boxes = { PapShadow1, PapShadow2, PapShadow3, PapReflective,
+                                 PapHidden, PapSinkSquare, PapSinkPoint, PapNoUpper,
+                                 PapNoGo, PapRoofExists, PapZone1, PapZone2,
+                                 PapZone3, PapZone4, PapFlatRoof, PapWater };
+            ushort flags = 0;
+            for (int i = 0; i < boxes.Length; i++)
+                if (boxes[i].IsChecked == true) flags |= (ushort)(1 << i);
+            return flags;
+        }
+
+        private void PapFlag_Changed(object sender, RoutedEventArgs e)
+        {
+            if (TxtPapFlagsSummary != null)
+                TxtPapFlagsSummary.Text = $"0x{GetSelectedPapFlags():X4}";
+        }
+
+        private void PapFlagsDragArea_Click(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm) return;
+
+            ushort flags = GetSelectedPapFlags();
+            mainVm.Map.PapFlagsMask = flags;
+            mainVm.Map.SelectedTool = EditorTool.AreaSetPapFlags;
+            mainVm.StatusMessage = $"PAP flags: drag on map to write 0x{flags:X4} to cells.";
         }
 
         // ====================================================================

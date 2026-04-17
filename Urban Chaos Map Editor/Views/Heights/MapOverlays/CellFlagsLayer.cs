@@ -5,6 +5,7 @@ using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Heights;
+using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.Views.Heights.Dialogs;
 
 namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
@@ -46,13 +47,54 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             Height = MapConstants.MapPixels;
             IsHitTestVisible = true;
 
-            Loaded += (_, __) => RefreshFlags();
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
 
             MouseLeftButtonDown += OnMouseLeftButtonDown;
+        }
 
-            MapDataService.Instance.MapLoaded += (_, __) => RefreshFlags();
-            MapDataService.Instance.MapCleared += (_, __) => RefreshFlags();
-            MapDataService.Instance.MapBytesReset += (_, __) => RefreshFlags();
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            RefreshFlags();
+
+            MapDataService.Instance.MapLoaded += OnMapChanged;
+            MapDataService.Instance.MapCleared += OnMapChanged;
+            MapDataService.Instance.MapBytesReset += OnMapChanged;
+
+            AltitudeChangeBus.Instance.TileChanged += OnAltitudeTileChanged;
+            AltitudeChangeBus.Instance.RegionChanged += OnAltitudeRegionChanged;
+            AltitudeChangeBus.Instance.AllChanged += OnAltitudeAllChanged;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            MapDataService.Instance.MapLoaded -= OnMapChanged;
+            MapDataService.Instance.MapCleared -= OnMapChanged;
+            MapDataService.Instance.MapBytesReset -= OnMapChanged;
+
+            AltitudeChangeBus.Instance.TileChanged -= OnAltitudeTileChanged;
+            AltitudeChangeBus.Instance.RegionChanged -= OnAltitudeRegionChanged;
+            AltitudeChangeBus.Instance.AllChanged -= OnAltitudeAllChanged;
+        }
+
+        private void OnMapChanged(object? sender, EventArgs e)
+        {
+            RefreshFlags();
+        }
+
+        private void OnAltitudeTileChanged(int tx, int ty)
+        {
+            RefreshFlags();
+        }
+
+        private void OnAltitudeRegionChanged(int minTx, int minTy, int maxTx, int maxTy)
+        {
+            RefreshFlags();
+        }
+
+        private void OnAltitudeAllChanged()
+        {
+            RefreshFlags();
         }
 
         public void RefreshFlags()
@@ -95,10 +137,8 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             Brush fill = active ? RedFlagBrush : GreyFlagBrush;
             Pen pen = active ? RedPen : GreyPen;
 
-            // pole
             dc.DrawRectangle(PoleBrush, null, new Rect(x, y, PoleWidth, PoleHeight));
 
-            // triangle flag
             var geo = new StreamGeometry();
             using (var ctx = geo.Open())
             {
@@ -125,7 +165,6 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                 ty < 0 || ty >= MapConstants.TilesPerSide)
                 return;
 
-            // Only react if the double-click was near the icon corner
             double localX = p.X - (tx * MapConstants.TileSize);
             double localY = p.Y - (ty * MapConstants.TileSize);
             if (localX > HitSize || localY > HitSize)

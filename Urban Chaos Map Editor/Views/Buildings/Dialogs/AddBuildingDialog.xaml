@@ -76,10 +76,6 @@
                       SelectedIndex="0">
                 <ComboBoxItem Content="House" Tag="0"/>
                 <ComboBoxItem Content="Warehouse" Tag="1"/>
-                <ComboBoxItem Content="Office (Legacy - Unused)" Tag="2"/>
-                <ComboBoxItem Content="Apartment (Legacy - Unused)" Tag="3"/>
-                <ComboBoxItem Content="Crate (In) (Legacy - Unused)" Tag="4"/>
-                <ComboBoxItem Content="Crate (Out) (Legacy - Unused)" Tag="5"/>
             </ComboBox>
             <TextBlock Text="The building will be created with no facets. Add facets after creation."
                        Foreground="{StaticResource Subtle}"

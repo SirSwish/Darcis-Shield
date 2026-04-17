@@ -64,15 +64,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             _facetIndex1 = facetIndex1;
             _faceOffset = faceOffset;
 
-            bool twoTextured = (facet.Flags & FacetFlags.TwoTextured) != 0;
-            bool twoSided    = (facet.Flags & FacetFlags.TwoSided)    != 0;
-            bool hugFloor    = (facet.Flags & FacetFlags.HugFloor)    != 0;
-            bool isDualFace  = !hugFloor && (twoTextured || twoSided);
-            bool isInside    = isDualFace && (facet.Flags & FacetFlags.Inside) != 0;
-            // Effective "Side B" (the visible interior face): faceOffset==0 normally, faceOffset==1 for Inside facets.
-            bool isPaintingSideB = isDualFace && (isInside ? faceOffset == 1 : faceOffset == 0);
-            if (isPaintingSideB)
-                Title = "Paint Facet — Side B";
+            // 2SIDED facets are single-channel — only StyleIndex+0 is paintable.
+            // (The game uses StyleIndex+1 for the back-face render, but we do not paint it.)
+            // 2TEXTURED warehouses are separate opposing DFacetRec entries — not dual-channel.
 
             if (!TryResolveVariantAndWorld(out _variant, out _worldNumber))
             {
@@ -115,22 +109,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private void InitializePaintDataFromFacet()
         {
-            // For each band, check if it's painted or raw
+            // 2SIDED facets are single-channel: only StyleIndex+0 is painted.
+            // 2TEXTURED: separate opposing facets — each has its own StyleIndex, step by 2 to skip partner.
             bool twoTextured = (_facet.Flags & FacetFlags.TwoTextured) != 0;
-            bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
-            bool hugFloor = (_facet.Flags & FacetFlags.HugFloor) != 0;
-
-            bool isDualFace = (!hugFloor && (twoTextured || twoSided));
-            int styleIndexStep = isDualFace ? 2 : 1;
-            // Dual-face layout: [SideB_header=X+0, SideA_0=X+1, SideB_0=X+2, SideA_1=X+3, ...]
-            // _faceOffset selects which face to load:
-            //   1 = Side A (primary/outer): StyleIndex + 1
-            //   0 = Side B (secondary/inner): StyleIndex + styleIndexStep (= StyleIndex + 2)
-            int styleIndexStart;
-            if (isDualFace)
-                styleIndexStart = _facet.StyleIndex + (_faceOffset == 0 ? styleIndexStep : _faceOffset);
-            else
-                styleIndexStart = _facet.StyleIndex;
+            int styleIndexStep = twoTextured ? 2 : 1;
+            int styleIndexStart = _facet.StyleIndex;
 
             // First pass: determine base style from band 0 (or first valid band)
             // This will be used as fallback for any new bands that don't have dstyle entries yet
@@ -209,10 +192,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                         var ds = _storeys[storeyId];  // storeys array includes slot 0, use storeyId directly
                         _baseStyles[band] = (short)ds.StyleIndex;
 
-                        // Load paint bytes
-                        // FacetPreviewWindow uses: pos = panelsAcross - 1 - col
-                        // and reads _paintMem[paintStart + pos] if pos < paintCount
-                        // We need to match this behavior
+                        // Load paint bytes.
+                        // 2SIDED: stored forward (pos = col), game reads Side A forward.
+                        // All others: stored reversed (pos = N-1-col).
+                        bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
                         int paintStart = ds.PaintIndex;
                         int paintCount = ds.Count;
 
@@ -220,8 +203,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
                         for (int col = 0; col < _panelsAcross; col++)
                         {
-                            // Side A: reversed storage (pos = N-1-col). Side B: forward (pos = col).
-                            int pos = (isDualFace && _faceOffset == 0) ? col : _panelsAcross - 1 - col;
+                            int pos = twoSided ? col : _panelsAcross - 1 - col;
 
                             if (pos < paintCount)
                             {
@@ -504,40 +486,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             // Draw grid lines
             DrawGrid(GridCanvas, width, height, PanelPx, PanelPx);
 
-            // For Side B (the visible interior face), the topmost band never renders in-game.
+            // For the secondary channel of a 2SIDED facet, the topmost band never renders in-game.
             // Draw a warning overlay so the user knows.
-            bool twoTexturedDraw = (_facet.Flags & FacetFlags.TwoTextured) != 0;
-            bool twoSidedDraw    = (_facet.Flags & FacetFlags.TwoSided)    != 0;
-            bool hugFloorDraw    = (_facet.Flags & FacetFlags.HugFloor)    != 0;
-            bool isDualFaceDraw  = !hugFloorDraw && (twoTexturedDraw || twoSidedDraw);
-            bool isInsideDraw    = isDualFaceDraw && (_facet.Flags & FacetFlags.Inside) != 0;
-            bool isPaintingSideBDraw = isDualFaceDraw && (isInsideDraw ? _faceOffset == 1 : _faceOffset == 0);
-            if (isPaintingSideBDraw)
-            {
-                var noRenderOverlay = new Rectangle
-                {
-                    Width = width,
-                    Height = PanelPx,
-                    Fill = new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0x60, 0x00)),
-                    ToolTip = "Top band of Side B does not render in-game (engine limitation)"
-                };
-                Canvas.SetLeft(noRenderOverlay, 0);
-                Canvas.SetTop(noRenderOverlay, 0);
-                GridCanvas.Children.Add(noRenderOverlay);
-
-                var noRenderLabel = new TextBlock
-                {
-                    Text = "Not rendered in-game",
-                    Foreground = Brushes.White,
-                    FontSize = 10,
-                    IsHitTestVisible = false
-                };
-                noRenderLabel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                Canvas.SetLeft(noRenderLabel, (width - noRenderLabel.DesiredSize.Width) / 2);
-                Canvas.SetTop(noRenderLabel, (PanelPx - noRenderLabel.DesiredSize.Height) / 2);
-                GridCanvas.Children.Add(noRenderLabel);
-            }
-
             // Draw outline
             var outline = new Rectangle
             {

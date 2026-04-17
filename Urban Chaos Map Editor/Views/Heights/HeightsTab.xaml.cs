@@ -19,89 +19,9 @@ namespace UrbanChaosMapEditor.Views.Heights
         private static readonly Regex _digits = new(@"^\d+$");
         private static readonly Regex _signedDigits = new(@"^-?\d+$");
 
-        // Store detected roof shape for "Apply" button
-        private RoofBuilder.ClosedShapeResult? _lastDetectedShape;
-        private List<int>? _lastDetectedFacetIds;
-
-        // PAP flag checkboxes in bit order for easy iteration
-        private CheckBox[]? _papFlagCheckBoxes;
-
         public HeightsTab()
         {
             InitializeComponent();
-            Loaded += HeightsTab_Loaded;
-        }
-
-        private void HeightsTab_Loaded(object sender, RoutedEventArgs e)
-        {
-            _papFlagCheckBoxes = new CheckBox[]
-            {
-                PapShadow1, PapShadow2, PapShadow3, PapReflective,
-                PapHidden,  PapSinkSquare, PapSinkPoint, PapNoUpper,
-                PapNoGo,    PapRoofExists, PapZone1, PapZone2,
-                PapZone3,   PapZone4, PapFlatRoof, PapWater
-            };
-
-            // Wire up Checked/Unchecked to update the hex summary
-            foreach (var cb in _papFlagCheckBoxes)
-            {
-                cb.Checked += PapFlag_Changed;
-                cb.Unchecked += PapFlag_Changed;
-            }
-        }
-
-        /// <summary>
-        /// Reads the selected flags from the 16 checkboxes as a ushort bitmask.
-        /// </summary>
-        public ushort GetSelectedPapFlags()
-        {
-            if (_papFlagCheckBoxes == null) return 0;
-
-            ushort flags = 0;
-            for (int bit = 0; bit < 16; bit++)
-            {
-                if (_papFlagCheckBoxes[bit].IsChecked == true)
-                    flags |= (ushort)(1 << bit);
-            }
-            return flags;
-        }
-
-        /// <summary>
-        /// Whether the user wants to SET (OR) or CLEAR (AND NOT) the flags.
-        /// </summary>
-        public bool IsClearMode => PapModeClear.IsChecked == true;
-
-        private void PapFlag_Changed(object sender, RoutedEventArgs e)
-        {
-            ushort flags = GetSelectedPapFlags();
-            if (TxtPapFlagsSummary != null)
-                TxtPapFlagsSummary.Text = $"Selected: 0x{flags:X4}";
-        }
-
-        private void PapFlagsSelectArea_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is not MainWindowViewModel vm) return;
-
-            ushort flags = GetSelectedPapFlags();
-            if (flags == 0)
-            {
-                TxtPapFlagsStatus.Text = "No flags selected - tick at least one flag above.";
-                return;
-            }
-
-            bool clearMode = IsClearMode;
-
-            // Store the flags and mode on the MapViewModel so the canvas drag handler can use them
-            vm.Map.PapFlagsMask = flags;
-            vm.Map.PapFlagsClearMode = clearMode;
-            vm.Map.SelectedTool = EditorTool.AreaSetPapFlags;
-            vm.Map.ShowCellFlags = true;
-
-            string modeStr = clearMode ? "CLEAR" : "SET";
-            vm.StatusMessage = $"PAP flags tool: drag on map to {modeStr} flags 0x{flags:X4}.";
-            TxtPapFlagsStatus.Text = $"Drag on map to {modeStr} flags 0x{flags:X4}. Right-click to cancel.";
-
-            Debug.WriteLine($"[HeightsTab] AreaSetPapFlags tool selected, flags=0x{flags:X4}, mode={modeStr}");
         }
 
         private void NewStamp_Click(object sender, RoutedEventArgs e)

@@ -295,6 +295,44 @@ namespace UrbanChaosMapEditor.Services.Roofs
         }
 
         /// <summary>
+        /// Finds an existing active walkable for the given building with matching bounds
+        /// and updates its Y and StoreyY fields in-place.
+        /// Returns true if a match was found and updated.
+        /// </summary>
+        public bool TryUpdateExistingWalkableY(int buildingId1, byte x1, byte z1, byte x2, byte z2, int worldY, byte storeyY)
+        {
+            if (!_svc.IsLoaded) return false;
+
+            var acc = new BuildingsAccessor(_svc);
+            var snap = acc.ReadSnapshot();
+
+            if (snap.Walkables == null || snap.WalkablesStart < 0) return false;
+
+            for (int i = 1; i < snap.Walkables.Length; i++)
+            {
+                var w = snap.Walkables[i];
+                if (w.Building == buildingId1 && w.X1 == x1 && w.Z1 == z1 && w.X2 == x2 && w.Z2 == z2)
+                {
+                    byte walkableY = (byte)Math.Clamp(worldY >> 5, 0, 255);
+
+                    var bytes = _svc.GetBytesCopy();
+                    int walkablesDataOff = snap.WalkablesStart + 4;
+                    int slotOffset = walkablesDataOff + i * DWalkableSize;
+                    bytes[slotOffset + 16] = walkableY;
+                    bytes[slotOffset + 17] = storeyY;
+
+                    _svc.ReplaceBytes(bytes);
+                    _svc.MarkDirty();
+
+                    Debug.WriteLine($"[WalkableAdder] Updated walkable #{i} in-place: WorldY={worldY} -> Y={walkableY}, StoreyY={storeyY}");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Convert world Y to walkable Y field (worldY >> 5).
         /// </summary>
         public static byte WorldYToWalkableY(int worldY)

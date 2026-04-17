@@ -1,7 +1,9 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.ViewModels.Core;
@@ -22,7 +24,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
     public sealed class FacetHandlesLayer : FrameworkElement
     {
         // ── constants ────────────────────────────────────────────────────────────
-        private const double HandleRadius = 12.0;    // canvas-space pixels, endpoint bulbs
+        private const double HandleRadius = 7.0;     // canvas-space pixels, endpoint bulbs
         private const double LineHitDist  =  8.0;    // canvas-space pixels, line body hit zone
         private const double TileSize     = 64.0;
         private const int    CoordMax     = 127;
@@ -39,8 +41,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
 
         static FacetHandlesLayer()
         {
-            BrushP0  = new SolidColorBrush(Color.FromArgb(220,   0, 220, 255)); BrushP0.Freeze();
-            BrushP1  = new SolidColorBrush(Color.FromArgb(220, 255, 160,   0)); BrushP1.Freeze();
+            BrushP0  = new SolidColorBrush(Color.FromArgb(220, 102, 255,   0)); BrushP0.Freeze();
+            BrushP1  = new SolidColorBrush(Color.FromArgb(220, 102, 255,   0)); BrushP1.Freeze();
             BrushHot = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)); BrushHot.Freeze();
 
             PenOutline    = new Pen(Brushes.Black, 2.0);  PenOutline.Freeze();
@@ -117,7 +119,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
 
         private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(MapViewModel.SelectedFacetId))
+            if (e.PropertyName == nameof(MapViewModel.SelectedFacetId) ||
+                e.PropertyName == nameof(MapViewModel.IsMultiDrawingFacets) ||
+                e.PropertyName == nameof(MapViewModel.ShowBuildings))
                 Dispatcher.BeginInvoke(RefreshFromSelection);
         }
 
@@ -133,6 +137,20 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
 
         private void RefreshFromSelection()
         {
+            // Suppress handles entirely while the user is drawing new facets.
+            if (_mapVm?.IsMultiDrawingFacets == true)
+            {
+                ClearFacet();
+                return;
+            }
+
+            // Hide handles when the buildings layer is switched off.
+            if (_mapVm?.ShowBuildings == false)
+            {
+                ClearFacet();
+                return;
+            }
+
             if (_mapVm?.SelectedFacetId is int id && id > 0)
             {
                 var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
@@ -319,7 +337,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
             var (x0, z0) = PixelToCoord(finalP0);
             var (x1, z1) = PixelToCoord(finalP1);
 
-            if (x0 != x1 && z0 != z1)
+            if (x0 != x1 && z0 != z1 && (FacetType)_facetType != FacetType.Cable)
             {
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     shell.StatusMessage = "Diagonal facets are not allowed — facets must be axis-aligned.";
@@ -368,20 +386,30 @@ namespace UrbanChaosMapEditor.Views.Buildings.MapOverlays
             // Endpoint handles
             bool p0Hot = _dragging == Handle.P0 || _dragging == Handle.Line || _hovered == Handle.P0;
             bool p1Hot = _dragging == Handle.P1 || _dragging == Handle.Line || _hovered == Handle.P1;
-            DrawHandle(dc, p0, p0Hot, BrushP0);
-            DrawHandle(dc, p1, p1Hot, BrushP1);
+            DrawHandle(dc, p0, p0Hot, BrushP0, "0");
+            DrawHandle(dc, p1, p1Hot, BrushP1, "1");
 
             // Facing arrow for Wall (3) and Normal (1) facets
             if (_facetType == 3 || _facetType == 1)
                 DrawFacingArrow(dc, p0, p1);
         }
 
-        private static void DrawHandle(DrawingContext dc, Point center, bool hot, Brush normalFill)
+        private static void DrawHandle(DrawingContext dc, Point center, bool hot, Brush normalFill, string label)
         {
             double r    = hot ? HandleRadius * 1.35 : HandleRadius;
             Brush  fill = hot ? BrushHot : normalFill;
             Pen    pen  = hot ? PenOutlineHot : PenOutline;
             dc.DrawEllipse(fill, pen, center, r, r);
+
+            var ft = new FormattedText(
+                label,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                new Typeface("Segoe UI"),
+                r * 1.1,
+                Brushes.Black,
+                96.0);
+            dc.DrawText(ft, new Point(center.X - ft.Width / 2.0, center.Y - ft.Height / 2.0));
         }
 
         /// <summary>

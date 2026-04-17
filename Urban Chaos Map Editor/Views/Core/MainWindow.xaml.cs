@@ -26,6 +26,11 @@ namespace UrbanChaosMapEditor.Views.Core
         private const double CollapsedRailWidth = 28;
         private double _lastDrawerWidth = MinExpandedEditorWidth;
 
+        private const double EditorDrawerMinOpenWidth = 366.0;
+        private const double EditorDrawerMaxWidth = 600.0;
+
+        private double _lastOpenDrawerWidth = EditorDrawerMinOpenWidth;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -107,7 +112,12 @@ namespace UrbanChaosMapEditor.Views.Core
 
             var vm = DataContext as MainWindowViewModel;
             System.Diagnostics.Debug.WriteLine($"[Recent] VM? {(vm != null)}  Count={(vm?.RecentFiles?.Count ?? -1)}");
+
+            // Auto-create a new blank map on startup
+            if (vm != null && vm.NewMapCommand.CanExecute(null))
+                vm.NewMapCommand.Execute(null);
         }
+
 
         private void EditorTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -119,20 +129,39 @@ namespace UrbanChaosMapEditor.Views.Core
 
         private void EditorExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            EditorRailCol.Width = new GridLength(CollapsedRailWidth);
-            EditorDrawerCol.MinWidth = MinExpandedEditorWidth;
-            var target = Math.Max(_lastDrawerWidth, MinExpandedEditorWidth);
-            EditorDrawerCol.Width = new GridLength(target);
+            double widthToUse = Math.Max(_lastOpenDrawerWidth, EditorDrawerMinOpenWidth);
+            widthToUse = Math.Min(widthToUse, EditorDrawerMaxWidth);
+
+            EditorDrawerCol.MinWidth = EditorDrawerMinOpenWidth;
+            EditorDrawerCol.MaxWidth = EditorDrawerMaxWidth;
+            EditorDrawerCol.Width = new GridLength(widthToUse, GridUnitType.Pixel);
         }
 
         private void EditorExpander_Collapsed(object sender, RoutedEventArgs e)
         {
-            var w = EditorDrawerCol.ActualWidth;
-            if (w > 0) _lastDrawerWidth = w;
+            double currentWidth = EditorDrawerCol.ActualWidth;
+            if (currentWidth >= EditorDrawerMinOpenWidth)
+            {
+                _lastOpenDrawerWidth = currentWidth;
+            }
 
             EditorDrawerCol.MinWidth = 0;
-            EditorDrawerCol.Width = new GridLength(0);
-            EditorRailCol.Width = new GridLength(CollapsedRailWidth);
+            EditorDrawerCol.Width = new GridLength(0, GridUnitType.Pixel);
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (EditorExpander.IsExpanded)
+            {
+                EditorDrawerCol.MinWidth = EditorDrawerMinOpenWidth;
+                EditorDrawerCol.MaxWidth = EditorDrawerMaxWidth;
+                EditorDrawerCol.Width = new GridLength(EditorDrawerMinOpenWidth, GridUnitType.Pixel);
+            }
+            else
+            {
+                EditorDrawerCol.MinWidth = 0;
+                EditorDrawerCol.Width = new GridLength(0, GridUnitType.Pixel);
+            }
         }
 
         private void TextureThumb_Click(object sender, RoutedEventArgs e)

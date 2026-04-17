@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
+using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Roofs;
 using UrbanChaosMapEditor.Services.Buildings;
@@ -23,8 +24,21 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         /// <summary>Flat list of all buildings (for the building list).</summary>
         public ObservableCollection<BuildingVM> Buildings { get; } = new();
 
-        /// <summary>Facet type groups for the currently selected building + storey (TreeView).</summary>
+        /// <summary>Facet type groups for the currently selected building + storey (internal use / TrySelectFacetFromMap).</summary>
         public ObservableCollection<FacetTypeGroupVM> SelectedBuildingFacetGroups { get; } = new();
+
+        /// <summary>Flat list of all facets for the selected building (drives the Facets list in the UI).</summary>
+        public ObservableCollection<FacetVM> SelectedBuildingFacets { get; } = new();
+
+        /// <summary>Connected wall-polygon groups for the selected building.</summary>
+        public ObservableCollection<PolygonGroupVM> SelectedBuildingPolygons { get; } = new();
+
+        private PolygonGroupVM? _selectedPolygonGroup;
+        public PolygonGroupVM? SelectedPolygonGroup
+        {
+            get => _selectedPolygonGroup;
+            set { if (_selectedPolygonGroup == value) return; _selectedPolygonGroup = value; OnPropertyChanged(); }
+        }
 
         /// <summary>Available storey ids for the selected building (ComboBox).</summary>
         public ObservableCollection<int> StoreyFilterOptions { get; } = new();
@@ -75,36 +89,21 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         public bool AutoDetectRoofs
         {
             get => GetMapVm()?.AutoDetectRoofs ?? true;
-            set { var vm = GetMapVm(); if (vm != null) vm.AutoDetectRoofs = value; OnPropertyChanged(); }
+            set { var vm = GetMapVm(); if (vm != null) { vm.AutoDetectRoofs = value; OnPropertyChanged(); } }
         }
 
         public bool AutoPaintRoofTextures
         {
-            get => GetMapVm()?.AutoPaintRoofTextures ?? false;
-            set { var vm = GetMapVm(); if (vm != null) vm.AutoPaintRoofTextures = value; OnPropertyChanged(); }
+            get => GetMapVm()?.AutoPaintRoofTextures ?? true;
+            set { var vm = GetMapVm(); if (vm != null) { vm.AutoPaintRoofTextures = value; OnPropertyChanged(); } }
         }
 
         public bool AutoCreateWalkables
         {
             get => GetMapVm()?.AutoCreateWalkables ?? true;
-            set { var vm = GetMapVm(); if (vm != null) vm.AutoCreateWalkables = value; OnPropertyChanged(); }
+            set { var vm = GetMapVm(); if (vm != null) { vm.AutoCreateWalkables = value; OnPropertyChanged(); } }
         }
 
-        /// <summary>Flat list of all cable facets (for the cables ListView).</summary>
-        public ObservableCollection<FacetVM> CableFacets { get; } = new();
-
-        /// <summary>Toggle: false = building facets view, true = cable list view.</summary>
-        private bool _showCablesList;
-        public bool ShowCablesList
-        {
-            get => _showCablesList;
-            set
-            {
-                if (_showCablesList == value) return;
-                _showCablesList = value;
-                OnPropertyChanged();
-            }
-        }
 
         private bool _filterWalls;
         public bool FilterWalls
@@ -170,11 +169,25 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 RefreshSelectedBuildingFacetGroups();
             }
         }
+
+        private bool _filterCables;
+        public bool FilterCables
+        {
+            get => _filterCables;
+            set
+            {
+                if (_filterCables == value) return;
+                _filterCables = value;
+                OnPropertyChanged();
+                RefreshSelectedBuildingFacetGroups();
+            }
+        }
+
         public bool HasSelectedFacet => SelectedFacet != null;
 
         // Convenience: is *any* facet filter active?
         private bool AnyFacetFilterActive =>
-            _filterWalls || _filterFences || _filterDoors || _filterGates || _filterLadders;
+            _filterWalls || _filterFences || _filterDoors || _filterGates || _filterLadders || _filterCables;
 
         // ---------- Selection state ----------
 
@@ -354,7 +367,6 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
         private readonly BuildingsAccessor _buildingsAcc;
         private readonly List<BuildingVM> _allBuildings = new();
-        private readonly List<FacetVM> _allCables = new();
 
         public ICommand RefreshCommand => _refreshCommand ??= new RelayCommand(_ => Refresh());
         private RelayCommand? _refreshCommand;
@@ -522,14 +534,11 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             Buildings.Clear();
             SelectedBuildingFacetGroups.Clear();
             StoreyFilterOptions.Clear();
-            CableFacets.Clear();
 
             _allBuildings.Clear();
-            _allCables.Clear();
 
             SelectedBuilding = null;
             SelectedFacet = null;
-            ShowCablesList = false;
 
             var arrays = _buildingsAcc.ReadSnapshot();
             _rawBuildings = arrays.Buildings ?? Array.Empty<DBuildingRec>();
@@ -557,6 +566,9 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 OnPropertyChanged(nameof(PaintMemPreview));
                 OnPropertyChanged(nameof(DStoreysNext));
                 OnPropertyChanged(nameof(DStoreysTotal));
+                OnPropertyChanged(nameof(AutoDetectRoofs));
+                OnPropertyChanged(nameof(AutoPaintRoofTextures));
+                OnPropertyChanged(nameof(AutoCreateWalkables));
                 Debug.WriteLine("=== [BuildingsTabVM] Refresh() done (empty) ===");
                 return;
             }
@@ -575,9 +587,9 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             var nonCable = facetsIndexed.Where(t => t.Facet.Type != FacetType.Cable).ToArray();
             var cables = facetsIndexed.Where(t => t.Facet.Type == FacetType.Cable)
                                       .OrderBy(t => t.Id1)
-                                      .ToList();
+                                      .ToArray();
 
-            Debug.WriteLine($"[BuildingsTabVM] nonCable={nonCable.Length} cables={cables.Count}");
+            Debug.WriteLine($"[BuildingsTabVM] nonCable={nonCable.Length} cables={cables.Length}");
 
             // Get ALL building IDs from the DBuildingRec array (1-based)
             // This includes buildings with no facets
@@ -605,14 +617,28 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
                 var bvm = new BuildingVM { Id = bId };
 
-                // Get building type from DBuildingRec if available
+                // Get building type and facet range from DBuildingRec if available
+                ushort bStartFacet = 0, bEndFacet = 0;
                 if (bId > 0 && bId <= arrays.Buildings.Length)
                 {
                     var bRec = arrays.Buildings[bId - 1];
                     bvm.BuildingType = (BuildingType)bRec.Type;
+                    bStartFacet = bRec.StartFacet;
+                    bEndFacet = bRec.EndFacet;
                 }
 
-                foreach (var storeyGroup in bFacets.GroupBy(t => t.Facet.Storey).OrderBy(g => g.Key))
+                // Include cables that fall within this building's facet range
+                var bCables = (bStartFacet > 0 && bEndFacet > bStartFacet)
+                    ? cables.Where(t => t.Id1 >= bStartFacet && t.Id1 < bEndFacet).ToArray()
+                    : Array.Empty<(DFacetRec Facet, int Id1)>();
+
+                // Combine non-cable and cable facets for this building
+                var allBFacets = bFacets
+                    .Select(t => (Id1: t.Id1, Facet: t.Facet, IsCable: false))
+                    .Concat(bCables.Select(t => (Id1: t.Id1, Facet: t.Facet, IsCable: true)))
+                    .ToList();
+
+                foreach (var storeyGroup in allBFacets.GroupBy(t => t.Facet.Storey).OrderBy(g => g.Key))
                 {
                     var svm = new StoreyVM { StoreyId = storeyGroup.Key };
 
@@ -628,11 +654,23 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                         {
                             var f = t.Facet;
 
-                            var styleDisplay = StyleDisplayFor(_styles, f.StyleIndex, DStoreysNext);
+                            string styleDisplay;
+                            bool isPainted;
+                            short cableStep1 = 0, cableStep2 = 0;
 
-                            bool isPainted =
-                                !string.IsNullOrEmpty(styleDisplay) &&
-                                styleDisplay.IndexOf("painted", StringComparison.OrdinalIgnoreCase) >= 0;
+                            if (t.IsCable)
+                            {
+                                styleDisplay = CableStyleDisplay(f);
+                                isPainted = false;
+                                cableStep1 = unchecked((short)f.StyleIndex);
+                                cableStep2 = unchecked((short)f.Building);
+                            }
+                            else
+                            {
+                                styleDisplay = StyleDisplayFor(_styles, f.StyleIndex, DStoreysNext);
+                                isPainted = !string.IsNullOrEmpty(styleDisplay) &&
+                                    styleDisplay.IndexOf("painted", StringComparison.OrdinalIgnoreCase) >= 0;
+                            }
 
                             gvm.Facets.Add(new FacetVM
                             {
@@ -651,7 +689,9 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                                 Y1 = f.Y1,
                                 BlockHeight = f.BlockHeight,
                                 Open = f.Open,
-                                IsPainted = isPainted
+                                IsPainted = isPainted,
+                                CableStep1 = cableStep1,
+                                CableStep2 = cableStep2
                             });
                         }
 
@@ -667,40 +707,6 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
                 bvm.FacetCount = bvm.Storeys.SelectMany(st => st.Groups).Sum(g => g.Count);
                 _allBuildings.Add(bvm);
-            }
-
-            // Populate flat cables list
-            _allCables.Clear();
-            if (cables.Count > 0)
-            {
-                foreach (var t in cables)
-                {
-                    var f = t.Facet;
-                    var cvm = new FacetVM
-                    {
-                        FacetId1 = t.Id1,
-                        Type = FacetType.Cable,
-                        StyleIndex = f.StyleIndex,
-                        StyleDisplay = CableStyleDisplay(f),
-                        Coords = $"({f.X0},{f.Z0}) : ({f.X1},{f.Z1})",
-                        Height = f.Height,
-                        FHeight = f.FHeight,
-                        Flags = $"0x{((ushort)f.Flags):X4}",
-                        BuildingId = 0,
-                        StoreyId = 0,
-                        Y0 = f.Y0,
-                        Y1 = f.Y1,
-                        BlockHeight = f.BlockHeight,
-                        Open = f.Open,
-                        Raw = f,
-                        CableStep1 = unchecked((short)f.StyleIndex),
-                        CableStep2 = unchecked((short)f.Building)
-                    };
-
-                    _allCables.Add(cvm);
-                }
-
-                Debug.WriteLine($"[BuildingsTabVM] cables collected into flat list: count={_allCables.Count}");
             }
 
             Debug.WriteLine($"[BuildingsTabVM] built _allBuildings={_allBuildings.Count} (total facets={_allBuildings.Sum(b => b.FacetCount)})");
@@ -736,10 +742,6 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             Buildings.Clear();
             foreach (var b in _allBuildings)
                 Buildings.Add(b);
-
-            CableFacets.Clear();
-            foreach (var c in _allCables)
-                CableFacets.Add(c);
 
             // --- RESTORE / FORCE selection ---
             BuildingVM? restoredBuilding = null;
@@ -812,10 +814,8 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             }
             else
             {
-                // Requested/previous building no longer exists: fall back to old behaviour
-                SelectedBuilding =
-                    Buildings.FirstOrDefault(b => !b.IsCablesBucket)
-                    ?? Buildings.FirstOrDefault();
+                // Requested/previous building no longer exists: fall back to first
+                SelectedBuilding = Buildings.FirstOrDefault();
             }
 
             UpdateSelectedBuildingRec();
@@ -833,24 +833,23 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
             Debug.WriteLine($"[BuildingsTabVM] AFTER POPULATE ? Buildings.Count={Buildings.Count}, facets(view)={totalFacetsView}");
             Debug.WriteLine("=== [BuildingsTabVM] Refresh() done ===");
+
+            // Ensure auto-build option checkboxes always reflect the live MapViewModel state.
+            // WPF may evaluate these bindings before GetMapVm() is available; Refresh() runs
+            // from the Loaded event by which time the full view-model chain is wired up.
+            OnPropertyChanged(nameof(AutoDetectRoofs));
+            OnPropertyChanged(nameof(AutoPaintRoofTextures));
+            OnPropertyChanged(nameof(AutoCreateWalkables));
         }
+
+        /// <summary>
+        /// True while a facet selection is being driven by a map click rather than the list.
+        /// The view checks this to decide whether to jump the viewport.
+        /// </summary>
+        public bool IsSelectingFromMap { get; private set; }
 
         public bool TrySelectFacetFromMap(int facetId1, int buildingId1)
         {
-            // Cables live in the flat CableFacets list, not in the storey/group tree.
-            // Handle them first so we switch to cable-list view and avoid a false-not-found.
-            var cable = CableFacets.FirstOrDefault(c => c.FacetId1 == facetId1);
-            if (cable != null)
-            {
-                // Set building BEFORE facet — the SelectedBuilding setter clears SelectedFacet.
-                var cableBuilding = Buildings.FirstOrDefault(b => b.Id == buildingId1);
-                if (cableBuilding != null && !ReferenceEquals(SelectedBuilding, cableBuilding))
-                    SelectedBuilding = cableBuilding;
-                SelectedFacet = cable;
-                SyncSelectionIntoMapVm();
-                return true;
-            }
-
             var building = Buildings.FirstOrDefault(b => b.Id == buildingId1);
             if (building == null)
             {
@@ -858,34 +857,40 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 return false;
             }
 
-            ShowCablesList = false;
-
-            if (!ReferenceEquals(SelectedBuilding, building))
-                SelectedBuilding = building;
-
-            var facet = building.Storeys
-                .SelectMany(s => s.Groups)
-                .SelectMany(g => g.Facets)
-                .FirstOrDefault(f => f.FacetId1 == facetId1);
-
-            if (facet == null)
+            IsSelectingFromMap = true;
+            try
             {
-                Debug.WriteLine($"[BuildingsTabVM] TrySelectFacetFromMap: facet#{facetId1} not found in building#{buildingId1} storeys/groups");
-                return false;
+                if (!ReferenceEquals(SelectedBuilding, building))
+                    SelectedBuilding = building;
+
+                var facet = building.Storeys
+                    .SelectMany(s => s.Groups)
+                    .SelectMany(g => g.Facets)
+                    .FirstOrDefault(f => f.FacetId1 == facetId1);
+
+                if (facet == null)
+                {
+                    Debug.WriteLine($"[BuildingsTabVM] TrySelectFacetFromMap: facet#{facetId1} not found in building#{buildingId1} storeys/groups");
+                    return false;
+                }
+
+                SelectedStoreyId = facet.StoreyId;
+
+                var group = SelectedBuildingFacetGroups
+                    .FirstOrDefault(g => g.Facets.Any(f => f.FacetId1 == facetId1));
+
+                if (group != null)
+                    SelectedFacetTypeGroup = group;
+
+                SelectedFacet = facet;
+
+                SyncSelectionIntoMapVm();
+                return true;
             }
-
-            SelectedStoreyId = facet.StoreyId;
-
-            var group = SelectedBuildingFacetGroups
-                .FirstOrDefault(g => g.Facets.Any(f => f.FacetId1 == facetId1));
-
-            if (group != null)
-                SelectedFacetTypeGroup = group;
-
-            SelectedFacet = facet;
-
-            SyncSelectionIntoMapVm();
-            return true;
+            finally
+            {
+                IsSelectingFromMap = false;
+            }
         }
 
 
@@ -898,17 +903,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
         {
             if (selection is FacetVM f)
             {
-                // Cables live in the flat CableFacets list, not the building/storey tree.
-                // Skip the group/storey sync to avoid RefreshSelectedBuildingFacetGroups clearing
-                // SelectedFacet (cables are not in SelectedBuildingFacetGroups).
-                if (f.Type == FacetType.Cable)
-                {
-                    SelectedFacet = f;
-                    SyncSelectionIntoMapVm();
-                    return;
-                }
-
-                // 1) Ensure the building matches the facet (for non-cable facets)
+                // 1) Ensure the building matches the facet
                 //    SelectedBuilding setter clears SelectedFacetTypeGroup and SelectedFacet,
                 //    so we do this first and re-apply them below.
                 if (f.BuildingId > 0)
@@ -1079,14 +1074,16 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             var keepGroupType = SelectedFacetTypeGroup?.Type;
 
             SelectedBuildingFacetGroups.Clear();
+            SelectedBuildingFacets.Clear();
             SelectedFacetTypeGroup = null;
 
             var b = SelectedBuilding;
             if (b == null || b.Storeys.Count == 0)
             {
-                // No building => no facet selection
+                // No building => no facet selection, no polygon groups
                 SelectedFacet = null;
                 SyncBuildingSelectionIntoMap();
+                RefreshSelectedBuildingPolygons();
                 return;
             }
 
@@ -1112,7 +1109,11 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 gvm.Count = gvm.Facets.Count;
 
                 if (gvm.Count > 0)
+                {
                     SelectedBuildingFacetGroups.Add(gvm);
+                    foreach (var fvm in gvm.Facets)
+                        SelectedBuildingFacets.Add(fvm);
+                }
             }
 
             // Restore type group if possible, else pick first group so the Facets list has content
@@ -1141,8 +1142,38 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 SyncSelectionIntoMapVm();       // single facet
             else
                 SyncBuildingSelectionIntoMap(); // whole building
+
+            // Rebuild polygon groups for the newly selected building
+            RefreshSelectedBuildingPolygons();
         }
 
+
+        private void RefreshSelectedBuildingPolygons()
+        {
+            SelectedBuildingPolygons.Clear();
+            SelectedPolygonGroup = null;
+
+            int bId = SelectedBuilding?.Id ?? 0;
+            if (bId <= 0) return;
+
+            // GetPolygonGroups returns only confirmed closed polygons (≥4 walls).
+            var groups = RoofEnclosureService.GetPolygonGroups(bId);
+            int idx = 1;
+            foreach (var g in groups)
+            {
+                var ids = g.FacetIds;
+                string summary = ids.Count <= 10
+                    ? string.Join(" ", ids.Select(id => $"#{id}"))
+                    : string.Join(" ", ids.Take(10).Select(id => $"#{id}")) + $" +{ids.Count - 10}";
+
+                SelectedBuildingPolygons.Add(new PolygonGroupVM
+                {
+                    Label = $"P{idx++}",
+                    FacetIdsSummary = summary,
+                    FacetIds = ids
+                });
+            }
+        }
 
         /// <summary>
         /// Pushes the current facet selection into MapViewModel for overlay highlight.
@@ -1160,11 +1191,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
             if (SelectedFacet != null)
             {
-                // Cables store step_angle2 in BuildingId (not the real owner building).
-                // Use SelectedBuilding?.Id for the correct map highlight.
-                buildingId = (SelectedFacet.Type == FacetType.Cable)
-                    ? (SelectedBuilding?.Id ?? 0)
-                    : SelectedFacet.BuildingId;
+                buildingId = SelectedFacet.BuildingId;
                 storeyId = SelectedFacet.StoreyId;
             }
             else
@@ -1291,6 +1318,13 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                     return true;
             }
 
+            // Cables pill
+            if (_filterCables)
+            {
+                if (type == FacetType.Cable)
+                    return true;
+            }
+
             // If we got here: none of the active filters matched this type
             return false;
         }
@@ -1330,6 +1364,21 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             public string DisplayName => $"Storey {StoreyId}";
         }
 
+        public sealed class PolygonGroupVM
+        {
+            private static readonly Brush ClosedBrush;
+
+            static PolygonGroupVM()
+            {
+                var c = new SolidColorBrush(Color.FromRgb(80, 220, 100)); c.Freeze(); ClosedBrush = c;
+            }
+
+            public string Label { get; init; } = "";
+            public string FacetIdsSummary { get; init; } = "";
+            public IReadOnlyList<int> FacetIds { get; init; } = Array.Empty<int>();
+            public Brush StatusBrush => ClosedBrush;
+        }
+
         public sealed class FacetTypeGroupVM
         {
             public FacetType Type { get; set; }
@@ -1349,6 +1398,28 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
 
         public sealed class FacetVM
         {
+            private static readonly Brush BrushWall   = Freeze(new SolidColorBrush(Color.FromRgb(0,   255, 0)));
+            private static readonly Brush BrushFence  = Freeze(new SolidColorBrush(Color.FromRgb(255, 255, 0)));
+            private static readonly Brush BrushCable  = Freeze(new SolidColorBrush(Color.FromRgb(255, 0,   0)));
+            private static readonly Brush BrushDoor   = Freeze(new SolidColorBrush(Color.FromRgb(160, 32,  240)));
+            private static readonly Brush BrushGate   = Freeze(new SolidColorBrush(Color.FromRgb(30,  144, 255)));
+            private static readonly Brush BrushLadder = Freeze(new SolidColorBrush(Color.FromRgb(255, 165, 0)));
+            private static readonly Brush BrushOther  = Freeze(new SolidColorBrush(Color.FromRgb(127, 212, 255)));
+            private static Brush Freeze(SolidColorBrush b) { b.Freeze(); return b; }
+
+            public Brush TypeBrush => Type switch
+            {
+                FacetType.Normal or FacetType.Wall or FacetType.Inside or
+                FacetType.OInside or FacetType.NormalFoundation           => BrushWall,
+                FacetType.Fence or FacetType.FenceBrick or
+                FacetType.FenceFlat                                        => BrushFence,
+                FacetType.Cable                                            => BrushCable,
+                FacetType.Door or FacetType.InsideDoor                    => BrushDoor,
+                FacetType.OutsideDoor                                      => BrushGate,
+                FacetType.Ladder                                           => BrushLadder,
+                _                                                          => BrushOther,
+            };
+
             public int FacetId1 { get; set; }
             public FacetType Type { get; set; }
             public ushort StyleIndex { get; set; }

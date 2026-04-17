@@ -16,7 +16,8 @@
         Width="1280" Height="860"
         WindowStyle="SingleBorderWindow"
         ResizeMode="CanResize"
-        Background="#1E1E1E">
+        Background="#1E1E1E"
+        Loaded="MainWindow_Loaded">
 
     <Window.Resources>
         <conv:NullToBoolConverter x:Key="NullToBool" />
@@ -197,7 +198,7 @@
                 <MenuItem Header="Diagnose _Walkables..." Click="DiagnoseWalkables_Click"/>
                 <Separator/>
                 <MenuItem Header="Dump _Indoor Data..." Click="DumpIndoorData_Click"
-          ToolTip="Dump all InsideStorey, Staircase, and InsideBlock data"/>
+                          ToolTip="Dump all InsideStorey, Staircase, and InsideBlock data"/>
                 <Separator/>
                 <MenuItem Header="?? _Indoor Building Editor..."
                           Click="IndoorBuildingEditor_Click"
@@ -228,6 +229,7 @@
                           Click="PaintRF4Tiles_Click"
                           ToolTip="Visual grid editor for painting individual roof tiles"/>
             </MenuItem>
+
             <MenuItem Header="_Help">
                 <MenuItem Header="Help Documentation" Click="Help_Click"/>
                 <Separator/>
@@ -375,13 +377,14 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="EditorRailCol" Width="28"/>
                 <ColumnDefinition x:Name="EditorDrawerCol"
-                                  Width="400"
-                                  MinWidth="400"
+                                  Width="366"
+                                  MinWidth="366"
                                   MaxWidth="600"/>
                 <ColumnDefinition Width="6"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Rail only -->
             <Expander x:Name="EditorExpander"
                       Grid.Column="0"
                       IsExpanded="True"
@@ -391,8 +394,7 @@
                       BorderBrush="#3E3E42"
                       BorderThickness="0,0,1,0"
                       Expanded="EditorExpander_Expanded"
-                      Collapsed="EditorExpander_Collapsed"
-                      Grid.ColumnSpan="2">
+                      Collapsed="EditorExpander_Collapsed">
 
                 <Expander.Header>
                     <TextBlock Text="Editor"
@@ -404,6 +406,18 @@
                         </TextBlock.LayoutTransform>
                     </TextBlock>
                 </Expander.Header>
+
+                <!-- Dummy content so the Expander still behaves normally -->
+                <Grid Width="0" Height="0" Background="Transparent"/>
+            </Expander>
+
+            <!-- Actual drawer -->
+            <Border Grid.Column="1"
+                    Background="#252526"
+                    MinWidth="366"
+                    BorderBrush="#3E3E42"
+                    BorderThickness="0,0,1,0"
+                    Visibility="{Binding IsExpanded, ElementName=EditorExpander, Converter={StaticResource BoolToVis}}">
 
                 <Grid Background="#252526" VerticalAlignment="Stretch">
                     <TabControl x:Name="EditorTabControl"
@@ -510,7 +524,7 @@
                         </TabItem>
                     </TabControl>
                 </Grid>
-            </Expander>
+            </Border>
 
             <GridSplitter Grid.Column="2"
                           Width="6"

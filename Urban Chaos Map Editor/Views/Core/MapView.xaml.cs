@@ -362,6 +362,12 @@ namespace UrbanChaosMapEditor.Views.Core
                 HookVm();
                 UpdateOverlayHitTesting();
                 RefreshCellFlagsOverlay();
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (Scroller == null) return;
+                    Scroller.ScrollToHorizontalOffset((Scroller.ExtentWidth - Scroller.ViewportWidth) / 2.0);
+                    Scroller.ScrollToVerticalOffset((Scroller.ExtentHeight - Scroller.ViewportHeight) / 2.0);
+                }, System.Windows.Threading.DispatcherPriority.Background);
             };
         }
 
@@ -728,6 +734,67 @@ namespace UrbanChaosMapEditor.Views.Core
 
                 UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
                 PasteTextureClipboard(tx, ty, vm);
+                e.Handled = true;
+                return;
+            }
+
+            // ── Move Building: place on click ────────────────────────────
+            if (vm.SelectedTool == EditorTool.MoveBuilding && vm.HasBuildingMoveClipboard)
+            {
+                Point mp = e.GetPosition(Surface);
+                int cursorUiX = Math.Clamp((int)mp.X, 0, MapConstants.MapPixels);
+                int cursorUiZ = Math.Clamp((int)mp.Y, 0, MapConstants.MapPixels);
+
+                var clipSnap = vm.BuildingMoveClipboard!;
+
+                // Compute delta in game coords: cursor UI maps to game anchor (MaxGameX, MaxGameZ)
+                // cursorUiX = (128 - newMaxGameX) * 64  →  newMaxGameX = 128 - cursorUiX/64
+                int newMaxGameX = (int)Math.Round(128.0 - cursorUiX / 64.0);
+                int newMaxGameZ = (int)Math.Round(128.0 - cursorUiZ / 64.0);
+                newMaxGameX = Math.Clamp(newMaxGameX, 0, 127);
+                newMaxGameZ = Math.Clamp(newMaxGameZ, 0, 127);
+
+                int dGameX = newMaxGameX - clipSnap.MaxGameX;
+                int dGameZ = newMaxGameZ - clipSnap.MaxGameZ;
+
+                // Ask user: move or copy
+                var dlg = new Views.Buildings.Dialogs.MoveBuildingDialog
+                {
+                    Owner = Application.Current.MainWindow
+                };
+                if (dlg.ShowDialog() != true || dlg.Choice == Views.Buildings.Dialogs.MoveBuildingResult.None)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                var mover = new Services.Buildings.BuildingMover(MapDataService.Instance);
+                UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
+
+                if (dlg.Choice == Views.Buildings.Dialogs.MoveBuildingResult.Move)
+                {
+                    mover.MoveInPlace(clipSnap, dGameX, dGameZ);
+                    if (mainVm != null)
+                        mainVm.StatusMessage = $"Building #{clipSnap.BuildingId1} moved by ({dGameX}, {dGameZ}).";
+                }
+                else
+                {
+                    int newId = mover.CopyToNewPosition(clipSnap, dGameX, dGameZ);
+                    if (newId > 0)
+                    {
+                        if (mainVm != null)
+                            mainVm.StatusMessage = $"Building #{clipSnap.BuildingId1} copied as Building #{newId}.";
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show("Copy failed — see debug output.", "Move Building",
+                            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    }
+                }
+
+                // Clear clipboard and exit tool
+                vm.BuildingMoveClipboard = null;
+                vm.SelectedTool = EditorTool.None;
                 e.Handled = true;
                 return;
             }
@@ -1110,6 +1177,14 @@ namespace UrbanChaosMapEditor.Views.Core
                 vm.TexAreaEndY = ty;
             }
 
+            // Move Building ghost tracking
+            if (vm.SelectedTool == EditorTool.MoveBuilding && vm.HasBuildingMoveClipboard && Surface != null)
+            {
+                Point mp = e.GetPosition(Surface);
+                vm.MoveGhostUiX = Math.Clamp((int)mp.X, 0, MapConstants.MapPixels);
+                vm.MoveGhostUiZ = Math.Clamp((int)mp.Y, 0, MapConstants.MapPixels);
+            }
+
             UpdateGhostHover(e.GetPosition(Surface));
 
             if (vm.IsPlacingPrim && Surface != null)
@@ -1464,6 +1539,16 @@ namespace UrbanChaosMapEditor.Views.Core
                 e.Handled = true;
                 return;
             }
+            if (e.Key == Key.Escape && vm.SelectedTool == EditorTool.MoveBuilding)
+            {
+                vm.BuildingMoveClipboard = null;
+                vm.SelectedTool = EditorTool.None;
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellEsc)
+                    shellEsc.StatusMessage = "Move Building cancelled.";
+                e.Handled = true;
+                return;
+            }
+
             if (e.Key == Key.Escape && vm.IsPlacingPrim)
             {
                 bool wasPaste = vm.PrimPasteTemplate != null;
@@ -1602,6 +1687,16 @@ namespace UrbanChaosMapEditor.Views.Core
         {
             if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
                 return;
+
+            if (DataContext is MapViewModel vmMoveBuilding && vmMoveBuilding.SelectedTool == EditorTool.MoveBuilding)
+            {
+                vmMoveBuilding.BuildingMoveClipboard = null;
+                vmMoveBuilding.SelectedTool = EditorTool.None;
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shellMb)
+                    shellMb.StatusMessage = "Move Building cancelled.";
+                e.Handled = true;
+                return;
+            }
 
             if (DataContext is MapViewModel vmSelTex)
             {
@@ -1897,11 +1992,21 @@ namespace UrbanChaosMapEditor.Views.Core
         {
             if (Scroller == null || Surface == null || DataContext is not MapViewModel vm) return;
 
+            // SelectionChanged handlers fire before WPF finishes the layout pass, so
+            // ViewportWidth/Height can be 0 at call time.  Defer until Loaded priority so
+            // the scroller has its real dimensions before we compute offsets.
+            if (Scroller.ViewportWidth == 0 || Scroller.ViewportHeight == 0)
+            {
+                Dispatcher.InvokeAsync(() => CenterOnPixel(px, pz),
+                    System.Windows.Threading.DispatcherPriority.Loaded);
+                return;
+            }
+
             double z = vm.Zoom;
-            double targetX = px * z - Scroller.ViewportWidth / 2.0;
+            double targetX = px * z - Scroller.ViewportWidth  / 2.0;
             double targetY = pz * z - Scroller.ViewportHeight / 2.0;
 
-            targetX = Math.Max(0, Math.Min(targetX, Scroller.ExtentWidth - Scroller.ViewportWidth));
+            targetX = Math.Max(0, Math.Min(targetX, Scroller.ExtentWidth  - Scroller.ViewportWidth));
             targetY = Math.Max(0, Math.Min(targetY, Scroller.ExtentHeight - Scroller.ViewportHeight));
 
             Scroller.ScrollToHorizontalOffset(targetX);
@@ -1909,7 +2014,8 @@ namespace UrbanChaosMapEditor.Views.Core
         }
 
         /// <summary>
-        /// Returns true if the given surface pixel coordinate is currently visible in the viewport.
+        /// Returns true if the given surface pixel coordinate falls within the viewport,
+        /// expanded by 15% on every side so that points near the edge don't trigger a jump.
         /// </summary>
         public bool IsPixelInView(int px, int pz)
         {
@@ -1919,10 +2025,40 @@ namespace UrbanChaosMapEditor.Views.Core
             double screenX = px * z;
             double screenZ = pz * z;
 
-            return screenX >= Scroller.HorizontalOffset
-                && screenX <= Scroller.HorizontalOffset + Scroller.ViewportWidth
-                && screenZ >= Scroller.VerticalOffset
-                && screenZ <= Scroller.VerticalOffset + Scroller.ViewportHeight;
+            double padX = Scroller.ViewportWidth  * 0.15;
+            double padZ = Scroller.ViewportHeight * 0.15;
+
+            return screenX >= Scroller.HorizontalOffset - padX
+                && screenX <= Scroller.HorizontalOffset + Scroller.ViewportWidth  + padX
+                && screenZ >= Scroller.VerticalOffset   - padZ
+                && screenZ <= Scroller.VerticalOffset   + Scroller.ViewportHeight + padZ;
+        }
+
+        /// <summary>
+        /// Returns true if any part of the given surface-pixel rectangle overlaps the viewport
+        /// (expanded by 15% on every side).  Use this for objects that have spatial extent
+        /// (walkables, multi-tile roofs, facet segments) rather than checking just a midpoint.
+        /// </summary>
+        public bool IsRectInView(int px0, int pz0, int px1, int pz1)
+        {
+            if (Scroller == null || DataContext is not MapViewModel vm) return false;
+
+            double z = vm.Zoom;
+            double padX = Scroller.ViewportWidth  * 0.15;
+            double padZ = Scroller.ViewportHeight * 0.15;
+
+            double vpLeft   = Scroller.HorizontalOffset - padX;
+            double vpRight  = Scroller.HorizontalOffset + Scroller.ViewportWidth  + padX;
+            double vpTop    = Scroller.VerticalOffset   - padZ;
+            double vpBottom = Scroller.VerticalOffset   + Scroller.ViewportHeight + padZ;
+
+            double rLeft   = Math.Min(px0, px1) * z;
+            double rRight  = Math.Max(px0, px1) * z;
+            double rTop    = Math.Min(pz0, pz1) * z;
+            double rBottom = Math.Max(pz0, pz1) * z;
+
+            return rRight >= vpLeft && rLeft <= vpRight
+                && rBottom >= vpTop && rTop  <= vpBottom;
         }
 
         private static void SnapUiToVertexIfCtrl(ref int uiX, ref int uiZ)

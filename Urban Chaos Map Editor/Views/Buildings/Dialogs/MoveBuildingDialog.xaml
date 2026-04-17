@@ -1,0 +1,56 @@
+<Window x:Class="UrbanChaosMapEditor.Views.Buildings.Dialogs.MoveBuildingDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Place Building"
+        Width="360"
+        SizeToContent="Height"
+        Background="#202225"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="20">
+        <TextBlock Text="Building placed. Choose an action:"
+                   FontSize="13" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+        <TextBlock TextWrapping="Wrap" Foreground="#CCC" Margin="0,0,0,16">
+            <Run FontWeight="Bold" Foreground="#6CF" Text="Move:"/>
+            <Run Text=" Remove from original position and restore default cells there. No new building ID."/>
+        </TextBlock>
+
+        <TextBlock TextWrapping="Wrap" Foreground="#CCC" Margin="0,0,0,24">
+            <Run FontWeight="Bold" Foreground="#FC6" Text="Copy:"/>
+            <Run Text=" Keep the original building intact and create a duplicate at the new position with a new ID."/>
+        </TextBlock>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="BtnMove"
+                    Content="Move"
+                    Background="#2D4A2D"
+                    BorderBrush="#4A8A4A"
+                    Margin="0,0,12,0"
+                    Click="BtnMove_Click"/>
+            <Button x:Name="BtnCopy"
+                    Content="Copy"
+                    Background="#2D3A5A"
+                    BorderBrush="#4A5A8A"
+                    Margin="0,0,12,0"
+                    Click="BtnCopy_Click"/>
+            <Button x:Name="BtnCancel"
+                    Content="Cancel"
+                    Background="#3A2D2D"
+                    BorderBrush="#5A4A4A"
+                    Click="BtnCancel_Click"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

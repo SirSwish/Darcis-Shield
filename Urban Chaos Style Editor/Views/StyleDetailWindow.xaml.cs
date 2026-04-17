@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UrbanChaosStyleEditor.Models;
+using UrbanChaosStyleEditor.Services;
 
 namespace UrbanChaosStyleEditor.Views
 {
@@ -201,10 +202,14 @@ namespace UrbanChaosStyleEditor.Views
             int texIndex = page * 64 + ty * 8 + tx;
             row.TexIndexLabel.Text = texIndex.ToString("D3");
 
-            if (texIndex >= 0 && texIndex < 256 && texIndex < _project.Slots.Count)
+            if (texIndex >= 256)
             {
-                var slot = _project.Slots[texIndex];
-                row.PreviewImage.Source = slot.Image;
+                // Shared texture (pages 4-7)
+                row.PreviewImage.Source = SharedTextureLoader.TryGet(texIndex);
+            }
+            else if (texIndex >= 0 && texIndex < _project.Slots.Count)
+            {
+                row.PreviewImage.Source = _project.Slots[texIndex].Image;
             }
             else
             {

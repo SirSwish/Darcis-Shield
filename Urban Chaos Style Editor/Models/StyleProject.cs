@@ -74,8 +74,8 @@ namespace UrbanChaosStyleEditor.Models
         }
 
         public string DisplayName => string.IsNullOrWhiteSpace(_name)
-            ? $"Style #{_index}"
-            : $"Style #{_index}: {_name}";
+            ? $"Style #{_index + 1}: Unnamed Style"
+            : $"Style #{_index + 1}: {_name}";
 
         public ObservableCollection<StylePiece> Pieces { get; } = new();
 
@@ -91,29 +91,68 @@ namespace UrbanChaosStyleEditor.Models
         private byte _tx;
         private byte _ty;
         private byte _flip;
+        private byte _flag = 0x03; // POLY_GT default (Gouraud | Textured)
 
         public byte Page
         {
             get => _page;
-            set { _page = value; OnPropertyChanged(nameof(Page)); OnPropertyChanged(nameof(TextureIndex)); }
+            set
+            {
+                if (_page == value) return;
+                _page = value;
+                OnPropertyChanged(nameof(Page));
+                OnPropertyChanged(nameof(TextureIndex));
+            }
         }
 
         public byte Tx
         {
             get => _tx;
-            set { _tx = value; OnPropertyChanged(nameof(Tx)); OnPropertyChanged(nameof(TextureIndex)); }
+            set
+            {
+                if (_tx == value) return;
+                _tx = value;
+                OnPropertyChanged(nameof(Tx));
+                OnPropertyChanged(nameof(TextureIndex));
+            }
         }
 
         public byte Ty
         {
             get => _ty;
-            set { _ty = value; OnPropertyChanged(nameof(Ty)); OnPropertyChanged(nameof(TextureIndex)); }
+            set
+            {
+                if (_ty == value) return;
+                _ty = value;
+                OnPropertyChanged(nameof(Ty));
+                OnPropertyChanged(nameof(TextureIndex));
+            }
         }
 
         public byte Flip
         {
             get => _flip;
-            set { _flip = value; OnPropertyChanged(nameof(Flip)); }
+            set
+            {
+                if (_flip == value) return;
+                _flip = value;
+                OnPropertyChanged(nameof(Flip));
+            }
+        }
+
+        /// <summary>
+        /// Raw TMA/poly draw flag byte for this style entry.
+        /// Default is POLY_GT (0x03 = Gouraud | Textured).
+        /// </summary>
+        public byte Flag
+        {
+            get => _flag;
+            set
+            {
+                if (_flag == value) return;
+                _flag = value;
+                OnPropertyChanged(nameof(Flag));
+            }
         }
 
         public int TextureIndex => Page * 64 + Ty * 8 + Tx;

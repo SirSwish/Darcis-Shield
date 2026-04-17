@@ -200,7 +200,7 @@
             <Grid Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="60"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -235,75 +235,6 @@
                            DataObject.Pasting="Units_OnPaste"
                            ToolTip="Maximum height difference between adjacent vertices (0 = disabled, 1–127 = enforced). Also applied at the boundary with surrounding terrain."/>
             </Grid>
-
-            <Separator Margin="0,12,0,6"/>
-
-            <!-- ===================== PAP CELL FLAGS ===================== -->
-            <TextBlock Text="Set PAP Cell Flags" FontWeight="SemiBold" Margin="0,0,0,6"/>
-            <TextBlock Text="Select flags below, then drag an area on the map to apply them to all cells in the region."
-                       Opacity="0.6" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
-
-            <!-- Show Cell Flags layer toggle -->
-            <CheckBox Content="Show Cell Flags Layer"
-                      IsChecked="{Binding Map.ShowCellFlags}"
-                      Margin="0,0,0,6"
-                      ToolTip="Show flag icons on the map canvas. Gold = flags set. Double-click to edit a single cell."/>
-
-            <!-- Flag checkboxes in two columns -->
-            <Border Background="#2A2D32" CornerRadius="4" Padding="8" Margin="0,0,0,6">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <CheckBox x:Name="PapShadow1"    Content="Shadow1 (0x0001)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapShadow2"    Content="Shadow2 (0x0002)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapShadow3"    Content="Shadow3 (0x0004)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapReflective" Content="Reflective (0x0008)" Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapHidden"     Content="Hidden (0x0010)"     Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
-                        <CheckBox x:Name="PapSinkSquare" Content="SinkSquare (0x0020)" Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapSinkPoint"  Content="SinkPoint (0x0040)"  Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapNoUpper"    Content="NoUpper (0x0080)"    Foreground="#FFD4D4D4" FontSize="10.5"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <CheckBox x:Name="PapNoGo"       Content="NoGo (0x0100)"       Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapRoofExists" Content="Roof Exists (0x0200)" Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
-                        <CheckBox x:Name="PapZone1"      Content="Zone1 (0x0400)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapZone2"      Content="Zone2 (0x0800)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapZone3"      Content="Zone3 (0x1000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapZone4"      Content="Zone4 (0x2000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
-                        <CheckBox x:Name="PapFlatRoof"   Content="Flat Roof (0x4000)"  Foreground="#FFD4D4D4" FontWeight="Bold" FontSize="10.5"/>
-                        <CheckBox x:Name="PapWater"      Content="Water (0x8000)"      Foreground="#FFD4D4D4" FontSize="10.5"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Flags hex summary -->
-            <TextBlock x:Name="TxtPapFlagsSummary" Text="Selected: 0x0000" FontFamily="Consolas"
-                       Foreground="#FF808080" FontSize="11" Margin="0,0,0,6"/>
-
-            <!-- Mode: Set or Clear -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <RadioButton x:Name="PapModeSet" Content="Set flags (OR)" IsChecked="True"
-                             Foreground="White" Margin="0,0,12,0"
-                             GroupName="PapFlagMode"/>
-                <RadioButton x:Name="PapModeClear" Content="Clear flags (AND NOT)"
-                             Foreground="White"
-                             GroupName="PapFlagMode"/>
-            </StackPanel>
-
-            <!-- Select Area button -->
-            <Button Margin="0,0,0,6"
-                    Padding="10,6"
-                    Content="Select Area on Map"
-                    Click="PapFlagsSelectArea_Click"
-                    ToolTip="Click, then drag a rectangle on the map. On release, the selected flags will be applied to all cells in the area."/>
-
-            <TextBlock x:Name="TxtPapFlagsStatus" Foreground="#FF4EC9B0" FontSize="11" Margin="0,0,0,4"
-                       TextWrapping="Wrap"/>
-
-            <Separator Margin="0,8,0,6"/>
 
             <TextBlock Text="Click in the map to apply. Ctrl+Wheel zooms. Ctrl+0 resets."
                        Opacity="0.7" TextWrapping="Wrap"/>

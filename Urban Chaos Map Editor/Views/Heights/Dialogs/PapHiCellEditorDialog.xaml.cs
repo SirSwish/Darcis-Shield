@@ -93,24 +93,21 @@ namespace UrbanChaosMapEditor.Views.Heights.Dialogs
             if (_suppressFlagSync) return;
             ushort flags = ReadFlagsFromCheckBoxes();
             TxtFlagsHexDisplay.Text = $"Flags: 0x{flags:X4}";
+            WriteFlags(flags);
         }
 
-        private void BtnApply_Click(object sender, RoutedEventArgs e)
+        private void WriteFlags(ushort flags)
         {
             if (!MapDataService.Instance.IsLoaded) return;
 
-            ushort flags = ReadFlagsFromCheckBoxes();
             var bytes = MapDataService.Instance.GetBytesCopy();
             int offset = CalcTileOffset(_gameX, _gameZ) + Off_Flags;
-
             if (offset + 1 >= bytes.Length) return;
 
-            bytes[offset] = (byte)(flags & 0xFF);
+            bytes[offset]     = (byte)(flags & 0xFF);
             bytes[offset + 1] = (byte)(flags >> 8);
             MapDataService.Instance.ReplaceBytes(bytes);
-
             Applied = true;
-            TxtFlagsHexDisplay.Text = $"Flags: 0x{flags:X4} (applied)";
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();

@@ -9,12 +9,15 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Roofs;
+using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.ViewModels.Core;
 
 namespace UrbanChaosMapEditor.ViewModels.Roofs
 {
+    public sealed record BuildingFilterOption(int Id, string Label);
+
     public sealed class RoofsTabViewModel : INotifyPropertyChanged
     {
         // Raw arrays cached from MapDataService
@@ -30,9 +33,50 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
             {
                 if (_selectedBuildingId == value) return;
                 _selectedBuildingId = value;
+                // Keep the ComboBox SelectedItem in sync
+                _selectedBuildingOption = BuildingFilterOptions.FirstOrDefault(o => o.Id == value);
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedBuildingOption));
+                OnPropertyChanged(nameof(IsFilterActive));
                 RebuildWalkablesForBuilding();
                 UpdateStatusText();
+            }
+        }
+
+        public bool IsFilterActive => _selectedBuildingId > 0;
+
+        public void ClearFilter()
+        {
+            SelectedBuildingId = 0;
+        }
+
+        /// <summary>Options for the building filter ComboBox. First entry is always "All Buildings" (Id=0).</summary>
+        public ObservableCollection<BuildingFilterOption> BuildingFilterOptions { get; } = new();
+
+        private BuildingFilterOption? _selectedBuildingOption;
+        private bool _rebuildingFilterOptions;
+
+        /// <summary>Drives the ComboBox SelectedItem — always mirrors SelectedBuildingId.</summary>
+        public BuildingFilterOption? SelectedBuildingOption
+        {
+            get => _selectedBuildingOption;
+            set
+            {
+                // Ignore spurious nulls fired by the ComboBox while its items list is being rebuilt
+                if (_rebuildingFilterOptions) return;
+                if (_selectedBuildingOption == value) return;
+                _selectedBuildingOption = value;
+                OnPropertyChanged();
+                // Propagate into the real filter without re-entering this setter
+                int newId = value?.Id ?? 0;
+                if (_selectedBuildingId != newId)
+                {
+                    _selectedBuildingId = newId;
+                    OnPropertyChanged(nameof(SelectedBuildingId));
+                    OnPropertyChanged(nameof(IsFilterActive));
+                    RebuildWalkablesForBuilding();
+                    UpdateStatusText();
+                }
             }
         }
 
@@ -137,6 +181,7 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
         public void Refresh()
         {
             LoadFromService();
+            RebuildBuildingFilterOptions();
             RebuildWalkablesForBuilding();
             UpdateStatusText();
         }
@@ -174,6 +219,44 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
             var (walkables, rf4s) = accessor.ReadSnapshot();
             _rawWalkables = walkables;
             _rawRoofFaces4 = rf4s;
+        }
+
+        // ====================================================================
+        // Building Filter Options
+        // ====================================================================
+
+        private void RebuildBuildingFilterOptions()
+        {
+            _rebuildingFilterOptions = true;
+            try
+            {
+                BuildingFilterOptions.Clear();
+                BuildingFilterOptions.Add(new BuildingFilterOption(0, "All Buildings"));
+
+                if (MapDataService.Instance.IsLoaded)
+                {
+                    var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
+                    if (snap.Buildings != null)
+                    {
+                        for (int i = 0; i < snap.Buildings.Length; i++)
+                        {
+                            int id = i + 1;
+                            var b = snap.Buildings[i];
+                            // Skip empty/unused building slots (no facets and no valid data)
+                            if (b.StartFacet == 0 && b.EndFacet == 0) continue;
+                            BuildingFilterOptions.Add(new BuildingFilterOption(id, $"Building #{id}"));
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                _rebuildingFilterOptions = false;
+            }
+
+            // Re-sync SelectedItem now that the list is stable
+            _selectedBuildingOption = BuildingFilterOptions.FirstOrDefault(o => o.Id == _selectedBuildingId);
+            OnPropertyChanged(nameof(SelectedBuildingOption));
         }
 
         // ====================================================================

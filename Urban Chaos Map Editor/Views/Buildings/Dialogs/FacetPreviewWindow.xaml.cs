@@ -499,23 +499,20 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
         private static bool HasDualFace(DFacetRec f)
         {
-            bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
-            bool twoSided = (f.Flags & FacetFlags.TwoSided) != 0;
-            bool hugFloor = (f.Flags & FacetFlags.HugFloor) != 0;
-            return !hugFloor && (twoTextured || twoSided);
+            // 2SIDED is now treated as single-channel only — no paintable Side B.
+            // 2TEXTURED = paired opposing facets (separate DFacetRec entries); not dual-channel here.
+            return false;
         }
 
         private void SummarizeStyleAndRecipe(DFacetRec f)
         {
-            bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
-            bool dualFace = HasDualFace(f);
+            bool showSideB = HasExplicitSideB(f);
 
-            StyleSectionLabel.Text = dualFace
-                ? (twoTextured ? "Style — Face A (Outside)" : "Style — Face A (Front)")
-                : "Style";
+            // 2SIDED: show both Side A and Side B labels (Side B is read-only, same base style).
+            StyleSectionLabel.Text = showSideB ? "Style — Side A (Front)" : "Style";
 
             SummarizeSingleFaceToNewLayout(
-                dstyleIndex: f.StyleIndex + (dualFace ? 1 : 0),
+                dstyleIndex: f.StyleIndex,
                 modeText: StyleModeText,
                 baseStyleText: BaseStyleText,
                 dstoreyText: AdvancedDStoreyText,
@@ -525,16 +522,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 isLadder: f.Type == FacetType.Ladder,
                 isDoor: IsProceduralDoor(f.Type));
 
-            if (dualFace)
+            if (showSideB)
             {
-                int faceBIndex = f.StyleIndex;
-
-                SecondFaceSectionLabel.Text = twoTextured
-                    ? "Face B Style (Interior)"
-                    : "Face B Style (Back)";
+                // Side B is not paintable — it mirrors the primary face's base style.
+                SecondFaceSectionLabel.Text = "Style — Side B (Back, read-only)";
 
                 SummarizeSingleFaceToNewLayout(
-                    dstyleIndex: faceBIndex,
+                    dstyleIndex: f.StyleIndex,  // same slot as Side A — base style only
                     modeText: SecondFaceStyleModeText,
                     baseStyleText: SecondFaceBaseStyleText,
                     dstoreyText: SecondFaceAdvancedDStoreyText,
@@ -543,6 +537,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                     paintCountText: SecondFaceAdvancedPaintMemCountText,
                     isLadder: false,
                     isDoor: false);
+
+                // Side B cannot be painted or independently styled — hide those buttons.
+                BtnPaintFaceB.Visibility = Visibility.Collapsed;
+                BtnChangeSecondFaceStyle.Visibility = Visibility.Collapsed;
 
                 SecondFacePanel.Visibility = Visibility.Visible;
             }
@@ -815,8 +813,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         }
         private static bool HasExplicitSideB(DFacetRec f)
         {
-            return (f.Flags & FacetFlags.TwoTextured) != 0 ||
-                   (f.Flags & FacetFlags.TwoSided) != 0;
+            // 2SIDED: always show the Side B panel — it displays the base style (read-only, not paintable).
+            // 2TEXTURED: partner face is a separate DFacetRec, not a second channel here.
+            return (f.Flags & FacetFlags.TwoSided) != 0;
         }
 
         private void DrawPreview(DFacetRec f)
@@ -824,11 +823,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             bool hasSideB = HasExplicitSideB(f);
             bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
 
-            // For Inside facets the engine renders the Side A slot (StyleIndex+1) on the interior
-            // and Side B slot (StyleIndex+2) on the exterior, so swap the labels.
-            bool isInside = hasSideB && (f.Flags & FacetFlags.Inside) != 0;
-            FaceALabel.Text = isInside ? "Side B" : "Side A";
-            FaceBLabel.Text = isInside ? "Side A" : "Side B";
+            FaceALabel.Text = "Side A";
+            FaceBLabel.Text = "Side B";
 
             if (f.Type == FacetType.Ladder)
             {
@@ -1004,15 +1000,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             FaceBGridCanvas.Width = width;
             FaceBGridCanvas.Height = height;
 
-            // Dual-face layout: [SideB_header=X+0, SideA_0=X+1, SideB_0=X+2, SideA_1=X+3, ...]
-            // Normal:  Side B panel shows StyleIndex+2 (inner face), read forward  (pos = col).
-            // Inside:  Side B panel shows StyleIndex+1 (now the interior-visible face), read reversed (pos = N-1-col).
-            bool isDualFaceB = HasDualFace(f);
-            bool isFaceBInside = isDualFaceB && (f.Flags & FacetFlags.Inside) != 0;
-            int faceBStyleStart = isDualFaceB
-                ? (isFaceBInside ? f.StyleIndex + 1 : f.StyleIndex + 2)
-                : f.StyleIndex;
-            bool faceBReadForward = isDualFaceB && !isFaceBInside;
+            // 2SIDED Face B: same style channel as Side A (StyleIndex+0), reversed read direction.
+            int faceBStyleStart = f.StyleIndex;
+            bool faceBReadForward = false;  // reversed: pos = N-1-col
 
             double yCursor = 0;
             for (int rowFromTop = 0; rowFromTop < panelsDown; rowFromTop++)
@@ -1213,20 +1203,21 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (_dstyles == null || _dstyles.Length == 0) return false;
             if (rowFromBottom < 0 || rowFromBottom >= panelsDown) return false;
 
-            bool dualFace = HasDualFace(_facet);
-            int step = dualFace ? 2 : 1;
+            // 2TEXTURED: two interleaved streams (outside/inside). Each facet steps by 2
+            // to skip the partner's interleaved slot. All other facets step by 1.
+            bool twoTextured = (_facet.Flags & FacetFlags.TwoTextured) != 0;
+            int step = twoTextured ? 2 : 1;
 
-            // For Inside dual-face facets the Side A panel shows the SideB slot (StyleIndex+2),
-            // read forward. For all other facets it shows StyleIndex+1, read reversed.
-            bool isInsideSwap = dualFace && (_facet.Flags & FacetFlags.Inside) != 0;
-            int slotOffset = dualFace ? (isInsideSwap ? 2 : 1) : 0;
-            int styleIndexForRow = _facet.StyleIndex + slotOffset + rowFromBottom * step;
+            int styleIndexForRow = _facet.StyleIndex + rowFromBottom * step;
             if (styleIndexForRow < 0 || styleIndexForRow >= _dstyles.Length) return false;
 
             short dval = _dstyles[styleIndexForRow];
 
             int count = panelsAcross + 1;
-            int pos = isInsideSwap ? col : panelsAcross - 1 - col;
+            // Paint is stored reversed for non-2SIDED facets, forward for 2SIDED.
+            // Mirror the same read direction the Painter uses so the display matches.
+            bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
+            int pos = twoSided ? col : panelsAcross - 1 - col;
 
             if (!TryResolveTileIdForCell(dval, pos, count, out int tileId, out byte flipFlag)) return false;
             if (tileId < 0) return false;
@@ -1429,11 +1420,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Inside dual-face facets render their interior on the Side A slot (faceOffset=0 = SideB data
-            // is exterior). So "Paint Facet" for an Inside facet should paint faceOffset=0 (SideB slot).
-            bool isInsideDual = HasDualFace(_facet) && (_facet.Flags & FacetFlags.Inside) != 0;
-            int faceOffsetA = isInsideDual ? 0 : 1;
-            var painter = new FacetPainterWindow(_facet, _facetIndex1, faceOffset: faceOffsetA) { Owner = this };
+            // For all 2SIDED (dual-channel) facets, Side A (primary/front) is at StyleIndex+0 → faceOffset=0.
+            // The Inside flag does NOT change which slot is Side A vs Side B.
+            var painter = new FacetPainterWindow(_facet, _facetIndex1, faceOffset: 0) { Owner = this };
 
             if (painter.ShowDialog() == true)
             {
@@ -1474,10 +1463,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Inside dual-face facets: Side B (the visible interior) is the Side A slot (faceOffset=1).
-            bool isInsideDualB = (_facet.Flags & FacetFlags.Inside) != 0;
-            int faceOffsetB = isInsideDualB ? 1 : 0;
-            var painter = new FacetPainterWindow(_facet, _facetIndex1, faceOffset: faceOffsetB) { Owner = this };
+            // For all 2SIDED (dual-channel) facets, Side B (reverse/back) is at StyleIndex+1 → faceOffset=1.
+            // The Inside flag does NOT change which slot is Side A vs Side B.
+            var painter = new FacetPainterWindow(_facet, _facetIndex1, faceOffset: 1) { Owner = this };
 
             if (painter.ShowDialog() == true)
             {
@@ -1590,8 +1578,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             int totalPixelsY = _facet.Height * 16 + _facet.FHeight;
             int panelsDown = Math.Max(1, (totalPixelsY + (PanelPx - 1)) / PanelPx);
 
-            bool dualFace = HasDualFace(_facet);
-            int step = dualFace ? 2 : 1;
+            bool twoTextured = (_facet.Flags & FacetFlags.TwoTextured) != 0;
+            int step = twoTextured ? 2 : 1;
 
             var indices = new HashSet<int>();
             for (int band = 0; band < panelsDown; band++)

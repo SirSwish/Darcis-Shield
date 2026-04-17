@@ -100,6 +100,43 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         #endregion
 
+        #region Polygon Groups List Handlers
+
+        private void PolygonsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm) return;
+            var group = vm.SelectedPolygonGroup;
+            if (group == null || group.FacetIds.Count == 0) return;
+
+            // Scroll the first member facet into view in the facets list
+            var firstFacet = vm.SelectedBuildingFacets.FirstOrDefault(f => f.FacetId1 == group.FacetIds[0]);
+            if (firstFacet != null)
+                FacetsList?.ScrollIntoView(firstFacet);
+        }
+
+        private void PolygonsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm) return;
+            var group = vm.SelectedPolygonGroup;
+            if (group == null || group.FacetIds.Count == 0) return;
+
+            OpenBulkFacetEdit(group, vm);
+            e.Handled = true;
+        }
+
+        private void OpenBulkFacetEdit(BuildingsTabViewModel.PolygonGroupVM group, BuildingsTabViewModel vm)
+        {
+            var dlg = new BulkFacetEditDialog(group.FacetIds, group.Label)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dlg.ShowDialog() == true)
+                vm.Refresh();
+        }
+
+        #endregion
+
         #region Facets List Handlers
 
         private void FacetsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,12 +147,60 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.FacetVM facet)
             {
                 vm.HandleTreeSelection(facet);
-                CenterOnFacet(facet);
+
+                // Jump the viewport to the facet only when the user selected it from
+                // this list — not when the selection was driven by a map click.
+                if (!vm.IsSelectingFromMap)
+                    JumpToFacet(facet);
             }
 
             // Buildings tab should never own walkable highlighting.
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                 shell.Map.SelectedWalkableId1 = 0;
+        }
+
+        private static void JumpToFacet(BuildingsTabViewModel.FacetVM fvm)
+        {
+            if (Application.Current.MainWindow is not MainWindow mw) return;
+
+            var mapView = mw.MapViewControl;
+            var scroller = mapView.Scroller;
+            if (scroller == null) return;
+
+            // Canvas-pixel coords for both endpoints.
+            // Coordinate convention (matches FacetHandlesLayer): pixel = (128 - coord) * 64
+            var f    = fvm.Raw;
+            double px0 = (128 - f.X0) * 64.0;
+            double pz0 = (128 - f.Z0) * 64.0;
+            double px1 = (128 - f.X1) * 64.0;
+            double pz1 = (128 - f.Z1) * 64.0;
+
+            // Check whether any part of the facet is already in the viewport.
+            // CenterOnPixel uses scrollOffset = canvasPixel * zoom, so
+            // visible canvas range = [scrollOffset / zoom, (scrollOffset + viewportSize) / zoom].
+            double zoom = (mapView.DataContext as MapViewModel)?.Zoom ?? 1.0;
+            if (zoom > 0 && scroller.ViewportWidth > 0 && scroller.ViewportHeight > 0)
+            {
+                double viewLeft   = scroller.HorizontalOffset / zoom;
+                double viewTop    = scroller.VerticalOffset   / zoom;
+                double viewRight  = viewLeft + scroller.ViewportWidth  / zoom;
+                double viewBottom = viewTop  + scroller.ViewportHeight / zoom;
+
+                double facetLeft   = Math.Min(px0, px1);
+                double facetRight  = Math.Max(px0, px1);
+                double facetTop    = Math.Min(pz0, pz1);
+                double facetBottom = Math.Max(pz0, pz1);
+
+                // Any overlap between the facet bounding box and the viewport means it's visible.
+                bool visible = facetRight  >= viewLeft  && facetLeft   <= viewRight &&
+                               facetBottom >= viewTop   && facetTop    <= viewBottom;
+                if (visible) return;
+            }
+
+            // Facet is off-screen — center the viewport on its midpoint.
+            int midPx = (256 - f.X0 - f.X1) * 32;
+            int midPz = (256 - f.Z0 - f.Z1) * 32;
+            mapView.CenterOnPixel(midPx, midPz);
         }
 
         private void FacetsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -144,49 +229,111 @@ namespace UrbanChaosMapEditor.Views.Buildings
             }
         }
 
-        #endregion
-
-        #region Cable List Handlers
-
-        private void CableList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void FacetsList_TransferFacet_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is not BuildingsTabViewModel vm)
+            if (DataContext is not BuildingsTabViewModel vm) return;
+
+            // Resolve the right-clicked facet — prefer the context-menu's placement target
+            // so the user doesn't have to left-click first.
+            BuildingsTabViewModel.FacetVM? fvm = null;
+
+            if (sender is MenuItem mi)
+            {
+                // Walk up: MenuItem → ContextMenu → ListBoxItem
+                var cm = mi.Parent as ContextMenu;
+                if (cm?.PlacementTarget is FrameworkElement target)
+                {
+                    fvm = (target.DataContext
+                           ?? (target as ListBoxItem)?.Content
+                           ?? (ItemsControl.ContainerFromElement(FacetsList, target) is ListBoxItem li
+                               ? li.DataContext
+                               : null))
+                          as BuildingsTabViewModel.FacetVM;
+                }
+            }
+
+            // Fall back to whatever is selected
+            fvm ??= vm.SelectedFacet as BuildingsTabViewModel.FacetVM;
+
+            if (fvm == null)
+            {
+                MessageBox.Show("Right-click a facet in the list to transfer it.", "Transfer Facet",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
-
-            if (sender is ListView lv && lv.SelectedItem is BuildingsTabViewModel.FacetVM fvm)
-            {
-                vm.SelectedFacet = fvm;
-                vm.HandleTreeSelection(fvm);
-                CenterOnFacet(fvm);
-            }
-            else if (sender is ListView lv2 && lv2.SelectedItem == null)
-            {
-                vm.SelectedFacet = null;
             }
 
-            // Cables/facets selection must not drive walkable highlighting.
-            if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                shell.Map.SelectedWalkableId1 = 0;
+            int sourceBuildingId = fvm.Raw.Building;
+
+            var dlg = new TransferFacetDialog(fvm.FacetId1, sourceBuildingId)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dlg.ShowDialog() != true || dlg.SelectedBuildingId <= 0) return;
+
+            int targetBuildingId = dlg.SelectedBuildingId;
+
+            // ── Capture everything before deletion (IDs shift afterwards) ──────
+            var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
+            var f    = fvm.Raw;
+
+            short dval = (snap.Styles != null && f.StyleIndex < snap.Styles.Length)
+                ? snap.Styles[f.StyleIndex]
+                : (short)1;
+            ushort rawStyleId = dval > 0 ? (ushort)dval : (ushort)1;
+
+            var template = new FacetTemplate
+            {
+                Type        = f.Type,
+                Height      = f.Height,
+                FHeight     = f.FHeight,
+                BlockHeight = f.BlockHeight,
+                Y0          = f.Y0,
+                Y1          = f.Y1,
+                RawStyleId  = rawStyleId,
+                Flags       = f.Flags,
+                BuildingId1 = targetBuildingId,
+                Storey      = f.Storey,
+            };
+
+            var coords = new List<(byte x0, byte z0, byte x1, byte z1)>
+            {
+                (f.X0, f.Z0, f.X1, f.Z1)
+            };
+
+            int facetId1 = fvm.FacetId1;
+
+            // ── Delete from source ────────────────────────────────────────────
+            var deleter    = new FacetDeleter(MapDataService.Instance);
+            var deleteResult = deleter.TryDeleteFacet(facetId1);
+
+            if (!deleteResult.IsSuccess)
+            {
+                MessageBox.Show($"Failed to remove facet #{facetId1}: {deleteResult.ErrorMessage}",
+                    "Transfer Facet", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // ── Recreate in target building ───────────────────────────────────
+            var adder     = new BuildingAdder(MapDataService.Instance);
+            var addResult = adder.TryAddFacets(targetBuildingId, coords, template);
+
+            if (!addResult.IsSuccess)
+            {
+                MessageBox.Show($"Facet #{facetId1} was deleted but could not be recreated in Building #{targetBuildingId}: {addResult.ErrorMessage}\n\nUndo (Ctrl+Z) is recommended.",
+                    "Transfer Facet — Partial Failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
+                    mainVm.StatusMessage = $"Transferred facet #{facetId1} from Building #{sourceBuildingId} to Building #{targetBuildingId}.";
+            }
+
+            vm.Refresh();
         }
 
-        private void CableList_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is not ListView lv)
-                return;
-
-            if (lv.SelectedItem is BuildingsTabViewModel.FacetVM fvm)
-            {
-                // Always use the cable editor for cables
-                if (fvm.Type == FacetType.Cable)
-                    OpenCableEditor(fvm);
-                else
-                    OpenFacetPreview(fvm);
-
-                e.Handled = true;
-            }
-        }
-
         #endregion
+
 
         #region Gate Handler
 
@@ -217,6 +364,61 @@ namespace UrbanChaosMapEditor.Views.Buildings
             };
 
             addGateWindow.Show();
+        }
+
+        private void BtnCloneFacet_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm) return;
+            if (vm.SelectedFacet is not BuildingsTabViewModel.FacetVM fvm) return;
+            if (vm.SelectedBuildingId <= 0) return;
+
+            if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm)
+                return;
+
+            // Read current dstyles table to resolve RawStyleId from the StyleIndex pointer
+            var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
+            var f = fvm.Raw;
+
+            short dval = (snap.Styles != null && f.StyleIndex < snap.Styles.Length)
+                ? snap.Styles[f.StyleIndex]
+                : (short)1;
+            ushort rawStyleId = dval > 0 ? (ushort)dval : (ushort)1;
+
+            var template = new FacetTemplate
+            {
+                Type        = f.Type,
+                Height      = f.Height,
+                FHeight     = f.FHeight,
+                BlockHeight = f.BlockHeight,
+                Y0          = f.Y0,
+                Y1          = f.Y1,
+                RawStyleId  = rawStyleId,
+                Flags       = f.Flags,
+                BuildingId1 = vm.SelectedBuildingId,
+                Storey      = f.Storey,
+            };
+
+            var handler = new CloneFacetDrawHandler(() =>
+            {
+                if (DataContext is BuildingsTabViewModel v) v.Refresh();
+            });
+
+            mainVm.Map.BeginFacetMultiDraw(handler, template);
+            mainVm.StatusMessage =
+                $"Cloning facet #{fvm.FacetId1} for Building #{vm.SelectedBuildingId}. " +
+                "Click start then end point. Right-click to finish.";
+        }
+
+        /// <summary>
+        /// Minimal IFacetMultiDrawWindow implementation for Clone Selected Facet.
+        /// No dialog — just refreshes the VM when drawing ends.
+        /// </summary>
+        private sealed class CloneFacetDrawHandler : IFacetMultiDrawWindow
+        {
+            private readonly Action _onFinished;
+            public CloneFacetDrawHandler(Action onFinished) => _onFinished = onFinished;
+            public void OnDrawCancelled()          => _onFinished();
+            public void OnDrawCompleted(int count) => _onFinished();
         }
 
         #endregion
@@ -335,10 +537,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
                                               "Use 'Add Facets' to draw walls and fences.";
                     }
 
-                    MessageBox.Show($"Building #{newBuildingId} created successfully.\n\n" +
-                                   $"Type: {dialog.SelectedBuildingType}\n\n" +
-                                   "The building is empty. Use 'Add Facets' to draw walls and fences.",
-                        "Building Added", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
@@ -545,8 +743,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 return;
             }
 
-            vm.ShowCablesList = true;
-
             var addCableWindow = new AddCableWindow(buildingId)
             {
                 Owner = Window.GetWindow(this)
@@ -584,26 +780,12 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                 shell.Map.SelectedWalkableId1 = 0;
 
-            // Capture before any ListView.SelectedItem assignment — setting SelectedItem fires
-            // CableList_OnSelectionChanged → HandleTreeSelection → SelectedBuilding setter which
-            // clears SelectedFacet as a side-effect if the building changes.
             var selectedFacet = vm.SelectedFacet;
 
-            if (selectedFacet?.Type == FacetType.Cable)
-            {
-                // Only sync the permanent bottom list; the full-screen CableList is not used here.
-                CableListPermanent.SelectedItem = selectedFacet;
-                CableListPermanent?.ScrollIntoView(selectedFacet);
-            }
-            else
-            {
-                if (vm.SelectedBuilding != null)
-                    BuildingsList?.ScrollIntoView(vm.SelectedBuilding);
-                if (vm.SelectedFacetTypeGroup != null)
-                    FacetTypesList?.ScrollIntoView(vm.SelectedFacetTypeGroup);
-                if (vm.SelectedFacet != null)
-                    FacetsList?.ScrollIntoView(vm.SelectedFacet);
-            }
+            if (vm.SelectedBuilding != null)
+                BuildingsList?.ScrollIntoView(vm.SelectedBuilding);
+            if (vm.SelectedFacet != null)
+                FacetsList?.ScrollIntoView(vm.SelectedFacet);
 
             if (openEditor)
             {
@@ -626,7 +808,52 @@ namespace UrbanChaosMapEditor.Views.Buildings
             {
                 BtnDeleteBuilding_Click(sender, e);
                 e.Handled = true;
+                return;
             }
+
+            bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+            if (ctrl && e.Key == Key.X)
+            {
+                BtnMoveBuilding_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
+        private void BtnMoveBuilding_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BuildingsTabViewModel vm)
+                return;
+
+            int buildingId = vm.SelectedBuildingId;
+            if (buildingId <= 0)
+            {
+                MessageBox.Show("Select a building first.", "Move Building",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm)
+                return;
+
+            var mover = new Services.Buildings.BuildingMover(MapDataService.Instance);
+            var snap = mover.Capture(buildingId);
+
+            if (snap == null)
+            {
+                MessageBox.Show($"Building #{buildingId} has no facets — cannot move.",
+                    "Move Building", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Activate the MoveBuilding tool on the map
+            mainVm.Map.BuildingMoveClipboard = snap;
+            mainVm.Map.SelectedTool = Models.Core.EditorTool.MoveBuilding;
+
+            // Prime the ghost position to the anchor (center of building)
+            mainVm.Map.MoveGhostUiX = snap.AnchorUiX;
+            mainVm.Map.MoveGhostUiZ = snap.AnchorUiZ;
+
+            mainVm.StatusMessage = $"Building #{buildingId} captured. Click on the map to place. Right-click or Escape to cancel.";
         }
 
         private void FacetsList_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -759,37 +986,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
         /// Centers the map on a facet's midpoint only if that point is not already in the viewport.
         /// Not called when a facet is selected via map click (it's already visible).
         /// </summary>
-        private void CenterOnFacet(BuildingsTabViewModel.FacetVM fvm)
-        {
-            var raw = fvm.Raw;
-
-            // Skip degenerate facets with no real position.
-            if (raw.X0 == 0 && raw.Z0 == 0 && raw.X1 == 0 && raw.Z1 == 0)
-                return;
-
-            // Midpoint in tile-space → UI pixels: uiPixel = (128 - tileCoord) * 64
-            double midTileX = (raw.X0 + raw.X1) * 0.5;
-            double midTileZ = (raw.Z0 + raw.Z1) * 0.5;
-            int pixelX = (int)((128 - midTileX) * 64);
-            int pixelZ = (int)((128 - midTileZ) * 64);
-
-            var win = Window.GetWindow(this);
-            if (win == null) return;
-
-            var mapView = LogicalTreeHelper.FindLogicalNode(win, "MapViewControl");
-            if (mapView == null) return;
-
-            var mapViewType = mapView.GetType();
-
-            // Only scroll if the midpoint is outside the current viewport.
-            var isInView = mapViewType.GetMethod("IsPixelInView")
-                               ?.Invoke(mapView, new object[] { pixelX, pixelZ }) as bool?;
-            if (isInView == true)
-                return;
-
-            mapViewType.GetMethod("CenterOnPixel")
-                       ?.Invoke(mapView, new object[] { pixelX, pixelZ });
-        }
 
         private static T? FindAncestor<T>(DependencyObject current)
             where T : DependencyObject

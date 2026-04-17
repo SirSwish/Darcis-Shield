@@ -56,8 +56,7 @@ namespace UrbanChaosStyleEditor.Views
         private void ImportSky_Click(object sender, RoutedEventArgs e) => Vm.ImportSky();
         private void ClearSky_Click(object sender, RoutedEventArgs e) => Vm.ClearSky();
 
-        private void AddStyle_Click(object sender, RoutedEventArgs e) => Vm.AddStyle();
-        private void RemoveStyle_Click(object sender, RoutedEventArgs e) => Vm.RemoveStyle();
+        private void LoadTma_Click(object sender, RoutedEventArgs e) => Vm.LoadTmaFromFile();
 
         private void CmbSoundGroup_Changed(object sender, SelectionChangedEventArgs e)
         {
