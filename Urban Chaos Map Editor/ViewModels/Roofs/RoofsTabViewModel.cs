@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Roofs;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
@@ -121,6 +122,9 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
             private set { _statusText = value; OnPropertyChanged(); }
         }
 
+        /// <summary>Column header for the walkable height column — changes with the display mode toggle.</summary>
+        public string WalkableHeightHeader => HeightDisplaySettings.ShowRawHeights ? "Raw Y" : "QS";
+
         // Reference to MapViewModel for syncing selection highlights
         private MapViewModel? _mapViewModel;
         public MapViewModel? MapViewModel
@@ -149,6 +153,14 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
 
         public RoofsTabViewModel()
         {
+            // Rebuild walkable list when the height display mode is toggled
+            HeightDisplaySettings.DisplayModeChanged += (_, _) =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+                {
+                    OnPropertyChanged(nameof(WalkableHeightHeader));
+                    RebuildWalkablesForBuilding();
+                });
+
             // Subscribe to changes
             RoofsChangeBus.Instance.Changed += (_, _) =>
                 System.Windows.Application.Current?.Dispatcher?.Invoke(Refresh);

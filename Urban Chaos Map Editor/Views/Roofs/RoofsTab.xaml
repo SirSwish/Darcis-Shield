@@ -127,6 +127,7 @@
                           ItemsSource="{Binding Walkables}"
                           SelectedItem="{Binding SelectedWalkable, Mode=TwoWay}"
                           SelectionChanged="WalkablesList_OnSelectionChanged"
+                          PreviewMouseDown="WalkablesList_PreviewMouseDown"
                           MouseDoubleClick="WalkablesList_OnMouseDoubleClick"
                           PreviewKeyDown="WalkablesList_PreviewKeyDown"
                           Background="Transparent"
@@ -140,8 +141,9 @@
                                             DisplayMemberBinding="{Binding BuildingId}"/>
                             <GridViewColumn Header="Rect" Width="110"
                                             DisplayMemberBinding="{Binding Rect}"/>
-                            <GridViewColumn Header="Y" Width="35"
-                                            DisplayMemberBinding="{Binding Y}"/>
+                            <GridViewColumn Header="{Binding DataContext.WalkableHeightHeader, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            Width="40"
+                                            DisplayMemberBinding="{Binding HeightDisplay}"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
@@ -181,6 +183,7 @@
                           ItemsSource="{Binding RoofFaces4}"
                           SelectedItem="{Binding SelectedRoofFace4, Mode=TwoWay}"
                           SelectionChanged="RoofFaces4List_OnSelectionChanged"
+                          PreviewMouseDown="RoofFaces4List_PreviewMouseDown"
                           MouseDoubleClick="RoofFaces4List_OnMouseDoubleClick"
                           PreviewKeyDown="RoofFaces4List_PreviewKeyDown"
                           Background="Transparent"
@@ -276,7 +279,7 @@
                            Foreground="#CFCFCF" Margin="0,0,0,6"/>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
-                    <TextBlock Text="Altitude:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="AltitudeLabel" Text="Altitude (QS):" VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <TextBox x:Name="AltitudeInput" Width="64"
                              Text="0"
                              Background="#333" Foreground="White" BorderBrush="#555"
@@ -284,12 +287,7 @@
                              Padding="4,2"
                              PreviewTextInput="Altitude_PreviewTextInput"
                              TextChanged="AltitudeInput_TextChanged"
-                             ToolTip="World altitude value (stored as value / 8)"/>
-                    <TextBlock Text="  (raw:" VerticalAlignment="Center" Margin="8,0,2,0" Foreground="#888"/>
-                    <TextBlock x:Name="RawAltitudeDisplay"
-                               Text="0"
-                               VerticalAlignment="Center" Foreground="#888"/>
-                    <TextBlock Text=")" VerticalAlignment="Center" Foreground="#888"/>
+                             ToolTip="Quarter Storeys (4 = 1 floor)"/>
                 </StackPanel>
 
                 <WrapPanel>

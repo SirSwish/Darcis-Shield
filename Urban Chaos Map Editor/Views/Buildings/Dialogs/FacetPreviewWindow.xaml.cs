@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.ViewModels.Core;
@@ -180,20 +181,20 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             hRow1.Children.Add(new TextBlock { Text = "¼-storey (4 = 1 floor)", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             var hRow2 = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
-            hRow2.Children.Add(MakeLabel("Y0", toolTip: "Altitude offset to the base of the facet"));
-            _txtY0 = MakeBox(width: 70, toolTip: "Altitude offset to the base of the facet");
+            hRow2.Children.Add(MakeLabel("Y Offset (QS)", toolTip: "Altitude offset in Quarter Storeys (4 = 1 storey). Raw value = QS × 64."));
+            _txtY0 = MakeBox(width: 70, toolTip: "Altitude offset in Quarter Storeys (4 = 1 storey)");
             _txtY0.PreviewTextInput += SignedNumericOnly_PreviewTextInput;
             _txtY0.LostFocus += Height_LostFocus;
             hRow2.Children.Add(_txtY0);
-            hRow2.Children.Add(new TextBlock { Text = "256 = 1 floor", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
+            hRow2.Children.Add(new TextBlock { Text = "4 = 1 storey", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             var hRow3 = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
-            hRow3.Children.Add(MakeLabel("Block Height", toolTip: "Height of each facet storey (Measured in lots of 4px)"));
-            _txtBlockHeight = MakeBox(width: 70, toolTip: "Height of each facet storey");
+            hRow3.Children.Add(MakeLabel("Block Height (QS)", toolTip: "Height of each facet storey in Quarter Storeys (4 QS = 1 floor = raw 16)"));
+            _txtBlockHeight = MakeBox(width: 70, toolTip: "Height of each facet storey in Quarter Storeys");
             _txtBlockHeight.PreviewTextInput += NumericOnly_PreviewTextInput;
             _txtBlockHeight.LostFocus += Height_LostFocus;
             hRow3.Children.Add(_txtBlockHeight);
-            hRow3.Children.Add(new TextBlock { Text = "4px each (16 = 1 floor)", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
+            hRow3.Children.Add(new TextBlock { Text = "Quarter Storeys (4 = 1 floor)", Foreground = new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0)), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
 
             HeightPanel.Children.Add(hRow1);
             HeightPanel.Children.Add(hRow2);
@@ -297,11 +298,32 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!byte.TryParse(_txtHeight.Text, out byte height))
                 height = _facet.Height;
 
-            if (!short.TryParse(_txtY0.Text, out short y0))
-                y0 = _facet.Y0;
+            bool rawMode = HeightDisplaySettings.ShowRawHeights;
+            short y0;
+            if (rawMode)
+            {
+                if (!short.TryParse(_txtY0.Text, out y0))
+                    y0 = _facet.Y0;
+            }
+            else
+            {
+                if (!short.TryParse(_txtY0.Text, out short y0QS))
+                    y0QS = (short)(_facet.Y0 / 64);
+                y0 = (short)(y0QS * 64);
+            }
 
-            if (!byte.TryParse(_txtBlockHeight.Text, out byte blockHeight))
-                blockHeight = _facet.BlockHeight;
+            byte blockHeight;
+            if (rawMode)
+            {
+                if (!byte.TryParse(_txtBlockHeight.Text, out blockHeight))
+                    blockHeight = _facet.BlockHeight;
+            }
+            else
+            {
+                if (!byte.TryParse(_txtBlockHeight.Text, out byte blockHeightQS))
+                    blockHeightQS = (byte)(_facet.BlockHeight / 4);
+                blockHeight = (byte)(blockHeightQS * 4);
+            }
 
             byte fheight = 0;
             short y1 = y0;
@@ -340,8 +362,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             }
 
             _txtHeight.Text = _facet.Height.ToString();
-            _txtY0.Text = _facet.Y0.ToString();
-            _txtBlockHeight.Text = _facet.BlockHeight.ToString();
+            _txtY0.Text = (HeightDisplaySettings.ShowRawHeights ? _facet.Y0 : _facet.Y0 / 64).ToString();
+            _txtBlockHeight.Text = (HeightDisplaySettings.ShowRawHeights ? _facet.BlockHeight : _facet.BlockHeight / 4).ToString();
         }
 
         private static DFacetRec CopyFacetWithHeights(DFacetRec f, byte height, byte fheight, short y0, short y1, byte blockHeight)

@@ -49,9 +49,9 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!byte.TryParse(TxtHeight.Text, out byte height)) height = 4;
             Height = height;
 
-            if (!short.TryParse(TxtY0.Text, out short y0)) y0 = 0;
-            Y0 = y0;
-            Y1 = y0;       // mirror Y0 into Y1
+            if (!short.TryParse(TxtY0.Text, out short y0QS)) y0QS = 0;
+            Y0 = (short)(y0QS * 64);
+            Y1 = Y0;       // mirror Y0 into Y1
 
             FHeight = 0;   // forced
             BlockHeight = 16; // forced

@@ -22,6 +22,13 @@ namespace UrbanChaosMapEditor.Views.Buildings
     {
         private bool _isWaitingForWalkableDrawing;
 
+        // True only for a brief window when the user has physically interacted
+        // with the FacetsList (mouse click or keyboard arrow/home/end/page).
+        // Jump-to-facet is gated on this flag so programmatic SelectedFacet
+        // assignments from Refresh() (triggered by prim edits, dialog closes,
+        // building reloads, etc.) do NOT cause the viewport to jump.
+        private bool _userInitiatedFacetSelection;
+
         public BuildingsTab()
         {
             InitializeComponent();
@@ -137,6 +144,15 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         #endregion
 
+        /// <summary>
+        /// Clears the selected facet so auto-zoom doesn't interfere with other map operations.
+        /// </summary>
+        public void ClearFacetSelection()
+        {
+            if (DataContext is BuildingsTabViewModel vm)
+                vm.SelectedFacet = null;
+        }
+
         #region Facets List Handlers
 
         private void FacetsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -144,13 +160,22 @@ namespace UrbanChaosMapEditor.Views.Buildings
             if (DataContext is not BuildingsTabViewModel vm)
                 return;
 
+            // Capture and immediately clear the user-initiated flag so that any
+            // cascading programmatic assignments inside HandleTreeSelection (or
+            // later in this pump iteration) don't piggy-back on the jump.
+            bool userInitiated = _userInitiatedFacetSelection;
+            _userInitiatedFacetSelection = false;
+
             if (sender is ListBox lb && lb.SelectedItem is BuildingsTabViewModel.FacetVM facet)
             {
                 vm.HandleTreeSelection(facet);
 
-                // Jump the viewport to the facet only when the user selected it from
-                // this list — not when the selection was driven by a map click.
-                if (!vm.IsSelectingFromMap)
+                // Jump ONLY when the selection was driven by direct user input to
+                // this FacetsList (mouse click or keyboard navigation). Every other
+                // selection change — Refresh() after a prim move, dialog close,
+                // map-click sync, building reload — is programmatic and must NOT
+                // move the viewport.
+                if (userInitiated && !vm.IsSelectingFromMap)
                     JumpToFacet(facet);
             }
 
@@ -159,39 +184,56 @@ namespace UrbanChaosMapEditor.Views.Buildings
                 shell.Map.SelectedWalkableId1 = 0;
         }
 
+        /// <summary>
+        /// Sets the user-initiated flag when the user physically clicks the
+        /// FacetsList. We schedule a Background reset so the flag can never
+        /// leak into a later programmatic SelectionChanged if, for some reason,
+        /// this click didn't result in a selection change.
+        /// </summary>
+        private void FacetsList_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _userInitiatedFacetSelection = true;
+            Dispatcher.BeginInvoke(
+                new Action(() => _userInitiatedFacetSelection = false),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
         private static void JumpToFacet(BuildingsTabViewModel.FacetVM fvm)
         {
             if (Application.Current.MainWindow is not MainWindow mw) return;
 
             var mapView = mw.MapViewControl;
-            var scroller = mapView.Scroller;
-            if (scroller == null) return;
+            if (mapView.Scroller == null) return;
+
+            // Never jump while placing a prim — it would fight the cursor.
+            if (mapView.DataContext is MapViewModel mapVm && mapVm.IsPlacingPrim) return;
 
             // Canvas-pixel coords for both endpoints.
             // Coordinate convention (matches FacetHandlesLayer): pixel = (128 - coord) * 64
-            var f    = fvm.Raw;
+            var f   = fvm.Raw;
             double px0 = (128 - f.X0) * 64.0;
             double pz0 = (128 - f.Z0) * 64.0;
             double px1 = (128 - f.X1) * 64.0;
             double pz1 = (128 - f.Z1) * 64.0;
 
-            // Check whether any part of the facet is already in the viewport.
-            // CenterOnPixel uses scrollOffset = canvasPixel * zoom, so
-            // visible canvas range = [scrollOffset / zoom, (scrollOffset + viewportSize) / zoom].
+            // Check whether the facet is already visible in the viewport.
+            // Surface has Margin="256", so surface pixel `px` is at scroll-content coord (px + 256) * zoom.
+            // Visible surface range: [(offset / zoom) - 256 .. (offset / zoom) - 256 + viewport / zoom]
+            var scroller = mapView.Scroller;
             double zoom = (mapView.DataContext as MapViewModel)?.Zoom ?? 1.0;
             if (zoom > 0 && scroller.ViewportWidth > 0 && scroller.ViewportHeight > 0)
             {
-                double viewLeft   = scroller.HorizontalOffset / zoom;
-                double viewTop    = scroller.VerticalOffset   / zoom;
-                double viewRight  = viewLeft + scroller.ViewportWidth  / zoom;
-                double viewBottom = viewTop  + scroller.ViewportHeight / zoom;
+                const double margin = 256.0;
+                double viewLeft   = scroller.HorizontalOffset / zoom - margin;
+                double viewTop    = scroller.VerticalOffset   / zoom - margin;
+                double viewRight  = viewLeft  + scroller.ViewportWidth  / zoom;
+                double viewBottom = viewTop   + scroller.ViewportHeight / zoom;
 
                 double facetLeft   = Math.Min(px0, px1);
                 double facetRight  = Math.Max(px0, px1);
                 double facetTop    = Math.Min(pz0, pz1);
                 double facetBottom = Math.Max(pz0, pz1);
 
-                // Any overlap between the facet bounding box and the viewport means it's visible.
                 bool visible = facetRight  >= viewLeft  && facetLeft   <= viewRight &&
                                facetBottom >= viewTop   && facetTop    <= viewBottom;
                 if (visible) return;
@@ -858,6 +900,18 @@ namespace UrbanChaosMapEditor.Views.Buildings
 
         private void FacetsList_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // Arrow / page / home / end keys change selection via keyboard —
+            // that counts as user-initiated and should allow the jump.
+            if (e.Key == Key.Up || e.Key == Key.Down ||
+                e.Key == Key.PageUp || e.Key == Key.PageDown ||
+                e.Key == Key.Home || e.Key == Key.End)
+            {
+                _userInitiatedFacetSelection = true;
+                Dispatcher.BeginInvoke(
+                    new Action(() => _userInitiatedFacetSelection = false),
+                    System.Windows.Threading.DispatcherPriority.Background);
+            }
+
             if (e.Key == Key.Delete)
             {
                 BtnDeleteFacet_Click(sender, e);

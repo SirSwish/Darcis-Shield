@@ -7,8 +7,8 @@ using System.Windows.Threading;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Roofs;
-
 using UrbanChaosMapEditor.ViewModels.Core;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 
 namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
 {
@@ -73,6 +73,9 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             AltitudeChangeBus.Instance.TileChanged += (tx, ty) => KickRepaint();
             AltitudeChangeBus.Instance.RegionChanged += (_, __, ___, ____) => KickRepaint();
             AltitudeChangeBus.Instance.AllChanged += () => KickRepaint();
+
+            // Listen for display mode toggle
+            HeightSettings.DisplayModeChanged += (_, __) => KickRepaint();
         }
 
         private void HookVm()
@@ -255,7 +258,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             // Target altitude label
             if (_vm.SelectedTool == EditorTool.SetAltitude)
             {
-                string targetText = $"Set: {_vm.TargetAltitude}";
+                string targetText = $"Set: {_vm.TargetAltitudeDisplay}{(HeightSettings.ShowRawHeights ? "" : " QS")}";
                 var ft = new FormattedText(targetText, CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight, typeface, 14, Brushes.Lime, ppd);
                 dc.DrawText(ft, new Point(x + 4, y - 20));
@@ -310,7 +313,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             // Draw target altitude indicator
             if (_vm!.SelectedTool == EditorTool.SetAltitude)
             {
-                string targetText = $"Target: {_vm.TargetAltitude}";
+                string targetText = $"Target: {_vm.TargetAltitudeDisplay}{(HeightSettings.ShowRawHeights ? "" : " QS")}";
                 var ft = new FormattedText(targetText, CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight, new Typeface("Segoe UI"), 12, Brushes.Lime,
                     VisualTreeHelper.GetDpi(this).PixelsPerDip);
@@ -338,7 +341,7 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
                     try
                     {
                         int alt = _altitude!.ReadWorldAltitude(ctx, cty);
-                        string text = alt.ToString();
+                        string text = (HeightSettings.ShowRawHeights ? alt : alt / 8).ToString();
 
                         var ft = new FormattedText(text, CultureInfo.InvariantCulture,
                             FlowDirection.LeftToRight, typeface, fontSize, TextBrush, ppd);

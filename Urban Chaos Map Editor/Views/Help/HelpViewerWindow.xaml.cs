@@ -133,6 +133,7 @@ namespace UrbanChaosMapEditor.Views.Help
 
                 DocViewer.Document = doc;
                 TxtBreadcrumb.Text = $"Help  >  {topic.DisplayName}";
+                ScrollDocToTop();
             }
             catch (Exception ex)
             {
@@ -168,6 +169,31 @@ namespace UrbanChaosMapEditor.Views.Help
 
             DocViewer.Document = doc;
             TxtBreadcrumb.Text = $"Help  ›  {topicName}  (coming soon)";
+            ScrollDocToTop();
+        }
+
+        /// <summary>
+        /// Resets the FlowDocumentScrollViewer to the top of the document.
+        /// Called after every topic change so the new page always starts at the beginning.
+        /// </summary>
+        private void ScrollDocToTop()
+        {
+            // FlowDocumentScrollViewer wraps an internal ScrollViewer — walk the visual tree to find it.
+            DocViewer.ApplyTemplate();
+            var sv = FindVisualChild<ScrollViewer>(DocViewer);
+            sv?.ScrollToTop();
+        }
+
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T match) return match;
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         /// <summary>

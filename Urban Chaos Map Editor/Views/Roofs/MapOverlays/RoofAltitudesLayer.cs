@@ -9,6 +9,7 @@ using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Roofs;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 
 namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 {
@@ -64,6 +65,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             AltitudeChangeBus.Instance.TileChanged += (tx, ty) => Dispatcher.Invoke(InvalidateVisual);
             AltitudeChangeBus.Instance.RegionChanged += (_, __, ___, ____) => Dispatcher.Invoke(InvalidateVisual);
             AltitudeChangeBus.Instance.AllChanged += () => Dispatcher.Invoke(InvalidateVisual);
+            HeightSettings.DisplayModeChanged += (_, __) => Dispatcher.Invoke(InvalidateVisual);
             MapDataService.Instance.MapLoaded += (_, _) => Dispatcher.Invoke(InvalidateVisual);
             MapDataService.Instance.MapCleared += (_, _) => Dispatcher.Invoke(InvalidateVisual);
         }
@@ -104,6 +106,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 
                         sbyte alt = unchecked((sbyte)fileBytes[offset]);
                         int worldAlt = alt << 3;
+                        int displayAlt = HeightSettings.ShowRawHeights ? worldAlt : worldAlt / 8;
 
                         int uiTileX = TilesPerSide - 1 - gx;
                         int uiTileZ = TilesPerSide - 1 - gz;
@@ -118,7 +121,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                                         : alt < 0 ? TextNegativeBrush
                                         : TextBrush;
 
-                        string label = worldAlt.ToString();
+                        string label = displayAlt.ToString();
 
                         var shadowFt = new FormattedText(label, CultureInfo.InvariantCulture,
                             FlowDirection.LeftToRight, LabelTypeface, 10, TextShadowBrush, dpi);

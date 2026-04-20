@@ -5,7 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>UrbanChaosMapEditor</RootNamespace>
     <AssemblyName>UrbanChaosMapEditor</AssemblyName>
-    <Version>1.13.0</Version>
+    <Version>1.16.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -43,6 +43,9 @@
     <None Remove="Help\Images\heights_layer_toggle.png" />
     <None Remove="Help\Images\heights_raise_lower_example.png" />
     <None Remove="Help\Images\heights_randomized.png" />
+    <None Remove="Help\Images\heights_randomize_constraints.png" />
+    <None Remove="Help\Images\heights_stamps_list.png" />
+    <None Remove="Help\Images\heights_stamp_editor.PNG" />
     <None Remove="Help\Images\heights_vertex_circles.png" />
     <None Remove="Help\Images\map_overview_buildings.png" />
     <None Remove="Help\Images\map_overview_height_vertices.png" />
@@ -53,6 +56,9 @@
     <None Remove="Help\Images\textures_example_5x5.png" />
     <None Remove="Help\Images\textures_ghost_preview.png" />
     <None Remove="Help\Images\textures_rotation.png" />
+    <None Remove="Help\Images\textures_sampled.png" />
+    <None Remove="Help\Images\textures_select_area.png" />
+    <None Remove="Help\Images\textures_select_area_paste.png" />
     <None Remove="Help\Images\textures_world_selected.png" />
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +91,9 @@
     <Resource Include="Help\Images\heights_layer_toggle.png" />
     <Resource Include="Help\Images\heights_raise_lower_example.png" />
     <Resource Include="Help\Images\heights_randomized.png" />
+    <Resource Include="Help\Images\heights_randomize_constraints.png" />
+    <Resource Include="Help\Images\heights_stamps_list.png" />
+    <Resource Include="Help\Images\heights_stamp_editor.PNG" />
     <Resource Include="Help\Images\heights_vertex_circles.png" />
     <Resource Include="Help\Images\map_overview_buildings.png" />
     <Resource Include="Help\Images\map_overview_height_vertices.png" />
@@ -95,6 +104,9 @@
     <Resource Include="Help\Images\textures_example_5x5.png" />
     <Resource Include="Help\Images\textures_ghost_preview.png" />
     <Resource Include="Help\Images\textures_rotation.png" />
+    <Resource Include="Help\Images\textures_sampled.png" />
+    <Resource Include="Help\Images\textures_select_area.png" />
+    <Resource Include="Help\Images\textures_select_area_paste.png" />
     <Resource Include="Help\Images\textures_world_selected.png" />
     <Resource Include="Help\Topics\Getting_Started.xaml" />
     <Resource Include="Help\Topics\Heights.xaml" />

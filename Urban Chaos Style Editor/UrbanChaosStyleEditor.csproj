@@ -9,6 +9,7 @@
     <AssemblyName>UrbanChaosStyleEditor</AssemblyName>
     <Nullable>enable</Nullable>
     <ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
+    <Version>1.16.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

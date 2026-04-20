@@ -19,6 +19,7 @@ using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Views.Buildings;
 using UrbanChaosMapEditor.Views.Buildings.Dialogs;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 
 namespace UrbanChaosMapEditor.Views.Core
 {
@@ -54,7 +55,8 @@ namespace UrbanChaosMapEditor.Views.Core
         {
             public int FacetId1 { get; init; }
             public int BuildingId1 { get; init; }
-            public int StoreyId { get; init; }
+            public short Y0 { get; init; }
+            public short Y1 { get; init; }
             public FacetType Type { get; init; }
             public byte X0 { get; init; }
             public byte Z0 { get; init; }
@@ -63,7 +65,7 @@ namespace UrbanChaosMapEditor.Views.Core
             public double DistancePx { get; init; }
 
             public string Display =>
-                $"Facet #{FacetId1} | Building #{BuildingId1} | Storey {StoreyId} | {Type} | ({X0},{Z0}) -> ({X1},{Z1})";
+                $"Facet #{FacetId1} | Building #{BuildingId1} | Y ({Y0 / 64},{Y1 / 64}) QS | {Type} | ({X0},{Z0}) -> ({X1},{Z1})";
         }
 
         private static double DistancePointToSegment(
@@ -132,7 +134,8 @@ namespace UrbanChaosMapEditor.Views.Core
                     {
                         FacetId1 = facetId1,
                         BuildingId1 = buildingId1,
-                        StoreyId = f.Storey,
+                        Y0 = f.Y0,
+                        Y1 = f.Y1,
                         Type = f.Type,
                         X0 = f.X0,
                         Z0 = f.Z0,
@@ -285,7 +288,8 @@ namespace UrbanChaosMapEditor.Views.Core
                 {
                     FacetId1 = h.FacetId1,
                     BuildingId1 = h.BuildingId1,
-                    StoreyId = h.StoreyId,
+                    Y0 = h.Y0,
+                    Y1 = h.Y1,
                     TypeName = h.Type.ToString(),
                     Coords = $"({h.X0},{h.Z0}) -> ({h.X1},{h.Z1})"
                 }).ToList();
@@ -832,10 +836,16 @@ namespace UrbanChaosMapEditor.Views.Core
 
                     case EditorTool.SampleAltitude:
                         int sampledAlt = _altitude.ReadWorldAltitude(tx, ty);
-                        vm.TargetAltitude = sampledAlt;
+                        bool rawSample = HeightSettings.ShowRawHeights;
+                        // In QS mode TargetAltitude holds QS (= world alt / 8 = stored byte).
+                        // In raw mode TargetAltitude holds world altitude directly.
+                        vm.TargetAltitude = rawSample ? sampledAlt : sampledAlt / 8;
 
                         if (mainVm != null)
-                            mainVm.StatusMessage = $"Sampled altitude {sampledAlt} (raw: {sampledAlt >> 3}) from cell [{tx},{ty}]";
+                        {
+                            string sampleDisplay = rawSample ? $"{sampledAlt} (raw: {sampledAlt >> 3})" : $"{sampledAlt / 8} QS";
+                            mainVm.StatusMessage = $"Sampled altitude {sampleDisplay} from cell [{tx},{ty}]";
+                        }
 
                         e.Handled = true;
                         return;
@@ -1277,7 +1287,12 @@ namespace UrbanChaosMapEditor.Views.Core
                             }
                             else
                             {
-                                _altitude.SetRoofTile(tx, ty, vm.TargetAltitude);
+                                // WriteWorldAltitude double-shifts (>> 6 total). Pre-shift by 6 in QS mode
+                                // so the stored byte equals what the user typed.
+                                int altToWrite = HeightSettings.ShowRawHeights
+                                    ? vm.TargetAltitude
+                                    : vm.TargetAltitude << 6;
+                                _altitude.SetRoofTile(tx, ty, altToWrite);
 
                                 if (vm.TargetAltitude == 0)
                                     ClearPapFlagsForTile(tx, ty);
@@ -1292,7 +1307,10 @@ namespace UrbanChaosMapEditor.Views.Core
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     {
-                        string action = isReset ? "Cleared" : $"Set altitude {vm.TargetAltitude} on";
+                        string altDisplay = HeightSettings.ShowRawHeights
+                            ? $"{vm.TargetAltitude}"
+                            : $"{vm.TargetAltitude} QS";
+                        string action = isReset ? "Cleared" : $"Set altitude {altDisplay} on";
                         shell.StatusMessage = $"{action} {tileCount} tiles";
                     }
                 }
@@ -1683,6 +1701,111 @@ namespace UrbanChaosMapEditor.Views.Core
             _lastLeveledTile = (tx, ty);
         }
 
+        /// <summary>
+        /// Cancels whatever active tool or placement operation is currently in progress,
+        /// exactly as a right-click would. Safe to call from outside (e.g. on tab change).
+        /// </summary>
+        public void CancelActiveOperation()
+        {
+            if (DataContext is not MapViewModel vm) return;
+
+            var shell = Application.Current.MainWindow?.DataContext as MainWindowViewModel;
+
+            if (vm.SelectedTool == EditorTool.MoveBuilding)
+            {
+                vm.BuildingMoveClipboard = null;
+                vm.SelectedTool = EditorTool.None;
+                if (shell != null) shell.StatusMessage = "Move Building cancelled.";
+                return;
+            }
+
+            if (vm.SelectedTool == EditorTool.SelectTextureArea && vm.IsSelectingTextureArea)
+            {
+                _isTextureDragging = false;
+                vm.ClearTextureAreaSelection();
+                if (IsMouseCaptured) ReleaseMouseCapture();
+                if (shell != null) shell.StatusMessage = "Texture area selection cancelled.";
+                return;
+            }
+
+            if (vm.SelectedTool == EditorTool.PasteTexture)
+            {
+                vm.SelectedTool = EditorTool.None;
+                if (shell != null) shell.StatusMessage = "Texture paste cancelled.";
+                return;
+            }
+
+            if (vm.IsDrawingWalkable)
+            {
+                _isDrawingWalkableRect = false;
+                vm.ClearWalkableSelection();
+                if (IsMouseCaptured) ReleaseMouseCapture();
+                if (shell != null) shell.StatusMessage = "Walkable drawing cancelled.";
+                return;
+            }
+
+            if (vm.IsPaintingTexture)
+            {
+                _isTextureDragging = false;
+                _isTextureStrokePainting = false;
+                _texturePaintedTiles = null;
+                vm.ClearTextureSelection();
+                if (IsMouseCaptured) ReleaseMouseCapture();
+                if (shell != null) shell.StatusMessage = "Texture painting cancelled.";
+                return;
+            }
+
+            if (_isLeveling)
+            {
+                _isLeveling = false;
+                _lastLeveledTile = null;
+                if (IsMouseCaptured) ReleaseMouseCapture();
+            }
+
+            if (vm.IsRedrawingFacet)
+            {
+                vm.CancelFacetRedraw();
+                if (shell != null) shell.StatusMessage = "Facet redraw cancelled.";
+                return;
+            }
+
+            if (vm.IsMultiDrawingFacets)
+            {
+                vm.FinishFacetMultiDraw();
+                return;
+            }
+
+            if (vm.IsPlacingLadder)
+            {
+                vm.CancelLadderPlacement();
+                if (shell != null) shell.StatusMessage = "Ladder placement cancelled.";
+                return;
+            }
+
+            if (vm.IsPlacingCable)
+            {
+                vm.CancelCablePlacement();
+                if (shell != null) shell.StatusMessage = "Cable placement cancelled.";
+                return;
+            }
+
+            if (vm.IsPlacingPrim)
+            {
+                bool wasPaste = vm.PrimPasteTemplate != null;
+                vm.CancelPlacePrim();
+                if (shell != null)
+                    shell.StatusMessage = wasPaste ? "Paste Prim canceled." : "Add Prim canceled.";
+                return;
+            }
+
+            // Fallback: clear tool and selection
+            vm.SelectedTool = EditorTool.None;
+            if (vm.SelectedPrim != null) { vm.SelectedPrim = null; }
+            UpdateOverlayHitTesting();
+            GhostLayer?.SetHoverTile(null, null);
+            if (shell != null) shell.StatusMessage = "Action cleared.";
+        }
+
         private void OnPreviewMouseRightButtonDown(object? sender, MouseButtonEventArgs e)
         {
             if (FindAncestor<ScrollBar>(e.OriginalSource as DependencyObject) != null)
@@ -1883,12 +2006,11 @@ namespace UrbanChaosMapEditor.Views.Core
             double cx = (tx + 0.5) * MapConstants.TileSize;
             double cy = (ty + 0.5) * MapConstants.TileSize;
 
+            // Surface has Margin="256" inside the scroll content.
+            const double SurfaceMargin = 256.0;
             double z = vm.Zoom;
-            double sx = cx * z;
-            double sy = cy * z;
-
-            double targetX = sx - Scroller.ViewportWidth / 2.0;
-            double targetY = sy - Scroller.ViewportHeight / 2.0;
+            double targetX = (cx + SurfaceMargin) * z - Scroller.ViewportWidth  / 2.0;
+            double targetY = (cy + SurfaceMargin) * z - Scroller.ViewportHeight / 2.0;
 
             targetX = Clamp(targetX, 0, System.Math.Max(0, Scroller.ExtentWidth - Scroller.ViewportWidth));
             targetY = Clamp(targetY, 0, System.Math.Max(0, Scroller.ExtentHeight - Scroller.ViewportHeight));
@@ -2002,9 +2124,12 @@ namespace UrbanChaosMapEditor.Views.Core
                 return;
             }
 
+            // Surface has Margin="256" inside the scroll content, so a surface pixel `px`
+            // sits at scroll-content coordinate (px + 256) * zoom.
+            const double SurfaceMargin = 256.0;
             double z = vm.Zoom;
-            double targetX = px * z - Scroller.ViewportWidth  / 2.0;
-            double targetY = pz * z - Scroller.ViewportHeight / 2.0;
+            double targetX = (px + SurfaceMargin) * z - Scroller.ViewportWidth  / 2.0;
+            double targetY = (pz + SurfaceMargin) * z - Scroller.ViewportHeight / 2.0;
 
             targetX = Math.Max(0, Math.Min(targetX, Scroller.ExtentWidth  - Scroller.ViewportWidth));
             targetY = Math.Max(0, Math.Min(targetY, Scroller.ExtentHeight - Scroller.ViewportHeight));

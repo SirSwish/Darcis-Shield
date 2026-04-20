@@ -254,14 +254,14 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             FHeight = 0;
 
-            if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeight))
-                blockHeight = 16;
-            BlockHeight = blockHeight;
+            if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeightQS))
+                blockHeightQS = 4;
+            BlockHeight = (byte)(blockHeightQS * 4);
 
-            if (!short.TryParse(TxtY0.Text, out short y0))
-                y0 = 0;
-            Y0 = y0;
-            Y1 = y0;
+            if (!short.TryParse(TxtY0.Text, out short y0QS))
+                y0QS = 0;
+            Y0 = (short)(y0QS * 64);
+            Y1 = Y0;
 
             if (!ushort.TryParse(TxtStyleIndex.Text, out ushort rawStyleId))
                 rawStyleId = 22;

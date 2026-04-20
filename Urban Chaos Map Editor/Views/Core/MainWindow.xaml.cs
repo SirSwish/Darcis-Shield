@@ -11,6 +11,7 @@ using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.ViewModels.Core;
+using UrbanChaosMapEditor.Views.Buildings;
 using UrbanChaosMapEditor.Views.Core.Dialogs;
 using UrbanChaosMapEditor.Views.Help;
 using UrbanChaosMapEditor.Views.Prims.Dialogs;
@@ -123,8 +124,9 @@ namespace UrbanChaosMapEditor.Views.Core
         {
             // Only act on top-level tab changes (TabControls inside tabs also fire this event)
             if (e.OriginalSource != EditorTabControl) return;
-            if (DataContext is MainWindowViewModel shell)
-                shell.Map.SelectedTool = EditorTool.None;
+
+            // Cancel any active tool or placement operation exactly as a right-click would.
+            MapViewControl?.CancelActiveOperation();
         }
 
         private void EditorExpander_Expanded(object sender, RoutedEventArgs e)
@@ -360,11 +362,31 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is not MainWindowViewModel shell) return;
             if ((sender as FrameworkElement)?.Tag is not PrimButton pb) return;
 
+            ClearBuildingsTabFacetSelection();
             shell.Map.BeginPlacePrim(pb.Number);
             shell.StatusMessage =
                 $"Add Prim: {pb.Title} ({pb.Number:000}). Click on the map to place. Right-click/Esc to cancel.";
 
             MapViewControl.Focus();
+        }
+
+        /// <summary>
+        /// Clears any selected facet in the BuildingsTab to prevent auto-zoom interfering
+        /// with prim placement or other map operations.
+        /// </summary>
+        private void ClearBuildingsTabFacetSelection()
+        {
+            var tabControl = FindName("EditorTabControl") as TabControl;
+            if (tabControl == null) return;
+
+            foreach (var item in tabControl.Items)
+            {
+                if (item is TabItem ti && ti.Content is BuildingsTab bt)
+                {
+                    bt.ClearFacetSelection();
+                    return;
+                }
+            }
         }
 
         private void PrimPalette_Click(object sender, RoutedEventArgs e)
@@ -430,6 +452,7 @@ namespace UrbanChaosMapEditor.Views.Core
             if (_copiedPrim == null) { if (DataContext is MainWindowViewModel s1) s1.StatusMessage = "Clipboard is empty."; return; }
             if (DataContext is not MainWindowViewModel shell) return;
 
+            ClearBuildingsTabFacetSelection();
             shell.Map.BeginPastePrim(_copiedPrim);
             MapViewControl.Focus();
             shell.StatusMessage = $"Pasting \"{_copiedPrim.Name}\" \u2014 move to position and click to place. Space to rotate. Right-click or Esc to cancel.";
@@ -664,12 +687,12 @@ namespace UrbanChaosMapEditor.Views.Core
             shell.Map.SelectedPrim = toSelect;
 
             int offset = ((newY % 256) + 256) % 256;
-            int storey = (int)Math.Floor(newY / 256.0);
+            int quarterStorey = (int)Math.Floor(newY / 64.0);
 
             var flagsPretty = PrimFlags.FromByte(newFlags);
             var insideLabel = newInside == 0 ? "Outside" : $"Inside={newInside}";
             shell.StatusMessage =
-                $"Updated {sel.Name} | Height={newY} px (storey={storey}, offset={offset}) | Flags: [{flagsPretty}] | {insideLabel}";
+                $"Updated {sel.Name} | Height={newY} px (quarter storey={quarterStorey}, offset={offset}) | Flags: [{flagsPretty}] | {insideLabel}";
         }
 
         private void OpenPrimHeightDialog(PrimListItem sel)
@@ -775,6 +798,12 @@ namespace UrbanChaosMapEditor.Views.Core
             clear.Click += ClearRecent_Click;
             m.Items.Add(clear);
         }
+        private void ViewOriginalHeights_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem mi)
+                HeightDisplaySettings.ShowRawHeights = mi.IsChecked;
+        }
+
         private void About_Click(object sender, RoutedEventArgs e)
         {
             var asm = Assembly.GetExecutingAssembly();

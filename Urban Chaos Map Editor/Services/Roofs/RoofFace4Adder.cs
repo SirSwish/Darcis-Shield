@@ -281,6 +281,59 @@ namespace UrbanChaosMapEditor.Services.Roofs
         }
 
         /// <summary>
+        /// Rewrites the Y field of every RoofFace4 entry in the given walkable's range.
+        /// Used when a warehouse walkable's WorldY changes (e.g. because a higher enclosing
+        /// polygon was formed above it, or a bulk facet height edit was applied). DY deltas
+        /// and draw flags are preserved — only the base Y is updated.
+        /// Returns the number of RF4 entries updated, or -1 on failure.
+        /// </summary>
+        public int TryUpdateWalkableRoofFace4Y(int walkableId1, short newY)
+        {
+            if (!_svc.IsLoaded) return -1;
+
+            var acc = new BuildingsAccessor(_svc);
+            var snap = acc.ReadSnapshot();
+
+            if (snap.Walkables == null || walkableId1 < 1 || walkableId1 >= snap.Walkables.Length)
+                return -1;
+
+            var walkable = snap.Walkables[walkableId1];
+            if (walkable.EndFace4 <= walkable.StartFace4)
+                return 0;
+
+            var bytes = _svc.GetBytesCopy();
+            int blockStart = snap.StartOffset;
+            int saveType = BitConverter.ToInt32(bytes, 0);
+            var offsets = CalculateOffsets(bytes, blockStart, saveType);
+
+            int updated = 0;
+            for (int i = walkable.StartFace4; i < walkable.EndFace4; i++)
+            {
+                int rf4Offset = offsets.RoofFacesDataOff + i * RoofFace4Size;
+
+                // Skip empty/zeroed slots — they aren't real RF4 entries
+                bool isEmpty = true;
+                for (int j = 0; j < RoofFace4Size; j++)
+                {
+                    if (bytes[rf4Offset + j] != 0) { isEmpty = false; break; }
+                }
+                if (isEmpty) continue;
+
+                WriteS16(bytes, rf4Offset, newY);
+                updated++;
+            }
+
+            if (updated > 0)
+            {
+                _svc.ReplaceBytes(bytes);
+                BuildingsChangeBus.Instance.NotifyChanged();
+                Debug.WriteLine($"[RoofFace4Adder] Bulk updated {updated} RF4 Y values to {newY} in walkable #{walkableId1}");
+            }
+
+            return updated;
+        }
+
+        /// <summary>
         /// Creates a flat roof filling all tiles in a walkable region.
         /// </summary>
         public RoofFace4Result TryCreateFlatRoof(int walkableId1, short altitude)

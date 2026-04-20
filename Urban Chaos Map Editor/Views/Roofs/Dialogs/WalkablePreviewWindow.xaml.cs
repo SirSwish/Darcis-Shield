@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 
@@ -22,17 +23,20 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             _walkable = walkable;
             _roofFaces4 = roofFaces4 ?? Array.Empty<RoofFace4Rec>();
 
-            Title = $"Walkable Preview � Walkable #{walkableId1}";
+            Title = $"Walkable Preview - Walkable #{walkableId1}";
 
             HeaderTextBlock.Text = $"Walkable #{walkableId1}";
             DetailsTextBlock.Text =
-                $"Building={_walkable.Building}  Rect=({_walkable.X1},{_walkable.Z1})?({_walkable.X2},{_walkable.Z2})  " +
-                $"Y={_walkable.Y}  StoreyY={_walkable.StoreyY}  " +
+                $"Building={_walkable.Building}  Rect=({_walkable.X1},{_walkable.Z1})-({_walkable.X2},{_walkable.Z2})  " +
+                $"Height={_walkable.Y / 2} QS  StoreyY={_walkable.StoreyY}  " +
                 $"Face4=[{_walkable.StartFace4}..{_walkable.EndFace4})";
 
             TxtBuilding.Text = _walkable.Building.ToString(CultureInfo.InvariantCulture);
-            TxtRect.Text = $"({_walkable.X1},{_walkable.Z1}) ? ({_walkable.X2},{_walkable.Z2})";
-            TxtY.Text = _walkable.Y.ToString(CultureInfo.InvariantCulture);
+            TxtRect.Text = $"({_walkable.X1},{_walkable.Z1}) - ({_walkable.X2},{_walkable.Z2})";
+
+            bool rawMode = HeightDisplaySettings.ShowRawHeights;
+            LblYField.Text = rawMode ? "Y (raw):" : "Quarter Storeys:";
+            TxtY.Text = (rawMode ? _walkable.Y : _walkable.Y / 2).ToString(CultureInfo.InvariantCulture);
             TxtStoreyY.Text = _walkable.StoreyY.ToString(CultureInfo.InvariantCulture);
             TxtStartFace4.Text = _walkable.StartFace4.ToString(CultureInfo.InvariantCulture);
             TxtEndFace4.Text = _walkable.EndFace4.ToString(CultureInfo.InvariantCulture);
@@ -41,11 +45,6 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             TxtFace4Count.Text = faceCount.ToString(CultureInfo.InvariantCulture);
 
             TxtNext.Text = _walkable.Next.ToString(CultureInfo.InvariantCulture);
-
-            // Populate editable legacy fields
-            // Populate editable height fields
-            TxtEditY.Text = _walkable.Y.ToString(CultureInfo.InvariantCulture);
-            TxtEditStoreyY.Text = _walkable.StoreyY.ToString(CultureInfo.InvariantCulture);
 
             SeedRoofFacesSpan();
         }
@@ -84,7 +83,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 rows.Add(new RoofFace4Row
                 {
                     Index1 = i, // index-as-stored; if you want 1-based, use i+1 (but keep consistent with StartFace4)
-                    Y = rf.Y,
+                    Y = (short)(rf.Y / 64), // display in Quarter Storeys (1 QS = 64 raw)
                     DY = $"{rf.DY0},{rf.DY1},{rf.DY2}",
                     FlagsHex = $"0x{rf.DrawFlags:X2}",
                     RX = rf.RX,
@@ -115,15 +114,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            if (!byte.TryParse(TxtEditY.Text.Trim(), out byte newY))
+            byte newY;
+            if (HeightDisplaySettings.ShowRawHeights)
             {
-                TxtStatus.Text = "Invalid Y value (0-255).";
-                return;
+                if (!byte.TryParse(TxtY.Text.Trim(), out newY))
+                {
+                    TxtStatus.Text = "Invalid value (0–255 raw Y).";
+                    return;
+                }
             }
-            if (!byte.TryParse(TxtEditStoreyY.Text.Trim(), out byte newStoreyY))
+            else
             {
-                TxtStatus.Text = "Invalid StoreyY value (0-255).";
-                return;
+                if (!int.TryParse(TxtY.Text.Trim(), out int newQS) || newQS < 0 || newQS > 127)
+                {
+                    TxtStatus.Text = "Invalid value (0–127 Quarter Storeys).";
+                    return;
+                }
+                newY = (byte)(newQS * 2);
             }
 
             var svc = MapDataService.Instance;
@@ -140,23 +147,15 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 return;
             }
 
-            // DWalkable layout (22 bytes):
-            // +16: Y (UBYTE)
-            // +17: StoreyY (UBYTE)
+            // DWalkable layout: +16 = Y (UBYTE)
+            svc.Edit(bytes => { bytes[walkableOffset + 16] = newY; });
 
-            svc.Edit(bytes =>
-            {
-                bytes[walkableOffset + 16] = newY;
-                bytes[walkableOffset + 17] = newStoreyY;
-            });
+            string displayStr = HeightDisplaySettings.ShowRawHeights
+                ? $"raw Y={newY}"
+                : $"{newY / 2} QS (raw Y={newY})";
 
-            Debug.WriteLine($"[WalkablePreview] Updated walkable #{_walkableId1}: Y={newY} (world={newY * 32}), StoreyY={newStoreyY} (world={newStoreyY * 64})");
-
-            TxtStatus.Text = $"Applied: Y={newY} (world {newY * 32}), StoreyY={newStoreyY} (world {newStoreyY * 64}). Save map to persist.";
-
-            // Update the read-only display too
-            TxtY.Text = newY.ToString(CultureInfo.InvariantCulture);
-            TxtStoreyY.Text = newStoreyY.ToString(CultureInfo.InvariantCulture);
+            Debug.WriteLine($"[WalkablePreview] Updated walkable #{_walkableId1}: {displayStr}");
+            TxtStatus.Text = $"Applied: {displayStr}. Save map to persist.";
 
             BuildingsChangeBus.Instance.NotifyChanged();
             Services.Roofs.RoofsChangeBus.Instance.NotifyChanged();

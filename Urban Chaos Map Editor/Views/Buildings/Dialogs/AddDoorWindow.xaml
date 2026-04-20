@@ -80,7 +80,7 @@
 
         <!-- Y Height -->
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Base Y Height (world units, 256 = 1 floor):" Style="{StaticResource FieldLabel}"/>
+            <TextBlock Text="Y Offset (Quarter Storeys, 4 = 1 storey):" Style="{StaticResource FieldLabel}"/>
             <TextBox x:Name="TxtY0" Text="0" Width="100" HorizontalAlignment="Left"/>
             <TextBlock Text="Set to match the floor level where the door sits"
                        Foreground="{StaticResource Subtle}"

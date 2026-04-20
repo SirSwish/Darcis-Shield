@@ -95,6 +95,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             UpdateFlagsDisplay();
             UpdateStylePreview();
+
+            TxtBlockHeight.TextChanged += (_, _) => UpdateStylePreview();
         }
 
         private void NumericOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -215,6 +217,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             var cache = TextureCacheService.Instance;
             int world = GetCurrentWorld();
 
+            // Crop ratio from block height in quarter storeys (1 QS = 25%, 4 QS = 100%)
+            int blockQS = int.TryParse(TxtBlockHeight?.Text, out int bqs) ? Math.Clamp(bqs, 1, 4) : 4;
+            double cropRatio = blockQS / 4.0;
+
             string pageInfo = "";
             for (int slot = 0; slot < Math.Min(5, entries.Count); slot++)
             {
@@ -222,13 +228,21 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 var bmp = GetTextureForEntry(entry, world, cache);
 
                 if (bmp != null)
-                    thumbImages[slot].Source = bmp;
+                {
+                    BitmapSource display = bmp;
+                    if (cropRatio < 1.0)
+                    {
+                        int croppedH = Math.Max(1, (int)(bmp.PixelHeight * cropRatio));
+                        display = new CroppedBitmap(bmp, new Int32Rect(0, 0, bmp.PixelWidth, croppedH));
+                    }
+                    thumbImages[slot].Source = display;
+                }
 
                 if (slot == 0)
                     pageInfo = $"Page {entry.Page}";
             }
 
-            TxtStyleInfo.Text = $"{styleName}  |  {entries.Count} entries  |  {pageInfo}";
+            TxtStyleInfo.Text = $"{styleName}  |  {entries.Count} entries  |  {pageInfo}  |  {blockQS} QS";
         }
 
         private BitmapSource? GetTextureForEntry(Models.Styles.TextureEntry entry, int world, TextureCacheService cache)
@@ -280,12 +294,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             if (!byte.TryParse(TxtHeight.Text, out byte height)) height = 4;
             Height = height;
 
-            if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeight)) blockHeight = 16;
-            BlockHeight = blockHeight;
+            if (!byte.TryParse(TxtBlockHeight.Text, out byte blockHeightQS)) blockHeightQS = 4;
+            BlockHeight = (byte)(blockHeightQS * 4);
 
-            if (!short.TryParse(TxtY0.Text, out short y0)) y0 = 0;
-            Y0 = y0;
-            Y1 = y0;
+            if (!short.TryParse(TxtY0.Text, out short y0QS)) y0QS = 0;
+            Y0 = (short)(y0QS * 64);
+            Y1 = Y0;
 
             if (!ushort.TryParse(TxtStyleIndex.Text, out ushort rawStyleId)) rawStyleId = 1;
             RawStyleId = rawStyleId;

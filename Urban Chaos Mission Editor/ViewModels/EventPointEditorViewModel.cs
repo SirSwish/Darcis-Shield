@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.Infrastructure;
 using UrbanChaosMissionEditor.Models;
@@ -25,6 +26,16 @@ public class EventPointEditorViewModel : BaseViewModel
     public EventPointEditorViewModel(EventPoint eventPoint)
     {
         _model = eventPoint ?? throw new ArgumentNullException(nameof(eventPoint));
+
+        // For CreateEnemies civilian EPs: ensure Data[6] is initialised to the current
+        // slot's actual mod if it hasn't been explicitly set yet (value 0 = unset sentinel).
+        // We do this BEFORE saving _originalState so that revert also keeps the init.
+        if (_model.WaypointType == WaypointType.CreateEnemies && _model.Data[6] == 0)
+        {
+            int et = (_model.Data[0] & 0xFFFF) - 1;
+            if (et == 0 || et == 1) // civilian types
+                _model.Data[6] = (_model.Index % 4 + 4) % 4 + 1; // store as 1-4
+        }
 
         // Store original state for cancel/revert
         _originalState = CloneEventPoint(eventPoint);
@@ -215,6 +226,7 @@ public class EventPointEditorViewModel : BaseViewModel
             {
                 _model.TriggeredBy = value.Value;
                 OnPropertyChanged();
+                NotifyTriggerParamProperties();
             }
         }
     }
@@ -229,6 +241,7 @@ public class EventPointEditorViewModel : BaseViewModel
             {
                 _model.OnTrigger = value.Value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(AfterTimerVisibility));
             }
         }
     }
@@ -248,7 +261,186 @@ public class EventPointEditorViewModel : BaseViewModel
     public int Radius
     {
         get => _model.Radius;
-        set { _model.Radius = value; OnPropertyChanged(); }
+        set
+        {
+            _model.Radius = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(RadiusInterpretedText));
+            OnPropertyChanged(nameof(RadiusInterpretedVisibility));
+            OnPropertyChanged(nameof(CuboidHalfSizeZ));
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // TRIGGER FLAGS, AFTER-TIMER, AND DYNAMIC PARAMETER PROPERTIES
+    // ──────────────────────────────────────────────────────────────
+
+    public bool InvertCondition
+    {
+        get => _model.Flags.HasFlag(WaypointFlags.Inverse);
+        set
+        {
+            if (value) _model.Flags |= WaypointFlags.Inverse;
+            else _model.Flags &= ~WaypointFlags.Inverse;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsOptional
+    {
+        get => _model.Flags.HasFlag(WaypointFlags.Optional);
+        set
+        {
+            if (value) _model.Flags |= WaypointFlags.Optional;
+            else _model.Flags &= ~WaypointFlags.Optional;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsReferenced => _model.Flags.HasFlag(WaypointFlags.Referenced);
+
+    public ushort AfterTimer
+    {
+        get => _model.AfterTimer;
+        set { _model.AfterTimer = value; OnPropertyChanged(); }
+    }
+
+    public Visibility AfterTimerVisibility =>
+        _model.OnTrigger == OnTriggerBehavior.ActiveTime ? Visibility.Visible : Visibility.Collapsed;
+
+    // ── Trigger parameter mode ──────────────────────────────────
+    private TriggerParamMode GetParamMode() => _model.TriggeredBy switch
+    {
+        TriggerType.None                                            => TriggerParamMode.None,
+        TriggerType.Dependency                                      => TriggerParamMode.Depend,
+        TriggerType.BooleanAnd or TriggerType.BooleanOr            => TriggerParamMode.Boolean,
+        TriggerType.PersonSeen                                      => TriggerParamMode.PersonSeen,
+        TriggerType.PersonInVehicle                                 => TriggerParamMode.PersonInVehicle,
+        TriggerType.Timer                                           => TriggerParamMode.Time,
+        TriggerType.Countdown or TriggerType.VisibleCountdown       => TriggerParamMode.Countdown,
+        TriggerType.Radius or TriggerType.PlayerUsesRadius          => TriggerParamMode.Proximity,
+        TriggerType.EnemyRadius or TriggerType.ThingRadiusDir
+            or TriggerType.MoveRadiusDir                           => TriggerParamMode.TargetRadius,
+        TriggerType.Cuboid                                          => TriggerParamMode.Cuboid,
+        TriggerType.Counter                                         => TriggerParamMode.Counter,
+        TriggerType.CrimeRateAbove or TriggerType.CrimeRateBelow   => TriggerParamMode.CrimeRate,
+        TriggerType.ItemHeld or TriggerType.SpecificItemHeld
+            or TriggerType.Killed or TriggerType.KilledNotArrested
+            or TriggerType.HalfDead or TriggerType.PersonArrested
+            or TriggerType.PersonUsed or TriggerType.ConversationOver
+            or TriggerType.PersonIsMurderer
+            or TriggerType.PunchedAndKicked                        => TriggerParamMode.EPRefOnly,
+        _                                                           => TriggerParamMode.None
+    };
+
+    // ── EP Ref ──────────────────────────────────────────────────
+    public string EPRefLabel => GetParamMode() switch
+    {
+        TriggerParamMode.Depend          => "Dependency EP:",
+        TriggerParamMode.Boolean         => "EP Ref A:",
+        TriggerParamMode.PersonSeen      => "Person EP:",
+        TriggerParamMode.PersonInVehicle => "Person EP:",
+        TriggerParamMode.Countdown       => "Dependency EP (0=none):",
+        TriggerParamMode.TargetRadius    => "Target EP:",
+        TriggerParamMode.Counter         => "Counter # (0–9):",
+        TriggerParamMode.EPRefOnly       => "Target EP:",
+        _                                => "EP Ref:"
+    };
+
+    public Visibility EPRefVisibility =>
+        GetParamMode() != TriggerParamMode.None ? Visibility.Visible : Visibility.Collapsed;
+
+    // ── EP Ref Bool ─────────────────────────────────────────────
+    public string EPRefBoolLabel => GetParamMode() switch
+    {
+        TriggerParamMode.Boolean         => "EP Ref B:",
+        TriggerParamMode.PersonSeen      => "Observer EP (0=anyone):",
+        TriggerParamMode.PersonInVehicle => "Vehicle EP (0=any):",
+        _                                => "EP Ref Bool:"
+    };
+
+    public Visibility EPRefBoolVisibility => GetParamMode() switch
+    {
+        TriggerParamMode.Boolean or TriggerParamMode.PersonSeen
+            or TriggerParamMode.PersonInVehicle => Visibility.Visible,
+        _                                       => Visibility.Collapsed
+    };
+
+    // ── Radius ──────────────────────────────────────────────────
+    public string RadiusLabel => GetParamMode() switch
+    {
+        TriggerParamMode.Time           => "Time (ticks):",
+        TriggerParamMode.Countdown      => "Countdown (ticks):",
+        TriggerParamMode.Proximity      => "Proximity Radius:",
+        TriggerParamMode.TargetRadius   => "Distance (raw ×64):",
+        TriggerParamMode.Counter        => "Threshold:",
+        TriggerParamMode.CrimeRate      => "Crime Rate (raw ÷100):",
+        TriggerParamMode.Cuboid         => "Cuboid Half-Size X:",
+        _                               => "Radius:"
+    };
+
+    public Visibility RadiusVisibility => GetParamMode() switch
+    {
+        TriggerParamMode.None or TriggerParamMode.Depend
+            or TriggerParamMode.EPRefOnly => Visibility.Collapsed,
+        _                                 => Visibility.Visible
+    };
+
+    /// <summary>Human-friendly conversion hint shown below the raw Radius field.</summary>
+    public string RadiusInterpretedText => GetParamMode() switch
+    {
+        TriggerParamMode.Time or TriggerParamMode.Countdown
+            => $"= {_model.Radius / 100.0:F2} seconds",
+        TriggerParamMode.TargetRadius
+            => $"= {_model.Radius / 64.0:F2} tiles",
+        TriggerParamMode.CrimeRate
+            => $"= {_model.Radius / 100.0:F1}%",
+        _ => ""
+    };
+
+    public Visibility RadiusInterpretedVisibility =>
+        string.IsNullOrEmpty(RadiusInterpretedText) ? Visibility.Collapsed : Visibility.Visible;
+
+    // ── Cuboid ──────────────────────────────────────────────────
+    /// <summary>High 16 bits of Radius — cuboid half-extent on the Z axis.</summary>
+    public int CuboidHalfSizeZ
+    {
+        get => (_model.Radius >> 16) & 0xFFFF;
+        set
+        {
+            int dx = _model.Radius & 0xFFFF;
+            _model.Radius = (value << 16) | dx;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(Radius));
+        }
+    }
+
+    public Visibility CuboidZVisibility =>
+        _model.TriggeredBy == TriggerType.Cuboid ? Visibility.Visible : Visibility.Collapsed;
+
+    // ── Engine override warning ─────────────────────────────────
+    /// <summary>
+    /// The engine forces OT_ACTIVE_WHILE for unreferenced Person Used → Message EPs.
+    /// Show a warning so users aren't confused when runtime ignores their OnTrigger setting.
+    /// </summary>
+    public Visibility PersonUsedMessageWarningVisibility =>
+        _model.TriggeredBy == TriggerType.PersonUsed &&
+        _model.WaypointType == WaypointType.Message &&
+        !_model.Flags.HasFlag(WaypointFlags.Referenced)
+            ? Visibility.Visible : Visibility.Collapsed;
+
+    private void NotifyTriggerParamProperties()
+    {
+        OnPropertyChanged(nameof(EPRefLabel));
+        OnPropertyChanged(nameof(EPRefVisibility));
+        OnPropertyChanged(nameof(EPRefBoolLabel));
+        OnPropertyChanged(nameof(EPRefBoolVisibility));
+        OnPropertyChanged(nameof(RadiusLabel));
+        OnPropertyChanged(nameof(RadiusVisibility));
+        OnPropertyChanged(nameof(RadiusInterpretedText));
+        OnPropertyChanged(nameof(RadiusInterpretedVisibility));
+        OnPropertyChanged(nameof(CuboidZVisibility));
+        OnPropertyChanged(nameof(PersonUsedMessageWarningVisibility));
     }
 
     // Type-specific editor
@@ -299,12 +491,16 @@ public class EventPointEditorViewModel : BaseViewModel
         ? EditorStrings.PlayerTypeNames[PlayerType - 1]
         : "Unknown";
 
-    // Camera-specific properties (CreateCamera)
+    // Camera-specific properties (CreateCamera + CameraWaypoint - shared layout)
     // Data[0] = Camera Type (Normal, Security Cam, Camcorder, News, Targetting)
-    // Data[1] = Target Type (Normal, Attached, Nearest Living)
-    // Data[2] = Follow player flag
+    // Data[1] = Movement Type (Normal, Smooth, Wobbly)
+    // Data[2] = Speed
+    // Data[3] = Delay
+    // Data[4] = Pause Player flag
+    // Data[5] = Direction Lock flag
+    // Data[6] = Cannot Be Skipped flag
     public ObservableCollection<string> CameraTypeOptions { get; } = new(EditorStrings.CameraTypeNames);
-    public ObservableCollection<string> TargetTypeOptions { get; } = new(EditorStrings.TargetTypeNames);
+    public ObservableCollection<string> CameraMovementTypeOptions { get; } = new(EditorStrings.CameraMoveNames);
 
     public int CameraType
     {
@@ -312,33 +508,40 @@ public class EventPointEditorViewModel : BaseViewModel
         set { _model.Data[0] = value; OnPropertyChanged(); }
     }
 
-    public int TargetType
+    public int CameraMovementType
     {
         get => _model.Data[1];
         set { _model.Data[1] = value; OnPropertyChanged(); }
     }
 
-    public bool FollowPlayer
+    public int CameraSpeed
     {
-        get => _model.Data[2] != 0;
-        set { _model.Data[2] = value ? 1 : 0; OnPropertyChanged(); }
+        get => _model.Data[2];
+        set { _model.Data[2] = value; OnPropertyChanged(); }
     }
 
-    // Camera Waypoint-specific properties
-    // Data[0] = Move type (Normal, Smooth, Wobbly)
-    // Data[1] = Dwell time (how long to stay at this waypoint)
-    public ObservableCollection<string> CameraMoveTypeOptions { get; } = new(EditorStrings.CameraMoveNames);
-
-    public int CameraMoveType
+    public int CameraDelay
     {
-        get => _model.Data[0];
-        set { _model.Data[0] = value; OnPropertyChanged(); }
+        get => _model.Data[3];
+        set { _model.Data[3] = value; OnPropertyChanged(); }
     }
 
-    public int DwellTime
+    public bool PausePlayer
     {
-        get => _model.Data[1];
-        set { _model.Data[1] = value; OnPropertyChanged(); }
+        get => _model.Data[4] != 0;
+        set { _model.Data[4] = value ? 1 : 0; OnPropertyChanged(); }
+    }
+
+    public bool DirectionLock
+    {
+        get => _model.Data[5] != 0;
+        set { _model.Data[5] = value ? 1 : 0; OnPropertyChanged(); }
+    }
+
+    public bool CannotBeSkipped
+    {
+        get => _model.Data[6] != 0;
+        set { _model.Data[6] = value ? 1 : 0; OnPropertyChanged(); }
     }
     // ============================================================
     // CUTSCENE PROPERTIES (WPT_CUT_SCENE / WaypointType.CutScene)
@@ -1849,6 +2052,88 @@ public class EventPointEditorViewModel : BaseViewModel
         {
             _model.Data[0] = (_model.Data[0] & unchecked((int)0xFFFF0000)) | ((value + 1) & 0xFFFF);
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsCivilian));
+            // When switching to a civilian type and no explicit variant has been stored yet,
+            // seed Data[6] with the current slot's actual mod so the preview shows correctly.
+            if ((value == 0 || value == 1) && _model.Data[6] == 0)
+                _model.Data[6] = (_model.Index % 4 + 4) % 4 + 1;
+            OnPropertyChanged(nameof(CivilianDesiredVariant));
+            OnPropertyChanged(nameof(CivilianVariantImageSource));
+        }
+    }
+
+    // ── Civilian appearance ─────────────────────────────────────
+    // EnemyType 0 = Civilian, EnemyType 1 = Civilian with balloon.
+    // The game selects one of four male civilian models by: EP_index % 4
+    //   mod 0 → Officer Barnaby         (male_civ0.PNG)
+    //   mod 1 → Grey Top                (male_civ1.PNG)
+    //   mod 2 → Young Male Blue Jeans   (male_civ2.PNG)
+    //   mod 3 → Old Male Blue Jeans     (male_civ3.PNG)
+    //
+    // Data[6] for CreateEnemies stores the desired variant:
+    //   0 = unset / auto (no padding will be applied by MainViewModel)
+    //   1 = force mod 0 (Officer Barnaby)
+    //   2 = force mod 1 (Grey Top)
+    //   3 = force mod 2 (Young Male)
+    //   4 = force mod 3 (Old Male)
+
+    public bool IsCivilian => EnemyType == 0 || EnemyType == 1;
+
+    // Variant names in mod order (0-3)
+    public static readonly string[] CivilianVariantNames =
+        { "Officer Barnaby", "Grey Top", "Young Male", "Old Male" };
+
+    public ObservableCollection<string> CivilianVariantOptions { get; } =
+        new(CivilianVariantNames);
+
+    /// <summary>
+    /// The desired civilian variant (0-3), backed by Data[6] encoded as variant+1 (1-4).
+    /// A stored value of 0 means "auto / not explicitly set" — MainViewModel will
+    /// not insert padding dummies in that case.
+    /// Selecting a variant stores the explicit choice; MainViewModel inserts
+    /// 0-3 dummy Simple Waypoints before the EP so that EP_index % 4 == chosen variant.
+    /// </summary>
+    public int CivilianDesiredVariant
+    {
+        get
+        {
+            int v = _model.Data[6];
+            // 1-4 = explicit variant 0-3; anything else → derive from current slot mod
+            return (v >= 1 && v <= 4) ? v - 1 : (_model.Index % 4 + 4) % 4;
+        }
+        set
+        {
+            _model.Data[6] = Math.Clamp(value, 0, 3) + 1; // store as 1-4
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(CivilianVariantImageSource));
+        }
+    }
+
+    /// <summary>
+    /// Returns the pack-URI bitmap for the desired civilian variant preview, or null.
+    /// Files expected: male_civ0.PNG … male_civ3.PNG in Assets/Images/.
+    /// </summary>
+    public ImageSource? CivilianVariantImageSource
+    {
+        get
+        {
+            if (!IsCivilian) return null;
+            int mod = CivilianDesiredVariant; // 0-3
+            // Try .PNG then .png — pack URIs are case-sensitive for embedded resources
+            foreach (string ext in new[] { ".PNG", ".png" })
+            {
+                string uriStr = $"pack://application:,,,/Assets/Images/male_civ{mod}{ext}";
+                try
+                {
+                    var img = new BitmapImage(new Uri(uriStr, UriKind.Absolute));
+                    return img;
+                }
+                catch
+                {
+                    // try next extension
+                }
+            }
+            return null;
         }
     }
 

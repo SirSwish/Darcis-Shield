@@ -28,6 +28,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private static readonly Pen SelectedTileBorderPen;
         private static readonly Brush SelectionFill;
         private static readonly Pen SelectionPen;
+        private static readonly Pen DiagonalPen;
 
         private TextBox? _editBox;
         private int _editingRf4Idx;
@@ -40,7 +41,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         private int _selStartCol = -1, _selStartRow = -1;
         private int _selHoverCol = -1, _selHoverRow = -1;
 
-        private record struct TileInfo(int Rf4Idx, double UiX, double UiZ, short Y, sbyte DY0, sbyte DY1, sbyte DY2);
+        private record struct TileInfo(int Rf4Idx, double UiX, double UiZ, short Y, sbyte DY0, sbyte DY1, sbyte DY2, bool DiagonalFlag);
         private List<TileInfo>? _cachedTiles;
         private int _cacheWalkablesStart;
         private int _cacheNextRf4;
@@ -110,6 +111,11 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             selStroke.Freeze();
             SelectionPen = new Pen(selStroke, 2) { DashStyle = DashStyles.Dash };
             SelectionPen.Freeze();
+
+            var diagStroke = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255));
+            diagStroke.Freeze();
+            DiagonalPen = new Pen(diagStroke, 1) { DashStyle = DashStyles.Dot };
+            DiagonalPen.Freeze();
         }
 
         public RoofsLayer()
@@ -184,8 +190,31 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 double uiX = (128 - tileX - 1) * 64.0;
                 double uiZ = (128 - tileZ - 1) * 64.0;
 
-                _cachedTiles.Add(new TileInfo(i, uiX, uiZ, rf4.Y, rf4.DY0, rf4.DY1, rf4.DY2));
+                _cachedTiles.Add(new TileInfo(i, uiX, uiZ, rf4.Y, rf4.DY0, rf4.DY1, rf4.DY2, (rf4.RX & 0x80) != 0));
             }
+        }
+
+        /// <summary>
+        /// Only claim the hit if the point lands on an actual tile, is in selection mode,
+        /// or an inline edit box is open. Otherwise return null so the click falls through
+        /// to the Prims layer (or whatever is underneath).
+        /// </summary>
+        protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters)
+        {
+            // Selection mode: need cursor tracking across the whole canvas.
+            if (RoofTileSelectionService.Instance.IsSelecting)
+                return new PointHitTestResult(this, hitTestParameters.HitPoint);
+
+            // Inline edit active: keep focus on the canvas.
+            if (_editBox != null)
+                return new PointHitTestResult(this, hitTestParameters.HitPoint);
+
+            // Only intercept if the point is over a real tile.
+            if (HitTestTile(hitTestParameters.HitPoint) != null)
+                return new PointHitTestResult(this, hitTestParameters.HitPoint);
+
+            // Nothing here — pass through to layers below.
+            return null!;
         }
 
         protected override Size MeasureOverride(Size s) => new(MapConstants.MapPixels, MapConstants.MapPixels);
@@ -244,16 +273,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 isSelected ? SelectedTileBorderPen : TileBorderPen,
                 new Rect(uiX, uiZ, 64, 64));
 
-            // Corner layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE
-            var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left
-            var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right
-            var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left
-            var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right
+            // Diagonal line showing which edge is straight on sloped tiles.
+            // DiagonalFlag (RX bit 7) set = NW-SE straight edge; clear = SW-NE straight edge.
+            if (tile.DiagonalFlag)
+                dc.DrawLine(DiagonalPen, new Point(uiX, uiZ), new Point(uiX + 64, uiZ + 64));       // NW → SE
+            else
+                dc.DrawLine(DiagonalPen, new Point(uiX, uiZ + 64), new Point(uiX + 64, uiZ));       // SW → NE
 
-            DrawInputField(dc, dy1Rect, $"{tile.DY1}", tile.Rf4Idx, EditField.DY1, dpi, GetDyColor(tile.DY1));
-            DrawInputField(dc, dy2Rect, $"{tile.DY2}", tile.Rf4Idx, EditField.DY2, dpi, GetDyColor(tile.DY2));
-            DrawInputField(dc, dy0Rect, $"{tile.DY0}", tile.Rf4Idx, EditField.DY0, dpi, GetDyColor(tile.DY0));
-            DrawInputField(dc, yRect,   $"{tile.Y}",   tile.Rf4Idx, EditField.Y,   dpi, Brushes.White);
+            // Y (base) shown SE corner; DY0 SW, DY1 NW, DY2 NE — original screen positions
+            var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right = Y (base)
+            var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left  = DY0
+            var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left     = DY1
+            var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right    = DY2
+
+            DrawInputField(dc, yRect,   $"{tile.Y / 64}",   tile.Rf4Idx, EditField.Y,   dpi, Brushes.White);
+            DrawInputField(dc, dy0Rect, $"{tile.DY0}px",    tile.Rf4Idx, EditField.DY0, dpi, GetDyColor(tile.DY0));
+            DrawInputField(dc, dy1Rect, $"{tile.DY1}px",    tile.Rf4Idx, EditField.DY1, dpi, GetDyColor(tile.DY1));
+            DrawInputField(dc, dy2Rect, $"{tile.DY2}px",    tile.Rf4Idx, EditField.DY2, dpi, GetDyColor(tile.DY2));
         }
 
         private void DrawInputField(DrawingContext dc, Rect rect, string value, int rf4Idx, EditField field, double dpi, Brush textBrush)
@@ -448,16 +484,16 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 if (pos.X < uiX || pos.X > uiX + 64 || pos.Y < uiZ || pos.Y > uiZ + 64)
                     continue;
 
-                // Corner layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE
-                var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left
-                var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right
-                var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left
-                var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right
+                // Y (base) shown SE corner; DY0 SW, DY1 NW, DY2 NE — original screen positions
+                var yRect   = new Rect(uiX + 38, uiZ + 48, 24, 14);  // SE bottom-right = Y (base)
+                var dy0Rect = new Rect(uiX + 2,  uiZ + 48, 24, 14);  // SW bottom-left  = DY0
+                var dy1Rect = new Rect(uiX + 2,  uiZ + 2,  24, 14);  // NW top-left     = DY1
+                var dy2Rect = new Rect(uiX + 38, uiZ + 2,  24, 14);  // NE top-right    = DY2
 
-                if (dy1Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY1, tile.DY1, dy1Rect);
-                if (dy2Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY2, tile.DY2, dy2Rect);
-                if (dy0Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY0, tile.DY0, dy0Rect);
-                if (yRect.Contains(pos))   return (tile.Rf4Idx, EditField.Y,   tile.Y,   yRect);
+                if (yRect.Contains(pos))   return (tile.Rf4Idx, EditField.Y,   tile.Y / 64,    yRect);
+                if (dy0Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY0, tile.DY0,       dy0Rect);
+                if (dy1Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY1, tile.DY1,       dy1Rect);
+                if (dy2Rect.Contains(pos)) return (tile.Rf4Idx, EditField.DY2, tile.DY2,       dy2Rect);
             }
             return null;
         }
@@ -547,8 +583,10 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             switch (field)
             {
                 case EditField.Y:
-                    bytes[off] = (byte)(val & 0xFF);
-                    bytes[off + 1] = (byte)((val >> 8) & 0xFF);
+                    // val is in Quarter Storeys; convert to raw RF4 units (1 QS = 64 raw)
+                    int rawY = val * 64;
+                    bytes[off] = (byte)(rawY & 0xFF);
+                    bytes[off + 1] = (byte)((rawY >> 8) & 0xFF);
                     break;
                 case EditField.DY0: bytes[off + 2] = (byte)(sbyte)val; break;
                 case EditField.DY1: bytes[off + 3] = (byte)(sbyte)val; break;

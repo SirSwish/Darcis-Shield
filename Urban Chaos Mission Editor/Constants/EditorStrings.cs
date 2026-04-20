@@ -150,8 +150,8 @@ public static class EditorStrings
     /// </summary>
     public static readonly string[] EnemyTypeNames =
     {
-        "Old Civilian",                    // ET_CIV = 1
-        "Young Civilian",       // ET_CIV_BALLOON = 2
+        "Civilian",                        // ET_CIV = 1
+        "Civilian with balloon",           // ET_CIV_BALLOON = 2
         "Woman",                  // ET_SLAG = 3
         "Fat Woman",         // ET_UGLY_FAT_SLAG = 4
         "Workman",                     // ET_WORKMAN = 5

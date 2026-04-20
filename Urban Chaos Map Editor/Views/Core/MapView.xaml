@@ -76,7 +76,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowCellFlags, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="11"
+                        Panel.ZIndex="200"
                         IsHitTestVisible="True"/>
 
                     <!-- Buildings -->
@@ -112,7 +112,7 @@
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowWalkables, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="8"/>
+                        Panel.ZIndex="12"/>
                     
                     <!-- Altitude hover -->
                     <hgtOvl:AltitudeHoverLayer
@@ -128,14 +128,14 @@
                         Visibility="{Binding ShowRoofs, Converter={StaticResource BoolToVis}}"
                         SelectedWalkableId1="{Binding SelectedWalkableId1}"
                         SelectedRf4Id="{Binding SelectedRf4Id}"
-                        Panel.ZIndex="9"/>
+                        Panel.ZIndex="13"/>
 
                     <rfOvl:RoofAltitudesLayer
                         x:Name="RoofAltitudesOverlay"
                         Width="8192"
                         Height="8192"
                         Visibility="{Binding ShowRoofAltitudes, Converter={StaticResource BoolToVis}}"
-                        Panel.ZIndex="10"
+                        Panel.ZIndex="14"
                         IsHitTestVisible="False"/>
 
                     <!-- Ghost preview for texture painting -->

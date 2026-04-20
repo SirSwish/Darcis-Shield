@@ -94,6 +94,35 @@
 
         <Separator Background="#FF555555" Margin="0,8,0,8"/>
 
+        <!-- Civilian Appearance — only visible for Civilian / Civilian with balloon types -->
+        <StackPanel Visibility="{Binding IsCivilian, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="Civilian Appearance" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Variant:" VerticalAlignment="Top" Padding="0,4,0,0"/>
+                <StackPanel Grid.Column="1">
+                    <Border Width="72" Height="96" HorizontalAlignment="Left"
+                            BorderBrush="#FF555555" BorderThickness="1"
+                            Background="#FF1E1E1E">
+                        <Image Source="{Binding CivilianVariantImageSource}"
+                               Stretch="Uniform"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                    </Border>
+                    <TextBlock Text="Determined by EP index mod 4"
+                               Foreground="#FF888888" FontSize="10" Margin="0,4,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <Separator Background="#FF555555"
+                   Visibility="{Binding IsCivilian, Converter={StaticResource BoolToVis}}"
+                   Margin="0,4,0,8"/>
+
         <!-- AI Targets -->
         <TextBlock Text="AI Targets" FontWeight="SemiBold" Margin="0,0,0,8"/>
         <Grid Margin="0,0,0,5">

@@ -192,42 +192,13 @@
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Use Beta Textures" IsCheckable="True" IsChecked="{Binding Map.UseBetaTextures, Mode=TwoWay}"/>
-            </MenuItem>
-
-            <MenuItem Header="_Diagnostics">
-                <MenuItem Header="Diagnose _Walkables..." Click="DiagnoseWalkables_Click"/>
                 <Separator/>
-                <MenuItem Header="Dump _Indoor Data..." Click="DumpIndoorData_Click"
-                          ToolTip="Dump all InsideStorey, Staircase, and InsideBlock data"/>
-                <Separator/>
-                <MenuItem Header="?? _Indoor Building Editor..."
-                          Click="IndoorBuildingEditor_Click"
-                          ToolTip="View and edit DStorey, dstyles, and other indoor building components"/>
-                <Separator/>
-                <MenuItem Header="Snapshot Building Block..." Click="SnapshotBuildingBlock_Click"/>
-                <Separator/>
-                <MenuItem Header="Dump All Buildings Raw..." Click="DumpAllBuildingsRaw_Click"/>
-                <MenuItem Header="Dump Selected _Building Raw Bytes..." Click="DumpBuildingBytes_Click"/>
-                <MenuItem Header="Dump Selected _Facet Raw Bytes..." Click="DumpFacetBytes_Click"/>
-                <MenuItem Header="Dump Building _Walkables + RoofFace4..." Click="DumpBuildingWalkables_Click"/>
-                <MenuItem Header="Dump _Walkable Raw Bytes..."
-                          Click="DumpWalkableRawBytes_Click"
-                          ToolTip="Dump raw 22-byte structure for a specific walkable (for comparison)"/>
-                <MenuItem Header="Dump _InsideStorey for Building..."
-                          Click="DumpInsideStoreyForBuilding_Click"
-                          ToolTip="Dump InsideStorey entries linked to a building (for roof rendering analysis)"/>
-                <Separator/>
-                <MenuItem Header="Dump _PAP_HI Cell Info..." Click="DumpPapHiCell_Click"/>
-                <Separator/>
-                <MenuItem Header="_Edit Walkable Points..."
-                          Click="EditWalkablePoints_Click"
-                          ToolTip="Modify StartPoint/EndPoint values for testing roof rendering"/>
-                <MenuItem Header="Set _RF4 DrawFlags..."
-                          Click="SetRF4DrawFlags_Click"
-                          ToolTip="Change DrawFlags for all RoofFace4 entries in a walkable (test 0x00 vs 0x08)"/>
-                <MenuItem Header="?? _Paint RF4 Tiles..."
-                          Click="PaintRF4Tiles_Click"
-                          ToolTip="Visual grid editor for painting individual roof tiles"/>
+                <MenuItem Header="Height Display" IsEnabled="False" FontWeight="SemiBold"/>
+                <MenuItem x:Name="MenuViewOriginalHeights"
+                          Header="View _Original Heights (Raw)"
+                          IsCheckable="True"
+                          ToolTip="Toggle between Quarter Storeys (QS) and raw file values for walkable heights"
+                          Click="ViewOriginalHeights_Click"/>
             </MenuItem>
 
             <MenuItem Header="_Help">

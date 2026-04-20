@@ -24,6 +24,10 @@
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="Background" Value="White"/>
         </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFCCCCCC"/>
+            <Setter Property="Margin" Value="0,5"/>
+        </Style>
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="#FF3E3E42"/>
             <Setter Property="Foreground" Value="#FFEEEEEE"/>
@@ -38,46 +42,72 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="110"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Move Type -->
-            <Label Grid.Row="0" Grid.Column="0" Content="Move Type:"/>
-            <ComboBox Grid.Row="0" Grid.Column="1" 
-                      ItemsSource="{Binding CameraMoveTypeOptions}"
-                      SelectedIndex="{Binding CameraMoveType}"/>
+            <!-- Camera Type -->
+            <Label Grid.Row="0" Grid.Column="0" Content="Camera Type:"/>
+            <ComboBox Grid.Row="0" Grid.Column="1"
+                      ItemsSource="{Binding CameraTypeOptions}"
+                      SelectedIndex="{Binding CameraType}"/>
 
-            <!-- Dwell Time -->
-            <Label Grid.Row="1" Grid.Column="0" Content="Dwell Time:"/>
-            <TextBox Grid.Row="1" Grid.Column="1" 
-                     Text="{Binding DwellTime, UpdateSourceTrigger=PropertyChanged}"
-                     ToolTip="Time (in game ticks) the camera stays at this waypoint"/>
+            <!-- Movement -->
+            <Label Grid.Row="1" Grid.Column="0" Content="Movement:"/>
+            <ComboBox Grid.Row="1" Grid.Column="1"
+                      ItemsSource="{Binding CameraMovementTypeOptions}"
+                      SelectedIndex="{Binding CameraMovementType}"/>
+
+            <!-- Speed -->
+            <Label Grid.Row="2" Grid.Column="0" Content="Speed:"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Text="{Binding CameraSpeed, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Delay -->
+            <Label Grid.Row="3" Grid.Column="0" Content="Delay:"/>
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Text="{Binding CameraDelay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Pause Player -->
+            <CheckBox Grid.Row="4" Grid.Column="1"
+                      Content="Pause Player"
+                      IsChecked="{Binding PausePlayer}"
+                      Margin="0,8,0,0"/>
+
+            <!-- Direction Lock -->
+            <CheckBox Grid.Row="5" Grid.Column="1"
+                      Content="Direction Lock"
+                      IsChecked="{Binding DirectionLock}"/>
+
+            <!-- Cannot Be Skipped -->
+            <CheckBox Grid.Row="6" Grid.Column="1"
+                      Content="Cannot Be Skipped"
+                      IsChecked="{Binding CannotBeSkipped}"/>
         </Grid>
 
         <Separator Margin="0,15,0,10" Background="#FF555555"/>
 
-        <!-- Move Type Descriptions -->
-        <TextBlock Text="Move Types:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+        <!-- Camera Type Descriptions -->
+        <TextBlock Text="Camera Types:" FontWeight="SemiBold" Margin="0,0,0,5"/>
         <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontSize="11">
-            <Run FontWeight="SemiBold">Normal:</Run> Standard camera movement
+            <Run FontWeight="SemiBold">Normal:</Run> Standard game camera
             <LineBreak/>
-            <Run FontWeight="SemiBold">Smooth:</Run> Smooth interpolated movement
+            <Run FontWeight="SemiBold">Security Cam:</Run> Fixed position surveillance camera
             <LineBreak/>
-            <Run FontWeight="SemiBold">Wobbly:</Run> Shaky handheld-style movement
-        </TextBlock>
-
-        <Separator Margin="0,10,0,10" Background="#FF555555"/>
-
-        <!-- Info text -->
-        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontStyle="Italic">
-            Camera waypoints define a path for the camera to follow. Link multiple waypoints 
-            together using the EP Reference field to create camera paths. The dwell time 
-            specifies how long the camera pauses at this waypoint before moving to the next.
+            <Run FontWeight="SemiBold">Camcorder:</Run> Handheld camera effect
+            <LineBreak/>
+            <Run FontWeight="SemiBold">News:</Run> News crew camera style
+            <LineBreak/>
+            <Run FontWeight="SemiBold">Targetting:</Run> Targeting/aiming camera
         </TextBlock>
     </StackPanel>
 </UserControl>

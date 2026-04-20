@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Roofs;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
@@ -378,6 +379,10 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             _buildingsAcc = new BuildingsAccessor(MapDataService.Instance);
             _buildingsAcc.BuildingsBytesReset += (_, __) =>
                 System.Windows.Application.Current.Dispatcher.Invoke(Refresh);
+
+            // Rebuild facet list when the height display mode is toggled
+            HeightDisplaySettings.DisplayModeChanged += (_, __) =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(Refresh);
 
             // If a map is already loaded at startup, populate immediately
             if (MapDataService.Instance.IsLoaded)
@@ -1435,6 +1440,12 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             public short Y1 { get; set; }
             public byte BlockHeight { get; set; }
             public byte Open { get; set; }
+
+            /// <summary>Y0 for display. Returns Quarter Storeys (Y0/64) or raw when the toggle is on.</summary>
+            public int Y0Display => HeightDisplaySettings.ShowRawHeights ? Y0 : Y0 / 64;
+
+            /// <summary>BlockHeight for display. Returns Quarter Storeys (BlockHeight/4) or raw when the toggle is on.</summary>
+            public int BlockHeightDisplay => HeightDisplaySettings.ShowRawHeights ? BlockHeight : BlockHeight / 4;
 
             // Raw cable angles for cable-style formatting
             public short CableStep1 { get; set; } // from StyleIndex (as S16)

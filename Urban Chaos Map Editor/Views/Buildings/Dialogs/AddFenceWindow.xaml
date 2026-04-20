@@ -178,12 +178,12 @@
 
                 <!-- BlockHeight -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Block Height:" Style="{StaticResource FieldLabel}"/>
+                    <TextBlock Text="Block Height (QS):" Style="{StaticResource FieldLabel}"/>
                     <TextBox x:Name="TxtBlockHeight"
                              Style="{StaticResource EditableField}"
-                             Text="16"
+                             Text="4"
                              PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="4px each (16 = 1 floor)"
+                    <TextBlock Text="Quarter Storeys (4 = 1 floor)"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>
@@ -192,13 +192,13 @@
                 <!-- Y0 only — enabled only when On Building is checked -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8"
                             IsEnabled="{Binding IsChecked, ElementName=ChkOnBuilding}">
-                    <TextBlock Text="Y Offset:" Style="{StaticResource FieldLabel}"/>
+                    <TextBlock Text="Y Offset (QS):" Style="{StaticResource FieldLabel}"/>
                     <TextBox x:Name="TxtY0"
                              Style="{StaticResource EditableField}"
                              Width="60"
                              Text="0"
                              PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="256 = 1 floor"
+                    <TextBlock Text="4 = 1 storey"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>

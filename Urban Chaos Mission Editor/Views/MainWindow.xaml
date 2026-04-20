@@ -285,6 +285,9 @@
                 <MenuItem Header="_Show All Categories" Command="{Binding ShowAllCategoriesCommand}"/>
                 <MenuItem Header="_Hide All Categories" Command="{Binding HideAllCategoriesCommand}"/>
             </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="About_Click"/>
+            </MenuItem>
         </Menu>
 
         <!-- Toolbar -->

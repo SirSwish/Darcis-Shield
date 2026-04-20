@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Go to Cell" SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource Brush.Surface}" Foreground="{StaticResource Brush.TextPrimary}">
+        Background="#222222" Foreground="White">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition/>

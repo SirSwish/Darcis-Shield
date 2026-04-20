@@ -109,8 +109,8 @@
                     <TextBlock Text="Z:" VerticalAlignment="Center" Margin="12,0,4,0"/>
                     <TextBox x:Name="TxtZ0" Style="{StaticResource EditableField}" Width="60" Text="64"
                              TextChanged="Coordinate_TextChanged" PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Y:" VerticalAlignment="Center" Margin="12,0,4,0"/>
-                    <TextBox x:Name="TxtY0" Style="{StaticResource EditableField}" Width="70" Text="512"
+                    <TextBlock Text="Y (QS):" VerticalAlignment="Center" Margin="12,0,4,0"/>
+                    <TextBox x:Name="TxtY0" Style="{StaticResource EditableField}" Width="70" Text="8"
                              TextChanged="Coordinate_TextChanged" PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
                 </StackPanel>
 
@@ -123,8 +123,8 @@
                     <TextBlock Text="Z:" VerticalAlignment="Center" Margin="12,0,4,0"/>
                     <TextBox x:Name="TxtZ1" Style="{StaticResource EditableField}" Width="60" Text="64"
                              TextChanged="Coordinate_TextChanged" PreviewTextInput="NumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="Y:" VerticalAlignment="Center" Margin="12,0,4,0"/>
-                    <TextBox x:Name="TxtY1" Style="{StaticResource EditableField}" Width="70" Text="512"
+                    <TextBlock Text="Y (QS):" VerticalAlignment="Center" Margin="12,0,4,0"/>
+                    <TextBox x:Name="TxtY1" Style="{StaticResource EditableField}" Width="70" Text="8"
                              TextChanged="Coordinate_TextChanged" PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
                 </StackPanel>
 

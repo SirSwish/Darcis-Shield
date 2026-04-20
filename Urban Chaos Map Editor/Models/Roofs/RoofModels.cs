@@ -2,6 +2,8 @@
 // View model classes for walkable and RoofFace4 data.
 // Extracted from BuildingsTabViewModel nested classes.
 
+using UrbanChaosMapEditor.Models.Core;
+
 namespace UrbanChaosMapEditor.Models.Roofs
 {
     /// <summary>
@@ -34,6 +36,12 @@ namespace UrbanChaosMapEditor.Models.Roofs
         public string Rect => $"({X1},{Z1}) → ({X2},{Z2})";
         public string Face4Span => $"{StartFace4}..{EndFace4}  (n={Math.Max(0, EndFace4 - StartFace4)})";
         public string PointSpan => $"{StartPoint}..{EndPoint}  (n={Math.Max(0, EndPoint - StartPoint)})";
+
+        /// <summary>
+        /// Height for display. Returns Quarter Storeys (raw Y / 2) normally,
+        /// or raw Y when <see cref="HeightDisplaySettings.ShowRawHeights"/> is true.
+        /// </summary>
+        public int HeightDisplay => HeightDisplaySettings.ShowRawHeights ? Y : Y / 2;
     }
 
     /// <summary>

@@ -117,7 +117,7 @@ namespace UrbanChaosMapEditor.Views.Prims.Dialogs
             Canvas.SetLeft(Dot, (Wall.Width - Dot.Width) / 2.0);
             Canvas.SetTop(Dot, top);
 
-            LblStorey.Text = _storey.ToString(CultureInfo.InvariantCulture);
+            LblStorey.Text = (_storey * 4).ToString(CultureInfo.InvariantCulture);
             LblOffset.Text = _offset.ToString(CultureInfo.InvariantCulture);
             LblTotal.Text = ResultHeight.ToString(CultureInfo.InvariantCulture);
 

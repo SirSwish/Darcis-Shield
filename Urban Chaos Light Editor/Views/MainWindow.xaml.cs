@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 using UrbanChaosLightEditor.ViewModels;
 
 namespace UrbanChaosLightEditor
@@ -18,10 +19,16 @@ namespace UrbanChaosLightEditor
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
+            var asm = Assembly.GetExecutingAssembly();
+            string version =
+                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? asm.GetName().Version?.ToString()
+                ?? "Unknown";
+
             MessageBox.Show(
-                "Urban Chaos Light Editor v1.9\n\n" +
-                "Part of the Darci's Shield modding toolkit.\n\n" +
-                "Edit .lgt light files for Urban Chaos maps.",
+                "Urban Chaos Light Editor\n\n" +
+                $"Version: {version}\n" +
+                "Part of the Darcis Shield modding toolkit.",
                 "About",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);

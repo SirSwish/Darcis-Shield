@@ -24,8 +24,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         // Track which cells are selected (relative coords)
         private readonly HashSet<(int rx, int rz)> _selectedCells = new();
 
-        // Track which cells already have RF4 entries
-        private readonly HashSet<(int rx, int rz)> _existingRF4Cells = new();
+        // Track which cells already have RF4 entries, keyed by (rx,rz) → existing DrawFlags
+        private readonly Dictionary<(int rx, int rz), byte> _existingRF4DrawFlags = new();
 
         // Grid buttons for toggling
         private readonly Dictionary<(int rx, int rz), Button> _cellButtons = new();
@@ -49,8 +49,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             txtBuildingId.Text = buildingId1.ToString();
             txtBounds.Text = $"({walkable.X1},{walkable.Z1}) ? ({walkable.X2},{walkable.Z2}) = {_width}x{_depth}";
 
-            // Set default altitude from walkable Y
-            txtAltitude.Text = (walkable.Y * 32).ToString();
+            // Set default altitude from walkable Y, seeded in Quarter Storeys (walkable.Y / 2 = QS)
+            txtAltitude.Text = (walkable.Y / 2).ToString();
 
             LoadExistingRF4Cells();
             BuildCellGrid();
@@ -58,7 +58,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void LoadExistingRF4Cells()
         {
-            _existingRF4Cells.Clear();
+            _existingRF4DrawFlags.Clear();
 
             var acc = new BuildingsAccessor(MapDataService.Instance);
             if (!acc.TryGetWalkables(out var walkables, out var roofFaces))
@@ -80,7 +80,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
                 if (rx >= 0 && rx < _width && rz >= 0 && rz < _depth)
                 {
-                    _existingRF4Cells.Add((rx, rz));
+                    _existingRF4DrawFlags[(rx, rz)] = rf.DrawFlags;
                     _selectedCells.Add((rx, rz)); // Pre-select existing cells
                 }
             }
@@ -264,11 +264,13 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)
         {
-            if (!short.TryParse(txtAltitude.Text, out short altitude))
+            // Altitude entered in Quarter Storeys; convert to raw RF4 units (1 QS = 64 raw)
+            if (!short.TryParse(txtAltitude.Text, out short altitudeQS))
             {
                 MessageBox.Show("Invalid altitude value.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            short altitude = (short)(altitudeQS * 64);
 
             if (!sbyte.TryParse(txtDY0.Text, out sbyte dy0) ||
                 !sbyte.TryParse(txtDY1.Text, out sbyte dy1) ||
@@ -279,8 +281,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             }
 
             // Determine what needs to be added/removed
-            var toAdd = _selectedCells.Except(_existingRF4Cells).ToList();
-            var toRemove = _existingRF4Cells.Except(_selectedCells).ToList();
+            var toAdd = _selectedCells.Except(_existingRF4DrawFlags.Keys).ToList();
+            var toRemove = _existingRF4DrawFlags.Keys.Except(_selectedCells).ToList();
 
             if (toAdd.Count == 0 && toRemove.Count == 0)
             {
@@ -353,16 +355,17 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 }
             }
 
-            // Now add new entries
+            // Now add new entries, preserving DrawFlags from any previously-existing tile at that cell
             int addedCount = 0;
             foreach (var (rx, rz) in toAdd.OrderBy(c => c.rz).ThenBy(c => c.rx))
             {
+                byte drawFlags = _existingRF4DrawFlags.TryGetValue((rx, rz), out byte existing) ? existing : (byte)0x08;
                 var result = adder.TryAddRoofFace4(
                     _walkableId1,
                     (byte)rx, (byte)rz,
                     altitude,
                     dy0, dy1, dy2,
-                    0x00); // DrawFlags = 0x00 for working roofs
+                    drawFlags);
 
                 if (result.IsSuccess)
                 {

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Roofs;
@@ -102,9 +103,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             // ── Populate fields from first facet ────────────────────────────
 
-            TxtY0.Text          = (firstY0          ?? 0).ToString();
+            short rawY0 = firstY0 ?? 0;
+            TxtY0.Text = (HeightDisplaySettings.ShowRawHeights ? rawY0 : rawY0 / 64).ToString();
             TxtHeight.Text      = (firstHeight      ?? 0).ToString();
-            TxtBlockHeight.Text = (firstBlockHeight ?? 0).ToString();
+            byte rawBH = firstBlockHeight ?? 0;
+            TxtBlockHeight.Text = (HeightDisplaySettings.ShowRawHeights ? rawBH : rawBH / 4).ToString();
             TxtStyle.Text       = (firstStyle       ?? 1).ToString();
 
             // ── Uniformity symbols for fields ───────────────────────────────
@@ -164,11 +167,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             if (ChkApplyY0.IsChecked == true)
             {
-                if (!short.TryParse(TxtY0.Text.Trim(), out y0))
+                if (!short.TryParse(TxtY0.Text.Trim(), out short y0Input))
                 {
                     MessageBox.Show("Y Offset must be a signed integer.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+                y0 = HeightDisplaySettings.ShowRawHeights ? y0Input : (short)(y0Input * 64);
             }
             if (ChkApplyHeight.IsChecked == true)
             {
@@ -180,11 +184,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             }
             if (ChkApplyBlockHeight.IsChecked == true)
             {
-                if (!byte.TryParse(TxtBlockHeight.Text.Trim(), out blockHeight))
+                if (!byte.TryParse(TxtBlockHeight.Text.Trim(), out byte blockHeightInput))
                 {
-                    MessageBox.Show("Block Height must be a value 0–255.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Block Height must be a positive number.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+                blockHeight = HeightDisplaySettings.ShowRawHeights ? blockHeightInput : (byte)(blockHeightInput * 4);
             }
             if (ChkApplyStyle.IsChecked == true)
             {

@@ -10,12 +10,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         {
             public int FacetId1 { get; init; }
             public int BuildingId1 { get; init; }
-            public int StoreyId { get; init; }
+            public short Y0 { get; init; }
+            public short Y1 { get; init; }
             public string TypeName { get; init; } = "";
             public string Coords { get; init; } = "";
 
             public string Display =>
-                $"Facet #{FacetId1} | Building #{BuildingId1} | Storey {StoreyId} | {TypeName} | {Coords}";
+                $"Facet #{FacetId1} | Building #{BuildingId1} | Y ({Y0 / 64},{Y1 / 64}) QS | {TypeName} | {Coords}";
         }
 
         public ObservableCollection<CandidateVm> Candidates { get; } = new();

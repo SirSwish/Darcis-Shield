@@ -252,10 +252,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             bool valid = true;
             valid &= byte.TryParse(TxtX0.Text, out _x0) && _x0 <= 127;
             valid &= byte.TryParse(TxtZ0.Text, out _z0) && _z0 <= 127;
-            valid &= short.TryParse(TxtY0.Text, out _y0);
+            short y0QS, y1QS;
+            valid &= short.TryParse(TxtY0.Text, out y0QS);
+            _y0 = (short)(y0QS * 64);
             valid &= byte.TryParse(TxtX1.Text, out _x1) && _x1 <= 127;
             valid &= byte.TryParse(TxtZ1.Text, out _z1) && _z1 <= 127;
-            valid &= short.TryParse(TxtY1.Text, out _y1);
+            valid &= short.TryParse(TxtY1.Text, out y1QS);
+            _y1 = (short)(y1QS * 64);
             return valid;
         }
 

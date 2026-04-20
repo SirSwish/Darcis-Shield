@@ -107,13 +107,13 @@
                 </StackPanel>
                 <!-- Y0 only; Y1 mirrors Y0 in code -->
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Vertical Offset:" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="TxtY0" 
-                             Style="{StaticResource EditableField}" 
+                    <TextBlock Text="Vertical Offset (QS):" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtY0"
+                             Style="{StaticResource EditableField}"
                              Width="60"
                              Text="0"
                              PreviewTextInput="SignedNumericOnly_PreviewTextInput"/>
-                    <TextBlock Text="256 = 1 floor"
+                    <TextBlock Text="4 = 1 storey"
                                Foreground="{StaticResource Subtle}"
                                VerticalAlignment="Center"
                                Margin="8,0,0,0"/>

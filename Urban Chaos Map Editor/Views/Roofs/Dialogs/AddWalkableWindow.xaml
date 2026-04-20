@@ -89,13 +89,13 @@
 
         <!-- Height -->
         <StackPanel Grid.Row="4">
-            <TextBlock Text="World Y:" Style="{StaticResource FieldLabel}"/>
+            <TextBlock Text="Height (Quarter Storeys):" Style="{StaticResource FieldLabel}"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                 <TextBox x:Name="TxtWorldY"
                          Width="80"
                          PreviewTextInput="SignedNumericOnly_PreviewTextInput"
                          TextChanged="TxtWorldY_TextChanged"/>
-                <TextBlock Text="256 = 1 floor"
+                <TextBlock Text="4 = 1 storey"
                            Foreground="{StaticResource Subtle}"
                            FontSize="11"
                            VerticalAlignment="Center"

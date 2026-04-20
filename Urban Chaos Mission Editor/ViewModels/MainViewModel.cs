@@ -1019,6 +1019,15 @@ public class MainViewModel : BaseViewModel
 
                 // Mark mission as modified
                 IsDirty = true;
+
+                // TODO: civilian variant padding disabled until UI editing is re-enabled
+                // var updatedModel = SelectedEventPoint.Model;
+                // if (updatedModel.WaypointType == Constants.WaypointType.CreateEnemies)
+                // {
+                //     int et = (updatedModel.Data[0] & 0xFFFF) - 1;
+                //     if (et == 0 || et == 1)
+                //         ApplyCivilianPadding(updatedModel.Index);
+                // }
             }
             else
             {
@@ -1158,6 +1167,14 @@ public class MainViewModel : BaseViewModel
 
                 StatusMessage = $"Created new EventPoint {freeIndex + 1}: {Constants.EditorStrings.GetWaypointTypeName(selectedType)}";
                 IsDirty = true;
+
+                // TODO: civilian variant padding disabled until UI editing is re-enabled
+                // if (newEventPoint.WaypointType == Constants.WaypointType.CreateEnemies)
+                // {
+                //     int et = (newEventPoint.Data[0] & 0xFFFF) - 1;
+                //     if (et == 0 || et == 1)
+                //         ApplyCivilianPadding(newEventPoint.Index);
+                // }
             }
             // If cancelled, we don't add anything
             break;
@@ -1182,6 +1199,198 @@ public class MainViewModel : BaseViewModel
         }
 
         return -1; // No free slots
+    }
+
+    /// <summary>
+    /// Adjusts the civilian EP's array slot so that index % 4 == Data[6]-1 (desired variant).
+    /// Inserts up to 3 dummy Simple Waypoints before the EP as padding, removing any
+    /// previously-inserted dummies first. Updates all EPRef references throughout the mission.
+    /// Only acts when Data[6] is in [1,4] (explicitly set by the user).
+    /// </summary>
+    private void ApplyCivilianPadding(int civilianEPIndex)
+    {
+        if (_currentMission == null) return;
+        var civEP = _currentMission.EventPoints[civilianEPIndex];
+        if (civEP == null || !civEP.Used) return;
+
+        int storedDesired = civEP.Data[6];
+        if (storedDesired < 1 || storedDesired > 4) return; // not explicitly set
+        int desiredVariant = storedDesired - 1; // 0-3
+
+        // ── Step 1: Locate and remove any existing padding dummies ──────────────────
+        // Padding dummies are Simple WPs with Colour == 0xFE immediately before the
+        // civilian EP's current slot.
+        int originalSlot = civilianEPIndex;
+        while (originalSlot > 1)
+        {
+            var prev = _currentMission.EventPoints[originalSlot - 1];
+            if (prev != null && prev.Used &&
+                prev.WaypointType == Constants.WaypointType.Simple &&
+                prev.Colour == 0xFE)
+            {
+                originalSlot--;
+            }
+            else break;
+        }
+
+        int prevPadding = civilianEPIndex - originalSlot;
+        if (prevPadding > 0)
+        {
+            // Remove old dummies
+            for (int i = originalSlot; i < civilianEPIndex; i++)
+                _currentMission.EventPoints[i] = null!;
+
+            // Move civilian back to its un-padded slot
+            _currentMission.EventPoints[originalSlot] = civEP;
+            _currentMission.EventPoints[civilianEPIndex] = null!;
+            civEP.Index = originalSlot;
+            UpdateEPIndexReferences(civilianEPIndex, originalSlot);
+        }
+
+        // ── Step 2: Compute new padding needed ──────────────────────────────────────
+        int currentMod = originalSlot % 4;
+        int padding = ((desiredVariant - currentMod) + 4) % 4;
+
+        if (padding == 0)
+        {
+            // Already at correct mod — just refresh the list
+            LoadEventPoints();
+            UpdateCategoryCounts();
+            ApplyFilters();
+            SelectedEventPoint = EventPoints.FirstOrDefault(e => e.Index == originalSlot);
+            if (prevPadding > 0)
+                StatusMessage = $"Civilian variant restored (no padding needed for current slot).";
+            return;
+        }
+
+        int targetSlot = originalSlot + padding;
+
+        if (targetSlot >= Models.Mission.MaxEventPoints)
+        {
+            _dialogService.ShowError(
+                $"Cannot set civilian variant: target slot {targetSlot} exceeds the mission limit of {Models.Mission.MaxEventPoints}.");
+            LoadEventPoints(); UpdateCategoryCounts(); ApplyFilters();
+            SelectedEventPoint = EventPoints.FirstOrDefault(e => e.Index == originalSlot);
+            return;
+        }
+
+        // ── Step 3: Verify intermediate slots are free ──────────────────────────────
+        for (int i = originalSlot + 1; i <= targetSlot; i++)
+        {
+            var ep = _currentMission.EventPoints[i];
+            if (ep != null && ep.Used)
+            {
+                _dialogService.ShowError(
+                    $"Cannot set civilian variant: slot {i} is occupied by another EventPoint.\n" +
+                    $"Free up the {padding} slot(s) after slot {originalSlot} to apply this change.");
+                LoadEventPoints(); UpdateCategoryCounts(); ApplyFilters();
+                SelectedEventPoint = EventPoints.FirstOrDefault(e => e.Index == originalSlot);
+                return;
+            }
+        }
+
+        // ── Step 4: Move civilian EP to target slot ──────────────────────────────────
+        _currentMission.EventPoints[targetSlot] = civEP;
+        civEP.Index = targetSlot;
+        _currentMission.EventPoints[originalSlot] = null!;
+        UpdateEPIndexReferences(originalSlot, targetSlot);
+
+        // ── Step 5: Fill intermediate slots with padding dummy Simple WPs ────────────
+        for (int i = originalSlot; i < targetSlot; i++)
+        {
+            _currentMission.EventPoints[i] = new Models.EventPoint
+            {
+                Index = i,
+                WaypointType = Constants.WaypointType.Simple,
+                Used = true,
+                Group = civEP.Group,
+                Colour = 0xFE,   // Sentinel: padding dummy
+                Direction = 0,
+                Flags = Constants.WaypointFlags.None,
+                TriggeredBy = Constants.TriggerType.None,
+                OnTrigger = Constants.OnTriggerBehavior.None,
+                X = civEP.X,
+                Y = civEP.Y,
+                Z = civEP.Z,
+            };
+        }
+
+        // ── Step 6: Refresh the observable collection ────────────────────────────────
+        LoadEventPoints();
+        UpdateCategoryCounts();
+        ApplyFilters();
+        SelectedEventPoint = EventPoints.FirstOrDefault(e => e.Index == targetSlot);
+
+        string[] variantNames = { "Officer Barnaby", "Grey Top", "Young Male", "Old Male" };
+        StatusMessage = $"Civilian variant set to {variantNames[desiredVariant]}. " +
+                        $"{padding} padding EP(s) inserted at slot(s) {originalSlot}–{targetSlot - 1}.";
+    }
+
+    /// <summary>
+    /// Updates all EPRef, EPRefBool, Next, Prev, and common Data[] references throughout
+    /// the mission when an EventPoint moves from oldIndex to newIndex.
+    /// </summary>
+    private void UpdateEPIndexReferences(int oldIndex, int newIndex)
+    {
+        if (_currentMission == null || oldIndex == newIndex) return;
+
+        foreach (var ep in _currentMission.EventPoints)
+        {
+            if (ep == null || !ep.Used) continue;
+
+            // Common trigger reference fields
+            if (ep.EPRef == (ushort)oldIndex) ep.EPRef = (ushort)newIndex;
+            if (ep.EPRefBool == (ushort)oldIndex) ep.EPRefBool = (ushort)newIndex;
+            if (ep.Next == (ushort)oldIndex) ep.Next = (ushort)newIndex;
+            if (ep.Prev == (ushort)oldIndex) ep.Prev = (ushort)newIndex;
+
+            // Type-specific Data[] fields that store EP indices
+            switch (ep.WaypointType)
+            {
+                case Constants.WaypointType.Conversation:
+                    if (ep.Data[1] == oldIndex) ep.Data[1] = newIndex;
+                    if (ep.Data[2] == oldIndex) ep.Data[2] = newIndex;
+                    break;
+
+                case Constants.WaypointType.AdjustEnemy:
+                    if (ep.Data[6] == oldIndex) ep.Data[6] = newIndex;
+                    break;
+
+                case Constants.WaypointType.CreateEnemies:
+                    // Data[1] = follow target EP
+                    if (ep.Data[1] == oldIndex) ep.Data[1] = newIndex;
+                    // Data[7] LOWORD = guard target EP
+                    if ((ep.Data[7] & 0xFFFF) == oldIndex)
+                        ep.Data[7] = (ep.Data[7] & unchecked((int)0xFFFF0000)) | (newIndex & 0xFFFF);
+                    break;
+
+                case Constants.WaypointType.MoveThing:
+                    if (ep.Data[0] == oldIndex) ep.Data[0] = newIndex;
+                    break;
+
+                case Constants.WaypointType.KillWaypoint:
+                    if (ep.Data[0] == oldIndex) ep.Data[0] = newIndex;
+                    break;
+
+                case Constants.WaypointType.CreateVehicle:
+                    if (ep.Data[2] == oldIndex) ep.Data[2] = newIndex;
+                    break;
+
+                case Constants.WaypointType.Message:
+                    if (ep.Data[2] == oldIndex &&
+                        ep.Data[2] != 0 && ep.Data[2] != 0xFFFF && ep.Data[2] != 0xFFFE)
+                        ep.Data[2] = newIndex;
+                    break;
+
+                case Constants.WaypointType.Extend:
+                    if (ep.Data[0] == oldIndex) ep.Data[0] = newIndex;
+                    break;
+
+                case Constants.WaypointType.NavBeacon:
+                    if (ep.Data[1] == oldIndex) ep.Data[1] = newIndex;
+                    break;
+            }
+        }
     }
 
     /// <summary>

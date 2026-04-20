@@ -26,10 +26,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 return;
             }
 
-            // Parse Y0 from input
+            // Parse Y0 from input (Quarter Storeys → raw)
             short y0 = 0;
-            if (short.TryParse(TxtY0.Text, out var parsedY))
-                y0 = parsedY;
+            if (short.TryParse(TxtY0.Text, out var parsedQS))
+                y0 = (short)(parsedQS * 64);
 
             // Door uses fixed values:
             // - Height: 4 (coarse)

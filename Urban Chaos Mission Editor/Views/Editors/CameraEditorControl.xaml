@@ -28,6 +28,13 @@
             <Setter Property="Foreground" Value="#FFCCCCCC"/>
             <Setter Property="Margin" Value="0,5"/>
         </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
     </UserControl.Resources>
 
     <StackPanel>
@@ -35,10 +42,14 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="110"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -46,21 +57,41 @@
 
             <!-- Camera Type -->
             <Label Grid.Row="0" Grid.Column="0" Content="Camera Type:"/>
-            <ComboBox Grid.Row="0" Grid.Column="1" 
+            <ComboBox Grid.Row="0" Grid.Column="1"
                       ItemsSource="{Binding CameraTypeOptions}"
                       SelectedIndex="{Binding CameraType}"/>
 
-            <!-- Target Type -->
-            <Label Grid.Row="1" Grid.Column="0" Content="Target Type:"/>
-            <ComboBox Grid.Row="1" Grid.Column="1" 
-                      ItemsSource="{Binding TargetTypeOptions}"
-                      SelectedIndex="{Binding TargetType}"/>
+            <!-- Movement -->
+            <Label Grid.Row="1" Grid.Column="0" Content="Movement:"/>
+            <ComboBox Grid.Row="1" Grid.Column="1"
+                      ItemsSource="{Binding CameraMovementTypeOptions}"
+                      SelectedIndex="{Binding CameraMovementType}"/>
 
-            <!-- Follow Player -->
-            <CheckBox Grid.Row="2" Grid.Column="1" 
-                      Content="Follow Player"
-                      IsChecked="{Binding FollowPlayer}"
+            <!-- Speed -->
+            <Label Grid.Row="2" Grid.Column="0" Content="Speed:"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Text="{Binding CameraSpeed, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Delay -->
+            <Label Grid.Row="3" Grid.Column="0" Content="Delay:"/>
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Text="{Binding CameraDelay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Pause Player -->
+            <CheckBox Grid.Row="4" Grid.Column="1"
+                      Content="Pause Player"
+                      IsChecked="{Binding PausePlayer}"
                       Margin="0,8,0,0"/>
+
+            <!-- Direction Lock -->
+            <CheckBox Grid.Row="5" Grid.Column="1"
+                      Content="Direction Lock"
+                      IsChecked="{Binding DirectionLock}"/>
+
+            <!-- Cannot Be Skipped -->
+            <CheckBox Grid.Row="6" Grid.Column="1"
+                      Content="Cannot Be Skipped"
+                      IsChecked="{Binding CannotBeSkipped}"/>
         </Grid>
 
         <Separator Margin="0,15,0,10" Background="#FF555555"/>
@@ -77,18 +108,6 @@
             <Run FontWeight="SemiBold">News:</Run> News crew camera style
             <LineBreak/>
             <Run FontWeight="SemiBold">Targetting:</Run> Targeting/aiming camera
-        </TextBlock>
-
-        <Separator Margin="0,10,0,10" Background="#FF555555"/>
-
-        <!-- Target Type Descriptions -->
-        <TextBlock Text="Target Types:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-        <TextBlock TextWrapping="Wrap" Foreground="#FF888888" FontSize="11">
-            <Run FontWeight="SemiBold">Normal:</Run> No special targeting
-            <LineBreak/>
-            <Run FontWeight="SemiBold">Attached:</Run> Camera attached to target
-            <LineBreak/>
-            <Run FontWeight="SemiBold">Nearest Living:</Run> Targets nearest living entity
         </TextBlock>
     </StackPanel>
 </UserControl>

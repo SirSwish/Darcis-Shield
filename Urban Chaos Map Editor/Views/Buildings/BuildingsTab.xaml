@@ -278,6 +278,7 @@
                                      SelectionChanged="FacetsList_SelectionChanged"
                                      MouseDoubleClick="FacetsList_MouseDoubleClick"
                                      PreviewKeyDown="FacetsList_PreviewKeyDown"
+                                     PreviewMouseDown="FacetsList_PreviewMouseDown"
                                      ItemContainerStyle="{StaticResource SelectableListBoxItem}"
                                      Background="Transparent"
                                      BorderThickness="0">
@@ -293,8 +294,8 @@
                                             <TextBlock Text="#"          FontSize="11" Foreground="{Binding TypeBrush}"/>
                                             <TextBlock Text="{Binding FacetId1}" FontWeight="Bold" FontSize="11" Margin="1,0,4,0" Foreground="{Binding TypeBrush}"/>
                                             <TextBlock Text="{Binding Coords}"   FontSize="11" Foreground="{Binding TypeBrush}"/>
-                                            <TextBlock Text=" Alt:" FontSize="11" Opacity="0.6" Foreground="{Binding TypeBrush}"/>
-                                            <TextBlock Text="{Binding Y0}"       FontSize="11" Foreground="{Binding TypeBrush}"/>
+                                            <TextBlock Text=" Y:" FontSize="11" Opacity="0.6" Foreground="{Binding TypeBrush}"/>
+                                            <TextBlock Text="{Binding Y0Display}" FontSize="11" Foreground="{Binding TypeBrush}"/>
                                             <TextBlock Text=" 🎨" FontSize="10">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">

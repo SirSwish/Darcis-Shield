@@ -30,7 +30,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             Debug.WriteLine($"[PrimsLayer#{_id} h={System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this)}] {msg}");
         }
 
-        private const double DotRadius = 4.0;
+        private const double DotRadius = 6.0;
         private const double HitGrow = 4.0;
         private const double DragThreshold = 4.0; // pixels
         private const double PrimSnapGrid = 32.0; // half-tile: covers corners, edge midpoints, and cell centres
@@ -261,6 +261,9 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
             var prim = vm.Prims[hit];
             bool isCtrl = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
+            // Capture selection state BEFORE we update it so yaw can require a prior selection.
+            bool wasAlreadySelected = vm.SelectedPrims.Contains(prim);
+
             if (isCtrl)
             {
                 // Toggle this prim in the multi-selection
@@ -296,8 +299,9 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
 
             var center = new Point(prim.PixelX, prim.PixelZ);
 
-            // --- NEW: Start yaw edit if click is in the arrow ring (outside the dot) ---
-            if (dist >= YawRingInner && dist <= YawRingOuter)
+            // --- NEW: Start yaw edit if click is in the arrow ring AND prim was already selected ---
+            // Requiring prior selection prevents an accidental rotation on the first click.
+            if (dist >= YawRingInner && dist <= YawRingOuter && wasAlreadySelected)
             {
                 _yawEditing = true;
                 _pressedIndex = hit;
@@ -341,8 +345,8 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
                 return;
             }
 
-            // --- Else: begin move drag on dot area (existing behavior) ---
-            if (dist <= (DotRadius + 4))
+            // --- Else: begin move drag on dot area (anything inside the yaw ring) ---
+            if (dist < YawRingInner)
             {
                 _mouseDown = true;
                 _isDragging = false;

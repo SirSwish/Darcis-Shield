@@ -1,5 +1,6 @@
 // /Views/MainWindow.xaml.cs
 using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -25,6 +26,23 @@ namespace UrbanChaosStyleEditor.Views
         private void Export_Click(object sender, RoutedEventArgs e) => Vm.ExportProject();
         private void Refresh_Click(object sender, RoutedEventArgs e) => Vm.ScanCustomTextures();
         private void Exit_Click(object sender, RoutedEventArgs e) => Close();
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            string version =
+                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? asm.GetName().Version?.ToString()
+                ?? "Unknown";
+
+            MessageBox.Show(
+                "Urban Chaos Style Editor\n\n" +
+                $"Version: {version}\n" +
+                "Part of the Darcis Shield modding toolkit.",
+                "About",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
 
         private void ImportTexture_Click(object sender, RoutedEventArgs e) => Vm.ImportTexture();
         private void ImportBatch_Click(object sender, RoutedEventArgs e) => Vm.ImportBatch();

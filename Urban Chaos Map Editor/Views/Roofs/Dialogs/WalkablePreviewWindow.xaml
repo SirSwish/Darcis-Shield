@@ -61,6 +61,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Opacity="0.7" Text="Building:" VerticalAlignment="Center"/>
@@ -69,8 +70,10 @@
                         <TextBlock Grid.Row="1" Grid.Column="0" Opacity="0.7" Text="Rect (X/Z):" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtRect" VerticalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Opacity="0.7" Text="Y:" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtY" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" x:Name="LblYField" Opacity="0.7" Text="Quarter Storeys:" VerticalAlignment="Center"/>
+                        <TextBox  Grid.Row="2" Grid.Column="1" x:Name="TxtY"
+                                  Background="#333" Foreground="White" BorderBrush="#555"
+                                  Padding="4,2" Margin="0,2" Width="60" HorizontalAlignment="Left"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Opacity="0.7" Text="StoreyY:" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtStoreyY" VerticalAlignment="Center"/>
@@ -86,46 +89,13 @@
 
                         <TextBlock Grid.Row="7" Grid.Column="0" Opacity="0.7" Text="Next:" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="7" Grid.Column="1" x:Name="TxtNext" VerticalAlignment="Center"/>
+
+                        <Button Grid.Row="8" Grid.Column="1" x:Name="BtnApply" Content="Apply"
+                                Click="BtnApply_Click"
+                                Margin="0,8,0,0" Padding="8,3"
+                                Background="#4a7c4a" Foreground="White"
+                                HorizontalAlignment="Left"/>
                     </Grid>
-
-                    <!-- Editable Height Fields -->
-                    <Border BorderBrush="#666" BorderThickness="1" CornerRadius="4" Margin="0,12,0,0" Padding="8" Background="#1a1a1a">
-                        <StackPanel>
-                            <TextBlock Text="Height / Storey (Editable)" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,8"/>
-                            <TextBlock Text="Y = roof surface height (raw byte, world = Y * 32).&#x0a;StoreyY = floor altitude in quarter-storey units (world = StoreyY * 64)." 
-                                       Opacity="0.6" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,8"/>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Y:" VerticalAlignment="Center" Margin="0,2"/>
-                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                                    <TextBox x:Name="TxtEditY" Width="60"
-                                             Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
-                                    <TextBlock Text="(8 = 1 floor)" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="StoreyY:" VerticalAlignment="Center" Margin="0,2"/>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                    <TextBox x:Name="TxtEditStoreyY" Width="60"
-                                             Background="#333" Foreground="White" BorderBrush="#555" Margin="0,2" Padding="4,2"/>
-                                    <TextBlock Text="(4 = 1 floor)" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <Button x:Name="BtnApply" Content="Apply Changes" 
-                                    Click="BtnApply_Click"
-                                    Margin="0,10,0,0" Padding="8,4"
-                                    Background="#4a7c4a" Foreground="White"/>
-                        </StackPanel>
-                    </Border>
 
                     <TextBlock Margin="0,10,0,0" Opacity="0.6"
                                Text="Double-click a RoofFace4 row to open its preview."/>
@@ -150,13 +120,9 @@
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="#" Width="50" DisplayMemberBinding="{Binding Index1}"/>
-                                <GridViewColumn Header="Y" Width="60" DisplayMemberBinding="{Binding Y}"/>
-                                <GridViewColumn Header="DY" Width="120" DisplayMemberBinding="{Binding DY}"/>
-                                <GridViewColumn Header="Flags" Width="70" DisplayMemberBinding="{Binding FlagsHex}"/>
-                                <GridViewColumn Header="RX" Width="50" DisplayMemberBinding="{Binding RX}"/>
-                                <GridViewColumn Header="RZ" Width="60" DisplayMemberBinding="{Binding RZHex}"/>
-                                <GridViewColumn Header="Next" Width="70" DisplayMemberBinding="{Binding Next}"/>
-                                <GridViewColumn Header="Slope?" Width="70" DisplayMemberBinding="{Binding Sloped}"/>
+                                <GridViewColumn Header="Y (QS)" Width="70" DisplayMemberBinding="{Binding Y}"/>
+                                <GridViewColumn Header="Vertex Offsets" Width="160" DisplayMemberBinding="{Binding DY}"/>
+                                <GridViewColumn Header="Draw Flags" Width="90" DisplayMemberBinding="{Binding FlagsHex}"/>
                             </GridView>
                         </ListView.View>
                     </ListView>

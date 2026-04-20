@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
 using UrbanChaosMissionEditor.ViewModels;
 
@@ -72,6 +73,23 @@ public partial class MainWindow : Window
         {
             filter.Toggle();
         }
+    }
+
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        string version =
+            asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? asm.GetName().Version?.ToString()
+            ?? "Unknown";
+
+        MessageBox.Show(
+            "Urban Chaos Mission Editor\n\n" +
+            $"Version: {version}\n" +
+            "Part of the Darcis Shield modding toolkit.",
+            "About",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void EventPointsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)

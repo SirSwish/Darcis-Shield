@@ -120,10 +120,10 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Altitude (Y):" Style="{StaticResource FieldLabel}"/>
+                <TextBlock Text="Altitude (QS):" Style="{StaticResource FieldLabel}"/>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox x:Name="TxtAltitude" Text="512" Width="80"/>
-                    <TextBlock Text="256 = 1 floor"
+                    <TextBox x:Name="TxtAltitude" Text="8" Width="80"/>
+                    <TextBlock Text="Quarter Storeys (1 QS = 64 raw)"
                                Foreground="{StaticResource Subtle}"
                                FontSize="11"
                                VerticalAlignment="Center"
@@ -155,9 +155,12 @@
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="RX" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="RZ" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="DY0 (SW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="DY1 (NW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="8" Text="DY2 (NE)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="DY0 (SW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
+                           ToolTip="SW corner delta — corner1 = SE + (DY0 &lt;&lt; ROOF_SHIFT)"/>
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="DY1 (NW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
+                           ToolTip="NW corner delta — corner2 = SE + (DY1 &lt;&lt; ROOF_SHIFT)"/>
+                <TextBlock Grid.Row="0" Grid.Column="8" Text="DY2 (NE)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
+                           ToolTip="NE corner delta — corner3 = SE + (DY2 &lt;&lt; ROOF_SHIFT)"/>
 
                 <TextBox Grid.Row="2" Grid.Column="0" x:Name="TxtRX" Text="0"/>
                 <TextBox Grid.Row="2" Grid.Column="2" x:Name="TxtRZ" Text="0"/>

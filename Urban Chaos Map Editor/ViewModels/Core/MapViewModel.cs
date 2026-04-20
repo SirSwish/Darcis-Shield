@@ -12,6 +12,7 @@ using UrbanChaosEditor.Shared.Services.Textures;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
@@ -551,6 +552,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                     _targetAltitude = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(TargetAltitudeRaw));
+                    OnPropertyChanged(nameof(TargetAltitudeDisplay));
                 }
             }
         }
@@ -560,6 +562,11 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         /// Read-only display property.
         /// </summary>
         public int TargetAltitudeRaw => TargetAltitude >> 3; // PAP_ALT_SHIFT = 3
+
+        /// <summary>
+        /// Display value for target altitude. TargetAltitude already holds what the user typed (QS or world), so show it directly.
+        /// </summary>
+        public int TargetAltitudeDisplay => TargetAltitude;
 
         // ===== Altitude painting state (for rectangle selection and overlay) =====
         private bool _isSettingAltitude;
@@ -1076,6 +1083,8 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             // if bytes reset implies -still loaded-, reflect it:
             mapSvc.MapBytesReset += (_, __) => IsMapLoaded = mapSvc.IsLoaded;
 
+            HeightSettings.DisplayModeChanged += (_, __) => OnPropertyChanged(nameof(TargetAltitudeDisplay));
+
             RaiseHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.RaiseHeight, _ => IsMapLoaded);
             LowerHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.LowerHeight, _ => IsMapLoaded);
             LevelHeightCommand = new RelayCommand(_ => SelectedTool = EditorTool.LevelHeight, _ => IsMapLoaded);
@@ -1184,6 +1193,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             PlacementYaw = 0;
             IsPlacingPrim = true;
             DragPreviewPrim = null;   // ghost will be driven by MapView mouse move
+            SelectedFacetId = null;   // deselect facet so auto-zoom doesn't interfere
         }
 
         // Called when Ctrl+V pastes a copied prim (ghost follows cursor until click)
@@ -1194,6 +1204,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             PlacementYaw = template.Yaw;
             IsPlacingPrim = true;
             DragPreviewPrim = null;
+            SelectedFacetId = null;   // deselect facet so auto-zoom doesn't interfere
         }
 
         // Cancel placement (Esc / right-click)
@@ -1772,8 +1783,16 @@ namespace UrbanChaosMapEditor.ViewModels.Core
                     // Explicitly notify that buildings changed - this triggers layer refresh
                     BuildingsChangeBus.Instance.NotifyChanged();
 
-                    // Check if walls now form a closed polygon - if so, set roof tiles
-                    if (_facetTemplate.Type == FacetType.Normal && AutoDetectRoofs)
+                    // Check if walls now form a closed polygon - if so, set roof tiles.
+                    // Any facet type that can participate in an exterior polygon edge must
+                    // trigger the check (a door sealing a 1-unit gap completes the polygon).
+                    bool triggersEnclosureCheck =
+                        _facetTemplate.Type == FacetType.Normal ||
+                        _facetTemplate.Type == FacetType.Wall ||
+                        _facetTemplate.Type == FacetType.NormalFoundation ||
+                        _facetTemplate.Type == FacetType.Door ||
+                        _facetTemplate.Type == FacetType.OutsideDoor;
+                    if (triggersEnclosureCheck && AutoDetectRoofs)
                     {
                         try
                         {

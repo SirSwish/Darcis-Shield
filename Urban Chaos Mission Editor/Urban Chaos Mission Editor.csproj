@@ -8,7 +8,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>UrbanChaosMissionEditor</RootNamespace>
 		<AssemblyName>UrbanChaosMissionEditor</AssemblyName>
-		<Version>1.11.0</Version>
+		<Version>1.16.0</Version>
 		<Authors>Darci's Shield Team</Authors>
 		<Description>Urban Chaos Mission Editor - UCM File Editor</Description>
 		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
@@ -38,6 +38,7 @@
 	<ItemGroup>
 		<Resource Include="Assets\Defaults\default.ucm" />
 		<Resource Include="Assets\Icons\app.ico" />
+		<Resource Include="Assets\Images\**\*.*" />
 	</ItemGroup>
 
 	<!-- Reference the Map Editor project to access shared texture/prim resources -->

@@ -174,18 +174,84 @@
     </BlockUIContainer>
 
     <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
-        Templates
+        Stamps
     </Paragraph>
     <Paragraph>
-        The
-        <Bold>Templates</Bold> section provides pre-built vertex height patterns that can
-        be applied to the map with a single action. Currently, one template is available:
+        The <Bold>Stamps</Bold> section lets you apply pre-built vertex height patterns to
+        the map. Stamps are fully user-created and can be saved to disk for reuse across
+        sessions and shared between maps.
     </Paragraph>
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ditch</Paragraph>
-    <Paragraph Margin="24,0,0,0">Creates a ditch pattern -- a recessed channel in the terrain
-        useful for rivers, drainage channels, or sunken paths.</Paragraph>
-    <Paragraph Margin="0,6,0,0" Foreground="#A0A0A0" FontStyle="Italic">
-        Additional templates for common terrain features are planned for future updates.
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Help/Images/heights_stamps_list.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Applying a Stamp
+    </Paragraph>
+    <Paragraph>
+        Placing a stamp is a three-step process:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Choose a stamp from the <Bold>dropdown list</Bold> in the Stamps panel.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click the <Bold>Stamp</Bold> button to arm the tool. The cursor changes to
+                indicate stamp placement mode is active.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click the desired location on the map canvas. The stamp's height pattern is
+                applied immediately, centred on the clicked vertex.</Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        There is no hover preview — the stamp is placed on the first click after the button is
+        activated. If you place it in the wrong spot, use <Bold>Ctrl+Z</Bold> to undo and try
+        again.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        The Stamp Editor
+    </Paragraph>
+    <Paragraph>
+        Click the <Bold>+ New Stamp</Bold> button in the Stamps panel to open the Stamp Editor.
+        Creating a stamp is a four-step process:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Type the desired grid size into the size box and click
+                <Bold>Generate Grid</Bold>. A blank grid of that size appears, ready to fill.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click each cell in the grid and enter a height value between
+                <Bold>-127</Bold> and <Bold>127</Bold>. Negative values lower the terrain;
+                positive values raise it; zero leaves the vertex at ground level.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Give the stamp a name.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click <Bold>Save Stamp</Bold>. The stamp is written as a
+                <Run FontFamily="Consolas" Foreground="#E8B84B">.stamp.json</Run> file to the
+                <Run FontFamily="Consolas" Foreground="#E8B84B">CustomStamps</Run> folder next
+                to the editor executable and immediately appears in the dropdown list.</Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,8">
+        <!-- IMAGE NEEDED: heights_stamp_editor.png — the Stamp Editor window showing the grid size input, Generate Grid button, the filled cell grid, name field and Save Stamp button -->
+        <Border Background="#2A2A2A" BorderBrush="#555" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock Foreground="#888" FontStyle="Italic" TextWrapping="Wrap">
+                [ Screenshot: heights_stamp_editor.png ]
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+    <Paragraph>
+        Custom stamps persist between sessions. You can manage them directly in the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">CustomStamps</Run> folder —
+        delete, rename, or copy
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.stamp.json</Run> files as needed.
+        The dropdown refreshes automatically when the panel is next opened.
     </Paragraph>
 
     <BlockUIContainer>
@@ -196,8 +262,7 @@
         Randomize Terrain
     </Paragraph>
     <Paragraph>
-        The
-        <Bold>Randomize</Bold> button applies a procedural algorithm to generate realistic
+        The <Bold>Randomize</Bold> button applies a procedural algorithm to generate realistic
         terrain heights across the entire map. This produces natural-looking hills, valleys, and
         undulating ground that can serve as a starting point for further manual sculpting. It
         affects all 129 x 129 vertices at once.
@@ -206,7 +271,7 @@
         <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/heights_randomized.png"
                MaxWidth="700" Stretch="Uniform"/>
     </BlockUIContainer>
-    <BlockUIContainer Margin="0,4,0,0">
+    <BlockUIContainer Margin="0,4,0,8">
         <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
                 CornerRadius="4" Padding="12">
             <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
@@ -214,6 +279,50 @@
                 <Run>Randomize overwrites all height values on the map. If you have existing terrain work, save your map first or use it only on a fresh map.</Run>
             </TextBlock>
         </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Randomize Area
+    </Paragraph>
+    <Paragraph>
+        Instead of randomizing the whole map at once, you can target a specific region with
+        the <Bold>Randomize Area</Bold> tool. Click the <Bold>Randomize Area</Bold> button,
+        then click and drag on the canvas to draw a rectangle around the vertices you want
+        to affect. When you release the mouse, the algorithm runs only within that rectangle,
+        leaving the rest of the map untouched.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Help/Images/heights_randomize_area.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,4">
+        Randomize Constraints
+    </Paragraph>
+    <Paragraph>
+        Three optional constraints let you control the character of the generated terrain.
+        All three apply to both the full-map Randomize and the Randomize Area tool:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Max Height</Paragraph>
+    <Paragraph Margin="24,0,0,6">Sets a ceiling on how high any vertex within the randomized
+        region can be raised. Vertices will not exceed this value regardless of what the
+        algorithm generates. Leave blank (or set to 127) to impose no upper limit.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Max Depth</Paragraph>
+    <Paragraph Margin="24,0,0,6">Sets a floor on how low any vertex can be pushed. Vertices
+        will not go below the negative of this value. Leave blank (or set to 128) to impose
+        no lower limit. For example, a Max Depth of 10 means no vertex will be lower
+        than -10.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Max Slope</Paragraph>
+    <Paragraph Margin="24,0,0,6">Limits the maximum height difference allowed between any two
+        adjacent vertices in the randomized region. This prevents cliff faces and sharp spikes,
+        producing smoother, more gradual terrain. A lower value gives rounder hills; a higher
+        value allows steeper drops.</Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,8">
+        <Image Source="pack://application:,,,/Help/Images/heights_randomize_constraints.png"
+               MaxWidth="700" Stretch="Uniform"/>
     </BlockUIContainer>
 
     <BlockUIContainer>
@@ -245,6 +354,15 @@
         </ListItem>
         <ListItem>
             <Paragraph>Remember that buildings and prims sit on top of the terrain surface. If you change heights after placing buildings, the walls may no longer align with the ground. Adjust facet Y0/Y1 values if needed.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Use <Bold>Randomize Area</Bold> instead of full-map Randomize to add organic variation to a specific neighbourhood without disturbing carefully crafted terrain elsewhere.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Set a low <Bold>Max Slope</Bold> value (e.g. 3–5) when randomizing areas that will contain roads or buildings to keep the generated terrain walkable and buildable.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Build a library of reusable <Bold>Stamps</Bold> for common shapes — hills, craters, river banks, ramps — and apply them quickly anywhere on the map. Stamps scale with the Units value, so one stamp can serve multiple height ranges.</Paragraph>
         </ListItem>
     </List>
 

@@ -26,7 +26,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             int depth = walkable.Z2 - walkable.Z1;
             TxtWalkableInfo.Text = $"Walkable #{walkableId1} (Building #{buildingId1}) - {width}x{depth} tiles";
 
-            TxtAltitude.Text = (walkable.Y * 32).ToString();
+            // Seed in Quarter Storeys: walkable.Y / 2 = QS (same as RF4 Y / 64)
+            TxtAltitude.Text = (walkable.Y / 2).ToString();
 
             RoofType_Changed(this, new RoutedEventArgs());
         }
@@ -60,12 +61,14 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            if (!short.TryParse(TxtAltitude.Text, out short altitude))
+            // Altitude entered in Quarter Storeys; convert to raw RF4 units (1 QS = 64 raw)
+            if (!short.TryParse(TxtAltitude.Text, out short altitudeQS))
             {
                 MessageBox.Show("Invalid altitude value.", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            short altitude = (short)(altitudeQS * 64);
 
             var adder = new RoofFace4Adder(MapDataService.Instance);
             RoofFace4Result result;

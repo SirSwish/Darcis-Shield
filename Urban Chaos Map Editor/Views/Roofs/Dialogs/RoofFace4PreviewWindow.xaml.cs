@@ -1,4 +1,4 @@
-// Views/Roofs/Dialogs/RoofFace4PreviewWindow.xaml.cs
+﻿﻿// Views/Roofs/Dialogs/RoofFace4PreviewWindow.xaml.cs
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -22,8 +22,6 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         private readonly int _index;
         private readonly RoofFace4Rec _rf;
         private readonly int _walkableId1;  // parent walkable (for Apply to All)
-        private bool _suppressFlagSync;
-
         private CheckBox[] _drawFlagChecks = null!;
         private CheckBox[] _papFlagChecks = null!;
 
@@ -55,8 +53,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 ChkPap12, ChkPap13, ChkPap14, ChkPap15
             };
 
-            Title = $"RoofFace4 Editor � #{index}";
-            HeaderTextBlock.Text = $"RoofFace4 #{index}";
+            Title = $"Roof Tile Editor - #{index}";
+            HeaderTextBlock.Text = $"Roof Tile #{index}";
 
             bool anyDy = rf.DY0 != 0 || rf.DY1 != 0 || rf.DY2 != 0;
             int gameZ = rf.RZ - 128;
@@ -70,6 +68,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
             LoadRf4Fields();
             LoadPapHiFlags();
+            UpdateSplitPreview();
         }
 
         // ====================================================================
@@ -78,18 +77,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void LoadRf4Fields()
         {
-            TxtY.Text = _rf.Y.ToString();
+            // Y is stored as raw RF4 units; display in Quarter Storeys (1 QS = 64 raw)
+            TxtY.Text = (_rf.Y / 64).ToString();
             TxtDY0.Text = _rf.DY0.ToString();
             TxtDY1.Text = _rf.DY1.ToString();
             TxtDY2.Text = _rf.DY2.ToString();
-            TxtRX.Text = _rf.RX.ToString();
-            TxtRZ.Text = _rf.RZ.ToString();
+
+            // RX: bits 0-6 = tile X (0-127), bit 7 = diagonal flag
+            TxtTileX.Text = (_rf.RX & 0x7F).ToString();
+            ChkDiagonal.IsChecked = (_rf.RX & 0x80) != 0;
+
+            // RZ: bits 0-6 = tile Z (0-127), bit 7 = always set in original maps
+            TxtTileZ.Text = (_rf.RZ & 0x7F).ToString();
+            ChkRzBit7.IsChecked = (_rf.RZ & 0x80) != 0;
+
             TxtNext.Text = _rf.Next.ToString();
 
-            _suppressFlagSync = true;
-            TxtDrawFlags.Text = $"{_rf.DrawFlags:X2}";
             SyncDrawFlagChecks(_rf.DrawFlags);
-            _suppressFlagSync = false;
         }
 
         private void LoadPapHiFlags()
@@ -98,27 +102,17 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             int gameZ = _rf.RZ - 128;
 
             if (gameX < 0 || gameX >= PAP_TILES || gameZ < 0 || gameZ >= PAP_TILES)
-            {
-                TxtPapFlags.Text = "�";
                 return;
-            }
 
             var bytes = MapDataService.Instance.GetBytesCopy();
             int tileIndex = gameX * PAP_TILES + gameZ;
             int offset = PAP_HEADER + tileIndex * PAP_TILE_SIZE;
 
             if (offset + PAP_TILE_SIZE > bytes.Length)
-            {
-                TxtPapFlags.Text = "�";
                 return;
-            }
 
             ushort flags = (ushort)(bytes[offset + 2] | (bytes[offset + 3] << 8));
-
-            _suppressFlagSync = true;
-            TxtPapFlags.Text = $"{flags:X4}";
             SyncPapFlagChecks(flags);
-            _suppressFlagSync = false;
         }
 
         // ====================================================================
@@ -140,24 +134,23 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             return flags;
         }
 
-        private void DrawFlagCheck_Changed(object sender, RoutedEventArgs e)
+        private void DrawFlagCheck_Changed(object sender, RoutedEventArgs e) { }
+
+        // ====================================================================
+        // Split direction preview
+        // ====================================================================
+
+        private void UpdateSplitPreview()
         {
-            if (_suppressFlagSync) return;
-            _suppressFlagSync = true;
-            TxtDrawFlags.Text = $"{ReadDrawFlagChecks():X2}";
-            _suppressFlagSync = false;
+            bool alternate = ChkDiagonal.IsChecked == true;
+            LineSplitA.Visibility = alternate ? Visibility.Visible : Visibility.Collapsed;
+            LineSplitB.Visibility = alternate ? Visibility.Collapsed : Visibility.Visible;
+            TxtSplitLabel.Text    = alternate ? "NW → SE" : "NE → SW";
         }
 
-        private void TxtDrawFlags_TextChanged(object sender, TextChangedEventArgs e)
+        private void ChkDiagonal_Changed(object sender, RoutedEventArgs e)
         {
-            if (_suppressFlagSync) return;
-            string text = TxtDrawFlags.Text.Trim().Replace("0x", "").Replace("0X", "");
-            if (byte.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out byte flags))
-            {
-                _suppressFlagSync = true;
-                SyncDrawFlagChecks(flags);
-                _suppressFlagSync = false;
-            }
+            UpdateSplitPreview();
         }
 
         // ====================================================================
@@ -179,25 +172,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             return flags;
         }
 
-        private void PapFlagCheck_Changed(object sender, RoutedEventArgs e)
-        {
-            if (_suppressFlagSync) return;
-            _suppressFlagSync = true;
-            TxtPapFlags.Text = $"{ReadPapFlagChecks():X4}";
-            _suppressFlagSync = false;
-        }
-
-        private void TxtPapFlags_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (_suppressFlagSync) return;
-            string text = TxtPapFlags.Text.Trim().Replace("0x", "").Replace("0X", "");
-            if (ushort.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out ushort flags))
-            {
-                _suppressFlagSync = true;
-                SyncPapFlagChecks(flags);
-                _suppressFlagSync = false;
-            }
-        }
+        private void PapFlagCheck_Changed(object sender, RoutedEventArgs e) { }
 
         // ====================================================================
         // Parsing helpers
@@ -208,27 +183,33 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         {
             y = 0; dy0 = dy1 = dy2 = 0; rx = rz = drawFlags = 0; next = 0;
 
-            if (!short.TryParse(TxtY.Text, out y) ||
+            // Y is entered in Quarter Storeys; convert to raw RF4 units (1 QS = 64 raw)
+            if (!short.TryParse(TxtY.Text, out short yQS) ||
                 !sbyte.TryParse(TxtDY0.Text, out dy0) ||
                 !sbyte.TryParse(TxtDY1.Text, out dy1) ||
                 !sbyte.TryParse(TxtDY2.Text, out dy2) ||
-                !byte.TryParse(TxtRX.Text, out rx) ||
-                !byte.TryParse(TxtRZ.Text, out rz) ||
+                !byte.TryParse(TxtTileX.Text, out byte tileX) ||
+                !byte.TryParse(TxtTileZ.Text, out byte tileZ) ||
                 !short.TryParse(TxtNext.Text, out next))
                 return false;
 
-            string drawText = TxtDrawFlags.Text.Trim().Replace("0x", "").Replace("0X", "");
-            if (!byte.TryParse(drawText, System.Globalization.NumberStyles.HexNumber, null, out drawFlags))
-                return false;
+            if (tileX > 127 || tileZ > 127) return false;
 
+            y = (short)(yQS * 64);
+
+            // Repack RX: bits 0-6 = X, bit 7 = diagonal flag
+            rx = (byte)(tileX | (ChkDiagonal.IsChecked == true ? 0x80 : 0x00));
+            // Repack RZ: bits 0-6 = Z, bit 7 = RZ.b7 flag
+            rz = (byte)(tileZ | (ChkRzBit7.IsChecked == true ? 0x80 : 0x00));
+
+            drawFlags = ReadDrawFlagChecks();
             return true;
         }
 
         private bool TryParsePapFlags(out ushort papFlags)
         {
-            papFlags = 0;
-            string text = TxtPapFlags.Text.Trim().Replace("0x", "").Replace("0X", "");
-            return ushort.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out papFlags);
+            papFlags = ReadPapFlagChecks();
+            return true;
         }
 
         /// <summary>
@@ -337,7 +318,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             int gameZ = rz - 128;
             WritePapFlags(bytes, gameX, gameZ, papFlags);
 
-            Debug.WriteLine($"[RF4Editor] Applied RF4 #{_index}: Y={y} DY=({dy0},{dy1},{dy2}) DrawFlags=0x{drawFlags:X2} RX={rx} RZ={rz}");
+            Debug.WriteLine($"[RF4Editor] Applied RF4 #{_index}: Y={y / 64} QS (raw={y}) DY=({dy0},{dy1},{dy2}) DrawFlags=0x{drawFlags:X2} RX={rx} RZ={rz}");
 
             svc.ReplaceBytes(bytes);
             svc.MarkDirty();
@@ -530,7 +511,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 $"Apply to all {tileCount} RF4 tiles in Walkable #{walkableId}?\n\n" +
                 $"RF4 range: [{startFace4}..{endFace4})\n\n" +
                 $"This will set:\n" +
-                $"  Y = {y}, DY = ({dy0},{dy1},{dy2})\n" +
+                $"  Y = {y / 64} QS, DY = ({dy0},{dy1},{dy2})\n" +
                 $"  DrawFlags = 0x{drawFlags:X2}\n" +
                 $"  PAP_HI Flags = 0x{papFlags:X4}\n\n" +
                 "RX, RZ, and Next are NOT changed (they're per-tile).",
@@ -564,7 +545,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
                 updated++;
             }
 
-            Debug.WriteLine($"[RF4Editor] Applied to all: {updated} RF4 tiles in Walkable #{walkableId}, Y={y} DrawFlags=0x{drawFlags:X2} PapFlags=0x{papFlags:X4}");
+            Debug.WriteLine($"[RF4Editor] Applied to all: {updated} RF4 tiles in Walkable #{walkableId}, Y={y / 64} QS (raw={y}) DrawFlags=0x{drawFlags:X2} PapFlags=0x{papFlags:X4}");
 
             svc.ReplaceBytes(bytes);
             svc.MarkDirty();

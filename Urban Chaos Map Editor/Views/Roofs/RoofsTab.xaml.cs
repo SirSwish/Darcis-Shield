@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 using UrbanChaosMapEditor.Models.Roofs;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
@@ -23,6 +24,13 @@ namespace UrbanChaosMapEditor.Views.Roofs
         private static readonly Regex _signedDigits = new(@"^-?[0-9]*$");
         private bool _isWaitingForWalkableDrawing;
 
+        // True only for a brief window when the user has physically interacted
+        // with the corresponding list (mouse click or keyboard arrow/home/end/page).
+        // Jump-to-viewport is gated on these so programmatic assignments from
+        // Refresh()/auto-select/building-filter changes do NOT move the viewport.
+        private bool _userInitiatedWalkableSelection;
+        private bool _userInitiatedRoofFaceSelection;
+
         public RoofsTab()
         {
             InitializeComponent();
@@ -37,6 +45,14 @@ namespace UrbanChaosMapEditor.Views.Roofs
                 if (MapDataService.Instance.IsLoaded)
                     vm.Refresh();
             };
+
+            HeightSettings.DisplayModeChanged += (_, __) => Dispatcher.Invoke(RefreshAltitudeMode);
+        }
+
+        private void RefreshAltitudeMode()
+        {
+            bool rawMode = HeightSettings.ShowRawHeights;
+            AltitudeLabel.Text = rawMode ? "Altitude (world):" : "Altitude (QS):";
         }
 
         // ====================================================================
@@ -57,6 +73,11 @@ namespace UrbanChaosMapEditor.Views.Roofs
             if (DataContext is not RoofsTabViewModel vm) return;
             if (sender is not ListView lv) return;
 
+            // Capture and immediately clear the flag so cascading programmatic
+            // assignments in the same pump iteration don't piggy-back on the jump.
+            bool userInitiated = _userInitiatedWalkableSelection;
+            _userInitiatedWalkableSelection = false;
+
             vm.HandleWalkableSelection(lv.SelectedItem);
 
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
@@ -65,10 +86,128 @@ namespace UrbanChaosMapEditor.Views.Roofs
                     (lv.SelectedItem as WalkableVM)?.WalkableId1 ?? 0;
             }
 
+            // Jump ONLY when the user physically picked this walkable from the
+            // list. Refresh/auto-select/building-filter assignments must not jump.
+            if (userInitiated && lv.SelectedItem is WalkableVM w)
+                JumpToWalkable(w);
         }
 
         private void RoofFaces4List_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (sender is not ListView lv) return;
+
+            bool userInitiated = _userInitiatedRoofFaceSelection;
+            _userInitiatedRoofFaceSelection = false;
+
+            if (userInitiated && lv.SelectedItem is RoofFace4VM rf)
+                JumpToRoofFace(rf);
+        }
+
+        /// <summary>
+        /// Sets the user-initiated flag for mouse clicks on the Walkables list.
+        /// A Background-priority reset prevents the flag leaking into a later
+        /// programmatic event if this click didn't cause a selection change.
+        /// </summary>
+        private void WalkablesList_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _userInitiatedWalkableSelection = true;
+            Dispatcher.BeginInvoke(
+                new Action(() => _userInitiatedWalkableSelection = false),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void RoofFaces4List_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _userInitiatedRoofFaceSelection = true;
+            Dispatcher.BeginInvoke(
+                new Action(() => _userInitiatedRoofFaceSelection = false),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        /// <summary>
+        /// Centers the map viewport on a walkable's midpoint if it is off-screen.
+        /// Matches the coordinate convention used by WalkablesLayer.ToMapRect:
+        /// pixel = (128 - tile) * 64.
+        /// </summary>
+        private static void JumpToWalkable(WalkableVM w)
+        {
+            if (Application.Current.MainWindow is not MainWindow mw) return;
+
+            var mapView = mw.MapViewControl;
+            if (mapView.Scroller == null) return;
+
+            // Don't jump while placing a prim — would fight the cursor.
+            if (mapView.DataContext is MapViewModel mapVm && mapVm.IsPlacingPrim) return;
+
+            // Rect corners in canvas pixels.
+            double px0 = (128 - w.X1) * 64.0;
+            double pz0 = (128 - w.Z1) * 64.0;
+            double px1 = (128 - w.X2) * 64.0;
+            double pz1 = (128 - w.Z2) * 64.0;
+
+            if (IsRectVisible(mapView, px0, pz0, px1, pz1)) return;
+
+            int midPx = (int)((px0 + px1) / 2.0);
+            int midPz = (int)((pz0 + pz1) / 2.0);
+            mapView.CenterOnPixel(midPx, midPz);
+        }
+
+        /// <summary>
+        /// Centers the map viewport on a RoofFace4 tile if it is off-screen.
+        /// Matches the coordinate convention used by RoofsLayer: the tile's
+        /// upper-left pixel is (128 - TileX - 1) * 64, (128 - TileZ - 1) * 64,
+        /// and the tile is 64x64 px, so centre is +32,+32 from the upper-left.
+        /// </summary>
+        private static void JumpToRoofFace(RoofFace4VM rf)
+        {
+            if (Application.Current.MainWindow is not MainWindow mw) return;
+
+            var mapView = mw.MapViewControl;
+            if (mapView.Scroller == null) return;
+
+            if (mapView.DataContext is MapViewModel mapVm && mapVm.IsPlacingPrim) return;
+
+            int tileX = rf.TileX;
+            int tileZ = rf.TileZ;
+            if (tileX < 0 || tileX > 127 || tileZ < 0 || tileZ > 127) return;
+
+            double left = (128 - tileX - 1) * 64.0;
+            double top  = (128 - tileZ - 1) * 64.0;
+            double right  = left + 64.0;
+            double bottom = top  + 64.0;
+
+            if (IsRectVisible(mapView, left, top, right, bottom)) return;
+
+            int midPx = (int)(left + 32);
+            int midPz = (int)(top  + 32);
+            mapView.CenterOnPixel(midPx, midPz);
+        }
+
+        /// <summary>
+        /// True when the canvas rectangle [px0..px1] x [pz0..pz1] is currently
+        /// inside the visible viewport (any overlap counts as visible).
+        /// Mirrors the logic in BuildingsTab.JumpToFacet so behaviour is consistent.
+        /// </summary>
+        private static bool IsRectVisible(MapView mapView, double px0, double pz0, double px1, double pz1)
+        {
+            var scroller = mapView.Scroller;
+            double zoom = (mapView.DataContext as MapViewModel)?.Zoom ?? 1.0;
+            if (zoom <= 0 || scroller.ViewportWidth <= 0 || scroller.ViewportHeight <= 0)
+                return false;
+
+            const double margin = 256.0; // MapSurface has Margin="256"
+            double viewLeft   = scroller.HorizontalOffset / zoom - margin;
+            double viewTop    = scroller.VerticalOffset   / zoom - margin;
+            double viewRight  = viewLeft + scroller.ViewportWidth  / zoom;
+            double viewBottom = viewTop  + scroller.ViewportHeight / zoom;
+
+            double rectLeft   = Math.Min(px0, px1);
+            double rectRight  = Math.Max(px0, px1);
+            double rectTop    = Math.Min(pz0, pz1);
+            double rectBottom = Math.Max(pz0, pz1);
+
+            return rectRight  >= viewLeft  && rectLeft   <= viewRight &&
+                   rectBottom >= viewTop   && rectTop    <= viewBottom;
         }
 
 
@@ -230,6 +369,20 @@ namespace UrbanChaosMapEditor.Views.Roofs
             {
                 BtnDeleteWalkable_Click(sender, e);
                 e.Handled = true;
+                return;
+            }
+
+            // Keyboard navigation that will change selection — mark as user-initiated
+            // so the jump-to-viewport fires, with a Background reset so the flag
+            // can't leak into a subsequent programmatic SelectionChanged.
+            if (e.Key == Key.Up || e.Key == Key.Down ||
+                e.Key == Key.PageUp || e.Key == Key.PageDown ||
+                e.Key == Key.Home || e.Key == Key.End)
+            {
+                _userInitiatedWalkableSelection = true;
+                Dispatcher.BeginInvoke(
+                    new Action(() => _userInitiatedWalkableSelection = false),
+                    System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
@@ -239,6 +392,17 @@ namespace UrbanChaosMapEditor.Views.Roofs
             {
                 BtnDeleteRoofFace4_Click(sender, e);
                 e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.Up || e.Key == Key.Down ||
+                e.Key == Key.PageUp || e.Key == Key.PageDown ||
+                e.Key == Key.Home || e.Key == Key.End)
+            {
+                _userInitiatedRoofFaceSelection = true;
+                Dispatcher.BeginInvoke(
+                    new Action(() => _userInitiatedRoofFaceSelection = false),
+                    System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
@@ -429,10 +593,10 @@ namespace UrbanChaosMapEditor.Views.Roofs
             if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm)
                 return;
 
-            if (!int.TryParse(AltitudeInput.Text, out int altitude))
-                altitude = 0;
+            if (!int.TryParse(AltitudeInput.Text, out int inputVal))
+                inputVal = 0;
 
-            mainVm.Map.TargetAltitude = altitude;
+            mainVm.Map.TargetAltitude = inputVal;
             mainVm.Map.SelectedTool = EditorTool.SetAltitude;
 
             Debug.WriteLine($"[RoofsTab] Set Altitude tool selected, TargetAltitude={mainVm.Map.TargetAltitude}");
@@ -449,24 +613,17 @@ namespace UrbanChaosMapEditor.Views.Roofs
 
         private void AltitudeInput_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (sender is not TextBox tb || RawAltitudeDisplay == null)
+            if (sender is not TextBox tb)
                 return;
 
-            if (int.TryParse(tb.Text, out int altitude))
+            if (int.TryParse(tb.Text, out int inputVal))
             {
-                RawAltitudeDisplay.Text = (altitude >> 3).ToString();
-
                 // If Set Altitude tool is already active, update TargetAltitude immediately
-                // so the next map click uses the new value without re-clicking "Set Alt".
                 if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm &&
                     mainVm.Map.SelectedTool == EditorTool.SetAltitude)
                 {
-                    mainVm.Map.TargetAltitude = altitude;
+                    mainVm.Map.TargetAltitude = inputVal;
                 }
-            }
-            else
-            {
-                RawAltitudeDisplay.Text = "0";
             }
         }
 

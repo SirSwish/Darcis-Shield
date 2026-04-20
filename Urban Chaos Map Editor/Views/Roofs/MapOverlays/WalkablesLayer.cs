@@ -9,6 +9,7 @@ using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.ViewModels.Core;
 using UrbanChaosMapEditor.Views.Roofs.Dialogs;
+using HeightSettings = UrbanChaosMapEditor.Models.Core.HeightDisplaySettings;
 
 namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
 {
@@ -118,6 +119,11 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             svc.MapLoaded += (_, __) => { SeedFromService(); Dispatcher.Invoke(InvalidateVisual); };
             svc.MapBytesReset += (_, __) => { SeedFromService(); Dispatcher.Invoke(InvalidateVisual); };
             svc.MapCleared += (_, __) => { ClearCache(); Dispatcher.Invoke(InvalidateVisual); };
+
+            Services.Buildings.BuildingsChangeBus.Instance.Changed +=
+                (_, __) => { SeedFromService(); Dispatcher.Invoke(InvalidateVisual); };
+
+            HeightSettings.DisplayModeChanged += (_, __) => Dispatcher.Invoke(InvalidateVisual);
 
             DataContextChanged += (_, __) => HookVm();
         }
@@ -249,13 +255,17 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
         {
             base.OnMouseLeftButtonDown(e);
 
-            if (e.ClickCount != 2) return;
             if (!_bubbleCenter.HasValue) return;
 
             Point pos = e.GetPosition(this);
             double dx = pos.X - _bubbleCenter.Value.X;
             double dy = pos.Y - _bubbleCenter.Value.Y;
             if (dx * dx + dy * dy > _bubbleRadius * _bubbleRadius) return;
+
+            // Consume every click on the bubble so it never falls through to the buildings layer.
+            e.Handled = true;
+
+            if (e.ClickCount != 2) return;
 
             var svc = MapDataService.Instance;
             if (!svc.TryGetWalkables(out var walkables, out var roofFaces4)) return;
@@ -266,7 +276,6 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
                 Owner = System.Windows.Application.Current.MainWindow
             };
             dlg.Show();
-            e.Handled = true;
         }
 
         private static void DrawHeightBubble(DrawingContext dc, Visual visual, Rect r, int y)
@@ -280,7 +289,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.MapOverlays
             dc.DrawEllipse(BubbleFill, BubbleEdge, center, radius, radius);
 
             var dpi = VisualTreeHelper.GetDpi(visual).PixelsPerDip;
-            string txt = y.ToString(CultureInfo.InvariantCulture);
+            string txt = (HeightSettings.ShowRawHeights ? y : y / 2).ToString(CultureInfo.InvariantCulture);
 
             double fontSize = radius * 0.95;
             var ft = new FormattedText(

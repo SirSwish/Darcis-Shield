@@ -169,12 +169,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox x:Name="ChkApplyY0" Grid.Column="0" IsChecked="True"/>
-                    <TextBlock Grid.Column="1" Text="Y Offset (Y0)" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="Y Offset (QS)" VerticalAlignment="Center"/>
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
                         <TextBox x:Name="TxtY0" Style="{StaticResource FieldBox}"
                                  IsEnabled="{Binding IsChecked, ElementName=ChkApplyY0}"/>
                         <TextBlock x:Name="SymY0" Style="{StaticResource UniformSym}"/>
-                        <TextBlock Style="{StaticResource HintText}" Text="Base altitude offset (signed)"/>
+                        <TextBlock Style="{StaticResource HintText}" Text="Quarter Storeys (4 = 1 storey)"/>
                     </StackPanel>
                 </Grid>
 
@@ -203,12 +203,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox x:Name="ChkApplyBlockHeight" Grid.Column="0" IsChecked="True"/>
-                    <TextBlock Grid.Column="1" Text="Block Height" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="Block Height (QS)" VerticalAlignment="Center"/>
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
                         <TextBox x:Name="TxtBlockHeight" Style="{StaticResource FieldBox}"
                                  IsEnabled="{Binding IsChecked, ElementName=ChkApplyBlockHeight}"/>
                         <TextBlock x:Name="SymBlockHeight" Style="{StaticResource UniformSym}"/>
-                        <TextBlock Style="{StaticResource HintText}" Text="4 px each  (16 = 1 floor)"/>
+                        <TextBlock Style="{StaticResource HintText}" Text="Quarter Storeys  (4 = 1 floor)"/>
                     </StackPanel>
                 </Grid>
 

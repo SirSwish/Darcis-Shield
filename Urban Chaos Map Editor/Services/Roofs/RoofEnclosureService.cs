@@ -11,6 +11,47 @@ namespace UrbanChaosMapEditor.Services.Roofs
 {
     public static class RoofEnclosureService
     {
+        // Fixed floor texture used when filling a warehouse's enclosed interior.
+        // Warehouses texture their roofs separately, so the PAP tiles inside a warehouse
+        // enclosure should be a floor texture rather than the classified roof pattern.
+        private const int WarehouseFloorTextureIndex = 287;
+
+        // ── Facet classification helpers ─────────────────────────────────────────
+        //
+        // Exterior polygon detection must include Doors (Type=Door, OutsideDoor) so that
+        // a wall polygon with a 1-tile gap closed by a door still registers as enclosed.
+        // Doors are NOT exposed in the polygon list / bulk facet editor though — only
+        // the Normal/Wall/NormalFoundation walls are editable there.
+        //
+        // Interior walls (FacetFlags.Inside set, or FacetType.Inside/OInside) are paired
+        // with their mirrored exterior wall by matching coordinates, and are included in
+        // the same polygon group so bulk height edits affect both at once.
+
+        private static bool IsExteriorPolygonEdge(DFacetRec f) =>
+            (f.Type == FacetType.Normal || f.Type == FacetType.Wall ||
+             f.Type == FacetType.NormalFoundation ||
+             f.Type == FacetType.Door || f.Type == FacetType.OutsideDoor)
+            && (f.Flags & FacetFlags.Inside) == 0;
+
+        private static bool IsExteriorWallForList(DFacetRec f) =>
+            (f.Type == FacetType.Normal || f.Type == FacetType.Wall ||
+             f.Type == FacetType.NormalFoundation)
+            && (f.Flags & FacetFlags.Inside) == 0;
+
+        private static bool IsInteriorWallForList(DFacetRec f)
+        {
+            // Consider it an interior wall if EITHER the Inside flag is set on a wall
+            // type, OR the FacetType itself is one of the explicit inside wall types.
+            bool hasInsideFlag = (f.Flags & FacetFlags.Inside) != 0;
+            bool isWallType = f.Type == FacetType.Normal ||
+                              f.Type == FacetType.Wall ||
+                              f.Type == FacetType.NormalFoundation;
+            bool isInsideType = f.Type == FacetType.Inside ||
+                                f.Type == FacetType.OInside;
+            return (hasInsideFlag && (isWallType || isInsideType)) || isInsideType;
+        }
+
+
         /// <summary>
         /// Returns true if the building's exterior wall facets form a closed polygon
         /// at any height level. Pure read — no side effects.
@@ -35,11 +76,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 if (fIdx < 1) continue;
                 var facet = snap.Facets[fIdx - 1];
 
-                if (facet.Type != FacetType.Normal && facet.Type != FacetType.Wall &&
-                    facet.Type != FacetType.NormalFoundation)
-                    continue;
-
-                if ((facet.Flags & FacetFlags.Inside) != 0) continue;
+                if (!IsExteriorPolygonEdge(facet)) continue;
                 if (facet.Building != buildingId1) continue;
 
                 int bh = facet.BlockHeight > 0 ? facet.BlockHeight : 16;
@@ -98,15 +135,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 if (fIdx < 1) continue;
                 var facet = snap.Facets[fIdx - 1];
 
-                if (facet.Type != FacetType.Normal && facet.Type != FacetType.Wall &&
-                    facet.Type != FacetType.NormalFoundation)
-                    continue;
-
-                if ((facet.Flags & FacetFlags.Inside) != 0)
-                    continue;
-
-                if (facet.Building != buildingId1)
-                    continue;
+                if (!IsExteriorPolygonEdge(facet)) continue;
+                if (facet.Building != buildingId1) continue;
 
                 int bh = facet.BlockHeight > 0 ? facet.BlockHeight : 16;
                 var key = (height: (int)facet.Height, blockHeight: bh, y0: (int)facet.Y0);
@@ -165,11 +195,32 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     byte minZ = (byte)polygon.Min(p => p.z);
                     byte maxZ = (byte)polygon.Max(p => p.z);
 
-                    // If we already have a matching walkable for this enclosure, skip reapply
-                    // unless forceRecalculate is set (e.g. bulk facet height edit).
-                    if (!forceRecalculate && PolygonAlreadyProcessed(svc, buildingId1, minX, minZ, maxX, maxZ))
+                    // rawAlt = (height × blockHeight × 4 + y0) >> PAP_ALT_SHIFT
+                    // Each BlockHeight unit = 4 world pixels ("4 px each" tooltip).
+                    // 1 standard storey (H=4, BH=16): (4×16×4 + 0) >> 3 = 256 >> 3 = 32 raw.
+                    // Y0 is the wall's base world Y, already in game pixel units.
+                    int worldAltitude = height * blockHeight * 4 + y0;
+                    byte newStoredY = (byte)Math.Clamp(worldAltitude >> 5, 0, 255);
+
+                    bool isWarehouseBuilding = (building.Type == (byte)BuildingType.Warehouse);
+
+                    // Decide whether to skip / replace an existing walkable over this footprint.
+                    //   - forceRecalculate (bulk facet height edit): always update to new Y
+                    //   - Existing is same altitude: already applied, nothing new to do
+                    //   - Existing is LOWER: a higher polygon now encloses the same footprint,
+                    //     replace — update walkable Y and every RF4 Y inside it
+                    //   - Existing is HIGHER: keep existing, this is an older lower polygon
+                    //   - No existing walkable: create new
+                    bool existingFound = TryFindExistingWalkable(svc, buildingId1, minX, minZ, maxX, maxZ,
+                        out int existingWalkableId1, out byte existingStoredY);
+
+                    bool replaceExistingWithHigher = existingFound && newStoredY > existingStoredY;
+                    bool wantUpdateExisting = existingFound && (forceRecalculate || replaceExistingWithHigher);
+
+                    if (existingFound && !wantUpdateExisting)
                     {
-                        Debug.WriteLine($"[RoofEnclosureService] Polygon already processed for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}), skipping reapply");
+                        Debug.WriteLine($"[RoofEnclosureService] Polygon already processed for Building #{buildingId1}: " +
+                            $"({minX},{minZ})->({maxX},{maxZ}) existingY={existingStoredY} newY={newStoredY}, skipping");
                         continue;
                     }
 
@@ -184,12 +235,11 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     var interiorTileSet = new HashSet<(int, int)>(interiorTiles);
                     bool oneWide = IsOneWidePolygon(interiorTileSet);
 
-                    // rawAlt = (height × blockHeight × 4 + y0) >> PAP_ALT_SHIFT
-                    // Each BlockHeight unit = 4 world pixels ("4 px each" tooltip).
-                    // 1 standard storey (H=4, BH=16): (4×16×4 + 0) >> 3 = 256 >> 3 = 32 raw.
-                    // Y0 is the wall's base world Y, already in game pixel units.
-                    int worldAltitude = height * blockHeight * 4 + y0;
                     int appliedCount = 0;
+                    // Track tiles where we actually applied PAP/texture for this polygon —
+                    // used so warehouse RF4 placement matches the interior footprint exactly,
+                    // not the (possibly larger) walkable bounding box.
+                    var appliedTilesForPolygon = new List<(int tx, int ty)>();
 
                     foreach (var (tx, ty) in interiorTiles)
                     {
@@ -205,31 +255,48 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                         Debug.WriteLine($"[RoofEnclosureService] Facet coords (X={tx}, Z={ty}) -> WPF coords ({wpfTx},{wpfTy})");
 
-                        bool isWarehouseBuilding = (building.Type == (byte)BuildingType.Warehouse);
-
-                        altAcc.WriteWorldAltitude(wpfTx, wpfTy, worldAltitude);
                         if (isWarehouseBuilding)
+                        {
+                            // Warehouses keep PAP altitude at 0 — only the Hidden flag is set so
+                            // the tile reads as "no roof here from the PAP layer". The real roof
+                            // sits at walkable/RF4 altitude instead.
                             altAcc.SetFlags(wpfTx, wpfTy, PapFlags.Hidden);
+                        }
                         else
+                        {
+                            altAcc.WriteWorldAltitude(wpfTx, wpfTy, worldAltitude);
                             altAcc.SetFlags(wpfTx, wpfTy, PapFlags.RoofExists | PapFlags.Hidden);
+                        }
 
                         changedWpfTiles.Add((wpfTx, wpfTy));
                         anyAltitudeChanged = true;
                         appliedCount++;
+                        appliedTilesForPolygon.Add((tx, ty));
 
                         if (applyRoofTextures)
                         {
-                            var (texNum, rot) = ClassifyRoofTile(tx, ty, interiorTileSet, oneWide);
-                            texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.Shared, texNum, rot, currentWorld);
+                            if (isWarehouseBuilding)
+                            {
+                                // Warehouses have their own roof texturing path (via RF4 entries)
+                                // so the tile underneath gets a flat floor texture, not a
+                                // classified roof pattern.
+                                texAcc.WriteTileTexture(wpfTx, wpfTy,
+                                    TexturesAccessor.TextureGroup.Shared,
+                                    WarehouseFloorTextureIndex, 0, currentWorld);
+                            }
+                            else
+                            {
+                                var (texNum, rot) = ClassifyRoofTile(tx, ty, interiorTileSet, oneWide);
+                                texAcc.WriteTileTexture(wpfTx, wpfTy, TexturesAccessor.TextureGroup.Shared, texNum, rot, currentWorld);
+                            }
                             anyTextureChanged = true;
                         }
                     }
 
-                    // Auto-create walkable for this specific enclosure
+                    // Auto-create walkable (and warehouse RF4s) for this specific enclosure
                     if (createWalkables && maxX > minX && maxZ > minZ)
                     {
-                        // WorldY = height × blockHeight × 4 + Y0 (same pixel scale as PAP altitude).
-                        int walkableWorldY = height * blockHeight * 4 + y0;
+                        int walkableWorldY = worldAltitude;
 
                         var template = new WalkableTemplate
                         {
@@ -243,19 +310,27 @@ namespace UrbanChaosMapEditor.Services.Roofs
                         };
 
                         var walkableAdder = new WalkableAdder(svc);
+                        var rf4Adder = new RoofFace4Adder(svc);
 
-                        // When recalculating (e.g. after bulk facet height edit), update the
-                        // existing walkable's Y in-place rather than creating a duplicate.
-                        bool updated = forceRecalculate && walkableAdder.TryUpdateExistingWalkableY(
+                        bool updated = wantUpdateExisting && walkableAdder.TryUpdateExistingWalkableY(
                             buildingId1, minX, minZ, maxX, maxZ, walkableWorldY, template.StoreyY);
 
                         if (updated)
                         {
-                            Debug.WriteLine($"[RoofEnclosureService] Updated existing walkable Y for Building #{buildingId1}: " +
-                                $"({minX},{minZ})->({maxX},{maxZ}) WorldY={walkableWorldY}");
+                            Debug.WriteLine($"[RoofEnclosureService] Updated existing walkable #{existingWalkableId1} Y for Building #{buildingId1}: " +
+                                $"({minX},{minZ})->({maxX},{maxZ}) WorldY={walkableWorldY} (replaceHigher={replaceExistingWithHigher})");
+
+                            // Walkable Y changed → keep any RF4 tiles aligned with the new height.
+                            if (isWarehouseBuilding && existingWalkableId1 > 0)
+                            {
+                                int touched = rf4Adder.TryUpdateWalkableRoofFace4Y(existingWalkableId1, (short)walkableWorldY);
+                                if (touched > 0)
+                                    Debug.WriteLine($"[RoofEnclosureService] Updated {touched} RF4 Y values to match walkable #{existingWalkableId1}");
+                            }
+
                             RoofsChangeBus.Instance.NotifyChanged();
                         }
-                        else
+                        else if (!existingFound)
                         {
                             var walkResult = walkableAdder.TryAddWalkable(template);
 
@@ -263,6 +338,29 @@ namespace UrbanChaosMapEditor.Services.Roofs
                             {
                                 Debug.WriteLine($"[RoofEnclosureService] Auto-created walkable #{walkResult.WalkableId1} " +
                                     $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) Height={height} Y0={y0} WorldY={walkableWorldY}");
+
+                                // For warehouses, auto-fill the interior with flat RF4 tiles at
+                                // the walkable's height. Only the polygon-interior footprint
+                                // gets RF4 tiles — not the full walkable bounding box — so that
+                                // non-rectangular shapes mirror the floor-texture footprint.
+                                // Houses etc. keep the PAP-roof mechanism and don't get auto
+                                // RF4 entries.
+                                if (isWarehouseBuilding && walkResult.WalkableId1 > 0)
+                                {
+                                    int rf4Created = 0;
+                                    foreach (var (tx, tz) in appliedTilesForPolygon)
+                                    {
+                                        byte rx = (byte)(tx - minX);
+                                        byte rz = (byte)(tz - minZ);
+                                        var rf4Result = rf4Adder.TryAddRoofFace4(
+                                            walkResult.WalkableId1, rx, rz,
+                                            (short)walkableWorldY, 0, 0, 0, 0x08);
+                                        if (rf4Result.IsSuccess) rf4Created++;
+                                        else Debug.WriteLine($"[RoofEnclosureService] Failed to add warehouse RF4 at rx={rx} rz={rz}: {rf4Result.ErrorMessage}");
+                                    }
+                                    Debug.WriteLine($"[RoofEnclosureService] Auto-created {rf4Created}/{appliedTilesForPolygon.Count} RF4 tiles (interior footprint) for warehouse walkable #{walkResult.WalkableId1}");
+                                }
+
                                 RoofsChangeBus.Instance.NotifyChanged();
                             }
                             else
@@ -329,7 +427,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
             var building = snap.Buildings[buildingId1 - 1];
             var result = new List<PolygonGroupInfo>();
 
-            // Collect qualifying facets with their 1-based IDs, grouped by (height, blockHeight, y0)
+            // Collect qualifying exterior edge facets (Normal/Wall/NormalFoundation +
+            // Door/OutsideDoor) with 1-based IDs, grouped by (height, blockHeight, y0).
+            // Doors count as polygon edges for closure but are filtered out of the
+            // FacetIds shown in the polygon list — bulk facet edits only operate on walls.
             var byLevel = new Dictionary<(int h, int bh, int y0), List<(Edge edge, int id1)>>();
 
             for (int fIdx = (int)building.StartFacet; fIdx < (int)building.EndFacet && fIdx <= snap.Facets.Length; fIdx++)
@@ -337,9 +438,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                 if (fIdx < 1) continue;
                 var f = snap.Facets[fIdx - 1];
 
-                if (f.Type != FacetType.Normal && f.Type != FacetType.Wall &&
-                    f.Type != FacetType.NormalFoundation) continue;
-                if ((f.Flags & FacetFlags.Inside) != 0) continue;
+                if (!IsExteriorPolygonEdge(f)) continue;
                 if (f.Building != buildingId1) continue;
 
                 int bh = f.BlockHeight > 0 ? f.BlockHeight : 16;
@@ -398,12 +497,61 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     if (edges.Count < 4) continue;
                     if (!TryFindClosedPolygon(edges, out _)) continue;
 
-                    var facetIds = compIndices.Select(i => items[i].id1).OrderBy(id => id).ToList();
+                    // Build the set of exterior wall IDs that belong to this polygon —
+                    // doors are used only for closure and are dropped from the bulk-edit list.
+                    var idsForList = new List<int>();
+                    foreach (int i in compIndices)
+                    {
+                        int id1 = items[i].id1;
+                        if (IsExteriorWallForList(snap.Facets[id1 - 1]))
+                            idsForList.Add(id1);
+                    }
+
+                    // Pair every exterior edge in this polygon to its mirrored interior wall
+                    // (same X/Z endpoints, forward or reversed) at the same level. These share
+                    // height with the exterior walls — bulk editing one must edit the other.
+                    // Build a fast lookup of the component's edge endpoints (normalised).
+                    var componentEdgeSet = new HashSet<((byte x, byte z) a, (byte x, byte z) b)>();
+                    foreach (var e in edges)
+                    {
+                        var a = e.Start; var b = e.End;
+                        var pair = Compare(a, b) <= 0 ? (a, b) : (b, a);
+                        componentEdgeSet.Add(pair);
+                    }
+
+                    for (int iIdx = (int)building.StartFacet; iIdx < (int)building.EndFacet && iIdx <= snap.Facets.Length; iIdx++)
+                    {
+                        if (iIdx < 1) continue;
+                        var ifacet = snap.Facets[iIdx - 1];
+                        if (ifacet.Building != buildingId1) continue;
+                        if (!IsInteriorWallForList(ifacet)) continue;
+
+                        int ibh = ifacet.BlockHeight > 0 ? ifacet.BlockHeight : 16;
+                        if ((int)ifacet.Height != key.h || ibh != key.bh || (int)ifacet.Y0 != key.y0)
+                            continue;
+
+                        var ia = ((byte)ifacet.X0, (byte)ifacet.Z0);
+                        var ib = ((byte)ifacet.X1, (byte)ifacet.Z1);
+                        var ipair = Compare(ia, ib) <= 0 ? (ia, ib) : (ib, ia);
+
+                        if (componentEdgeSet.Contains(ipair))
+                            idsForList.Add(iIdx);
+                    }
+
+                    if (idsForList.Count == 0) continue;
+
+                    var facetIds = idsForList.Distinct().OrderBy(id => id).ToList();
                     result.Add(new PolygonGroupInfo(key.h, key.bh, key.y0, facetIds));
                 }
             }
 
             return result;
+
+            static int Compare((byte x, byte z) a, (byte x, byte z) b)
+            {
+                int cmp = a.x.CompareTo(b.x);
+                return cmp != 0 ? cmp : a.z.CompareTo(b.z);
+            }
         }
 
         /// <summary>
@@ -429,10 +577,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
             {
                 if (fIdx < 1) continue;
                 var facet = snap.Facets[fIdx - 1];
-                if (facet.Type != FacetType.Normal && facet.Type != FacetType.Wall &&
-                    facet.Type != FacetType.NormalFoundation) continue;
-                if ((facet.Flags & FacetFlags.Inside) != 0)
-                    continue;
+                if (!IsExteriorPolygonEdge(facet)) continue;
                 if (facet.Building != buildingId1) continue;
                 wallEdges.Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
             }
@@ -507,16 +652,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                 var facet = snap.Facets[fIdx - 1];
 
-                if (facet.Type != FacetType.Normal &&
-                    facet.Type != FacetType.Wall &&
-                    facet.Type != FacetType.NormalFoundation)
-                    continue;
-
-                if ((facet.Flags & FacetFlags.Inside) != 0)
-                    continue;
-
-                if (facet.Building != buildingId1)
-                    continue;
+                if (!IsExteriorPolygonEdge(facet)) continue;
+                if (facet.Building != buildingId1) continue;
 
                 wallEdges.Add(new Edge(facet.X0, facet.Z0, facet.X1, facet.Z1));
             }
@@ -658,6 +795,28 @@ namespace UrbanChaosMapEditor.Services.Roofs
             byte maxX,
             byte maxZ)
         {
+            return TryFindExistingWalkable(svc, buildingId1, minX, minZ, maxX, maxZ, out _, out _);
+        }
+
+        /// <summary>
+        /// Finds an existing walkable for this building whose footprint matches the given
+        /// bounds. Returns true with the walkable's 1-based ID and stored byte Y, so
+        /// callers can compare altitudes and decide whether to replace the existing
+        /// enclosure with a higher one.
+        /// </summary>
+        private static bool TryFindExistingWalkable(
+            MapDataService svc,
+            int buildingId1,
+            byte minX,
+            byte minZ,
+            byte maxX,
+            byte maxZ,
+            out int walkableId1,
+            out byte storedY)
+        {
+            walkableId1 = 0;
+            storedY = 0;
+
             if (!svc.TryGetWalkables(out var existingWalkables, out _))
                 return false;
 
@@ -668,6 +827,8 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     w.X1 == minX && w.Z1 == minZ &&
                     w.X2 == maxX && w.Z2 == maxZ)
                 {
+                    walkableId1 = i;
+                    storedY = w.Y;
                     return true;
                 }
             }

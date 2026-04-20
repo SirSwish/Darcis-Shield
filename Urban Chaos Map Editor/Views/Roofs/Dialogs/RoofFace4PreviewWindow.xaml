@@ -1,9 +1,9 @@
 <Window x:Class="UrbanChaosMapEditor.Views.Roofs.Dialogs.RoofFace4PreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="RoofFace4 Editor"
-        Height="620"
-        Width="540"
+        Title="Roof Tile Editor"
+        Height="680"
+        Width="680"
         Background="#222222"
         Foreground="White"
         WindowStartupLocation="CenterOwner"
@@ -36,16 +36,15 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Margin" Value="0,1"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="MinWidth" Value="130"/>
         </Style>
     </Window.Resources>
 
+    <!-- Outer grid: header | scrollable content | buttons -->
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -55,116 +54,207 @@
             <TextBlock x:Name="DetailsTextBlock" Foreground="#888" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0"/>
         </StackPanel>
 
-        <!-- RF4 Core Fields -->
-        <Border Grid.Row="1" BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+        <!-- Scrollable content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
             <StackPanel>
-                <TextBlock Text="ROOF TILE PROPERTIES" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Y (SE):"/>
-                    <TextBox x:Name="TxtY" Style="{StaticResource FieldBox}"/>
-                    <TextBlock Style="{StaticResource InfoText}" Text="SE base altitude (256 = 1 floor)"/>
-                </StackPanel>
+                <!-- RF4 Core Fields -->
+                <Border BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="DY0 (SW):"/>
-                    <TextBox x:Name="TxtDY0" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Text="DY1 (NW):" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
-                    <TextBox x:Name="TxtDY1" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Text="DY2 (NE):" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
-                    <TextBox x:Name="TxtDY2" Style="{StaticResource FieldBox}" Width="50"/>
-                </StackPanel>
+                        <!-- Left: scalar fields -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="ROOF TILE PROPERTIES" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,0,8"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="RX:"/>
-                    <TextBox x:Name="TxtRX" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Text="RZ:" Foreground="#AAA" VerticalAlignment="Center" Margin="12,0,8,0"/>
-                    <TextBox x:Name="TxtRZ" Style="{StaticResource FieldBox}" Width="50"/>
-                    <TextBlock Style="{StaticResource InfoText}" Text="Tile coords (RZ = abs Z + 128)"/>
-                </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="X (0-127):"/>
+                                <TextBox x:Name="TxtTileX" Style="{StaticResource FieldBox}" Width="50"/>
+                                <TextBlock Text="Z (0-127):" Foreground="#AAA" VerticalAlignment="Center" Margin="16,0,8,0"/>
+                                <TextBox x:Name="TxtTileZ" Style="{StaticResource FieldBox}" Width="50"/>
+                            </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Next:"/>
-                    <TextBox x:Name="TxtNext" Style="{StaticResource FieldBox}"/>
-                    <TextBlock Style="{StaticResource InfoText}" Text="Linked list pointer (S16)"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Next:"/>
+                                <TextBox x:Name="TxtNext" Style="{StaticResource FieldBox}"/>
+                                <TextBlock Style="{StaticResource InfoText}" Text="Linked list pointer (S16)"/>
+                            </StackPanel>
 
-        <!-- RF4 DrawFlags -->
-        <Border Grid.Row="2" BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="RF4 DRAW FLAGS" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Hex:" Foreground="#AAA" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBox x:Name="TxtDrawFlags" Style="{StaticResource FieldBox}" Width="40"
-                             TextChanged="TxtDrawFlags_TextChanged"/>
-                </StackPanel>
-                <WrapPanel Margin="0,2,0,0">
-                    <CheckBox x:Name="ChkDraw0" Style="{StaticResource FlagCheck}" Content="Bit0 (0x01) Shadow1"       Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw1" Style="{StaticResource FlagCheck}" Content="Bit1 (0x02) Shadow2"       Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw2" Style="{StaticResource FlagCheck}" Content="Bit2 (0x04) Shadow3"       Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw3" Style="{StaticResource FlagCheck}" Content="Bit3 (0x08) SlideEdge0"    Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw4" Style="{StaticResource FlagCheck}" Content="Bit4 (0x10) SlideEdge1"    Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw5" Style="{StaticResource FlagCheck}" Content="Bit5 (0x20) SlideEdge2"    Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw6" Style="{StaticResource FlagCheck}" Content="Bit6 (0x40) SlideEdge3"    Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                    <CheckBox x:Name="ChkDraw7" Style="{StaticResource FlagCheck}" Content="Bit7 (0x80) NoDraw/Split"  Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
-                </WrapPanel>
-            </StackPanel>
-        </Border>
+                            <!-- Split direction & preview -->
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,20,0">
+                                    <CheckBox x:Name="ChkDiagonal" Content="Switch Roof Split Direction"
+                                              Foreground="White" Margin="0,0,0,6"
+                                              ToolTip="RX bit 7 — selects which diagonal of the tile is the straight edge on sloped roofs"
+                                              Checked="ChkDiagonal_Changed" Unchecked="ChkDiagonal_Changed"/>
+                                    <CheckBox x:Name="ChkRzBit7" Content="Special Marker"
+                                              Foreground="White"
+                                              ToolTip="RZ bit 7 — always set in original maps; meaning unknown"/>
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Center">
+                                    <Border BorderBrush="#555" BorderThickness="1" CornerRadius="3"
+                                            Width="44" Height="44" Background="#1A1A1A">
+                                        <Canvas Width="44" Height="44">
+                                            <Line x:Name="LineSplitA" X1="2" Y1="2" X2="42" Y2="42"
+                                                  Stroke="#4AAFFF" StrokeThickness="2"/>
+                                            <Line x:Name="LineSplitB" X1="42" Y1="2" X2="2" Y2="42"
+                                                  Stroke="#4AAFFF" StrokeThickness="2" Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    <TextBlock x:Name="TxtSplitLabel" Text="NW → SE"
+                                               Foreground="#888" FontSize="10" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
 
-        <!-- PAP_HI Cell Flags -->
-        <Border Grid.Row="3" BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="PAP_HI FLAGS (at this tile)" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Hex:" Foreground="#AAA" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBox x:Name="TxtPapFlags" Style="{StaticResource FieldBox}" Width="50"
-                             TextChanged="TxtPapFlags_TextChanged"/>
-                    <TextBlock x:Name="TxtPapCoords" Style="{StaticResource InfoText}"/>
-                </StackPanel>
-                <Grid Margin="0,2,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <CheckBox x:Name="ChkPap0"  Style="{StaticResource FlagCheck}" Content="Bit0  (0x0001) Shadow1"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap1"  Style="{StaticResource FlagCheck}" Content="Bit1  (0x0002) Shadow2"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap2"  Style="{StaticResource FlagCheck}" Content="Bit2  (0x0004) Shadow3"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap3"  Style="{StaticResource FlagCheck}" Content="Bit3  (0x0008) Reflective" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap4"  Style="{StaticResource FlagCheck}" Content="Bit4  (0x0010) Hidden"     Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap5"  Style="{StaticResource FlagCheck}" Content="Bit5  (0x0020) SinkSquare" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap6"  Style="{StaticResource FlagCheck}" Content="Bit6  (0x0040) SinkPoint"  Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap7"  Style="{StaticResource FlagCheck}" Content="Bit7  (0x0080) NoUpper"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                        <!-- Right: corner height grid (spatial layout) -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                            <TextBlock Text="CORNER HEIGHTS" FontWeight="SemiBold" FontSize="10" Foreground="#888" Margin="0,0,0,4"/>
+                            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="3" Background="#1A1A1A" Width="190">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- NW = DY1 -->
+                                    <Border Grid.Row="0" Grid.Column="0" BorderBrush="#333" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <StackPanel>
+                                            <TextBlock Text="NW" Foreground="#888" FontSize="10" Margin="0,0,0,3"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox x:Name="TxtDY1" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
+                                                         Width="44" Padding="3,2" HorizontalContentAlignment="Right"
+                                                         ToolTip="NW corner delta — corner2 = SE + (DY1 &lt;&lt; ROOF_SHIFT)"/>
+                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- NE = DY2 -->
+                                    <Border Grid.Row="0" Grid.Column="1" BorderBrush="#333" BorderThickness="0,0,0,1" Padding="8,6">
+                                        <StackPanel>
+                                            <TextBlock Text="NE" Foreground="#888" FontSize="10" Margin="0,0,0,3"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox x:Name="TxtDY2" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
+                                                         Width="44" Padding="3,2" HorizontalContentAlignment="Right"
+                                                         ToolTip="NE corner delta — corner3 = SE + (DY2 &lt;&lt; ROOF_SHIFT)"/>
+                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- SW = DY0 -->
+                                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="#333" BorderThickness="0,0,1,0" Padding="8,6">
+                                        <StackPanel>
+                                            <TextBlock Text="SW" Foreground="#888" FontSize="10" Margin="0,0,0,3"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox x:Name="TxtDY0" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
+                                                         Width="44" Padding="3,2" HorizontalContentAlignment="Right"
+                                                         ToolTip="SW corner delta — corner1 = SE + (DY0 &lt;&lt; ROOF_SHIFT)"/>
+                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- SE = Y (base) -->
+                                    <Border Grid.Row="1" Grid.Column="1" Padding="8,6">
+                                        <StackPanel>
+                                            <TextBlock Text="SE  (base)" Foreground="#AAA" FontSize="10" Margin="0,0,0,3"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox x:Name="TxtY" Background="#2A2A2A" Foreground="White" BorderBrush="#666"
+                                                         Width="44" Padding="3,2" HorizontalContentAlignment="Right"
+                                                         ToolTip="SE corner — base height in Quarter Storeys (1 QS = 64 raw)"/>
+                                                <TextBlock Text="QS" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <TextBlock Foreground="#444" FontSize="9" Margin="0,4,0,0" Width="190" TextWrapping="Wrap"
+                                       Text="SE = Y (base)   NW = Y+DY1&#x0A;SW = Y+DY0      NE = Y+DY2"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- RF4 DrawFlags -->
+                <Border BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="RF4 DRAW FLAGS" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                        <WrapPanel>
+                            <CheckBox x:Name="ChkDraw0" Style="{StaticResource FlagCheck}" Content="Shadow1"     Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw1" Style="{StaticResource FlagCheck}" Content="Shadow2"     Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw2" Style="{StaticResource FlagCheck}" Content="Shadow3"     Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw7" Style="{StaticResource FlagCheck}" Content="NoDraw (b7)" Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"
+                                      ToolTip="Suppresses rendering of this tile face"/>
+                            <!-- SlideEdge bits — hidden, kept for binary sync only -->
+                            <CheckBox x:Name="ChkDraw3" Visibility="Collapsed" Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw4" Visibility="Collapsed" Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw5" Visibility="Collapsed" Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                            <CheckBox x:Name="ChkDraw6" Visibility="Collapsed" Checked="DrawFlagCheck_Changed" Unchecked="DrawFlagCheck_Changed"/>
+                        </WrapPanel>
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <CheckBox x:Name="ChkPap8"  Style="{StaticResource FlagCheck}" Content="Bit8  (0x0100) NoGo"       Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap9"  Style="{StaticResource FlagCheck}" Content="Bit9  (0x0200) RoofExists" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap10" Style="{StaticResource FlagCheck}" Content="Bit10 (0x0400) Zone1"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap11" Style="{StaticResource FlagCheck}" Content="Bit11 (0x0800) Zone2"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap12" Style="{StaticResource FlagCheck}" Content="Bit12 (0x1000) Zone3"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap13" Style="{StaticResource FlagCheck}" Content="Bit13 (0x2000) Zone4"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap14" Style="{StaticResource FlagCheck}" Content="Bit14 (0x4000) FlatRoof"   Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                        <CheckBox x:Name="ChkPap15" Style="{StaticResource FlagCheck}" Content="Bit15 (0x8000) Water"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </Border>
+                </Border>
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                <!-- PAP_HI Cell Flags -->
+                <Border BorderBrush="#333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="PAP_HI FLAGS (at this tile)" FontWeight="SemiBold" FontSize="11" Foreground="#888" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtPapCoords" Style="{StaticResource InfoText}"/>
+                        </StackPanel>
+                        <Grid Margin="0,2,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <CheckBox x:Name="ChkPap0"  Style="{StaticResource FlagCheck}" Content="Shadow1"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap1"  Style="{StaticResource FlagCheck}" Content="Shadow2"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap2"  Style="{StaticResource FlagCheck}" Content="Shadow3"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap3"  Style="{StaticResource FlagCheck}" Content="Reflective" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap4"  Style="{StaticResource FlagCheck}" Content="Hidden"     Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap5"  Style="{StaticResource FlagCheck}" Content="SinkSquare" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap6"  Style="{StaticResource FlagCheck}" Content="SinkPoint"  Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap7"  Style="{StaticResource FlagCheck}" Content="NoUpper"    Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <CheckBox x:Name="ChkPap8"  Style="{StaticResource FlagCheck}" Content="NoGo"       Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap9"  Style="{StaticResource FlagCheck}" Content="RoofExists" Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap10" Style="{StaticResource FlagCheck}" Content="Zone1"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap11" Style="{StaticResource FlagCheck}" Content="Zone2"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap12" Style="{StaticResource FlagCheck}" Content="Zone3"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap13" Style="{StaticResource FlagCheck}" Content="Zone4"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap14" Style="{StaticResource FlagCheck}" Content="FlatRoof"   Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                                <CheckBox x:Name="ChkPap15" Style="{StaticResource FlagCheck}" Content="Water"      Checked="PapFlagCheck_Changed" Unchecked="PapFlagCheck_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons — always visible, pinned at bottom -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Apply to Selection" Padding="10,6" Margin="0,0,8,0"
                     Click="BtnApplyToSelection_Click" Background="#4A2D5A" Foreground="White" BorderBrush="#7A4A8A"
                     ToolTip="Drag a rectangle on the map to apply Y and DY values to all tiles in that area"/>
-            <Button Content="Apply to All Tiles" Padding="10,6" Margin="0,0,8,0"
+            <Button Content="Apply to All" Padding="10,6" Margin="0,0,8,0"
                     Click="BtnApplyToAll_Click" Background="#2D4A5A" Foreground="White" BorderBrush="#4A7A8A"
                     ToolTip="Apply Y, DY, DrawFlags and PAP flags to ALL RF4 tiles in the parent walkable"/>
-            <Button Content="Apply" Width="80" Margin="0,0,8,0" Click="BtnApply_Click"
+            <Button Content="Apply" Width="70" Margin="0,0,8,0" Click="BtnApply_Click"
                     ToolTip="Write changes to this single RF4 tile"/>
-            <Button Content="OK" Width="80" Margin="0,0,8,0" IsDefault="True" Click="BtnOk_Click"
+            <Button Content="OK" Width="70" Margin="0,0,8,0" IsDefault="True" Click="BtnOk_Click"
                     ToolTip="Apply changes and close"/>
-            <Button Content="Cancel" Width="80" IsCancel="True" Click="BtnClose_Click"/>
+            <Button Content="Cancel" Width="70" IsCancel="True" Click="BtnClose_Click"/>
         </StackPanel>
     </Grid>
 </Window>

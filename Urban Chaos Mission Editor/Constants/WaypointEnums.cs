@@ -246,6 +246,27 @@
     }
 
     /// <summary>
+    /// Determines which trigger-parameter fields to show/label in the EP editor.
+    /// Derived from TriggerType at runtime — never stored in the file.
+    /// </summary>
+    public enum TriggerParamMode
+    {
+        None,           // No trigger parameters
+        Depend,         // EPRef = dependency waypoint
+        Boolean,        // EPRef + EPRefBool = two dependency waypoints (AND / OR)
+        EPRefOnly,      // EPRef = target person / item EP only
+        PersonSeen,     // EPRef = person being seen; EPRefBool = observer (0 = anyone)
+        PersonInVehicle,// EPRef = person EP; EPRefBool = vehicle EP (0 = any)
+        Time,           // Radius = time in ticks (100/s)
+        Countdown,      // EPRef = optional dep; Radius = countdown ticks
+        Proximity,      // Radius = proximity radius
+        TargetRadius,   // EPRef = target EP; Radius = distance (raw ×64)
+        Counter,        // EPRef = counter index 0–9; Radius = threshold
+        CrimeRate,      // Radius = crime-rate value (÷100 for %)
+        Cuboid          // Radius packed: low16 = half-X, high16 = half-Z
+    }
+
+    /// <summary>
     /// Waypoint category for tree view organization
     /// </summary>
     public enum WaypointCategory

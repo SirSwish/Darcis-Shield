@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using UrbanChaosMapEditor.Models.Buildings;
+using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.ViewModels.Buildings;
 using UrbanChaosMapEditor.ViewModels.Core;
@@ -59,12 +60,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private void LoadFacetData(DFacetRec f)
         {
             // Coordinates
+            bool rawMode = HeightDisplaySettings.ShowRawHeights;
             TxtX0.Text = f.X0.ToString();
             TxtZ0.Text = f.Z0.ToString();
-            TxtY0.Text = f.Y0.ToString();
+            TxtY0.Text = (rawMode ? f.Y0 : f.Y0 / 64).ToString();
             TxtX1.Text = f.X1.ToString();
             TxtZ1.Text = f.Z1.ToString();
-            TxtY1.Text = f.Y1.ToString();
+            TxtY1.Text = (rawMode ? f.Y1 : f.Y1 / 64).ToString();
 
             // Cable parameters
             TxtSegments.Text = f.Height.ToString();
@@ -253,10 +255,13 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
             if (!byte.TryParse(TxtX0.Text, out x0)) return false;
             if (!byte.TryParse(TxtZ0.Text, out z0)) return false;
-            if (!short.TryParse(TxtY0.Text, out y0)) return false;
+            if (!short.TryParse(TxtY0.Text, out short y0Input)) return false;
             if (!byte.TryParse(TxtX1.Text, out x1)) return false;
             if (!byte.TryParse(TxtZ1.Text, out z1)) return false;
-            if (!short.TryParse(TxtY1.Text, out y1)) return false;
+            if (!short.TryParse(TxtY1.Text, out short y1Input)) return false;
+            bool rawMode = HeightDisplaySettings.ShowRawHeights;
+            y0 = rawMode ? y0Input : (short)(y0Input * 64);
+            y1 = rawMode ? y1Input : (short)(y1Input * 64);
             if (!byte.TryParse(TxtSegments.Text, out segments)) return false;
             if (!short.TryParse(TxtStepAngle1.Text, out stepAngle1)) return false;
             if (!short.TryParse(TxtStepAngle2.Text, out stepAngle2)) return false;

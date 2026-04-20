@@ -47,8 +47,19 @@
         <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
                 CornerRadius="4" Padding="12">
             <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
-                <Run FontWeight="Bold">Note:</Run>
-                <Run>Custom world folders are not yet supported but are in development. Currently, only the world numbers shipped with the game are available.</Run>
+                <Run FontWeight="Bold">Custom Worlds:</Run>
+                <Run>World numbers 0–20 are reserved for the game's built-in texture sets.
+Custom worlds use numbers</Run>
+                <Run FontWeight="Bold">21 and above.</Run>
+                <Run>To create a custom world, open the</Run>
+                <Run FontWeight="Bold">Style Editor</Run>
+                <Run>and define a new style with a world number of 21 or higher. Save the style
+from within the Style Editor — the Map Editor will then be able to read it immediately,
+allowing you to select that world number in the World box and paint with your custom textures.
+When you are ready to test in-game, use the Style Editor's</Run>
+                <Run FontWeight="Bold">Export</Run>
+                <Run>function to write the style files to the game's textures folder. The engine
+will then load the custom world exactly like any built-in world.</Run>
             </TextBlock>
         </Border>
     </BlockUIContainer>
@@ -187,6 +198,108 @@
         <Border Height="1" Background="#444" Margin="0,14,0,12"/>
     </BlockUIContainer>
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Sampling a Texture from the Map
+    </Paragraph>
+    <Paragraph>
+        If you want to reuse a texture that is already painted somewhere on the map, you can
+        sample it directly rather than hunting for it in the palette. This is done with the
+        <Bold>Eye (sample) tool</Bold>.
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Click the
+                <Bold>Eye icon</Bold> in the Textures tab toolbar to enter sample mode.
+                The cursor changes to indicate that the next map click will sample rather than paint.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click any tile on the map canvas. The texture on that tile is immediately
+                <Bold>copied to the clipboard</Bold> and also becomes the active texture in the
+                palette — ready to paint with straight away.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,8">
+        <Image Source="pack://application:,,,/Help/Images/textures_sampled.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph>
+        Sample mode is a one-shot action — after the click the tool automatically returns to
+        the normal paint tool so you can start painting immediately with the sampled texture.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Selecting an Area (Rectangle Select, Copy and Paste)
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Select Area</Bold> tool lets you copy a rectangular block of existing map
+        textures and paste them elsewhere — useful for duplicating patterns, mirroring sections,
+        or moving a finished area to a new location.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Making a Selection
+    </Paragraph>
+    <Paragraph>
+        Switch to the <Bold>Select</Bold> tool in the Textures tab, then click and drag on the
+        map canvas to draw a rectangular selection. A dashed outline appears over the selected
+        region as you drag.
+    </Paragraph>
+    <BlockUIContainer Margin="0,4,0,8">
+        <Image Source="pack://application:,,,/Help/Images/textures_select_area.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Copying the Selection
+    </Paragraph>
+    <Paragraph>
+        Once a rectangular area is selected, press
+        <Bold>Ctrl+C</Bold> to copy all of the textures (and their rotations) within the
+        selection to the clipboard. The selection outline remains visible so you can confirm
+        the correct area was captured before pasting.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Pasting
+    </Paragraph>
+    <Paragraph>
+        Press <Bold>Ctrl+V</Bold> to enter paste mode. A
+        <Bold>ghost preview</Bold> of the copied block appears under your cursor, showing
+        exactly how the textures will land when placed. Move your cursor to the desired
+        position and <Bold>click to place</Bold> the block.
+    </Paragraph>
+    <BlockUIContainer Margin="0,4,0,8">
+        <Image Source="pack://application:,,,/Help/Images/textures_select_area_paste.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph>
+        After placing, the ghost remains active so you can stamp the same block multiple times.
+        Press <Bold>Escape</Bold> or <Bold>right-click</Bold> to cancel the paste and return
+        to the normal tool.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,8">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>You can copy a selection and then immediately paste it into a different part of the map without leaving the Textures tab. The clipboard is also populated by the Eye sample tool, so sampling a single tile and then pressing Ctrl+V lets you stamp that one texture repeatedly as a 1×1 paste.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
     <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
         Worked Example
     </Paragraph>
@@ -247,6 +360,16 @@
         <ListItem>
             <Paragraph>Remember to
                 <Bold>save your map</Bold> (Ctrl+S) after painting. Texture changes exist only in memory until saved.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Use the
+                <Bold>Eye tool</Bold> to quickly grab a texture already on the map without scrolling through the palette to find it.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Ctrl+C / Ctrl+V</Bold> works on the current selection — copy a finished section of the map and paste it elsewhere to replicate patterns without repainting tile by tile.
             </Paragraph>
         </ListItem>
     </List>

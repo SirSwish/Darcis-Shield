@@ -50,8 +50,8 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             TxtBounds.Text = $"({minX}, {minZ}) ? ({maxX}, {maxZ})";
             TxtSize.Text = $"{width} - {depth} tiles";
 
-            // Default height - 1 storey = 256
-            TxtWorldY.Text = "256";
+            // Default height - 1 storey = 4 quarter storeys
+            TxtWorldY.Text = "4";
             TxtWorldY.Focus();
             TxtWorldY.SelectAll();
         }
@@ -67,16 +67,15 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         {
             if (TxtInfo == null) return;
 
-            if (int.TryParse(TxtWorldY.Text, out int worldY))
+            if (int.TryParse(TxtWorldY.Text, out int qs) && qs >= 0)
             {
-                int storey = worldY / 256;
-                int offset = ((worldY % 256) + 256) % 256;
-                int walkableY = worldY >> 5;
-                int storeyY = worldY >> 6;
+                int worldY = qs * 64;
+                int rawY = qs * 2;
+                int storeys = qs / 4;
 
-                TxtInfo.Text = $"Storey {storey}, Offset {offset}\n" +
-                              $"Walkable.Y = {walkableY} (worldY >> 5)\n" +
-                              $"Walkable.StoreyY = {storeyY} (worldY >> 6)";
+                TxtInfo.Text = $"Full storeys: {storeys}\n" +
+                              $"Raw Y (file) = {rawY}\n" +
+                              $"World Y = {worldY}";
             }
             else
             {
@@ -86,13 +85,14 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 
         private void BtnOk_Click(object sender, RoutedEventArgs e)
         {
-            if (!int.TryParse(TxtWorldY.Text, out int worldY))
+            if (!int.TryParse(TxtWorldY.Text, out int qs) || qs < 0)
             {
-                MessageBox.Show("Please enter a valid integer for World Y.",
+                MessageBox.Show("Please enter a valid Quarter Storeys value (0 or greater).",
                     "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            int worldY = qs * 64;
             WorldY = worldY;
             StoreyY = (byte)Math.Clamp(worldY >> 6, 0, 255);
             WasCancelled = false;
