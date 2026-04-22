@@ -1,0 +1,239 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Roofs: Cell Altitudes
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Setting, sampling, and resetting cell vertical offsets.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What are Cell Altitudes?
+    </Paragraph>
+    <Paragraph>
+        <Bold>Cell altitude</Bold> controls the vertical offset of each map cell in quarter storeys.
+        This is <Bold>separate from terrain height</Bold> (which is controlled by the Heights tab)
+        and <Bold>separate from RF4 tiles</Bold> (which are used in warehouses).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Cell altitudes are typically set automatically when you create closed polygon buildings
+        (non-warehouses). The Auto-Build system sets the cell altitude to represent the roof height,
+        and sets the <Bold>RoofExists</Bold> PAP flag so the player stands on the roof surface.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For <Bold>warehouses</Bold>, cell altitude stays at 0 because RF4 tiles define the interior
+        floor height instead.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When to Manually Set Cell Altitudes
+    </Paragraph>
+    <Paragraph>
+        You'll manually set cell altitudes for:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Bridges</Bold> — Creating elevated walkways without closed polygonal facets
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Platforms</Bold> — Raised areas where the player should stand at a specific height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Adjusting auto-generated roofs</Bold> — Fine-tuning heights that the Auto-Build
+                system set
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Setting Cell Altitude
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Set Alt</Bold> tool allows you to paint cell altitudes onto a rectangular area
+        of the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the <Bold>Cell Altitude</Bold> section of the Roofs tab, enter the desired
+                <Bold>height in quarter storeys</Bold> (e.g., 8 for 2 storeys high).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Set Alt</Bold> button. Your cursor changes to indicate altitude
+                painting mode.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the map canvas, <Bold>click and drag</Bold> to define a rectangular area.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button. All cells in the selected rectangle are set to the
+                specified altitude.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> to exit altitude painting mode.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_set_altitude.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Cell Altitude controls showing height input field and Set Alt button, with rectangular selection preview on canvas
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Sampling Cell Altitude
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Sample</Bold> tool allows you to read the current cell altitude from any cell
+        on the map. This is useful when you want to match the height of an existing structure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Sample</Bold> button in the Cell Altitude section.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click any cell on the map canvas.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The cell's altitude is read and <Bold>automatically populated</Bold> into the
+                height input field.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                You can now use <Bold>Set Alt</Bold> to apply that sampled height to other cells.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Resetting Cell Altitude
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Reset</Bold> button sets the cell altitude back to <Bold>0 QS</Bold> (ground level)
+        for a selected rectangular area.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Reset</Bold> button in the Cell Altitude section.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the map canvas, <Bold>click and drag</Bold> to define a rectangular area.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button. All cells in the rectangle are reset to 0 QS.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        This is useful for clearing roof altitudes when you delete a building or want to start over.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Use the <Bold>Sample</Bold> tool to match the height of existing buildings when
+                creating adjacent structures.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Always set the <Bold>RoofExists</Bold> PAP flag on cells with elevated altitudes,
+                otherwise the player will fall through.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Cell altitudes are rendered visually on the map canvas when the altitude layer is
+                visible (check the layer toggle in the toolbar).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Remember: Cell altitude is <Bold>separate from terrain height</Bold>. Terrain
+                height (controlled in the Heights tab) defines the ground shape. Cell altitude
+                defines roof/platform surfaces above the ground.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                For warehouses, <Bold>do not</Bold> use cell altitudes — use RF4 tiles instead.
+                Warehouses must keep cell altitude at 0.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

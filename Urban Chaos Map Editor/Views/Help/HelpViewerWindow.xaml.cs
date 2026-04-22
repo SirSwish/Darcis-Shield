@@ -50,14 +50,17 @@ namespace UrbanChaosMapEditor.Views.Help
             Register("Map_Overview", "Map Overview");
             Register("Textures", "Textures & Painting");
             Register("Heights", "Heights & Terrain");
-            Register("Buildings_Overview", "Buildings — Overview");
-            Register("Building_Walls", "Buildings — Walls");
-            Register("Building_Warehouses", "Buildings — Warehouses");
-            Register("Building_Doors", "Buildings — Doors & Fences");
-            Register("Roofs_Walkables", "Roofs & Walkables");
-            Register("Prims_Objects", "Prims & Objects");
-            Register("Styles_TMA", "Styles & TMA System");
-            Register("Facet_Painting", "Facet Painting");
+            Register("Buildings_Basics", "Buildings: Getting Started");
+            Register("Buildings_Facets", "Buildings: Facets");
+            Register("Buildings_Painting", "Buildings: Painting Facets");
+            Register("Buildings_Properties", "Buildings: Properties & Flags");
+            Register("Buildings_Advanced", "Buildings: Advanced");
+            Register("Buildings_Examples", "Buildings: Examples");
+            Register("Roofs_Overview", "Roofs: Overview");
+            Register("Roofs_Walkables", "Roofs: Walkables & RF4 Tiles");
+            Register("Roofs_CellAltitudes", "Roofs: Cell Altitudes");
+            Register("Roofs_PAPFlags", "Roofs: PAP Flags");
+            Register("Prims_Overview", "Prims & Objects");
             Register("Keyboard_Shortcuts", "Keyboard Shortcuts");
             Register("File_Format", "IAM File Format Reference");
             Register("Troubleshooting", "Troubleshooting");
@@ -116,14 +119,12 @@ namespace UrbanChaosMapEditor.Views.Help
                     return;
                 }
 
-                // Read the stream as text, stripping BOM and invalid XML characters
                 string xamlText;
                 using (var reader = new System.IO.StreamReader(sri.Stream))
                 {
                     xamlText = reader.ReadToEnd();
                 }
 
-                // Strip BOM and control characters
                 xamlText = xamlText.TrimStart('\uFEFF', '\u200B');
                 xamlText = System.Text.RegularExpressions.Regex.Replace(
                     xamlText, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", "");
@@ -178,7 +179,6 @@ namespace UrbanChaosMapEditor.Views.Help
         /// </summary>
         private void ScrollDocToTop()
         {
-            // FlowDocumentScrollViewer wraps an internal ScrollViewer — walk the visual tree to find it.
             DocViewer.ApplyTemplate();
             var sv = FindVisualChild<ScrollViewer>(DocViewer);
             sv?.ScrollToTop();

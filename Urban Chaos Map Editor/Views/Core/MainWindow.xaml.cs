@@ -15,6 +15,7 @@ using UrbanChaosMapEditor.Views.Buildings;
 using UrbanChaosMapEditor.Views.Core.Dialogs;
 using UrbanChaosMapEditor.Views.Help;
 using UrbanChaosMapEditor.Views.Prims.Dialogs;
+using UrbanChaosMapEditor.Views.Viewport3D;
 
 namespace UrbanChaosMapEditor.Views.Core
 {
@@ -32,6 +33,10 @@ namespace UrbanChaosMapEditor.Views.Core
 
         private double _lastOpenDrawerWidth = EditorDrawerMinOpenWidth;
 
+        public static readonly RoutedCommand Open3DViewportCommand = new(nameof(Open3DViewportCommand), typeof(MainWindow));
+
+        private Viewport3DWindow? _viewport3DWindow;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -42,6 +47,22 @@ namespace UrbanChaosMapEditor.Views.Core
 
             AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), handledEventsToo: true);
             AddHandler(Keyboard.PreviewKeyUpEvent, new KeyEventHandler(MainWindow_PreviewKeyUp), handledEventsToo: true);
+
+            CommandBindings.Add(new CommandBinding(Open3DViewportCommand, (_, __) => Open3DViewport()));
+        }
+
+        private void Open3DViewport_Click(object sender, RoutedEventArgs e) => Open3DViewport();
+
+        private void Open3DViewport()
+        {
+            if (_viewport3DWindow != null && _viewport3DWindow.IsLoaded)
+            {
+                _viewport3DWindow.Activate();
+                return;
+            }
+            _viewport3DWindow = new Viewport3DWindow { Owner = this };
+            _viewport3DWindow.Closed += (_, __) => _viewport3DWindow = null;
+            _viewport3DWindow.Show();
         }
 
         private static readonly Regex _digits = new(@"^\d+$");

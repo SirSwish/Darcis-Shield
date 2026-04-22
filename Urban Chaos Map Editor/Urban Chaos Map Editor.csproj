@@ -5,7 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>UrbanChaosMapEditor</RootNamespace>
     <AssemblyName>UrbanChaosMapEditor</AssemblyName>
-    <Version>1.16.0</Version>
+    <Version>1.17.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -30,6 +30,29 @@
     <Resource Remove="Assets\Images\NewFolder\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Help\Images\buildings_add_dialog.png" />
+    <None Remove="Help\Images\buildings_add_wall.png" />
+    <None Remove="Help\Images\buildings_auto_options.png" />
+    <None Remove="Help\Images\buildings_bulk_edit.png" />
+    <None Remove="Help\Images\buildings_cable.png" />
+    <None Remove="Help\Images\buildings_clone_facet.png" />
+    <None Remove="Help\Images\buildings_color_filter.png" />
+    <None Remove="Help\Images\buildings_door.png" />
+    <None Remove="Help\Images\buildings_example_step3.png" />
+    <None Remove="Help\Images\buildings_example_step5.png" />
+    <None Remove="Help\Images\buildings_facet_disambiguation.png" />
+    <None Remove="Help\Images\buildings_fences.png" />
+    <None Remove="Help\Images\buildings_gate.png" />
+    <None Remove="Help\Images\buildings_house_vs_warehouse.png" />
+    <None Remove="Help\Images\buildings_ladder.png" />
+    <None Remove="Help\Images\buildings_move.png" />
+    <None Remove="Help\Images\buildings_overview.png" />
+    <None Remove="Help\Images\buildings_paint_button.png" />
+    <None Remove="Help\Images\buildings_paint_example.png" />
+    <None Remove="Help\Images\buildings_paint_window.png" />
+    <None Remove="Help\Images\buildings_transfer_facet.png" />
+    <None Remove="Help\Images\buildings_warehouse_step3.png" />
+    <None Remove="Help\Images\buildings_warehouse_step5.png" />
     <None Remove="Help\Images\getting_started_coordinates.png" />
     <None Remove="Help\Images\getting_started_editor_drawer.png" />
     <None Remove="Help\Images\getting_started_editor_tabs.png" />
@@ -43,6 +66,7 @@
     <None Remove="Help\Images\heights_layer_toggle.png" />
     <None Remove="Help\Images\heights_raise_lower_example.png" />
     <None Remove="Help\Images\heights_randomized.png" />
+    <None Remove="Help\Images\heights_randomize_area.png" />
     <None Remove="Help\Images\heights_randomize_constraints.png" />
     <None Remove="Help\Images\heights_stamps_list.png" />
     <None Remove="Help\Images\heights_stamp_editor.PNG" />
@@ -52,6 +76,19 @@
     <None Remove="Help\Images\map_overview_prims.png" />
     <None Remove="Help\Images\map_overview_tile_grid.png" />
     <None Remove="Help\Images\map_overview_walkables_rf4.png" />
+    <None Remove="Help\Images\prims_arrow_keys.png" />
+    <None Remove="Help\Images\prims_ghost_preview.png" />
+    <None Remove="Help\Images\prims_properties_window.png" />
+    <None Remove="Help\Images\prims_rotation.png" />
+    <None Remove="Help\Images\prims_tab_interface.png" />
+    <None Remove="Help\Images\roofs_add_rf4.png" />
+    <None Remove="Help\Images\roofs_add_walkable.png" />
+    <None Remove="Help\Images\roofs_edit_walkable.png" />
+    <None Remove="Help\Images\roofs_overview.png" />
+    <None Remove="Help\Images\roofs_pap_flags.png" />
+    <None Remove="Help\Images\roofs_rf4_editor.png" />
+    <None Remove="Help\Images\roofs_set_altitude.png" />
+    <None Remove="Help\Images\roofs_walkables_list.png" />
     <None Remove="Help\Images\textures_beta_checkbox.PNG" />
     <None Remove="Help\Images\textures_example_5x5.png" />
     <None Remove="Help\Images\textures_ghost_preview.png" />
@@ -62,10 +99,23 @@
     <None Remove="Help\Images\textures_world_selected.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Remove="Help\Topics\File_Format.xaml" />
     <Page Remove="Help\Topics\Getting_Started.xaml" />
     <Page Remove="Help\Topics\Heights.xaml" />
+    <Page Remove="Help\Topics\Keyboard_Shortcuts.xaml" />
     <Page Remove="Help\Topics\Map_Overview.xaml" />
     <Page Remove="Help\Topics\Textures.xaml" />
+    <Page Remove="Help\Topics\Buildings_Basics.xaml" />
+    <Page Remove="Help\Topics\Buildings_Facets.xaml" />
+    <Page Remove="Help\Topics\Buildings_Properties.xaml" />
+    <Page Remove="Help\Topics\Buildings_Advanced.xaml" />
+    <Page Remove="Help\Topics\Buildings_Examples.xaml" />
+    <Page Remove="Help\Topics\Buildings_Painting.xaml" />
+    <Page Remove="Help\Topics\Roofs_Overview.xaml" />
+    <Page Remove="Help\Topics\Roofs_Walkables.xaml" />
+    <Page Remove="Help\Topics\Roofs_CellAltitudes.xaml" />
+    <Page Remove="Help\Topics\Roofs_PAPFlags.xaml" />
+    <Page Remove="Help\Topics\Prims_Overview.xaml" />
   </ItemGroup>
 
   <!-- (Optional) Keep these folders visible in Solution Explorer -->
@@ -78,6 +128,29 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Help\Images\buildings_add_dialog.png" />
+    <Resource Include="Help\Images\buildings_add_wall.png" />
+    <Resource Include="Help\Images\buildings_auto_options.png" />
+    <Resource Include="Help\Images\buildings_bulk_edit.png" />
+    <Resource Include="Help\Images\buildings_cable.png" />
+    <Resource Include="Help\Images\buildings_clone_facet.png" />
+    <Resource Include="Help\Images\buildings_color_filter.png" />
+    <Resource Include="Help\Images\buildings_door.png" />
+    <Resource Include="Help\Images\buildings_example_step3.png" />
+    <Resource Include="Help\Images\buildings_example_step5.png" />
+    <Resource Include="Help\Images\buildings_facet_disambiguation.png" />
+    <Resource Include="Help\Images\buildings_fences.png" />
+    <Resource Include="Help\Images\buildings_gate.png" />
+    <Resource Include="Help\Images\buildings_house_vs_warehouse.png" />
+    <Resource Include="Help\Images\buildings_ladder.png" />
+    <Resource Include="Help\Images\buildings_move.png" />
+    <Resource Include="Help\Images\buildings_overview.png" />
+    <Resource Include="Help\Images\buildings_paint_button.png" />
+    <Resource Include="Help\Images\buildings_paint_example.png" />
+    <Resource Include="Help\Images\buildings_paint_window.png" />
+    <Resource Include="Help\Images\buildings_transfer_facet.png" />
+    <Resource Include="Help\Images\buildings_warehouse_step3.png" />
+    <Resource Include="Help\Images\buildings_warehouse_step5.png" />
     <Resource Include="Help\Images\getting_started_coordinates.png" />
     <Resource Include="Help\Images\getting_started_editor_drawer.png" />
     <Resource Include="Help\Images\getting_started_editor_tabs.png" />
@@ -91,6 +164,7 @@
     <Resource Include="Help\Images\heights_layer_toggle.png" />
     <Resource Include="Help\Images\heights_raise_lower_example.png" />
     <Resource Include="Help\Images\heights_randomized.png" />
+    <Resource Include="Help\Images\heights_randomize_area.png" />
     <Resource Include="Help\Images\heights_randomize_constraints.png" />
     <Resource Include="Help\Images\heights_stamps_list.png" />
     <Resource Include="Help\Images\heights_stamp_editor.PNG" />
@@ -100,6 +174,19 @@
     <Resource Include="Help\Images\map_overview_prims.png" />
     <Resource Include="Help\Images\map_overview_tile_grid.png" />
     <Resource Include="Help\Images\map_overview_walkables_rf4.png" />
+    <Resource Include="Help\Images\prims_arrow_keys.png" />
+    <Resource Include="Help\Images\prims_ghost_preview.png" />
+    <Resource Include="Help\Images\prims_properties_window.png" />
+    <Resource Include="Help\Images\prims_rotation.png" />
+    <Resource Include="Help\Images\prims_tab_interface.png" />
+    <Resource Include="Help\Images\roofs_add_rf4.png" />
+    <Resource Include="Help\Images\roofs_add_walkable.png" />
+    <Resource Include="Help\Images\roofs_edit_walkable.png" />
+    <Resource Include="Help\Images\roofs_overview.png" />
+    <Resource Include="Help\Images\roofs_pap_flags.png" />
+    <Resource Include="Help\Images\roofs_rf4_editor.png" />
+    <Resource Include="Help\Images\roofs_set_altitude.png" />
+    <Resource Include="Help\Images\roofs_walkables_list.png" />
     <Resource Include="Help\Images\textures_beta_checkbox.PNG" />
     <Resource Include="Help\Images\textures_example_5x5.png" />
     <Resource Include="Help\Images\textures_ghost_preview.png" />
@@ -108,10 +195,23 @@
     <Resource Include="Help\Images\textures_select_area.png" />
     <Resource Include="Help\Images\textures_select_area_paste.png" />
     <Resource Include="Help\Images\textures_world_selected.png" />
+    <Resource Include="Help\Topics\File_Format.xaml" />
     <Resource Include="Help\Topics\Getting_Started.xaml" />
     <Resource Include="Help\Topics\Heights.xaml" />
+    <Resource Include="Help\Topics\Keyboard_Shortcuts.xaml" />
     <Resource Include="Help\Topics\Map_Overview.xaml" />
     <Resource Include="Help\Topics\Textures.xaml" />
+    <Resource Include="Help\Topics\Buildings_Basics.xaml" />
+    <Resource Include="Help\Topics\Buildings_Facets.xaml" />
+    <Resource Include="Help\Topics\Buildings_Properties.xaml" />
+    <Resource Include="Help\Topics\Buildings_Advanced.xaml" />
+    <Resource Include="Help\Topics\Buildings_Examples.xaml" />
+    <Resource Include="Help\Topics\Buildings_Painting.xaml" />
+    <Resource Include="Help\Topics\Roofs_Overview.xaml" />
+    <Resource Include="Help\Topics\Roofs_Walkables.xaml" />
+    <Resource Include="Help\Topics\Roofs_CellAltitudes.xaml" />
+    <Resource Include="Help\Topics\Roofs_PAPFlags.xaml" />
+    <Resource Include="Help\Topics\Prims_Overview.xaml" />
   </ItemGroup>
 
 </Project>

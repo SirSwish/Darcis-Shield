@@ -1,0 +1,405 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Roofs: Overview
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Understanding Walkables, Roof Tiles, Cell Altitudes, and PAP Flags.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What is the Roofs Tab?
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Roofs tab</Bold> provides functionality for managing four interconnected systems
+        that control vertical space and surfaces in Urban Chaos:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Walkables</Bold> — Containers attached to buildings that hold Roof Face 4 tiles
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roof Face 4 (RF4) tiles</Bold> — Individual roof/floor surface tiles that live
+                inside walkables
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Cell Altitudes</Bold> — Vertical offset of each map cell (measured in quarter storeys)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>PAP Flags</Bold> — Properties that tell the engine how each cell should behave
+                (hidden, water, no-go, etc.)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_overview.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Roofs tab showing Walkables list, RF4 tiles list, Cell Altitude controls, and PAP Flags panel
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Automatic vs Manual Management
+    </Paragraph>
+    <Paragraph>
+        In most cases, <Bold>you don't need to manually manage roofs</Bold>. The Auto-Build system
+        (enabled in the Buildings tab) automatically handles walkables, roof tiles, cell altitudes,
+        and PAP flags when you create closed polygon structures.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        When Auto-Build Handles Everything
+    </Paragraph>
+    <Paragraph>
+        When you draw walls that form a closed polygon, the Auto-Build system automatically:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Creates a <Bold>walkable container</Bold> at the appropriate height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                For <Bold>warehouses</Bold>: Fills the walkable with <Bold>RF4 tiles</Bold> matching
+                the interior footprint
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                For <Bold>houses</Bold>: Sets the <Bold>cell altitude</Bold> to represent roof height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Sets appropriate <Bold>PAP flags</Bold> (RoofExists for houses, Hidden for warehouses)
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        When to Use Manual Management
+    </Paragraph>
+    <Paragraph>
+        You'll need to use the Roofs tab manually for:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Sloped roofs</Bold> — Adjusting individual RF4 tile corner heights to create
+                pitched or angled roofs
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Elevated structures</Bold> — Creating bridges, platforms, or raised areas without
+                closed polygonal facets
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Overlapping walkables</Bold> — Adding multiple walkable regions at different
+                heights on the same building
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Special surface properties</Bold> — Marking cells as water, no-go zones, or
+                mission event areas
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Fine-tuning</Bold> — Adjusting heights or flags that the Auto-Build system didn't
+                set exactly as desired
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Understanding the Four Systems
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        1. Walkables (Containers)
+    </Paragraph>
+    <Paragraph>
+        <Bold>Walkables</Bold> are rectangular containers attached to buildings. They define a
+        bounding box (X1, Z1 to X2, Z2) and a height. Walkables do <Bold>not</Bold> define surfaces
+        themselves — they are simply organizational containers that hold Roof Face 4 tiles.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Each walkable stores:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Building ID</Bold> — Which building owns this walkable
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Bounding box</Bold> — X1, Z1, X2, Z2 coordinates
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Height</Bold> — Vertical position in quarter storeys
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>RF4 range</Bold> — Start and end indices pointing to the RF4 tiles it contains
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        2. Roof Face 4 Tiles (RF4)
+    </Paragraph>
+    <Paragraph>
+        <Bold>Roof Face 4 tiles</Bold> (also called RF4 or roof tiles) are the actual walkable surfaces.
+        Each RF4 tile defines a 1×1 cell surface with four corner heights, allowing for sloped or
+        angled roofs.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Each RF4 tile stores:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Position</Bold> — X and Z coordinates (absolute, not relative to walkable)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>SE corner height</Bold> — Base height of the cell in quarter storeys
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>NW, NE, SW corner offsets</Bold> — Height deltas in pixels (for slopes)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roof direction</Bold> — Which way the tile splits diagonally
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Special marker</Bold> — Usually set for roof tiles (exact purpose unclear)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        RF4 tiles are used in <Bold>warehouse buildings</Bold> (for floors) and <Bold>houses with
+        sloped roofs</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        3. Cell Altitudes
+    </Paragraph>
+    <Paragraph>
+        <Bold>Cell altitude</Bold> controls the vertical offset of each map cell. This is <Bold>not</Bold>
+        the terrain height (which is controlled by the Heights tab) — it's a separate layer that
+        defines roof surfaces for non-warehouse buildings.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Cell altitude is measured in <Bold>quarter storeys</Bold> and is typically set automatically
+        when houses are built. For warehouses, cell altitude stays at 0 because RF4 tiles define
+        the interior floor height instead.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can manually set cell altitudes to create elevated areas like bridges or platforms
+        without needing closed polygonal facets.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        4. PAP Flags
+    </Paragraph>
+    <Paragraph>
+        <Bold>PAP flags</Bold> are binary properties attached to each cell that tell the engine
+        how the cell should behave. Multiple flags can be set on a single cell.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Common flags include:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>RoofExists</Bold> — Player should stand on the roof altitude (non-warehouses)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Hidden</Bold> — Cell is an interior cell with a ceiling above it (warehouses)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>NoGo</Bold> — Player cannot enter this cell (functions like No Go Zone in missions)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Water</Bold> — Marks the tile as water (sets sink behavior)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Zone flags</Bold> — Can be used for mission event trigger areas
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        See <Bold>Roofs: PAP Flags</Bold> for a complete list and detailed descriptions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Building Filter Integration
+    </Paragraph>
+    <Paragraph>
+        The Roofs tab is tightly integrated with the Buildings tab. When you select a building
+        in the Buildings tab, that building is <Bold>automatically passed through</Bold> to the
+        Roofs tab building filter.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This means:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                When you select Building #5 in Buildings tab, the Roofs tab automatically filters
+                to show only walkables attached to Building #5
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                You can manually change the filter by selecting a different building from the
+                dropdown in the Roofs tab
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                You can clear the filter to see <Bold>all</Bold> walkables from all buildings
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Quick Summary
+    </Paragraph>
+    <Table CellSpacing="0" Margin="0,8,0,0">
+        <Table.Columns>
+            <TableColumn Width="150"/>
+            <TableColumn Width="450"/>
+        </Table.Columns>
+        <TableRowGroup>
+            <TableRow Background="#2A2D32">
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Component</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Purpose</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Walkables</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Containers that hold RF4 tiles (bounding box + height)</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>RF4 Tiles</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Actual walkable surfaces (flat or sloped) — used in warehouses and sloped roofs</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Cell Altitudes</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Vertical offset of each cell (for non-warehouse roofs, bridges, platforms)</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>PAP Flags</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Properties that control cell behavior (hidden, water, no-go, zones, etc.)</Paragraph>
+                </TableCell>
+            </TableRow>
+        </TableRowGroup>
+    </Table>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        Now that you understand the four systems, see the specialized topics:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Roofs: Walkables &amp; RF4 Tiles</Bold> — Adding, editing, and deleting walkables
+                and roof tiles
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roofs: Cell Altitudes</Bold> — Setting, sampling, and resetting cell heights
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roofs: PAP Flags</Bold> — Complete flag reference and how to apply them
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roofs: Examples</Bold> — Creating sloped roofs, bridges, and special surfaces
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

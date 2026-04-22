@@ -1,0 +1,1159 @@
+﻿<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        IAM File Format Reference
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        A reverse-engineered reference for the Urban Chaos PC map format as currently understood by the editor.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- INTRODUCTION -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Scope and Terminology
+    </Paragraph>
+    <Paragraph>
+        This page documents the current understanding of the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.IAM</Run>
+        file structure used by the Urban Chaos PC map format. It is based on the editor's live read and write logic,
+        not on guesswork. Where a field is proven by the code, it is described directly. Where the editor preserves bytes
+        but does not yet decode them, that is stated clearly.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Unless otherwise noted, multi-byte values are stored in
+        <Bold>little-endian</Bold>
+        order.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The file uses several arrays that include a
+        <Bold>dummy entry at index 0</Bold>
+        . This is important: some sections are effectively 1-based in engine/editor logic, even though the slot-0 record is still written to disk.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Important Conventions
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">SaveType</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The file begins with a save-type value that controls version-dependent sections. The editor currently relies on these thresholds:
+        <LineBreak/>
+        <Run FontFamily="Consolas">SaveType &gt;= 17</Run>
+        enables
+        <Run FontFamily="Consolas">paint_mem</Run>
+        and
+        <Run FontFamily="Consolas">dstoreys</Run>
+        .
+        <LineBreak/>
+        <Run FontFamily="Consolas">SaveType &gt;= 21</Run>
+        enables the Indoors chunk.
+        <LineBreak/>
+        <Run FontFamily="Consolas">SaveType &gt;= 25</Run>
+        adds a late trailer of 2004 bytes after the object section.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">ObjectSectionSize</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The second 32-bit value in the file is the stored size of the objects/prims section. The editor uses it together with the file length
+        to locate the start of the objects block from the end of the file.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Coordinate systems</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Terrain cells use a 128×128 map grid. Object lookup uses a 32×32 MapWho grid. Roof and walkable data often use compact coordinates
+        and height values which must be scaled back into world space.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- TOP LEVEL LAYOUT -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Top-Level File Layout
+    </Paragraph>
+    <Paragraph>
+        The editor treats the file as a sequence of major blocks. The first three are fixed enough to be documented precisely.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        File header and major blocks
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">0x000000</Run>
+        <Run FontFamily="Consolas">int32 SaveType</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">0x000004</Run>
+        <Run FontFamily="Consolas">int32 ObjectSectionSize</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">0x000008</Run>
+        <Run FontFamily="Consolas">TileBlock[16384 * 6 bytes]</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">0x018008</Run>
+        <Run FontFamily="Consolas">BuildingBlock[...]</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">ObjectOffset</Run>
+        <Run FontFamily="Consolas">Objects / Prims section</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">EOF - 4 or EOF - 2004</Run>
+        <Run FontFamily="Consolas">TextureWorld + trailer</Run>
+    </Paragraph>
+
+    <Paragraph Margin="0,8,0,0">
+        The terrain/tile block is always
+        <Run FontFamily="Consolas">16384</Run>
+        records of
+        <Run FontFamily="Consolas">6</Run>
+        bytes each, so it occupies exactly
+        <Run FontFamily="Consolas">0x18000</Run>
+        bytes. Starting from file offset
+        <Run FontFamily="Consolas">0x000008</Run>
+        , that places the building block at
+        <Run FontFamily="Consolas">0x018008</Run>
+        .
+    </Paragraph>
+
+    <Paragraph Margin="0,8,0,0">
+        The start of the objects section is calculated from the end of the file:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">ObjectOffset = FileLength - 4 - sizeAdjustment - ObjectSectionSize</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        where
+        <Run FontFamily="Consolas">sizeAdjustment = 2000</Run>
+        if
+        <Run FontFamily="Consolas">SaveType &gt;= 25</Run>
+        , otherwise
+        <Run FontFamily="Consolas">0</Run>
+        .
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- TILE BLOCK -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tile Block (128×128 cells, 6 bytes per cell)
+    </Paragraph>
+    <Paragraph>
+        The tile block begins at file offset
+        <Run FontFamily="Consolas">0x000008</Run>
+        and stores terrain and PAP-style data for all map cells.
+        Each record is 6 bytes long.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Tile record layout
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0</Run>
+        <Run FontFamily="Consolas">U8  TextureByte</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+1</Run>
+        <Run FontFamily="Consolas">U8  CombinedByte</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2..+3</Run>
+        <Run FontFamily="Consolas">U16 PAP flags</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4</Run>
+        <Run FontFamily="Consolas">S8  Terrain height</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+5</Run>
+        <Run FontFamily="Consolas">S8  Floor/Roof altitude</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Tile ordering on disk
+    </Paragraph>
+    <Paragraph>
+        The tile array is stored in a transposed/flipped order compared with the editor grid. The current mapping is:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">fx = 127 - ty</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">fy = 127 - tx</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">fileIndex = fy * 128 + fx</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">tileOffset = 0x000008 + fileIndex * 6</Run>
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This means the first visual tile in the editor is not the first record in the file.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Texture bytes
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">TextureByte (+0)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The tile number within the selected texture group.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">CombinedByte (+1)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A packed control byte. The editor currently uses:
+        <LineBreak/>
+        bits
+        <Run FontFamily="Consolas">0..1</Run>
+        = texture group
+        <LineBreak/>
+        bits
+        <Run FontFamily="Consolas">2..3</Run>
+        = rotation
+        <LineBreak/>
+        bits
+        <Run FontFamily="Consolas">4..7</Run>
+        are not yet interpreted by the current editor.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Texture group values:
+        <LineBreak/>
+        <Run FontFamily="Consolas">0 = world</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">1 = shared</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">2 = prims/shared_prims</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">3 = prims/shared_prims</Run>
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Rotation values:
+        <LineBreak/>
+        <Run FontFamily="Consolas">0 = 180°</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">1 = 90°</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">2 = 0°</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">3 = 270°</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        PAP flags (+2..+3)
+    </Paragraph>
+    <Paragraph>
+        The editor treats bytes
+        <Run FontFamily="Consolas">+2..+3</Run>
+        as a 16-bit flags field. The currently named bits are:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">bit 0  = Shadow1</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 1  = Shadow2</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 2  = Shadow3</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 3  = Reflective</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 4  = Hidden</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 5  = SinkSquare</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 6  = SinkPoint</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 7  = NoUpper</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 8  = NoGo</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 9  = AnimTmap / RoofExists</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 10 = Zone1</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 11 = Zone2</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 12 = Zone3</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 13 = Zone4</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 14 = Wander / FlatRoof</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 15 = Water</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Height and altitude bytes
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Terrain height (+4)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Stored as a signed byte.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Roof/Floor altitude (+5)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Stored as a signed byte representing a shifted world altitude. The intended conversion is:
+        <LineBreak/>
+        <Run FontFamily="Consolas">worldAltitude = rawAlt &lt;&lt; 3</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">rawAlt = worldAltitude &gt;&gt; 3</Run>
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- BUILDING BLOCK -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Building Block
+    </Paragraph>
+    <Paragraph>
+        The building block begins at absolute file offset
+        <Run FontFamily="Consolas">0x018008</Run>
+        and extends up to the start of the objects section.
+        It contains the building header, building records, facet records, style/paint arrays, optional indoors data,
+        walkables, and RoofFace4 records.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        48-byte building header
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x00..+0x01</Run>
+        <Run FontFamily="Consolas">unknown / reserved</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x02..+0x03</Run>
+        <Run FontFamily="Consolas">U16 nextDBuilding</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x04..+0x05</Run>
+        <Run FontFamily="Consolas">U16 nextDFacet</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x06..+0x07</Run>
+        <Run FontFamily="Consolas">U16 nextDStyle</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x08..+0x09</Run>
+        <Run FontFamily="Consolas">U16 nextPaintMem</Run>
+        <Run Foreground="#A0A0A0">(used when SaveType ≥ 17)</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x0A..+0x0B</Run>
+        <Run FontFamily="Consolas">U16 nextDStorey</Run>
+        <Run Foreground="#A0A0A0">(used when SaveType ≥ 17)</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x0C..+0x2F</Run>
+        <Run FontFamily="Consolas">36 bytes unknown / reserved / preserved</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        The editor preserves the full 48-byte header even though it currently only edits the counter fields above.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Building block sub-layout
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas">Header[48 bytes]</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">DBuilding[nextDBuilding - 1]     // 24 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">14-byte pad</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">DFacet[nextDFacet - 1]           // 26 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">dstyles[nextDStyle]              // 2 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">paint_mem[nextPaintMem]          // 1 byte each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">DStorey[nextDStorey]             // 6 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">Indoors chunk (SaveType ≥ 21)</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">Walkables chunk</Run>
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- DBUILDING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        DBuilding records (24 bytes each)
+    </Paragraph>
+    <Paragraph>
+        The current editor proves some fields in the 24-byte building record, but not all of them. The following fields are confirmed:
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x00..+0x01</Run>
+        <Run FontFamily="Consolas">U16 StartFacet</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x02..+0x03</Run>
+        <Run FontFamily="Consolas">U16 EndFacet</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x04..+0x05</Run>
+        <Run FontFamily="Consolas">U16 Walkable</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x06</Run>
+        <Run FontFamily="Consolas">U8 Counter0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x07</Run>
+        <Run FontFamily="Consolas">U8 Counter1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x0B</Run>
+        <Run FontFamily="Consolas">U8 Type</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0x16</Run>
+        <Run FontFamily="Consolas">U8 Ware</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        The remaining bytes in the record are still preserved rather than authoritatively decoded by the current editor.
+        In particular, the editor code does not yet provide a trustworthy byte-perfect definition for building world position fields.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Buildings refer to facets by index range. In practice the editor treats the building's facet span as the set of facets from
+        <Run FontFamily="Consolas">StartFacet</Run>
+        up to but not including
+        <Run FontFamily="Consolas">EndFacet</Run>
+        in some mutation code, so care is required when comparing engine/editor interpretations.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- DFACET -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        DFacet Records (26 bytes each)
+    </Paragraph>
+    <Paragraph>
+        Facets are the fundamental building geometry records. This layout is fully defined by the current editor.
+    </Paragraph>
+
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0</Run>
+        <Run FontFamily="Consolas">U8  FacetType</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+1</Run>
+        <Run FontFamily="Consolas">U8  Height</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2</Run>
+        <Run FontFamily="Consolas">U8  X0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+3</Run>
+        <Run FontFamily="Consolas">U8  X1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4..+5</Run>
+        <Run FontFamily="Consolas">S16 Y0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6..+7</Run>
+        <Run FontFamily="Consolas">S16 Y1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+8</Run>
+        <Run FontFamily="Consolas">U8  Z0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+9</Run>
+        <Run FontFamily="Consolas">U8  Z1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+10..+11</Run>
+        <Run FontFamily="Consolas">U16 FacetFlags</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+12..+13</Run>
+        <Run FontFamily="Consolas">U16 StyleIndex</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+14..+15</Run>
+        <Run FontFamily="Consolas">U16 Building</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+16..+17</Run>
+        <Run FontFamily="Consolas">U16 DStorey / Storey</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+18</Run>
+        <Run FontFamily="Consolas">U8  FHeight</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+19</Run>
+        <Run FontFamily="Consolas">U8  BlockHeight</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+20</Run>
+        <Run FontFamily="Consolas">U8  Open</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+21</Run>
+        <Run FontFamily="Consolas">U8  Dfcache</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+22</Run>
+        <Run FontFamily="Consolas">U8  Shake</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+23</Run>
+        <Run FontFamily="Consolas">U8  CutHole</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+24</Run>
+        <Run FontFamily="Consolas">U8  Counter0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+25</Run>
+        <Run FontFamily="Consolas">U8  Counter1</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        FacetFlags bit meanings
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">bit 0  = Invisible</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 3  = Inside</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 4  = Dlit</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 5  = HugFloor</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 6  = Electrified</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 7  = TwoSided</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 8  = Unclimbable</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 9  = OnBuilding</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 10 = BarbTop</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 11 = SeeThrough</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 12 = Open</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 13 = Deg90</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 14 = TwoTextured</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bit 15 = FenceCut</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Special cable interpretation
+    </Paragraph>
+    <Paragraph>
+        Cable facets reuse parts of the standard facet record in a special way. In the current editor,
+        the cable interpretation is:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">Height     = segment count</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">StyleIndex = signed step_angle1</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">Building   = signed step_angle2</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">FHeight    = cable mode</Run>
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- STYLES / PAINT -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        dstyles, paint_mem, and DStorey
+    </Paragraph>
+    <Paragraph>
+        These arrays appear after the facet table. They support indoor/facet painting and indirect style selection.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        dstyles
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        Each
+        <Run FontFamily="Consolas">dstyles</Run>
+        entry is a signed 16-bit value.
+        Slot 0 is stored on disk.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">value &gt;= 0</Run>
+        = direct style id
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">value &lt; 0</Run>
+        = indirect lookup through
+        <Run FontFamily="Consolas">DStorey[-value]</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        paint_mem
+    </Paragraph>
+    <Paragraph>
+        <Run FontFamily="Consolas">paint_mem</Run>
+        is a raw byte array of length
+        <Run FontFamily="Consolas">nextPaintMem</Run>
+        . Slot 0 is stored on disk.
+        Each byte is interpreted as:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">bit 7    = flip flag</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">bits 0..6 = paint value</Run>
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If the low 7-bit paint value is
+        <Run FontFamily="Consolas">0</Run>
+        , the base style from the referenced
+        <Run FontFamily="Consolas">DStorey</Run>
+        is used.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        DStorey records (6 bytes each)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">U16 Style</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2..+3</Run>
+        <Run FontFamily="Consolas">U16 PaintIndex</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4</Run>
+        <Run FontFamily="Consolas">S8  Count</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+5</Run>
+        <Run FontFamily="Consolas">U8  Padding</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        Slot 0 is stored on disk here as well.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- INDOORS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Indoors Chunk (SaveType ≥ 21)
+    </Paragraph>
+    <Paragraph>
+        If the save type is 21 or higher, an indoors chunk is present after the
+        <Run FontFamily="Consolas">DStorey</Run>
+        array.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Indoors header (8 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">U16 nextInsideStorey</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2..+3</Run>
+        <Run FontFamily="Consolas">U16 nextInsideStair</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4..+5</Run>
+        <Run FontFamily="Consolas">U16 nextInsideBlock</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6..+7</Run>
+        <Run FontFamily="Consolas">U16 unknown / padding</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Indoors payload order
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas">InsideStorey[nextInsideStorey]   // 22 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">Staircase[nextInsideStair]       // 10 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">InsideBlock[nextInsideBlock]     // raw bytes</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        InsideStorey records (22 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0</Run>
+        <Run FontFamily="Consolas">U8  MinX</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+1</Run>
+        <Run FontFamily="Consolas">U8  MinZ</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2</Run>
+        <Run FontFamily="Consolas">U8  MaxX</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+3</Run>
+        <Run FontFamily="Consolas">U8  MaxZ</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4..+5</Run>
+        <Run FontFamily="Consolas">U16 InsideBlock</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6..+7</Run>
+        <Run FontFamily="Consolas">U16 StairCaseHead</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+8..+9</Run>
+        <Run FontFamily="Consolas">U16 TexType</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+10..+11</Run>
+        <Run FontFamily="Consolas">U16 FacetStart</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+12..+13</Run>
+        <Run FontFamily="Consolas">U16 FacetEnd</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+14..+15</Run>
+        <Run FontFamily="Consolas">S16 StoreyY</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+16..+17</Run>
+        <Run FontFamily="Consolas">U16 Building</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+18..+19</Run>
+        <Run FontFamily="Consolas">U16 Dummy0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+20..+21</Run>
+        <Run FontFamily="Consolas">U16 Dummy1</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Staircase records (10 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0</Run>
+        <Run FontFamily="Consolas">U8  X</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+1</Run>
+        <Run FontFamily="Consolas">U8  Z</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2</Run>
+        <Run FontFamily="Consolas">U8  Flags</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+3</Run>
+        <Run FontFamily="Consolas">U8  Id</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4..+5</Run>
+        <Run FontFamily="Consolas">S16 NextStairs</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6..+7</Run>
+        <Run FontFamily="Consolas">S16 DownInside</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+8..+9</Run>
+        <Run FontFamily="Consolas">S16 UpInside</Run>
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- WALKABLES / RF4 -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Walkables and RoofFace4
+    </Paragraph>
+    <Paragraph>
+        After the indoors chunk, or directly after
+        <Run FontFamily="Consolas">DStorey</Run>
+        when there is no indoors chunk, the file stores walkables and RoofFace4 records.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Walkables chunk header
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">U16 nextDWalkable</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2..+3</Run>
+        <Run FontFamily="Consolas">U16 nextRoofFace4</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        Both arrays include slot 0 on disk.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        DWalkable records (22 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">U16 StartPoint</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2..+3</Run>
+        <Run FontFamily="Consolas">U16 EndPoint</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4..+5</Run>
+        <Run FontFamily="Consolas">U16 StartFace3</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6..+7</Run>
+        <Run FontFamily="Consolas">U16 EndFace3</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+8..+9</Run>
+        <Run FontFamily="Consolas">U16 StartFace4</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+10..+11</Run>
+        <Run FontFamily="Consolas">U16 EndFace4</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+12</Run>
+        <Run FontFamily="Consolas">U8  X1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+13</Run>
+        <Run FontFamily="Consolas">U8  Z1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+14</Run>
+        <Run FontFamily="Consolas">U8  X2</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+15</Run>
+        <Run FontFamily="Consolas">U8  Z2</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+16</Run>
+        <Run FontFamily="Consolas">U8  Y</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+17</Run>
+        <Run FontFamily="Consolas">U8  StoreyY</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+18..+19</Run>
+        <Run FontFamily="Consolas">U16 Next</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+20..+21</Run>
+        <Run FontFamily="Consolas">U16 Building</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        The walkable Y byte is scaled to world height using:
+        <LineBreak/>
+        <Run FontFamily="Consolas">worldY = Y &lt;&lt; 5</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        RoofFace4 records (10 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">S16 Y</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2</Run>
+        <Run FontFamily="Consolas">S8  DY0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+3</Run>
+        <Run FontFamily="Consolas">S8  DY1</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4</Run>
+        <Run FontFamily="Consolas">S8  DY2</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+5</Run>
+        <Run FontFamily="Consolas">U8  DrawFlags</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6</Run>
+        <Run FontFamily="Consolas">U8  RX</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+7</Run>
+        <Run FontFamily="Consolas">U8  RZ</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+8..+9</Run>
+        <Run FontFamily="Consolas">S16 Next</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        The current editor display logic interprets these bytes as:
+        <LineBreak/>
+        <Run FontFamily="Consolas">tileX = RX &amp; 0x7F</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">specialFlag = RX &amp; 0x80</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">tileZ = RZ - 128</Run>
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- OBJECTS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Objects / Prims Section
+    </Paragraph>
+    <Paragraph>
+        The objects section starts at
+        <Run FontFamily="Consolas">ObjectOffset</Run>
+        and begins with an object count followed by packed 8-byte prim records and then the MapWho table.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Objects section layout
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas">+0..+3             int32 NumObjects</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">+4..               Prim[NumObjects]   // 8 bytes each, includes slot 0</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas">after prims        MapWho[1024]       // 2 bytes each</Run>
+    </Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        The editor rewrites
+        <Run FontFamily="Consolas">ObjectSectionSize</Run>
+        as:
+        <LineBreak/>
+        <Run FontFamily="Consolas">4 + NumObjects * 8 + 2048</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Prim records (8 bytes)
+    </Paragraph>
+    <Paragraph Margin="8,6,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+0..+1</Run>
+        <Run FontFamily="Consolas">S16 Y</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+2</Run>
+        <Run FontFamily="Consolas">U8  X</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+3</Run>
+        <Run FontFamily="Consolas">U8  Z</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+4</Run>
+        <Run FontFamily="Consolas">U8  PrimNumber</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+5</Run>
+        <Run FontFamily="Consolas">U8  Yaw</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+6</Run>
+        <Run FontFamily="Consolas">U8  Flags</Run>
+    </Paragraph>
+    <Paragraph Margin="8,2,0,0">
+        <Run FontFamily="Consolas" Foreground="#E8B84B">+7</Run>
+        <Run FontFamily="Consolas">U8  InsideIndex</Run>
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        MapWho table (1024 × 2 bytes)
+    </Paragraph>
+    <Paragraph>
+        Each MapWho entry is a packed 16-bit value:
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Run FontFamily="Consolas">lower 11 bits = index of first prim in cell</Run>
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Run FontFamily="Consolas">upper 5 bits = prim count in cell</Run>
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The MapWho table therefore describes a 32×32 spatial partitioning grid.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Footer and Late-Save Trailer
+    </Paragraph>
+    <Paragraph>
+        After the objects section, the file ends with either a small footer or a larger trailer depending on save type.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        SaveType &lt; 25
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        The file ends with 4 bytes which the editor interprets as
+        <Run FontFamily="Consolas">TextureWorld</Run>
+        .
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        SaveType ≥ 25
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        The file ends with 2004 bytes.
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        The first 4 of those bytes are interpreted as
+        <Run FontFamily="Consolas">TextureWorld</Run>
+        .
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        The remaining 2000 bytes are present but are not yet decoded by the current editor.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- INDEXING / NOTES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Indexing and Important Notes
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Dummy slot 0</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Several arrays include a stored slot-0 entry. These dummy entries should not be stripped from a writer unless the rest of the format is updated to compensate.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Confirmed slot-0 arrays</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The current editor stores slot 0 for:
+        <LineBreak/>
+        <Run FontFamily="Consolas">Prims</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">dstyles</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">paint_mem</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">DStorey</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">DWalkable</Run>
+        <LineBreak/>
+        <Run FontFamily="Consolas">RoofFace4</Run>
+        <LineBreak/>
+        the typed Indoors arrays as parsed by the editor.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Partially unresolved areas</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The following areas are still preserved rather than fully decoded by the current editor:
+        <LineBreak/>
+        the unknown bytes in the 48-byte building header,
+        <LineBreak/>
+        several remaining bytes in the 24-byte
+        <Run FontFamily="Consolas">DBuilding</Run>
+        record,
+        <LineBreak/>
+        and the final 2000 bytes of the late-save trailer.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Practical editing rule</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        If a field is not yet understood, the safest behaviour is to preserve its original bytes exactly when reading and writing the file.
+    </Paragraph>
+
+</FlowDocument>

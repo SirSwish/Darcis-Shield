@@ -117,6 +117,7 @@
         <KeyBinding Gesture="Ctrl+T" Command="{Binding ToggleTexturesCommand}" />
         <KeyBinding Gesture="Ctrl+J" Command="{Binding ToggleObjectsCommand}" />
         <KeyBinding Gesture="Ctrl+Y" Command="{Binding TogglePrimGraphicsCommand}" />
+        <KeyBinding Gesture="Ctrl+D3" Command="{x:Static views:MainWindow.Open3DViewportCommand}" />
         <KeyBinding Key="Delete" Command="{Binding DeletePrimCommand}" />
     </Window.InputBindings>
 
@@ -161,6 +162,8 @@
             </MenuItem>
 
             <MenuItem Header="_View">
+                <MenuItem Header="Open _3D Viewport..." Click="Open3DViewport_Click" InputGestureText="Ctrl+3"/>
+                <Separator/>
                 <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
                 <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
                 <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
@@ -170,6 +173,7 @@
                     <MenuItem Header="Map" IsEnabled="False" FontWeight="SemiBold"/>
                     <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding Map.ShowGridLines}" InputGestureText="Ctrl+G"/>
                     <MenuItem Header="Show _MapWho" IsCheckable="True" IsChecked="{Binding Map.ShowMapWho}" InputGestureText="Ctrl+M"/>
+                    <MenuItem Header="Show 3D _Camera Marker" IsCheckable="True" IsChecked="{Binding Map.ShowCameraMarker}"/>
                     <Separator/>
                     <MenuItem Header="Textures" IsEnabled="False" FontWeight="SemiBold"/>
                     <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding Map.ShowTextures}" InputGestureText="Ctrl+T"/>

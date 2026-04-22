@@ -153,6 +153,9 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         private bool _showMapWho = false;
         public bool ShowMapWho { get => _showMapWho; set { if (_showMapWho != value) { _showMapWho = value; OnPropertyChanged(); } } }
 
+        private bool _showCameraMarker = true;
+        public bool ShowCameraMarker { get => _showCameraMarker; set { if (_showCameraMarker != value) { _showCameraMarker = value; OnPropertyChanged(); } } }
+
         private bool _showRoofs;
         public bool ShowRoofs
         {

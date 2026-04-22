@@ -1236,10 +1236,12 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             short dval = _dstyles[styleIndexForRow];
 
             int count = panelsAcross + 1;
-            // Paint is stored reversed for non-2SIDED facets, forward for 2SIDED.
+            // Paint is stored reversed for non-2SIDED facets, forward for 2SIDED / Inside.
             // Mirror the same read direction the Painter uses so the display matches.
             bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
-            int pos = twoSided ? col : panelsAcross - 1 - col;
+            bool isInside = (_facet.Flags & FacetFlags.Inside) != 0;
+            bool readForward = twoSided || isInside;
+            int pos = readForward ? col : panelsAcross - 1 - col;
 
             if (!TryResolveTileIdForCell(dval, pos, count, out int tileId, out byte flipFlag)) return false;
             if (tileId < 0) return false;

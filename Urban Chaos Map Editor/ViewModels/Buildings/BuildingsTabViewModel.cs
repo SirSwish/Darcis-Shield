@@ -695,6 +695,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                                 BlockHeight = f.BlockHeight,
                                 Open = f.Open,
                                 IsPainted = isPainted,
+                                IsInside = (f.Flags & FacetFlags.Inside) != 0,
                                 CableStep1 = cableStep1,
                                 CableStep2 = cableStep2
                             });
@@ -1441,6 +1442,9 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
             public byte BlockHeight { get; set; }
             public byte Open { get; set; }
 
+            /// <summary>True if the facet has the FacetFlags.Inside bit set (interior-facing face).</summary>
+            public bool IsInside { get; set; }
+
             /// <summary>Y0 for display. Returns Quarter Storeys (Y0/64) or raw when the toggle is on.</summary>
             public int Y0Display => HeightDisplaySettings.ShowRawHeights ? Y0 : Y0 / 64;
 
@@ -1469,6 +1473,7 @@ namespace UrbanChaosMapEditor.ViewModels.Buildings
                 Y1 = f.Y1;
                 BlockHeight = f.BlockHeight;
                 Open = f.Open;
+                IsInside = (f.Flags & FacetFlags.Inside) != 0;
             }
 
             public DFacetRec Raw { get; set; }

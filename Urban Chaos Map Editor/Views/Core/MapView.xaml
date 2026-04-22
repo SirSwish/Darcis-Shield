@@ -170,6 +170,14 @@
                         Panel.ZIndex="102"
                         DataContext="{Binding}"
                         IsHitTestVisible="False"/>
+
+                    <!-- 3D viewport camera marker (purple cone) -->
+                    <coreOvl:CameraMarkerLayer
+                        x:Name="CameraMarkerOverlay"
+                        Width="8192"
+                        Height="8192"
+                        Visibility="{Binding ShowCameraMarker, Converter={StaticResource BoolToVis}}"
+                        Panel.ZIndex="150"/>
                 </Grid>
             </Grid>
         </ScrollViewer>

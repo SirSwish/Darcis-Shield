@@ -1,0 +1,137 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Keyboard Shortcuts
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        A reference for the currently known shortcuts implemented in the editor.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Global Shortcuts
+    </Paragraph>
+    <Paragraph>
+        These shortcuts are available as direct bindings in the main editor window.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+N</Paragraph>
+    <Paragraph Margin="24,0,0,0">Create a new map.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+O</Paragraph>
+    <Paragraph Margin="24,0,0,0">Open an existing map.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+S</Paragraph>
+    <Paragraph Margin="24,0,0,0">Save the current map.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+Shift+S</Paragraph>
+    <Paragraph Margin="24,0,0,0">Save the current map under a new filename.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+G</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the grid overlay.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+M</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the MapWho overlay.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+T</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the texture layer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+H</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the heights layer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+J</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the objects layer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+Y</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle object graphics rendering.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+B</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the buildings layer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+W</Paragraph>
+    <Paragraph Margin="24,0,0,0">Toggle the walkables layer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ctrl+0</Paragraph>
+    <Paragraph Margin="24,0,0,0">Reset the zoom level.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Delete</Paragraph>
+    <Paragraph Margin="24,0,0,0">Delete the currently selected object.</Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Menu and Context Shortcuts
+    </Paragraph>
+    <Paragraph>
+        These shortcuts are shown in menu items or used in specific editing contexts.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Copy and Paste
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Ctrl+C</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Copy the current selection. Depending on the active editor mode, this may copy objects
+        or selected texture cells.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Ctrl+V</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Paste the copied selection. Depending on context, this may paste objects or texture cells.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Zoom
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">+</Paragraph>
+    <Paragraph Margin="24,0,0,0">Zoom in.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">-</Paragraph>
+    <Paragraph Margin="24,0,0,0">Zoom out.</Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Application
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Alt+F4</Paragraph>
+    <Paragraph Margin="24,0,0,0">Exit the application.</Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Notes
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                This page only lists shortcuts that are currently known from the code and menu definitions.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Some tools show tooltip hints that do not currently match a real keyboard binding.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If new bindings are added later, this page should be updated to stay in sync with the editor.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

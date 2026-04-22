@@ -215,9 +215,14 @@ namespace UrbanChaosMapEditor.Services.Buildings
 
                 // Write paint bytes.
                 // 2SIDED walls: stored forward — game reads Side A with pos = col.
-                // All other walls (single-channel, non-2SIDED): stored reversed — game reads with pos = N-1-col.
+                // Indoor (Inside flag) walls: engine reads them forward too, so store forward
+                //   to compensate for otherwise coming out mirrored on the inner face.
+                // All other walls (single-channel, non-2SIDED, non-Inside): stored reversed —
+                //   game reads with pos = N-1-col.
+                bool isInside = (facet.Flags & FacetFlags.Inside) != 0;
+                bool storeForward = twoSided || isInside;
                 var bandPaintBytes = paintData[band];
-                if (twoSided)
+                if (storeForward)
                 {
                     for (int col = 0; col < columnsCount; col++)
                         newPaintBytes.Add(col < bandPaintBytes.Length ? bandPaintBytes[col] : (byte)0);

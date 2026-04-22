@@ -217,12 +217,11 @@ namespace UrbanChaosMapEditor.Services.Buildings
                         newPaintMemBytes, newStoreyEntries);
                     newDStyleValues.Add(outsideDStyleValue);
 
-                    for (int extra = 1; extra < entriesPerBand; extra++)
-                        newDStyleValues.Add(outsideDStyleValue);
-
-                    // Interior dstyle (warehouse Normal walls only)
                     if (createInteriorFacets)
                     {
+                        // Warehouse 2TEXTURED: interleaved layout — partner (inside) facet owns
+                        // the very next slot. Engine reads each side with step = 2 from its own
+                        // StyleIndex. Do NOT duplicate outside into the inside slot.
                         ushort interiorRawStyle = template.InteriorStyleId > 0
                             ? template.InteriorStyleId
                             : template.RawStyleId;
@@ -232,6 +231,12 @@ namespace UrbanChaosMapEditor.Services.Buildings
                             ref nextPaintMemCursor, ref nextStoreyCursor,
                             newPaintMemBytes, newStoreyEntries);
                         newDStyleValues.Add(insideDStyleValue);
+                    }
+                    else
+                    {
+                        // 2SIDED (non-warehouse): mirror outside into the back-face slot(s).
+                        for (int extra = 1; extra < entriesPerBand; extra++)
+                            newDStyleValues.Add(outsideDStyleValue);
                     }
 
                     nextStyleCursor = (ushort)(oldNextStyle + newDStyleValues.Count);
@@ -244,7 +249,10 @@ namespace UrbanChaosMapEditor.Services.Buildings
                 // Interior facet (warehouse Normal walls only — reversed coords with Inside flag)
                 if (createInteriorFacets)
                 {
-                    ushort interiorStyleIndex = (ushort)(outsideStyleIndex + entriesPerBand);
+                    // Inside facet sits one slot after outside in the interleaved block:
+                    //   dstyles: [out0, in0, out1, in1, ...] — inside.StyleIndex = outsideStyleIndex + 1
+                    //   engine reads each side with step = 2.
+                    ushort interiorStyleIndex = (ushort)(outsideStyleIndex + 1);
 
                     var interiorTemplate = new FacetTemplate
                     {

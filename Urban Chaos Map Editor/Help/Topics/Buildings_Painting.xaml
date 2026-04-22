@@ -1,0 +1,527 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Painting Facets
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Customizing facet textures with cell-by-cell painting.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What is Facet Painting?
+    </Paragraph>
+    <Paragraph>
+        <Bold>Facet painting</Bold> allows you to customize individual cells on a facet by applying
+        textures from the paint palette. Paint is applied <Bold>over</Bold> the base style, giving
+        you fine-grained control over facet appearance without needing to create custom styles.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Common uses for facet painting:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Adding windows, doors, or vents to otherwise plain walls
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Creating signs, graffiti, or damage effects
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Breaking up repetitive textures on long walls
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Mixing brick and stone textures for variety
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>Paint cannot be applied to a facet until it has a base style defined. You must assign a style (e.g., Style Index 0) before you can paint individual cells.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Opening the Facet Editor
+    </Paragraph>
+    <Paragraph>
+        Before you can paint a facet, you need to open it in the Facet Editor. There are two ways
+        to do this:
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Method 1: From the Facets List
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the Buildings tab, locate the facet you want to paint in the <Bold>Facets</Bold>
+                list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> the facet entry.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>Edit Facet</Bold> window opens.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Method 2: From the Map View
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                On the map canvas, locate the facet you want to paint.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> the facet on the map.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If there is only one facet at that location, the <Bold>Edit Facet</Bold> window
+                opens immediately.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If there are <Bold>multiple facets</Bold> on the same grid line, a <Bold>Facet
+                Disambiguation Window</Bold> appears showing all facets at that location.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> the desired facet in the disambiguation window.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>Edit Facet</Bold> window opens for the selected facet.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_facet_disambiguation.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Facet Disambiguation Window showing list of multiple facets at the same grid location, with facet details (type, height, style)
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Opening the Paint Facet Window
+    </Paragraph>
+    <Paragraph>
+        Once the Edit Facet window is open, you need to navigate to the painting interface.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the <Bold>Edit Facet</Bold> window, scroll down to the <Bold>Style</Bold> section.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Verify that the facet has a base style assigned (e.g., Style Index 0). If not,
+                select a base style from the dropdown before proceeding.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Paint Facet</Bold> button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>Paint Facet</Bold> window opens.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_paint_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Edit Facet window's Style section showing base style dropdown and Paint Facet button
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>You can also change the base style in the Edit Facet window before painting. This allows you to switch from one foundational texture (e.g., brick) to another (e.g., stone) without losing your paint work.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Using the Paint Facet Window
+    </Paragraph>
+    <Paragraph>
+        The Paint Facet window has two main sections:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Left side:</Bold> Paint palette showing textures tex000 through tex127
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right side:</Bold> Facet preview showing the facet's cells
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_paint_window.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Paint Facet window showing texture palette on left (tex000-tex127 grid), facet preview on right, flip horizontal checkbox, eraser button, and clear all paint button
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Painting Cells
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                On the <Bold>left side</Bold>, click a texture from the paint palette (tex000 - tex127).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the <Bold>right side</Bold>, click the desired cell in the facet preview.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The selected texture is painted onto that cell, <Bold>over</Bold> the base style.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Repeat for additional cells. You can select different textures for different cells.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Flipping Paint Horizontally
+    </Paragraph>
+    <Paragraph>
+        Some textures have directional features (e.g., a door hinge on the left side). You can
+        flip the texture horizontally before painting:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Check the <Bold>Flip Horizontal</Bold> checkbox.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select a texture from the palette.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click a cell in the facet preview.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The texture is painted flipped horizontally.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        You can toggle the Flip Horizontal checkbox on or off at any time while painting.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Erasing Paint (Restoring Base Style)
+    </Paragraph>
+    <Paragraph>
+        To remove paint from a cell and restore it to the base style:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Eraser</Bold> button in the Paint Facet window.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the painted cell you want to restore.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The cell returns to the base style texture.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        The eraser only removes paint — it does not delete the cell itself. The base style is
+        always preserved underneath.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Clearing All Paint
+    </Paragraph>
+    <Paragraph>
+        To remove all paint from the facet in one action:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Clear All Paint</Bold> button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                All painted cells are restored to the base style.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        This is useful if you want to start over or if you've decided the painted customizations
+        aren't working.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Saving Your Work
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Once you're satisfied with the painted facet, click the <Bold>Save Changes</Bold>
+                button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The Paint Facet window closes and your changes are applied to the facet.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The facet now displays your custom paint in the map view.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Warning:</Run>
+                <Run>If you close the Paint Facet window without clicking Save Changes, your paint work will be lost.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Paint Layers Work
+    </Paragraph>
+    <Paragraph>
+        Understanding how paint interacts with the base style is key to effective facet painting:
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Base Style Layer
+    </Paragraph>
+    <Paragraph>
+        The <Bold>base style</Bold> (e.g., Style Index 0 = brick wall) defines the foundational
+        texture for the entire facet. This is the texture that appears on all cells by default.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Paint Layer
+    </Paragraph>
+    <Paragraph>
+        <Bold>Painted textures</Bold> are applied <Bold>on top of</Bold> the base style. When you
+        paint a cell, that specific cell shows the painted texture instead of the base style.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Example
+    </Paragraph>
+    <Paragraph>
+        Imagine a 10-cell-high wall facet:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Base style:</Bold> Style Index 5 (stone wall texture)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Painted cells:</Bold> Cell 3 painted with tex042 (window), Cell 7 painted
+                with tex068 (vent)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Result:</Bold> Cells 1, 2, 4, 5, 6, 8, 9, 10 show stone wall. Cell 3 shows
+                window. Cell 7 shows vent.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        If you later change the base style from Style Index 5 (stone) to Style Index 2 (brick),
+        the unpainted cells (1, 2, 4, 5, 6, 8, 9, 10) will switch to brick, but the painted cells
+        (3 = window, 7 = vent) remain unchanged.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Example: Painting a Wall with Windows
+    </Paragraph>
+    <Paragraph>
+        Let's walk through a complete example of painting windows onto a plain brick wall.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Create a wall facet with Height = 12 QS (3 storeys), Style Index = 0 (brick).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Double-click the wall on the map view to open the Edit Facet window.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Scroll to the Style section and click <Bold>Paint Facet</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                In the Paint Facet window, locate a window texture (e.g., tex042) in the palette
+                and click it.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the facet preview, click cells 4, 8, and 12 to add windows at each storey.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Save Changes</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The wall now shows brick with three evenly-spaced windows.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_paint_example.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Before and after comparison showing plain brick wall (left) and same wall with painted window textures at cells 4, 8, and 12 (right)
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Use the <Bold>Flip Horizontal</Bold> option to create variety. For example, flip
+                a door texture to make it open in the opposite direction.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Paint is most effective for <Bold>vertical walls</Bold> and <Bold>fences</Bold>.
+                Ladders and cables typically don't benefit from painting due to their small size.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Combine painted facets with unpainted facets on the same building to create visual
+                interest. Not every wall needs custom paint.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If you're experimenting, use <Bold>Clear All Paint</Bold> to quickly reset and try
+                a different approach.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Remember that painted textures are tied to specific cells. If you later adjust the
+                facet's height, you may need to repaint to account for the new cell layout.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

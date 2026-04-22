@@ -1,0 +1,312 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Getting Started
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Introduction to buildings, building types, and automatic features.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What are Buildings and Facets?
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Buildings tab</Bold> houses all the facets (walls, doors, ladders, cables,
+        fences, gates) used in your map. In Urban Chaos, <Bold>buildings</Bold> are containers
+        that organize related <Bold>facets</Bold> together.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        All facets must be attached to at least one building, but not all buildings need to form
+        closed rectangular structures. Buildings are simply organizational containers — you can
+        have standalone fences, cables, or walls all attached to a "building" even if they don't
+        form a physical structure.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_overview.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Buildings tab showing the Buildings list, Facets list, and Polygons column
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Building Types
+    </Paragraph>
+    <Paragraph>
+        When creating a new building, you must choose between two types. This choice affects
+        how the building's interior is rendered and how doors function.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        House
+    </Paragraph>
+    <Paragraph>
+        <Bold>Houses</Bold> are decorative buildings with no interior sections for the player
+        to walk inside. The player can climb on rooftops and exterior surfaces, but cannot
+        enter the structure. If you place a door on a house building, it functions as an
+        <Bold>elevator</Bold> — teleporting the player directly to the top of the building.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Houses use the standard PAP (PAP) rendering system where the
+        cell altitude determines the roof height, and roof textures are automatically applied
+        when a closed polygon is detected.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Warehouse
+    </Paragraph>
+    <Paragraph>
+        <Bold>Warehouses</Bold> are designed to contain playable interior areas. Players can
+        enter through doors and walk around inside. Warehouses use a distinct rendering mechanism:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                The <Bold>PAP cell altitude remains at 0</Bold> (ground level) — it does not
+                change to represent the roof height.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roof tiles (RF4 entries)</Bold> define the walkable height inside the warehouse,
+                matching the interior footprint of the closed polygon.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Floor textures</Bold> are applied automatically to the interior instead of
+                roof textures (specifically <Run FontFamily="Consolas" Foreground="#E8B84B">tex287hi</Run>
+                from the Shared texture group).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Only the <Bold>PAP Hidden flag</Bold> is set on interior tiles, signaling that
+                the PAP layer should be ignored inside the warehouse.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_house_vs_warehouse.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Side-by-side comparison of House building (left) and Warehouse building (right) showing differences in interior rendering
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Auto-Build Options
+    </Paragraph>
+    <Paragraph>
+        The editor includes powerful automatic features that trigger when you draw facets
+        that form a <Bold>closed polygon</Bold> (a connected loop of walls/doors with no gaps).
+        All three options can be independently enabled or disabled via the
+        <Bold>Auto Build Options</Bold> checkboxes in the Buildings tab:
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Auto Detect Roofs
+    </Paragraph>
+    <Paragraph>
+        When enabled, the editor automatically detects closed polygons and triggers the appropriate
+        interior treatment:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Houses:</Bold> Applies roof textures to the enclosed area using the intelligent
+                roof texture classification system.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Warehouses:</Bold> Applies floor textures (<Run FontFamily="Consolas" Foreground="#E8B84B">tex287hi</Run>)
+                to the interior footprint.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        A closed polygon is detected when walls (or walls + doors) form a complete connected loop
+        at the same height and Y offset. Even a 1-cell gap sealed by a door counts as a closed
+        polygon and will trigger the automation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Auto Paint Roof Textures
+    </Paragraph>
+    <Paragraph>
+        When enabled, the editor automatically paints textures onto detected closed polygon
+        interiors. Disable this if you want to manually texture the interior later using the
+        Textures tab tools.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Auto Create Walkables
+    </Paragraph>
+    <Paragraph>
+        When enabled, the editor automatically creates <Bold>walkable regions</Bold> at the height
+        of the drawn facets whenever a closed polygon is detected. Walkables are containers for
+        <Bold>Roof Face 4 (RF4) tiles</Bold>, which define the actual surfaces players can stand
+        on and move across.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For <Bold>warehouses</Bold>, this option also auto-creates <Bold>RF4 roof tiles</Bold>
+        matching the interior footprint at the walkable height. These tiles define the effective
+        floor height inside the warehouse (since PAP altitude stays at 0).
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_auto_options.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Auto-Build Options checkboxes in the Buildings tab (Auto Detect Roofs, Auto Paint Roof Textures, Auto Create Walkables)
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>Leave all three Auto-Build options enabled when learning. They dramatically speed up building creation and handle complex tasks (walkable management, texture classification) automatically. You can always disable them later for fine-grained manual control.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Creating Your First Building
+    </Paragraph>
+    <Paragraph>
+        Every facet must belong to a building. Here's how to create one:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open the <Bold>Buildings tab</Bold> in the editor drawer on the right side of
+                the screen.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>New Building icon</Bold> in the toolbar (looks like a house with
+                a plus sign). The <Bold>Add Building</Bold> dialog appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Choose a building type — <Bold>House</Bold> or <Bold>Warehouse</Bold>. For your
+                first building, choose <Bold>House</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Add Building</Bold>. The new building appears in the <Bold>Buildings
+                list</Bold> on the right side of the tab.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_add_dialog.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Add Building dialog with House and Warehouse radio button options
+    </Paragraph>
+    <Paragraph>
+        The building now exists as an empty container with a unique ID (e.g., <Bold>Building #1</Bold>).
+        It contains no facets yet — you will add walls, doors, and other elements in the next steps.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can create as many buildings as needed. Each building shows up in the list and can be
+        selected to view or edit its facets.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Color Coding
+    </Paragraph>
+    <Paragraph>
+        Each facet type is color-coded on the map canvas for easy identification at a glance:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph><Bold Foreground="#90EE90">Green</Bold> — Walls</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold Foreground="#FFA500">Orange</Bold> — Ladders</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold Foreground="#FFFF00">Yellow</Bold> — Fences</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold Foreground="#FF6347">Red</Bold> — Cables</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold Foreground="#DA70D6">Purple</Bold> — Doors</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold Foreground="#87CEEB">Blue</Bold> — Gates</Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        Within each building, you can <Bold>filter</Bold> the Facets list to show only a particular
+        type by clicking the associated <Bold>color pill</Bold> at the top of the Facets panel.
+        For example, to see all ladders attached to a building, select the building and click the
+        <Bold>orange pill</Bold>.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_color_filter.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Color pill buttons at top of Facets panel (green=walls, orange=ladders, yellow=fences, red=cables, purple=doors, blue=gates)
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        Now that you understand building types and have created your first building container,
+        you're ready to add facets. See:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Buildings: Facets</Bold> — Learn how to add walls, doors, ladders, fences,
+                cables, and gates to your buildings.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Buildings: Properties</Bold> — Deep dive into facet properties like height,
+                block height, Y offset, style index, and flags.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Buildings: Advanced</Bold> — Filtering, bulk editing, transferring, cloning,
+                moving, and deleting buildings and facets.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

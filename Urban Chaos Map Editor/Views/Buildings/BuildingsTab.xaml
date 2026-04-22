@@ -296,6 +296,24 @@
                                             <TextBlock Text="{Binding Coords}"   FontSize="11" Foreground="{Binding TypeBrush}"/>
                                             <TextBlock Text=" Y:" FontSize="11" Opacity="0.6" Foreground="{Binding TypeBrush}"/>
                                             <TextBlock Text="{Binding Y0Display}" FontSize="11" Foreground="{Binding TypeBrush}"/>
+                                            <TextBlock Text=" H:" FontSize="11" Opacity="0.6" Foreground="{Binding TypeBrush}"/>
+                                            <TextBlock Text="{Binding Height}" FontSize="11" Foreground="{Binding TypeBrush}"/>
+                                            <TextBlock Text=" [IN]"
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       Foreground="#FFD080"
+                                                       ToolTip="FacetFlags.Inside is set (interior-facing face)">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsInside}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <TextBlock Text=" 🎨" FontSize="10">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">

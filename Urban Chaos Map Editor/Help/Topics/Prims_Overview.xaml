@@ -1,0 +1,729 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Prims &amp; Objects
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Placing, positioning, and managing primitive objects in your map.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What are Prims?
+    </Paragraph>
+    <Paragraph>
+        <Bold>Prims</Bold> (primitives) are objects placed on the map to add visual detail and
+        environmental storytelling. Prims include signs, weapons, collectibles, lights, vehicles,
+        furniture, foliage, structures, and more.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Each prim has a position (X, Y, Z coordinates), rotation angle, and graphic representation.
+        Prims are rendered at their exact pixel size, giving you a precise preview of how they will
+        appear in-game.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>Prims placed in the Map Editor are</Run>
+                <Run FontWeight="Bold">display-only</Run>
+                <Run>. Collectible items cannot be picked up, and vehicles are non-functional. For functional objects (e.g., collectible weapons, driveable vehicles), use the Mission Editor. Prims in the Map Editor are for visual decoration and environmental detail only.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Prims Tab Interface
+    </Paragraph>
+    <Paragraph>
+        The Prims tab is divided into three main sections:
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        1. Prims List
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Prims List</Bold> displays all prim objects currently placed on the map. Each
+        entry shows the prim's ID and type.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Clicking a prim in the list</Bold> selects it on the map. If the prim is not currently
+        visible in the viewport, the map view automatically zooms to the prim's location. This
+        behavior is consistent with facets, walkables, and RF4 tiles.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Two buttons are available for managing selected prims:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Cell Properties</Bold> — Opens the Prim Properties window for the selected
+                prim, allowing you to edit its coordinates, rotation, and other attributes.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Delete Prim</Bold> — Removes the selected prim from the map.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        2. Auto-Snap to Floor
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Auto-Snap to Floor</Bold> checkbox is <Bold>enabled by default</Bold>. When
+        active, prims automatically adjust their Y height to match the floor beneath them.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is especially useful when placing prims on buildings, rooftops, or in ditches — the
+        editor automatically calculates the correct Y coordinate so the prim sits on the surface.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can still manually enter a Y coordinate in the Prim Properties window if you need to
+        override the automatic height (e.g., for floating objects or suspended signs).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        3. Prim Selection Section
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Prim Selection</Bold> section displays all available prim types, organized into
+        rough groups for easy browsing:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph><Bold>Signs</Bold> — Street signs, billboards, posters</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Weapons</Bold> — Guns, melee weapons (display only)</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Collectibles</Bold> — Items, pickups (display only)</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Lights</Bold> — Street lamps, light fixtures</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>City</Bold> — Urban objects like fire hydrants, mailboxes, benches</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Vehicles</Bold> — Cars, trucks (display only, non-functional)</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Furniture</Bold> — Tables, chairs, cabinets</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Foliage</Bold> — Trees, bushes, plants</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Structures</Bold> — Architectural elements, debris</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Other</Bold> — Miscellaneous objects</Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        Each prim button displays the prim's texture graphic, making it easy to visually identify
+        which object you want to place.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/prims_tab_interface.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Prims tab showing Prims List at top, Auto-Snap to Floor checkbox, Cell Properties and Delete Prim buttons, and Prim Selection section with categorized prim buttons displaying texture graphics
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Placing Prims
+    </Paragraph>
+    <Paragraph>
+        Placing a prim is a two-step process: select the prim type, then position it on the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the <Bold>Prim Selection</Bold> section, find the prim you want to place and
+                <Bold>click its button</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim becomes active under your cursor. A <Bold>ghost yellow circle</Bold> appears
+                on the map with a <Bold>direction arrow</Bold> indicating the prim's facing direction.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor around the map to position the prim. The yellow circle follows your
+                cursor.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Once you're happy with the position, <Bold>click</Bold> to place the prim.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim's <Bold>graphic</Bold> appears at the placement location. This is a
+                <Bold>pixel-perfect representation</Bold> of how the prim will appear in-game.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/prims_ghost_preview.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Ghost yellow circle with direction arrow following cursor during prim placement, before final click
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Prim Alignment and Footprint
+    </Paragraph>
+    <Paragraph>
+        Prims are aligned against their <Bold>center of rotation</Bold> (marked by a red dot) in
+        various ways depending on the prim type. The alignment determines how the prim's graphic
+        is positioned relative to its placement point.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        It's best to place a prim and check its footprint visually. The graphic representation shows
+        exactly how the prim will appear, so you can adjust positioning as needed.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Precise Alignment
+    </Paragraph>
+    <Paragraph>
+        For uniform placement and fine-tuned positioning, the editor provides several alignment tools.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Snap to Grid (Ctrl Key)
+    </Paragraph>
+    <Paragraph>
+        To snap a prim to the grid while placing it:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a prim from the Prim Selection section.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Hold the Ctrl key</Bold> while moving the prim around the map.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim snaps to <Bold>cell vertices</Bold> and <Bold>edge centers</Bold>, allowing
+                for more uniform placement along grid lines.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click to place the prim at the snapped position.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Fine Adjustment (Arrow Keys)
+    </Paragraph>
+    <Paragraph>
+        Once a prim is placed, you can fine-tune its position pixel-by-pixel:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Select the prim</Bold> (click it on the map or in the Prims List).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use the <Bold>directional arrow keys</Bold> (↑ ↓ ← →) to move the prim <Bold>one
+                pixel at a time</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                This allows for extremely precise positioning when aligning prims with building edges,
+                facets, or other prims.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/prims_arrow_keys.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Selected prim with red center of rotation visible, showing pixel-by-pixel adjustment with arrow keys
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Rotating Prims
+    </Paragraph>
+    <Paragraph>
+        Prims can be rotated both in 90-degree increments and with fine precision.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        90-Degree Rotation (Space Bar)
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Select the prim</Bold> (click it on the map or in the Prims List).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press the <Bold>Space Bar</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim rotates <Bold>90 degrees clockwise</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press <Bold>Space Bar</Bold> multiple times to continue rotating (90°, 180°, 270°,
+                back to 0°).
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Fine Rotation (Drag Green Arrow)
+    </Paragraph>
+    <Paragraph>
+        For precise rotation angles, you can drag the prim's direction arrow:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Select the prim</Bold> (click it on the map or in the Prims List).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>green directional arrow</Bold> appears, indicating the prim's facing direction.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Click and drag the tip</Bold> of the green arrow.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim rotates smoothly as you drag, allowing you to precisely align it to any angle.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>status bar</Bold> at the bottom of the window displays the exact rotation
+                angle in degrees for inspection.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/prims_rotation.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Selected prim with green directional arrow being dragged for fine rotation, status bar showing rotation angle
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Moving Prims
+    </Paragraph>
+    <Paragraph>
+        Once placed, prims can be moved to a new location by dragging their center of rotation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Click the prim</Bold> on the map to select it.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The prim's <Bold>red center of rotation</Bold> becomes visible.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Click and drag the red center</Bold> to a new location on the map.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button to drop the prim at the new location.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If <Bold>Auto-Snap to Floor</Bold> is enabled, the prim automatically adjusts to the
+                correct Y height for the new location.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Editing Prim Properties
+    </Paragraph>
+    <Paragraph>
+        The Prim Properties window provides detailed control over a prim's coordinates, flags, and
+        height adjustment. This is where you configure prim behavior and fine-tune positioning.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Opening the Prim Properties Window
+    </Paragraph>
+    <Paragraph>
+        There are three ways to open the Prim Properties window:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click the prim</Bold> on the map canvas.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click the prim</Bold> in the Prims List.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Select the prim</Bold> (on map or in list), then click the <Bold>Cell Properties</Bold>
+                button in the Prims tab.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/prims_properties_window.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Prim Properties window showing Flags section, Manual Height Adjust section with pixel input, Auto Snap To Floor button, +4QS/-4QS buttons, px display, height slider with red dot, and OK button
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Flags Section
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Flags</Bold> section contains checkboxes that control prim behavior. Not all flags
+        are fully understood or functional.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>On Floor</Bold> — Supposed to be equivalent to the Auto-Snap to Floor feature,
+                but is <Bold>not functioning</Bold>. Use the Auto-Snap to Floor checkbox in the Prims
+                tab instead.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Not On PSX</Bold> — Function unclear. May be related to PlayStation version
+                compatibility.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Warehouse (Inside)</Bold> — The prim will be <Bold>visible in indoor areas only</Bold>.
+                Use this for prims that should only appear inside warehouse interiors.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Reserved 1</Bold> — No known function.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Searchable</Bold> — The player can hold the action button next to the prim to
+                <Bold>search it</Bold>. This can also be set in the Mission Editor. Useful for
+                containers, crates, or objects that should be interactable.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Damaged</Bold> — The prim appears <Bold>damaged</Bold>. For example, light poles
+                are bent, vehicles show damage. Not all prims have damaged variants.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Hidden Item</Bold> — Function unclear. May be related to collectible visibility
+                or mission scripting.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Reserved 2</Bold> — No known function.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Manual Height Adjust Section
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Manual Height Adjust</Bold> section provides precise control over the prim's Y
+        coordinate (vertical position). Height is measured in <Bold>pixels</Bold>, where <Bold>256
+        pixels = 4 quarter storeys</Bold> (1 storey).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Pixel units are retained for <Bold>precise vertical alignment</Bold>, which is critical when
+        positioning prims like building signs, mounted lights, or decorative elements that need to
+        align exactly with building features.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        Height Input Box
+    </Paragraph>
+    <Paragraph Margin="0,2,0,0">
+        Manually enter the Y coordinate in pixels. The editor accepts any integer value.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        Auto Snap To Floor Button
+    </Paragraph>
+    <Paragraph Margin="0,2,0,0">
+        Click this button to automatically calculate the correct floor height based on the prim's
+        current X and Z position. This recalculates the Y coordinate so the prim sits on the surface
+        beneath it (terrain, building roof, or RF4 tile).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        +4QS and -4QS Buttons
+    </Paragraph>
+    <Paragraph Margin="0,2,0,0">
+        These buttons move the prim up or down by <Bold>one storey</Bold> (4 quarter storeys = 256 pixels):
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>+4QS</Bold> — Raises the prim by 1 storey (adds 256 pixels to Y)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>-4QS</Bold> — Lowers the prim by 1 storey (subtracts 256 pixels from Y)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        These are useful for quickly moving prims between building floors without calculating pixel
+        values manually.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        px Display
+    </Paragraph>
+    <Paragraph Margin="0,2,0,0">
+        Displays the prim's <Bold>exact Y pixel position</Bold> for inspection. This updates in
+        real-time as you adjust the height.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        Height Display Box (Red Dot Slider)
+    </Paragraph>
+    <Paragraph Margin="0,2,0,0">
+        A visual height slider is displayed with a <Bold>red dot</Bold> representing the prim's
+        current Y position. You can <Bold>click and drag the red dot</Bold> up or down to visually
+        adjust the height. This provides intuitive height control without typing pixel values.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Applying Changes
+    </Paragraph>
+    <Paragraph>
+        Once you've configured the prim's flags and height, click the <Bold>OK</Bold> button to
+        apply the changes. The Prim Properties window closes and the prim is updated with the new
+        settings.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If you close the window without clicking OK, your changes are discarded.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>For building-mounted prims like signs or lights, use the height input box for pixel-precise alignment with building features (e.g., aligning a sign exactly with a window ledge). For general placement, the +4QS/-4QS buttons and Auto Snap To Floor button are faster.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Display-Only Limitation
+    </Paragraph>
+    <Paragraph>
+        It's important to understand that prims placed in the Map Editor are <Bold>for visual
+        decoration only</Bold>. They do not have functional game logic.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        What This Means
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Collectible items</Bold> (weapons, ammo, health packs) <Bold>cannot be picked
+                up</Bold> by the player, even though they appear in the inventory category. They are
+                purely decorative.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Vehicles</Bold> are <Bold>non-functional</Bold>. They cannot be driven or
+                interacted with. Functional vehicles are typically created in the Mission Editor.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Use Cases for Display-Only Prims
+    </Paragraph>
+    <Paragraph>
+        Despite the display-only limitation, prims are extremely useful for environmental storytelling
+        and visual detail:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Set dressing:</Bold> Add clutter, furniture, and props to make interiors and
+                streets feel lived-in.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Broken vehicles:</Bold> Place vehicles with missing wheels or damage to suggest
+                abandonment or decay.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Signs and landmarks:</Bold> Use signs and billboards to guide players or add
+                flavor to the environment.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Foliage:</Bold> Scatter trees, bushes, and plants to add natural elements.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Use <Bold>Ctrl + click</Bold> while placing prims to snap to grid vertices and edge
+                centers for clean, uniform placement along streets and building edges.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>arrow keys</Bold> are invaluable for pixel-perfect alignment. Use them to
+                nudge prims into exact positions after initial placement.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Check the <Bold>status bar</Bold> when rotating prims to see the exact angle. This
+                is useful when you need prims to face specific directions (e.g., 45° for diagonal
+                placement).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Auto-Snap to Floor</Bold> works for most scenarios, but if you're creating
+                suspended objects (hanging signs, floating debris), disable it and manually set the
+                Y coordinate in the Prim Properties window.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                When placing many similar prims (e.g., street lamps along a road), place the first
+                one carefully, then duplicate it by selecting it in the Prims List and using the
+                interactive placement to position copies.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Remember that prims are <Bold>display-only</Bold>. For functional objects (collectibles,
+                driveable vehicles, interactive elements), use the Mission Editor.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Prims render at their exact pixel size, so they provide a perfect preview of the
+                final appearance. Use this to experiment with different placements and find the best
+                visual composition.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

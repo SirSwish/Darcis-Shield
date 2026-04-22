@@ -1,0 +1,453 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Properties and Flags
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Understanding Height, Block Height, Y Offset, Style Index, and Facet Flags.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Overview
+    </Paragraph>
+    <Paragraph>
+        All facets (except cables) share a common set of properties that control their appearance,
+        height, position, and behavior. These properties are set in the <Bold>Add Facets</Bold>
+        window before drawing on the map, and can be bulk-edited later for multiple facets at once.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- HEIGHT -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Height (Quarter Storeys)
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Height</Bold> value specifies how tall the facet is, measured in
+        <Bold>quarter storeys</Bold> (abbreviated as <Bold>QS</Bold>). This measurement system
+        is used consistently throughout Urban Chaos for vertical distances.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Quarter Storey Scale
+    </Paragraph>
+    <Paragraph>
+        One storey in Urban Chaos equals <Bold>4 quarter storeys</Bold>. This gives you fine-grained
+        control over vertical dimensions:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>1 QS</Bold> = Quarter storey (one unit of vertical height)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>4 QS</Bold> = 1 storey
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>8 QS</Bold> = 2 storeys
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>12 QS</Bold> = 3 storeys
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>16 QS</Bold> = 4 storeys
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        For example, if you set <Bold>Height = 8</Bold>, the facet will be 2 storeys tall.
+        A value of <Bold>Height = 6</Bold> creates a facet that is 1.5 storeys tall.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Practical Examples
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Height = 4</Bold> creates a standard 1-storey wall suitable for most buildings.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Height = 2</Bold> creates a half-height wall or barrier.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Height = 12</Bold> creates a tall 3-storey wall for large buildings.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- BLOCK HEIGHT -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Block Height
+    </Paragraph>
+    <Paragraph>
+        <Bold>Block Height</Bold> defines how tall a single storey is <Bold>for texture mapping
+        purposes</Bold>. It controls how textures are scaled vertically on the facet.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        In most cases, you should leave Block Height at <Bold>4</Bold> (the default). This matches
+        the standard storey size and displays textures at their intended scale.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How Block Height Works
+    </Paragraph>
+    <Paragraph>
+        Block Height allows you to stretch or shrink texture mapping independent of the actual
+        physical height of the facet. This is useful for advanced effects like capping pieces,
+        parapets, and decorative trim.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Stretching Textures (Block Height &gt; 4)
+    </Paragraph>
+    <Paragraph>
+        If you set <Bold>Block Height = 8</Bold>, the engine treats each storey as if it were
+        2 storeys tall for texture purposes. This effectively <Bold>stretches</Bold> the textures
+        vertically.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example: A facet with <Bold>Height = 4</Bold> (nominally 1 storey) and
+        <Bold>Block Height = 8</Bold> will show a stretched texture — the texture is expanded
+        to cover 2 storeys of visual height even though the physical facet is only 1 storey tall.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Shrinking Textures (Block Height &lt; 4)
+    </Paragraph>
+    <Paragraph>
+        If you set <Bold>Block Height = 2</Bold>, the engine treats each storey as if it were
+        half a storey tall for texture purposes. This effectively <Bold>shrinks</Bold> the textures
+        vertically.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example: A facet with <Bold>Height = 4</Bold> and <Bold>Block Height = 2</Bold> will show
+        2 full texture tiles stacked vertically instead of 1 — the texture is compressed to fit
+        half the expected height.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Special Case: Block Height = 1
+    </Paragraph>
+    <Paragraph>
+        Setting <Bold>Block Height = 1</Bold> shows only the <Bold>top 25%</Bold> of the texture.
+        This is different from <Bold>Height = 1</Bold> (which shows texture from the bottom).
+        Block Height = 1 is useful for thin capping pieces at the top of walls.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>For 99% of use cases, leave Block Height at 4. Only modify it when you need specialized texture scaling effects like decorative trim, parapets, or capping pieces on building tops.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- Y OFFSET -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Y Offset
+    </Paragraph>
+    <Paragraph>
+        <Bold>Y Offset</Bold> specifies how high off the ground the facet should be drawn,
+        measured in <Bold>quarter storeys</Bold>. This allows you to stack facets vertically
+        on top of existing structures.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Common Use Cases
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Y Offset = 0</Bold> — Ground level. Use this for the first layer of any building.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Y Offset = 4</Bold> — One storey up. Use this to stack a second layer on top
+                of a 1-storey structure.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Y Offset = 8</Bold> — Two storeys up. Use this for the third layer of a
+                multi-storey building.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Stacking Example
+    </Paragraph>
+    <Paragraph>
+        To create a 3-storey building:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Draw the first layer with <Bold>Height = 4, Y Offset = 0</Bold>
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Draw the second layer with <Bold>Height = 4, Y Offset = 4</Bold>
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Draw the third layer with <Bold>Height = 4, Y Offset = 8</Bold>
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        Each layer forms its own closed polygon, and the Auto-Build system will detect and process
+        each one independently.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Warehouse Stacking:</Run>
+                <Run>Always make the first layer of a warehouse exactly 4 QS (1 storey) so doors fit correctly. Doors cannot span multiple storeys. If you need additional height, create a second facet group with Y Offset = 4 and stack it on top.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- STYLE INDEX -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Style Index
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Style Index</Bold> refers to a predefined texture pattern in the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">style.tma</Run> file. Each style entry
+        is a "recipe" that defines which textures to use, their rotations, and how they are
+        arranged on the facet.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How Style Index Works
+    </Paragraph>
+    <Paragraph>
+        When you set <Bold>Style Index = 1</Bold>, the facet uses the first style recipe in
+        <Run FontFamily="Consolas" Foreground="#E8B84B">style.tma</Run>. <Bold>Style Index = 2</Bold>
+        uses the second recipe, and so on.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Add Facets</Bold> window shows a <Bold>texture preview</Bold> of the selected
+        style so you can visually see what pattern will be applied before drawing on the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Editing Styles
+    </Paragraph>
+    <Paragraph>
+        To create or modify style recipes, use the <Bold>Style Editor</Bold> (a separate
+        application in the Darcis Shield toolkit). The Style Editor lets you:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Create new texture patterns by arranging tiles in a grid
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Assign rotation values to individual tiles
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Save the style file and immediately use it in the Map Editor
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Export the style to the game's texture folder for in-game testing
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- FLAGS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Flags
+    </Paragraph>
+    <Paragraph>
+        Flags are binary properties that modify facet behavior. Multiple flags can be enabled
+        on a single facet. Some flags are automatically set or greyed out depending on the
+        facet type and building type.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Flag Descriptions
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Invisible</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The facet is not rendered visually but still exists as collision geometry. Useful for
+        invisible barriers or hidden collision walls.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Inside</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        Marks this as an interior wall, viewed from inside a building. This flag is automatically
+        set for warehouse interior walls and affects texture mapping (uses the "inside" texture
+        variant).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">DLit (Dynamically Lit)</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The facet responds to in-game dynamic lighting (e.g., streetlights, explosions, muzzle
+        flashes). Without this flag, the facet uses only static baked lighting.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Hug Floor</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The facet automatically snaps to the floor/ground altitude regardless of terrain height
+        or surrounding building heights. You do not need to manually specify the Y Offset value.
+        Useful for walls on uneven terrain.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Electrified</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        Touching the facet causes the player to be electrocuted and take damage. Used for
+        electric fences, exposed wiring, and dangerous barriers.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Two Sided</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        By default, facet textures are only rendered on the front side (backface culling saves
+        memory and improves performance). Enabling this flag renders textures on <Bold>both
+        front and back</Bold> sides of the facet. Useful for thin walls or freestanding barriers
+        viewed from multiple angles.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Unclimbable</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        Usually enabled by default. The facet cannot be climbed like a ladder or fence. Disable
+        this flag to make a wall climbable.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">On Building</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        Same as <Bold>Hug Floor</Bold>, but specifically for fences. The fence automatically
+        snaps to the building/terrain height.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Barb Top</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The facet can be climbed, but cannot be jumped over or vaulted. Used for fences with
+        barbed wire or spikes on top.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">See Through</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The player's camera can see through the facet. Useful for chain-link fences, grates,
+        or other transparent barriers. The facet still provides collision but allows visibility.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Open</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        Used exclusively for <Bold>gates</Bold>. This flag is set at runtime via mission files
+        to open the gate. You typically leave this unchecked in the editor — the mission script
+        will enable it when triggered by gameplay events.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Two-Textured</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        The facet is part of an indoor/outdoor texture pairing. This flag is <Bold>automatically
+        set</Bold> for warehouse buildings and ensures the correct inside/outside texture variants
+        are applied to doors and walls.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,0,0,1">Fence Cut</Paragraph>
+    <Paragraph Margin="24,0,0,6">
+        <Bold>Unused.</Bold> Originally intended for wire cutter objects to open fences, but
+        this feature was never implemented in the final game.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Summary
+    </Paragraph>
+    <Paragraph>
+        Understanding these properties gives you complete control over facet appearance and behavior:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Height</Bold> controls physical vertical size (measured in quarter storeys)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Block Height</Bold> controls texture scaling (usually leave at 4)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Y Offset</Bold> controls vertical position for stacking
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Style Index</Bold> selects a texture recipe from
+                <Run FontFamily="Consolas" Foreground="#E8B84B">style.tma</Run>
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Flags</Bold> modify behavior (lighting, collision, visibility, etc.)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,8,0,0">
+        For most building tasks, you'll primarily use Height, Y Offset, and Style Index. The other
+        properties are available for advanced scenarios and fine-tuning.
+    </Paragraph>
+
+</FlowDocument>

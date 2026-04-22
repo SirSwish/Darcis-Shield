@@ -1,0 +1,444 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Roofs: Walkables &amp; RF4 Tiles
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Adding, editing, and managing walkable containers and roof tiles.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Viewing Walkables
+    </Paragraph>
+    <Paragraph>
+        Walkables appear as numbered circles on the <Bold>Walkable layer</Bold> (toggle with the
+        layer button in the toolbar). They are also listed in the <Bold>Walkables panel</Bold> on
+        the right side of the Roofs tab.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Each walkable entry shows:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Walkable ID</Bold> (e.g., Walkable #3)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Building ID</Bold> it's attached to
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Bounding box</Bold> (X1, Z1 → X2, Z2)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Height</Bold> in quarter storeys
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>RF4 count</Bold> — how many roof tiles it contains
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_walkables_list.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Walkables panel showing list of walkables with IDs, building IDs, bounds, heights, and RF4 counts
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a New Walkable
+    </Paragraph>
+    <Paragraph>
+        You can add a new walkable to a building even if it already has existing walkables. This
+        is useful for creating overlapping walkable regions at different heights (e.g., a raised
+        platform on a rooftop).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building from the building filter dropdown (or use the building already
+                selected from the Buildings tab).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add button</Bold> next to the Walkables panel.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the map canvas, <Bold>click and drag</Bold> to define the walkable area.
+                An <Bold>orange box</Bold> highlights the region as you drag.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button. The <Bold>Add Walkable Region</Bold> dialog appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>Height</Bold> in quarter storeys (e.g., 8 for 2 storeys high).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Add Walkable</Bold>. The walkable is created and appears in the list.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_add_walkable.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Add Walkable Region dialog showing height input and Add Walkable button, with orange box preview on canvas
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Editing an Existing Walkable
+    </Paragraph>
+    <Paragraph>
+        You can edit a walkable's height. The bounding box cannot be changed without deleting and
+        recreating the walkable.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> the walkable in the Walkables list, OR
+                <Bold>double-click</Bold> the numbered circle on the Walkable layer on the map canvas.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>Walkable Preview</Bold> window appears showing the walkable's properties.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Change the <Bold>Height</Bold> value (in quarter storeys).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Apply</Bold> to commit the height change.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_edit_walkable.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Walkable Preview window showing walkable properties (bounds, height) with Apply button
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Deleting a Walkable
+    </Paragraph>
+    <Paragraph>
+        Deleting a walkable removes it and <Bold>all RF4 tiles it contains</Bold>. This is a
+        destructive operation.
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the walkable from the Walkables list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Delete</Bold> button, or press the <Bold>Delete</Bold> key.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Confirm the deletion in the dialog that appears.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding Roof Tiles (RF4)
+    </Paragraph>
+    <Paragraph>
+        Roof tiles are typically added to <Bold>warehouse buildings</Bold> (for floors) or
+        <Bold>houses with sloped roofs</Bold>. Roof tiles must be added to an existing walkable
+        container.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the <Bold>desired walkable</Bold> from the Walkables list that should
+                contain the roof tiles.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add button</Bold> next to the Roof Tiles panel. The
+                <Bold>Add Roof Face to Walkable</Bold> window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                You have two options:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Fill Entire Walkable</Bold> — Creates a flat roof tile for every cell
+                        in the walkable's bounding box
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Add Single Tile</Bold> — Adds one roof tile at a specific X, Z position
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>Height</Bold> in quarter storeys. It should automatically match the
+                walkable's height, but you can adjust it.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Add Flat Roof</Bold> to fill the walkable, or <Bold>Add Tile</Bold>
+                to add a single tile.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_add_rf4.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Add Roof Face to Walkable window with Fill Entire Walkable / Add Single Tile options, height input, and buttons
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Editing Roof Tiles
+    </Paragraph>
+    <Paragraph>
+        Editing individual roof tiles allows you to create <Bold>sloped roofs</Bold> by adjusting
+        corner heights.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Opening the Roof Tile Editor
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> a roof tile on the <Bold>Roof Tiles layer</Bold> on the
+                map canvas, OR
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> a roof tile entry in the <Bold>Roof Face 4 Entries</Bold>
+                panel (shown when a walkable is selected).
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        The <Bold>Roof Tile Editor</Bold> window appears with three sections:
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Roof Tile Properties Section
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>X and Z Coordinate</Bold> — Position of the tile on the map (read-only)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>SE Corner Height</Bold> — The base height of the cell in quarter storeys.
+                This is the primary height value.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>NW, NE, SW Corner Offsets</Bold> — Height deltas in <Bold>pixels</Bold>
+                (not quarter storeys). Negative values create downward slopes; positive values
+                create upward slopes.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Roof Direction Checkbox</Bold> — Indicates which way the tile splits diagonally.
+                A preview box shows the split direction visually.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Special Marker</Bold> — Usually always set for roof tiles. Exact purpose
+                unclear; leave it checked.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        RF4 Draw Flags Section
+    </Paragraph>
+    <Paragraph>
+        These flags do not appear to be used by the editor or engine, or they are populated
+        procedurally during gameplay. You can generally ignore this section.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Applying Changes
+    </Paragraph>
+    <Paragraph>
+        After setting the corner heights and properties, you have three application options:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Apply to Single Tile</Bold> — Updates only the current tile
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Apply to All Tiles</Bold> — Updates every RF4 tile in the walkable with the
+                same corner height values
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Apply to Selection</Bold> — Opens a selection tool; click and drag on the
+                map canvas to select a rectangular area of tiles to apply the properties to
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_rf4_editor.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Roof Tile Editor window showing position, SE/NW/NE/SW corner heights, roof direction checkbox with preview, special marker, and Apply buttons
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Deleting Roof Tiles
+    </Paragraph>
+    <Paragraph>
+        To delete individual roof tiles:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a walkable to view its RF4 tiles in the Roof Face 4 Entries panel.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select the tile(s) you want to delete from the list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Delete</Bold> button or press the <Bold>Delete</Bold> key.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Use <Bold>Fill Entire Walkable</Bold> when creating flat warehouse floors or flat
+                rooftops. This creates RF4 tiles across the entire bounding box automatically.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                For <Bold>sloped roofs</Bold>, first fill the walkable, then edit individual tiles
+                (or use Apply to Selection) to set corner height offsets.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Corner height offsets are in <Bold>pixels</Bold>, not quarter storeys. 1 QS = 64 pixels,
+                so a typical slope might use offsets of -32, -64, etc.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>Apply to Selection</Bold> button is very useful for creating sloped roofs
+                on one side of a building without affecting the other sides.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                When the Walkable layer is visible, numbered circles on the map make it easy to
+                quickly identify and select walkables for editing.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

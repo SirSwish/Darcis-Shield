@@ -1,0 +1,554 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Advanced Techniques
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Bulk editing polygons, filtering facets, transferring, cloning, moving, and deleting.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Polygons and Bulk Editing
+    </Paragraph>
+    <Paragraph>
+        Facets that form a <Bold>closed polygon</Bold> (a connected loop of walls/doors with
+        no gaps) are automatically grouped in the <Bold>Polygons</Bold> column on the right
+        side of the Buildings tab.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Polygon groups allow you to edit all facets in a closed structure simultaneously, which
+        is much faster than editing each facet individually. This is especially useful when you
+        need to change the height, style, or other properties of an entire building layer at once.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Opening the Bulk Facet Edit Dialog
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building from the Buildings list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                In the <Bold>Polygons</Bold> column, <Bold>double-click</Bold> a polygon group.
+                The <Bold>Bulk Facet Edit</Bold> window appears.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Understanding the Bulk Edit Interface
+    </Paragraph>
+    <Paragraph>
+        The Bulk Facet Edit window shows all property values for the facets in the selected
+        polygon. Each property has a color-coded indicator:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold Foreground="#90EE90">Green (=)</Bold> — All facets in the polygon have the
+                <Bold>same value</Bold> for this property. The shared value is displayed.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold Foreground="#FFD700">Yellow (≠)</Bold> — Facets have <Bold>different values</Bold>
+                for this property. The field shows a mixed/empty state.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Making Changes
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Modify any values you want to update. For example, change <Bold>Height</Bold> from
+                4 to 8 to make all walls in the polygon 2 storeys tall.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Untick the checkbox</Bold> next to a property if you do not want to update
+                it. Only properties with checked boxes will be applied to the facets.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                You can also change the <Bold>base style</Bold> by selecting a new style from the
+                style picker. This replaces the Style Index for all facets in the polygon.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Apply to All</Bold> to commit the changes. All facets in the polygon
+                are updated with the new values.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_bulk_edit.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Bulk Facet Edit dialog showing property values with green (=) and yellow (≠) indicators, checkboxes, and Apply to All button
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>Use bulk editing when you need to increase building height uniformly, change all walls to a different style, or adjust Y offsets for an entire layer. It's much faster than selecting and editing each facet individually.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- FILTERING -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Filtering Facets by Type
+    </Paragraph>
+    <Paragraph>
+        Complex buildings can contain dozens or hundreds of facets — walls, doors, ladders,
+        fences, cables, and gates all mixed together. The <Bold>color pill</Bold> filtering
+        system lets you quickly show only one facet type at a time.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How to Filter
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building from the Buildings list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                At the top of the <Bold>Facets</Bold> panel, you'll see a row of colored pills
+                corresponding to each facet type (green for walls, orange for ladders, etc.).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Click a color pill</Bold> to filter the Facets list to show only that type.
+                For example, click the <Bold>orange pill</Bold> to see only ladders.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the pill again (or click <Bold>All</Bold>) to clear the filter and show
+                all facets.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_color_filter.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Facets panel with color pill filter buttons active, showing filtered list of one facet type
+    </Paragraph>
+    <Paragraph>
+        Filtering is purely visual — it doesn't modify the facets, just makes it easier to find
+        and select specific types in the list. The map canvas always shows all facets regardless
+        of the filter.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- CLONING -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Cloning Facets
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Clone Facet</Bold> feature allows you to quickly create multiple facets with
+        the same properties without repeatedly opening the Add Facets dialog. This dramatically
+        speeds up building construction.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How to Clone a Facet
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a facet by clicking it on the map view or in the Facets list. The facet
+                is highlighted and its properties are loaded.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Clone Facet</Bold> button in the toolbar (looks like two overlapping
+                squares). You immediately enter <Bold>draw mode</Bold> with a copy of the facet's
+                properties loaded.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Draw the new facets on the map as normal. All properties (height, Y offset, style,
+                flags) are inherited from the original facet.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> when finished drawing.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_clone_facet.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Clone Facet button in toolbar (overlapping squares icon) and facet selected on map ready to clone
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        When to Use Cloning
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Drawing multiple walls with the same height, style, and Y offset
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Adding a series of fences with consistent properties
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Creating repetitive structures (e.g., a row of identical building sections)
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- TRANSFERRING -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Transferring Facets Between Buildings
+    </Paragraph>
+    <Paragraph>
+        If you accidentally add a facet to the wrong building, you can <Bold>transfer</Bold>
+        it to another building without deleting and recreating it. The facet's properties and
+        position are preserved — only its parent building changes.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How to Transfer a Facet
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the Facets list, <Bold>right-click</Bold> the facet you want to transfer.
+                A context menu appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select <Bold>Transfer Facet...</Bold> from the menu. The <Bold>Transfer Facet</Bold>
+                dialog appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Choose the <Bold>target building</Bold> from the dropdown list. This is the building
+                the facet will be moved to.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Transfer</Bold>. The facet is moved to the new building and now appears
+                in that building's Facets list.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_transfer_facet.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Transfer Facet dialog showing target building dropdown and Transfer button
+    </Paragraph>
+    <Paragraph>
+        Transferring does not change the facet's position, height, texture, or any other property.
+        It simply moves organizational ownership from one building container to another.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- MOVING BUILDINGS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Moving Buildings
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Move Building</Bold> feature allows you to relocate an entire building —
+        including all facets, textures, walkables, roof tiles, and PAP flags — to a new location
+        on the map. You can either <Bold>move</Bold> (preserving the building ID) or
+        <Bold>copy</Bold> (creating a clone with a new ID).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        How to Move a Building
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the building from the Buildings list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Move Building</Bold> button in the toolbar (blue-colored button).
+                The building's footprint is captured and <Bold>cut from the map</Bold> (textures,
+                walkables, and PAP flags are removed from the original location).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>blue ghost preview</Bold> of the building appears under your cursor,
+                showing where it will be placed.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor to the desired location and <Bold>click</Bold>. The
+                <Bold>Place Building</Bold> dialog appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Choose an option:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Move</Bold> — Moves the building to the new location, preserving its
+                        building ID and all references.
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Copy</Bold> — Creates a clone at the new location with a new building ID.
+                        The original building remains in its original location.
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Place</Bold>. The building is placed at the new location.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_move.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Move Building in progress showing blue ghost preview of building under cursor, and Place Building dialog with Move/Copy options
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Move vs Copy:</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• Use</Run>
+                <Run FontWeight="Bold">Move</Run>
+                <Run>when you want to relocate a building to a better position. The building ID stays the same, so any mission references remain valid.</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• Use</Run>
+                <Run FontWeight="Bold">Copy</Run>
+                <Run>when you want to duplicate a building to create multiple identical structures. Each copy gets a new building ID and can be independently modified.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- DELETING -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Deleting Buildings and Facets
+    </Paragraph>
+    <Paragraph>
+        You can delete individual facets or entire buildings (including all their facets) using
+        either the toolbar buttons or keyboard shortcuts.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Deleting a Facet
+    </Paragraph>
+    <Paragraph>
+        To delete a single facet:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the facet from the Facets list or click it directly on the map canvas.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Either:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        Click the <Bold>Delete Facet</Bold> button in the toolbar, or
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        Press the <Bold>Delete</Bold> key on your keyboard.
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+    </List>
+    <Paragraph>
+        The facet is immediately removed from the map and the Facets list. If the facet was part
+        of a closed polygon, the polygon is now open and the Auto-Build system will no longer
+        treat it as an enclosure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Deleting a Building
+    </Paragraph>
+    <Paragraph>
+        To delete an entire building (including all of its facets):
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the building from the Buildings list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Either:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        Click the <Bold>Delete Building</Bold> button in the toolbar, or
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        Press the <Bold>Delete</Bold> key on your keyboard.
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A confirmation dialog appears (since deleting a building is a destructive action).
+                Click <Bold>Yes</Bold> to confirm.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        The building and all of its facets are permanently removed from the map. The building
+        ID is freed and can be reused by a new building.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Warning:</Run>
+                <Run>Deleting a building is irreversible (unless you immediately use Undo). If you accidentally delete a complex building, you will need to recreate it from scratch. Consider using the Move Building feature instead if you just want to relocate it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips and Best Practices
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Use <Bold>bulk editing</Bold> (double-click polygon groups) when you need to
+                change properties for an entire building layer. It's much faster than editing
+                each facet individually.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use <Bold>color pill filtering</Bold> when working on complex buildings with many
+                facet types. For example, filter to show only doors when checking door placement,
+                or only ladders when verifying climbing paths.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use <Bold>Clone Facet</Bold> liberally. It's the fastest way to create multiple
+                facets with the same properties without repeatedly opening dialogs.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If you accidentally add a facet to the wrong building, use <Bold>Transfer Facet</Bold>
+                rather than deleting and recreating it. Transferring preserves all properties and
+                position.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use <Bold>Move Building (Copy mode)</Bold> to quickly duplicate identical structures
+                across your map. This is perfect for creating rows of houses, repeating fence
+                sections, or standardized warehouse layouts.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                When deleting facets, if you make a mistake you can immediately press
+                <Bold>Ctrl+Z</Bold> to undo (if undo is supported in the current version).
+                Otherwise, be careful before deleting complex facets or buildings.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The Facets list displays <Bold>Y:</Bold> (Y offset) and <Bold>H:</Bold> (Height)
+                for each facet, so you can quickly identify which layer a facet belongs to without
+                selecting it.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

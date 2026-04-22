@@ -1,0 +1,615 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Facets
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to add walls, doors, ladders, fences, cables, and gates to your buildings.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Overview
+    </Paragraph>
+    <Paragraph>
+        Facets are the building blocks of structures in Urban Chaos. Each facet type has unique
+        properties and behaviors, but all share a common drawing workflow:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Select a building from the Buildings list</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click the appropriate facet icon (Add Wall, Add Ladder, etc.)</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Configure properties in the dialog that appears</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click <Bold>Draw on Map</Bold> to enter drawing mode</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Click on the canvas to place facets, <Bold>right-click</Bold> to finish</Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Drawing Restriction:</Run>
+                <Run>You cannot draw diagonally (except for cables). All walls, doors, ladders, fences, and gates must be axis-aligned — either horizontal or vertical on the grid. This is an engine limitation.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- WALLS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Walls
+    </Paragraph>
+    <Paragraph>
+        Walls are the most common facet type and appear <Bold Foreground="#90EE90">green</Bold>
+        on the map. They form the primary structure of buildings and can be stacked, textured,
+        and configured with various properties.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Adding Walls
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building from the Buildings list (create one first if needed).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add Wall icon</Bold> in the toolbar. The <Bold>Add Facets</Bold>
+                window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select the facet sub-type. For walls, there is only one option: <Bold>Normal</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the facet properties:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Height</Bold> — Measured in quarter storeys (4 = 1 storey, 8 = 2 storeys)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Block Height</Bold> — Usually 4 (standard storey size)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Y Offset</Bold> — 0 for ground level, higher values to stack on existing structures
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Style Index</Bold> — Texture pattern from
+                        <Run FontFamily="Consolas" Foreground="#E8B84B">style.tma</Run>
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Flags</Bold> — Optional properties
+                    </Paragraph>
+                </ListItem>
+            </List>
+            <Paragraph Margin="16,4,0,0">
+                <Run FontStyle="Italic" Foreground="#A0A0A0">
+                    For detailed explanations of Height, Block Height, Y Offset, Style Index, and
+                    Flags, see the</Run>
+                <Bold Foreground="#7AD7FF">Buildings: Properties &amp; Flags</Bold>
+                <Run FontStyle="Italic" Foreground="#A0A0A0">section.</Run>
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>. Your cursor changes to draw mode.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click once to set the start point, move to the desired end position, and click
+                again to place the wall. The wall must be horizontal or vertical (no diagonals).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Repeat to add more walls. <Bold>Right-click</Bold> when finished drawing.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_add_wall.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Add Facets window for walls showing Type, Height, Block Height, Y Offset, Style Index, Flags, and texture preview
+    </Paragraph>
+    <Paragraph>
+        If you draw walls that form a closed polygon (a complete connected loop with no gaps),
+        the Auto-Build system will detect it and automatically apply roof textures, set PAP flags,
+        and create walkables (if enabled).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Quick Resizing and Rotating Walls
+    </Paragraph>
+    <Paragraph>
+        After placing a wall, you can quickly resize or rotate it without recreating it:
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Margin="0,8,0,2">
+        To Resize:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Click the facet</Bold> on the map canvas to select it. The facet is highlighted.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Green bulbs</Bold> appear at both endpoints of the facet.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Click and drag</Bold> one of the green bulbs to a new location on the grid.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button to commit the resize. The facet is now resized to the new length.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph FontWeight="SemiBold" Margin="0,6,0,2">
+        To Rotate in Place:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Click the facet</Bold> on the map canvas to select it. The facet is highlighted.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press the <Bold>Space Bar</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The facet rotates 90 degrees clockwise around its center point, staying in place.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press <Bold>Space Bar</Bold> multiple times to continue rotating (90°, 180°, 270°, back to 0°).
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        This is much faster than deleting and redrawing a facet when you need to adjust its position
+        or length.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- LADDERS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Ladders
+    </Paragraph>
+    <Paragraph>
+        Ladders allow the player to climb vertical surfaces and appear <Bold Foreground="#FFA500">orange</Bold>
+        on the map. Unlike walls, ladders have only two configurable properties and are always
+        <Bold>1 cell wide</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Adding Ladders
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building and click the <Bold>Add Ladder icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>Height</Bold> (in quarter storeys) and <Bold>Y Offset</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold> and place the ladder by clicking once, moving to
+                the end position (1 cell away), and clicking again.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        When drawing a ladder, you will see a <Bold>direction arrow</Bold> indicating which way
+        the ladder faces (inward or outward from the wall). If you make a mistake, press
+        <Bold>Escape</Bold> to cancel the draw and start again.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_ladder.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Ladder (orange) placed on a wall with direction arrow showing ladder orientation
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- FENCES -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fences
+    </Paragraph>
+    <Paragraph>
+        Fences appear <Bold Foreground="#FFFF00">yellow</Bold> on the map and have the same
+        properties as walls. Textures are managed via the <Bold>Style Index</Bold>. There are
+        three fence sub-types:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Fence Flat</Bold> — A fence with no top barrier. Can be climbed over.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Fence</Bold> — A fence with a barbed wire top. Cannot be climbed over.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Fence Brick</Bold> — A flat-topped fence that cannot be climbed over (solid barrier).
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Key Difference from Walls
+    </Paragraph>
+    <Paragraph>
+        Unlike walls, fence textures are always <Bold>stretched</Bold> to the height of the
+        facet rather than stacked vertically. This means a 2-storey fence will show one stretched
+        texture tile, whereas a 2-storey wall will show two stacked texture tiles.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_fences.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Three fence types (yellow) - Fence Flat, Fence (barbed), Fence Brick - showing texture stretching
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- CABLES -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Cables
+    </Paragraph>
+    <Paragraph>
+        Cables appear <Bold Foreground="#FF6347">red</Bold> on the map and are the <Bold>only
+        facet type</Bold> that can be drawn diagonally. They are useful for overhead power lines,
+        zip lines, and other suspended elements.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Adding Cables
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building and click the <Bold>Add Cable icon</Bold>. The <Bold>Add New Cable</Bold>
+                window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>start point</Bold> (X, Z coordinates) and start <Bold>height</Bold>
+                (in quarter storeys).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>end point</Bold> (X, Z coordinates) and end <Bold>height</Bold>
+                (in quarter storeys).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Alternatively, click <Bold>Draw on Map</Bold> to manually place the start and end
+                points directly on the canvas by clicking twice.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The window automatically calculates the required number of segments and shows a
+                <Bold>preview</Bold> of the cable path.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Create Cable</Bold> to place it on the map.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_cable.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Add New Cable dialog showing Start/End coordinates, heights, segment calculation, and preview
+    </Paragraph>
+    <Paragraph>
+        <Bold>Example use case:</Bold> Create a cable from the roof of a building (height 8 QS)
+        down to the ground (height 0 QS) to simulate a power line or zip line.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- DOORS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Doors
+    </Paragraph>
+    <Paragraph>
+        Doors appear <Bold Foreground="#DA70D6">purple</Bold> on the map and are portals between
+        the outside view and the inside view. Doors behave differently depending on the building type:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>House buildings:</Bold> Doors function as <Bold>elevators</Bold>, teleporting
+                the player to the top of the building.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Warehouse buildings:</Bold> Doors allow the player to enter the interior and
+                walk around inside.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Door Requirements
+    </Paragraph>
+    <Paragraph>
+        Doors are maximum <Bold>1 cell wide</Bold> (like ladders) and must be placed in a gap
+        of <Bold>exactly 1 cell</Bold>. When a door seals a 1-cell gap in a wall polygon, it
+        completes the closed polygon and triggers the Auto-Build system (if enabled).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        When drawing, a <Bold>direction arrow</Bold> shows the correct orientation. The arrow
+        should face <Bold>outside</Bold> so the player can approach and enter through the door.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Adding Doors
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select a building (typically a warehouse) and click the <Bold>Add Door icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>Y Offset</Bold>. Use 0 for ground level, or a higher value if the
+                door accesses an upper floor.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold> and place the door in a 1-cell gap between walls.
+                Ensure the arrow points <Bold>outward</Bold>.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_door.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Door (purple) placed in a 1-cell gap with direction arrow pointing outward
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Warehouse Door Best Practices:</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• Leave a 1-cell gap in the wall polygon before placing the door. The door will seal the gap and complete the closed polygon.</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• Do not make the first layer of a warehouse building multi-storey. Doors cannot span multiple storeys, so the polygon will not close properly and the Auto-Build system will not trigger.</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• Instead, build the first layer at exactly 4 quarter storeys (1 storey) so the door fits. If you need additional height, create a separate facet group offset by 4 quarter storeys and stack it on top.</Run>
+                <LineBreak/>
+                <LineBreak/>
+                <Run>• If you forget the gap and draw a completely closed wall loop, you can still add a door — but it will be covered by the wall texture and won't function correctly. Always leave the 1-cell gap first.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- GATES -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Gates
+    </Paragraph>
+    <Paragraph>
+        Gates appear <Bold Foreground="#87CEEB">blue</Bold> on the map and function similarly
+        to fences. They are styled via the <Bold>Style Index</Bold> and have the same properties
+        as walls (Height, Block Height, Y Offset, Flags).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The key difference from fences is that gates can be <Bold>programmed to open</Bold> via
+        mission files during gameplay. The <Bold>Open</Bold> flag is set at runtime by the mission
+        script, allowing the gate to swing open when triggered by an event or player action.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_gate.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Gate (blue) placed as part of a fence line, can be opened via mission scripts
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Quick Reference
+    </Paragraph>
+    <Paragraph>
+        Summary of facet types and their characteristics:
+    </Paragraph>
+    <Table CellSpacing="0" Margin="0,8,0,0">
+        <Table.Columns>
+            <TableColumn Width="120"/>
+            <TableColumn Width="80"/>
+            <TableColumn Width="120"/>
+            <TableColumn Width="300"/>
+        </Table.Columns>
+        <TableRowGroup>
+            <TableRow Background="#2A2D32">
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Facet Type</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Color</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Max Width</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph FontWeight="Bold" Foreground="#7AD7FF">Notes</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Walls</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#90EE90">Green</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Unlimited</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Textures stack vertically</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Ladders</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#FFA500">Orange</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>1 cell</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Only Height + Y Offset properties</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Fences</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#FFFF00">Yellow</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Unlimited</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Textures stretch to height</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Cables</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#FF6347">Red</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Unlimited</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Only facet type that can be diagonal</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Doors</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#DA70D6">Purple</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>1 cell</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Requires exactly 1-cell gap to place</Paragraph>
+                </TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Gates</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph Foreground="#87CEEB">Blue</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Unlimited</Paragraph>
+                </TableCell>
+                <TableCell Padding="8,4" BorderBrush="#444" BorderThickness="1">
+                    <Paragraph>Can be opened via mission files</Paragraph>
+                </TableCell>
+            </TableRow>
+        </TableRowGroup>
+    </Table>
+
+</FlowDocument>

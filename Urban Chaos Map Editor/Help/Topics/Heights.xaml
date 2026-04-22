@@ -241,9 +241,8 @@
     <BlockUIContainer Margin="0,4,0,8">
         <!-- IMAGE NEEDED: heights_stamp_editor.png — the Stamp Editor window showing the grid size input, Generate Grid button, the filled cell grid, name field and Save Stamp button -->
         <Border Background="#2A2A2A" BorderBrush="#555" BorderThickness="1" CornerRadius="4" Padding="12">
-            <TextBlock Foreground="#888" FontStyle="Italic" TextWrapping="Wrap">
-                [ Screenshot: heights_stamp_editor.png ]
-            </TextBlock>
+            <Image Source="pack://application:,,,/Help/Images/heights_stamp_editor.png"
+       MaxWidth="700" Stretch="Uniform"/>
         </Border>
     </BlockUIContainer>
     <Paragraph>

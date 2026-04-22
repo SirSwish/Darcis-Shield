@@ -1,0 +1,379 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Roofs: PAP Flags
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Complete reference for PAP flags and how to apply them.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What are PAP Flags?
+    </Paragraph>
+    <Paragraph>
+        <Bold>PAP flags</Bold> are binary properties attached to each cell that tell the engine
+        how the cell should behave. Multiple flags can be set on a single cell simultaneously.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Most flags are set automatically by the Auto-Build system when you create buildings.
+        However, you can manually apply or remove flags for special effects, mission areas, or
+        fine-tuning.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>Not all PAP flags are fully understood or documented. Some may be unused by the engine, or their exact behavior may vary depending on game version. The descriptions below represent the best current understanding.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        PAP Flag Reference
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Shadow Boxes
+    </Paragraph>
+    <Paragraph>
+        Defines shadows for sloped roofs. Used to create realistic shadow casting on angled surfaces.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Applied automatically by the engine on sloped RF4 tiles. Rarely needs
+        manual setting.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Reflective
+    </Paragraph>
+    <Paragraph>
+        Surface reflects light, creating a wet or shiny appearance.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Status:</Bold> Possibly unused by the final engine. May have been intended for wet-look
+        tiles but not fully implemented.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Hidden
+    </Paragraph>
+    <Paragraph>
+        Cell is an <Bold>interior cell</Bold> and has a ceiling above it. The player is inside a
+        structure.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Automatically set by the Auto-Build system on warehouse interiors. This
+        tells the engine to render the interior view and hide the sky/outdoor elements.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Critical:</Bold> Required for warehouse buildings to function correctly. Without this
+        flag, warehouse interiors won't render properly.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        SinkSquare
+    </Paragraph>
+    <Paragraph>
+        Lowers the floor square to create a curb or step-down effect.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Used for creating curbs, gutters, or small elevation changes within
+        a cell. The exact lowering amount may be engine-defined.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        SinkPoint
+    </Paragraph>
+    <Paragraph>
+        Player sinks into the tile (originally intended for water tiles).
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Status:</Bold> Probably unused in the final game. Was likely intended to make the
+        player sink when standing in water, but this behavior may not be fully implemented.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        NoUpper
+    </Paragraph>
+    <Paragraph>
+        Controls which side of a stepped edge gets deformed.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Status:</Bold> Probably unused. May have been intended for edge-smoothing on height
+        transitions but not fully implemented.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        NoGo
+    </Paragraph>
+    <Paragraph>
+        Player <Bold>cannot enter</Bold> this cell. Functions the same as a No Go Zone in the
+        mission file.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Use this to block off areas that should be inaccessible to the player,
+        such as decorative areas, out-of-bounds regions, or mission-specific restricted zones.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Note:</Bold> This is a <Bold>hard block</Bold> — the player physically cannot move
+        into the cell. Use sparingly to avoid frustrating players.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        RoofExists
+    </Paragraph>
+    <Paragraph>
+        Tells the engine the player should stand on the <Bold>roof altitude height</Bold> rather
+        than the terrain height.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Automatically set by the Auto-Build system on non-warehouse buildings.
+        This is the key flag that makes roof surfaces walkable.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Critical:</Bold> If you manually set a cell altitude (e.g., for a bridge), you
+        <Bold>must</Bold> also set the RoofExists flag, otherwise the player will fall through.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Warehouse Note:</Bold> Do <Bold>not</Bold> use RoofExists on warehouse interiors.
+        Warehouses use RF4 tiles for floors and keep this flag off.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Zone Flags (Zone 0 – Zone 7)
+    </Paragraph>
+    <Paragraph>
+        Eight zone flags that function the same as zone flags in the Mission Editor. These can be
+        used to create specific areas for mission event trigger points.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Usage:</Bold> Mark cells with zone flags (e.g., Zone 1, Zone 2) and then reference
+        those zones in mission scripts to create event triggers. For example, "when player enters
+        Zone 3, spawn enemies."
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Benefit:</Bold> Using PAP zone flags in the map file is more flexible than hardcoding
+        zones in mission files, as the zones are baked into the map and can be visually designed.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Flat Roof
+    </Paragraph>
+    <Paragraph>
+        Indicates the cell has a roof, but it is not sloped.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Status:</Bold> Probably unused. The engine likely determines flat vs. sloped roofs
+        from RF4 tile corner heights rather than this flag.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Water
+    </Paragraph>
+    <Paragraph>
+        Marks the tile as water. Sets sink behavior around the tile and updates the water level
+        rendering.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Status:</Bold> Probably unused or partially implemented. The game may not fully
+        support dynamic water tile behavior defined via PAP flags.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,0">
+        <Bold>Note:</Bold> If you want water effects, it's safer to use mission scripts or
+        predefined water areas in the map rather than relying solely on this flag.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Applying PAP Flags
+    </Paragraph>
+    <Paragraph>
+        You can apply PAP flags to cells using the <Bold>Drag Area</Bold> tool. This allows you
+        to bulk-apply flags to rectangular areas of the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step-by-Step
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                In the <Bold>PAP Flags</Bold> section of the Roofs tab, check the flags you want
+                to apply (e.g., <Bold>NoGo</Bold> to block off an area).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Drag Area</Bold> button. Your cursor changes to indicate flag
+                painting mode.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the map canvas, <Bold>click and drag</Bold> to define a rectangular area.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Release the mouse button. All cells in the selected rectangle have the checked
+                flags applied (added to any existing flags).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> to exit flag painting mode.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/roofs_pap_flags.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: PAP Flags panel showing checkboxes for all flag types and Drag Area button, with rectangular selection preview on canvas
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>Drag Area</Run>
+                <Run FontWeight="Bold">adds</Run>
+                <Run>flags to cells, it does not replace existing flags. If a cell already has RoofExists set and you apply NoGo via Drag Area, the cell will have</Run>
+                <Run FontWeight="Bold">both</Run>
+                <Run>flags. To remove flags, you must manually clear them in the PAP editor.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Flag Combinations
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Non-Warehouse Rooftops
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>RoofExists</Bold> + <Bold>Hidden</Bold> (if under another structure)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="16,2,0,6">
+        Standard combination for house roofs. RoofExists makes it walkable; Hidden is added if
+        the roof is enclosed by taller buildings.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Warehouse Interiors
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Hidden</Bold> only (no RoofExists)
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="16,2,0,6">
+        Warehouses use RF4 tiles for floors, so RoofExists is not needed. Hidden tells the engine
+        to render the interior view.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Mission Event Zones
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Zone 1</Bold> (or Zone 2, 3, etc.) + other appropriate flags
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="16,2,0,6">
+        Mark areas with zone flags for mission script triggers. The zone flag does not affect
+        walkability or appearance — it's purely for mission logic.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Restricted Areas
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>NoGo</Bold>
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="16,2,0,6">
+        Block player access to decorative or out-of-bounds areas. Use sparingly — it's better
+        to guide players with level design than hard-block them.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>RoofExists</Bold> and <Bold>Hidden</Bold> are the most important flags for
+                normal building construction. The Auto-Build system handles these automatically.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Zone flags</Bold> are very useful for mission design. Mark key areas (spawn
+                points, objectives, trigger zones) during map creation so mission scripters can
+                easily reference them.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use <Bold>NoGo</Bold> sparingly. Players find invisible walls frustrating. It's
+                better to use visible barriers (fences, walls) combined with level design to guide
+                movement.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If a flag's purpose is unclear or marked "probably unused," it's safe to ignore it.
+                Focus on <Bold>RoofExists</Bold>, <Bold>Hidden</Bold>, <Bold>NoGo</Bold>, and
+                <Bold>Zone flags</Bold> — these are the most reliable and well-understood.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Flags can be applied outside of walkables or buildings. For example, you can create
+                elevated bridges using cell altitudes + RoofExists flag without any building facets.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

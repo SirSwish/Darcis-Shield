@@ -1,0 +1,841 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Buildings: Step-by-Step Examples
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Complete walk-throughs for creating common building types.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Example 1: Simple Rectangular Building with Ladder
+    </Paragraph>
+    <Paragraph>
+        In this example, we will create a simple 3×5 rectangular house that is 1 storey high,
+        then add a ladder so the player can climb to the rooftop.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 1: Create the Building Container
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open the <Bold>Buildings tab</Bold> in the editor drawer.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>New Building icon</Bold>. The Add Building dialog appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select <Bold>House</Bold> as the building type.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Add Building</Bold>. The new building appears in the Buildings list
+                (e.g., <Bold>Building #1</Bold>).
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 2: Configure Wall Properties
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                With the building selected, click the <Bold>Add Wall icon</Bold>. The Add Facets
+                window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the following properties:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Type:</Bold> Normal (default)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Height:</Bold> 4 (1 storey = 4 quarter storeys)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Block Height:</Bold> 4 (standard)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Y Offset:</Bold> 0 (ground level)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Style Index:</Bold> 1 (first style in
+                        <Run FontFamily="Consolas" Foreground="#E8B84B">style.tma</Run>)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Flags:</Bold> Leave defaults
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>. Your cursor changes to draw mode.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 3: Draw the Building Walls
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                On the map canvas, click to place the first corner of the building.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor 5 cells horizontally and click to place the first wall.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor 3 cells vertically and click to place the second wall.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor 5 cells back (horizontally) and click to place the third wall.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor back to the starting point (3 cells) and click to complete the
+                rectangle and close the polygon.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> to finish drawing walls.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_example_step3.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: 3×5 rectangular building (green walls) with auto-applied roof textures, walkable region, and closed polygon detected
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 4: Observe Auto-Build Results
+    </Paragraph>
+    <Paragraph>
+        As soon as the polygon is closed, the <Bold>Auto-Build system</Bold> detects it and
+        automatically:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Adjusts the <Bold>cell altitude</Bold> for the enclosed area to represent the roof height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Applies <Bold>roof textures</Bold> to the interior using intelligent texture
+                classification (corners, edges, center tiles)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Creates a <Bold>walkable region</Bold> at the roof height so the player can stand
+                on top of the building
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The polygon appears in the <Bold>Polygons list</Bold> on the right side
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        You now have a complete 1-storey building with a walkable rooftop!
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 5: Add a Ladder
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add Ladder icon</Bold>. The Add Facets window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Height:</Bold> 4 (1 storey — matches wall height)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Y Offset:</Bold> 0 (starts at ground level)
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the map, click on one of the building's walls to place the ladder start point.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Move your cursor 1 cell perpendicular to the wall. A <Bold>direction arrow</Bold>
+                appears showing which way the ladder faces.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Ensure the arrow points <Bold>outward</Bold> (away from the building center) so
+                the player can climb from outside.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click to place the ladder. It appears in <Bold>orange</Bold> on the map.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_example_step5.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Same 3×5 building now with orange ladder placed on one wall, allowing player access to the rooftop
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Result
+    </Paragraph>
+    <Paragraph>
+        You now have a complete 3×5, 1-storey building with:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Four <Bold>green walls</Bold> forming a closed rectangle
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Automatically-applied <Bold>roof textures</Bold> on the interior
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>walkable region</Bold> on the rooftop
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                An <Bold>orange ladder</Bold> the player can use to climb up
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        The building is ready for in-game use!
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- EXAMPLE 2: WAREHOUSE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Example 2: Warehouse with Playable Interior
+    </Paragraph>
+    <Paragraph>
+        In this example, we will create a warehouse building with a door that the player can
+        enter to access the interior. This demonstrates the key differences between houses and
+        warehouses.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 1: Create a Warehouse Building
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open the <Bold>Buildings tab</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>New Building icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select <Bold>Warehouse</Bold> as the building type (this is critical!).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Add Building</Bold>.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 2: Configure Warehouse Walls
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                With the warehouse selected, click the <Bold>Add Wall icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Notice that the <Bold>Two-Textured</Bold> flag is already checked. This is
+                automatically set for warehouse buildings and ensures correct inside/outside
+                texture rendering. Leave it checked.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Height:</Bold> 4 (1 storey — <Bold>never</Bold> make the first layer
+                        taller, doors can't span multiple storeys)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Block Height:</Bold> 4
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Y Offset:</Bold> 0
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Style Index:</Bold> 1
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 3: Draw Walls with a 1-Cell Gap
+    </Paragraph>
+    <Paragraph>
+        This is the critical step — you must leave a gap of <Bold>exactly 1 cell</Bold> for
+        the door.
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Draw three walls to form three sides of a rectangle (e.g., 4×4 cells).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                On the fourth side, draw walls on either side leaving a <Bold>1-cell gap</Bold>
+                in the middle. For example, if the side is 4 cells wide, draw a 1-cell wall on
+                the left, leave 1 cell empty, and draw a 2-cell wall on the right.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> to finish drawing walls.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_warehouse_step3.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Warehouse building with three walls and a 1-cell gap (polygon not yet closed)
+    </Paragraph>
+    <Paragraph>
+        At this point, the polygon is <Bold>not closed</Bold> because of the 1-cell gap. The
+        Auto-Build system will not trigger yet.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 4: Add the Door
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add Door icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set <Bold>Y Offset = 0</Bold> (ground level).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click on one edge of the 1-cell gap, then move your cursor across the gap.
+                A <Bold>direction arrow</Bold> appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Ensure the arrow points <Bold>outward</Bold> (away from the building interior)
+                so the player can approach and enter.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click to place the door. It appears in <Bold>purple</Bold> on the map.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/buildings_warehouse_step5.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
+        Screenshot: Warehouse with purple door sealing the gap, polygon now closed, floor textures and RF4 tiles auto-created
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 5: Observe Warehouse Auto-Build Results
+    </Paragraph>
+    <Paragraph>
+        As soon as the door seals the gap, the polygon is closed and the <Bold>warehouse-specific
+        Auto-Build</Bold> triggers. The system automatically:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Keeps the <Bold>PAP cell altitude at 0</Bold> (ground level) — it does <Bold>not</Bold>
+                raise it like houses
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Sets the <Bold>PAP Hidden flag</Bold> on interior tiles so the PAP layer is ignored
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Applies <Bold>floor textures</Bold> (specifically
+                <Run FontFamily="Consolas" Foreground="#E8B84B">tex287hi</Run>) to the interior
+                instead of roof textures
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Creates a <Bold>walkable region</Bold> at the facet height (1 storey up)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Auto-creates <Bold>RF4 roof tiles</Bold> matching the interior footprint at the
+                walkable height. These tiles define the effective floor height inside the warehouse.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Adds interior walls (marked with the <Bold>Inside</Bold> flag) that are paired
+                1:1 with exterior walls by coordinate matching
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Result
+    </Paragraph>
+    <Paragraph>
+        You now have a fully functional warehouse building:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Green exterior walls</Bold> forming the structure
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>purple door</Bold> the player can enter through
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Floor textures</Bold> on the interior (not roof textures)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>walkable interior</Bold> at the building height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>RF4 roof tiles</Bold> defining the walkable floor height
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Interior walls</Bold> that mirror the exterior walls for inside viewing
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        The player can now walk up to the door, enter the warehouse, and move around inside!
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- EXAMPLE 3: L-SHAPED FENCES -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Example 3: L-Shaped Fence Section
+    </Paragraph>
+    <Paragraph>
+        In this example, we will create an L-shaped fence barrier using the Clone Facet feature
+        to speed up the process.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 1: Create a Building Container
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Create a new building (House type is fine for fences).
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 2: Add the First Fence Segment
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Add Fence icon</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select fence type: <Bold>Fence</Bold> (barbed wire top, cannot climb over).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Height:</Bold> 2 (half-storey, typical fence height)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Block Height:</Bold> 4
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Y Offset:</Bold> 0
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Style Index:</Bold> Choose a fence style (e.g., 15)
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Draw on Map</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Draw a fence segment 5 cells long (horizontal). <Bold>Right-click</Bold> to finish.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph>
+        The fence appears in <Bold>yellow</Bold> on the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 3: Clone the Fence to Create the Perpendicular Segment
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Click the fence</Bold> you just drew on the map canvas to select it.
+                It is highlighted in the Facets list.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Clone Facet button</Bold> in the toolbar. You immediately enter
+                draw mode with the fence's properties loaded (Height=2, Style=15, etc.).
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Draw a second fence segment perpendicular to the first, starting at the end of
+                the first fence. Draw it 5 cells long (vertical) to form the "L" shape.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Right-click</Bold> to finish.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Result
+    </Paragraph>
+    <Paragraph>
+        You now have an L-shaped fence barrier made from two segments:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Both segments have <Bold>identical properties</Bold> (height, style, flags)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The Clone Facet feature saved time — you didn't have to reopen the Add Fence
+                dialog and reconfigure properties for the second segment
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The barrier appears as two <Bold>yellow</Bold> fence facets on the map
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        You can continue cloning and drawing to create longer fence runs or complex shapes quickly.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <!-- EXAMPLE 4: CABLE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Example 4: Diagonal Cable from Roof to Ground
+    </Paragraph>
+    <Paragraph>
+        In this example, we will add a cable running diagonally from the rooftop of our example
+        building down to the ground. This demonstrates the only facet type that can be drawn
+        diagonally.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Prerequisites
+    </Paragraph>
+    <Paragraph>
+        You should already have a building (from Example 1) that is 1 storey high (4 QS).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Step 1: Add a Cable
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the building and click the <Bold>Add Cable icon</Bold>. The <Bold>Add New
+                Cable</Bold> window appears.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>start point</Bold> at a corner of the building's roof:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Start X:</Bold> (e.g., 50)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Start Z:</Bold> (e.g., 50)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>Start Height:</Bold> 4 (roof height, 1 storey = 4 QS)
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>end point</Bold> at ground level 5 cells away diagonally:
+            </Paragraph>
+            <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+                <ListItem>
+                    <Paragraph>
+                        <Bold>End X:</Bold> (e.g., 55)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>End Z:</Bold> (e.g., 55)
+                    </Paragraph>
+                </ListItem>
+                <ListItem>
+                    <Paragraph>
+                        <Bold>End Height:</Bold> 0 (ground level)
+                    </Paragraph>
+                </ListItem>
+            </List>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Alternatively, click <Bold>Draw on Map</Bold> and manually click the start and
+                end points on the canvas. The window will auto-fill the coordinates and heights.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The window shows a <Bold>preview</Bold> and automatically calculates the required
+                number of segments for a smooth cable.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click <Bold>Create Cable</Bold> to place it.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Result
+    </Paragraph>
+    <Paragraph>
+        A <Bold>red diagonal cable</Bold> now runs from the building's rooftop down to the ground,
+        creating a visual connection between the two heights. Cables can be used for:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Power lines connecting buildings
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Zip lines for player traversal (if mission-scripted)
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Decorative suspended elements
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Summary
+    </Paragraph>
+    <Paragraph>
+        These examples demonstrate the core workflows for building in Urban Chaos:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Example 1</Bold> shows the basic house building workflow: create container,
+                draw closed polygon, add ladder. The Auto-Build system handles texturing and
+                walkables.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Example 2</Bold> demonstrates warehouse-specific mechanics: 1-cell gap for
+                door, warehouse Auto-Build (floor textures, PAP Hidden, RF4 tiles), playable interior.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Example 3</Bold> shows how Clone Facet speeds up repetitive tasks like
+                creating fence runs with consistent properties.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Example 4</Bold> demonstrates cables, the only diagonal facet type, and how
+                to connect different height levels.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,8,0,0">
+        With these techniques, you can create simple decorative houses, playable warehouse
+        interiors, fenced areas, and connected structures of any complexity!
+    </Paragraph>
+
+</FlowDocument>

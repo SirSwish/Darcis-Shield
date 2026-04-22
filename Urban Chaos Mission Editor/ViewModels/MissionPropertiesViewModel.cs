@@ -19,6 +19,7 @@ public class MissionPropertiesViewModel : BaseViewModel
     private readonly byte _originalCivsRate;
     private readonly byte _originalBoredomRate;
     private readonly byte _originalCarsRate;
+    private readonly byte _originalMusicWorld;
 
     public MissionPropertiesViewModel(Mission mission)
     {
@@ -33,6 +34,7 @@ public class MissionPropertiesViewModel : BaseViewModel
         _originalCivsRate = mission.CivsRate;
         _originalBoredomRate = mission.BoredomRate;
         _originalCarsRate = mission.CarsRate;
+        _originalMusicWorld = mission.MusicWorld;
     }
 
     public string HeaderText => "Mission Properties";
@@ -157,6 +159,21 @@ public class MissionPropertiesViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Music world index (1 byte at end of packed Mission struct, immediately after CarsRate).
+    /// Game engine clamps values &lt; 1 up to 1, and the runtime value can be overridden at load time
+    /// by a matching entry in levels\mworlds.txt. Only present in mission versions &gt; 8.
+    /// </summary>
+    public byte MusicWorld
+    {
+        get => _mission.MusicWorld;
+        set
+        {
+            _mission.MusicWorld = value;
+            OnPropertyChanged();
+        }
+    }
+
     public uint Version => _mission.Version;
     public int EventPointCount => _mission.UsedEventPointCount;
 
@@ -173,6 +190,7 @@ public class MissionPropertiesViewModel : BaseViewModel
         _mission.CivsRate = _originalCivsRate;
         _mission.BoredomRate = _originalBoredomRate;
         _mission.CarsRate = _originalCarsRate;
+        _mission.MusicWorld = _originalMusicWorld;
     }
 
     private static string GetFileName(string path)

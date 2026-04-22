@@ -193,9 +193,11 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                         _baseStyles[band] = (short)ds.StyleIndex;
 
                         // Load paint bytes.
-                        // 2SIDED: stored forward (pos = col), game reads Side A forward.
+                        // 2SIDED or Inside: stored forward (pos = col).
                         // All others: stored reversed (pos = N-1-col).
                         bool twoSided = (_facet.Flags & FacetFlags.TwoSided) != 0;
+                        bool isInside = (_facet.Flags & FacetFlags.Inside) != 0;
+                        bool readForward = twoSided || isInside;
                         int paintStart = ds.PaintIndex;
                         int paintCount = ds.Count;
 
@@ -203,7 +205,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 
                         for (int col = 0; col < _panelsAcross; col++)
                         {
-                            int pos = twoSided ? col : _panelsAcross - 1 - col;
+                            int pos = readForward ? col : _panelsAcross - 1 - col;
 
                             if (pos < paintCount)
                             {
