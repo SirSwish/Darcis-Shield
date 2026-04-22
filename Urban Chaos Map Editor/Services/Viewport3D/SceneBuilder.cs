@@ -106,10 +106,13 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double cellAltWorld = 0.0;
                     try
                     {
-                        int engineY = _altitudes.ReadAltRaw(tx, ty) << AltitudeAccessor.PAP_ALT_SHIFT;
-                        cellAltWorld = engineY * EngineToViewY;
+                        int papAlt = _altitudes.ReadAltRaw(tx, ty);
+                        cellAltWorld = papAlt * QuarterStoreyWorld;   // 1 quarter-storey = 16
                     }
-                    catch { cellAltWorld = 0.0; }
+                    catch
+                    {
+                        cellAltWorld = 0.0;
+                    }
 
                     // Quad corners in 2D-canvas XZ.
                     double x0 = tx * tile;
@@ -117,7 +120,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double z0 = ty * tile;
                     double z1 = z0 + tile;
 
-                    double y00 = cornerY[tx, ty]     + cellAltWorld;
+                    double y00 = cornerY[tx, ty] + cellAltWorld;
                     double y10 = cornerY[tx + 1, ty] + cellAltWorld;
                     double y01 = cornerY[tx, ty + 1] + cellAltWorld;
                     double y11 = cornerY[tx + 1, ty + 1] + cellAltWorld;
@@ -189,8 +192,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             Point uv0 = new(0, 0), uv1 = new(1, 0), uv2 = new(1, 1), uv3 = new(0, 1);
             switch (rotationDeg % 360)
             {
-                case 0:   break;
-                case 90:  (uv0, uv1, uv2, uv3) = (uv1, uv2, uv3, uv0); break;
+                case 0: break;
+                case 90: (uv0, uv1, uv2, uv3) = (uv1, uv2, uv3, uv0); break;
                 case 180: (uv0, uv1, uv2, uv3) = (uv2, uv3, uv0, uv1); break;
                 case 270: (uv0, uv1, uv2, uv3) = (uv3, uv0, uv1, uv2); break;
             }
@@ -228,27 +231,27 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             var flatMeshes = new Dictionary<FacetType, MeshGeometry3D>();
             var colors = new Dictionary<FacetType, Color>
             {
-                [FacetType.Normal]        = Color.FromRgb(210, 200, 180),
-                [FacetType.Wall]          = Color.FromRgb(200, 180, 150),
-                [FacetType.Inside]        = Color.FromRgb(180, 160, 140),
-                [FacetType.OInside]       = Color.FromRgb(180, 160, 140),
-                [FacetType.Partition]     = Color.FromRgb(170, 150, 140),
-                [FacetType.Door]          = Color.FromRgb(100,  70,  40),
-                [FacetType.InsideDoor]    = Color.FromRgb(110,  80,  50),
-                [FacetType.OutsideDoor]   = Color.FromRgb( 90,  60,  30),
-                [FacetType.Roof]          = Color.FromRgb(120,  70,  70),
-                [FacetType.RoofQuad]      = Color.FromRgb(130,  80,  80),
-                [FacetType.FloorPoints]   = Color.FromRgb(100, 100, 100),
-                [FacetType.Fence]         = Color.FromRgb(160, 140, 100),
-                [FacetType.FenceBrick]    = Color.FromRgb(150, 120, 110),
-                [FacetType.FenceFlat]     = Color.FromRgb(160, 140, 100),
-                [FacetType.Skylight]      = Color.FromRgb(160, 200, 240),
-                [FacetType.Staircase]     = Color.FromRgb(160, 140, 110),
-                [FacetType.FireEscape]    = Color.FromRgb(120, 120, 140),
-                [FacetType.Ladder]        = Color.FromRgb(140, 110,  80),
-                [FacetType.Cable]         = Color.FromRgb( 40,  40,  40),
-                [FacetType.Trench]        = Color.FromRgb( 80,  70,  60),
-                [FacetType.JustCollision] = Color.FromRgb(255,   0, 255),
+                [FacetType.Normal] = Color.FromRgb(210, 200, 180),
+                [FacetType.Wall] = Color.FromRgb(200, 180, 150),
+                [FacetType.Inside] = Color.FromRgb(180, 160, 140),
+                [FacetType.OInside] = Color.FromRgb(180, 160, 140),
+                [FacetType.Partition] = Color.FromRgb(170, 150, 140),
+                [FacetType.Door] = Color.FromRgb(100, 70, 40),
+                [FacetType.InsideDoor] = Color.FromRgb(110, 80, 50),
+                [FacetType.OutsideDoor] = Color.FromRgb(90, 60, 30),
+                [FacetType.Roof] = Color.FromRgb(120, 70, 70),
+                [FacetType.RoofQuad] = Color.FromRgb(130, 80, 80),
+                [FacetType.FloorPoints] = Color.FromRgb(100, 100, 100),
+                [FacetType.Fence] = Color.FromRgb(160, 140, 100),
+                [FacetType.FenceBrick] = Color.FromRgb(150, 120, 110),
+                [FacetType.FenceFlat] = Color.FromRgb(160, 140, 100),
+                [FacetType.Skylight] = Color.FromRgb(160, 200, 240),
+                [FacetType.Staircase] = Color.FromRgb(160, 140, 110),
+                [FacetType.FireEscape] = Color.FromRgb(120, 120, 140),
+                [FacetType.Ladder] = Color.FromRgb(140, 110, 80),
+                [FacetType.Cable] = Color.FromRgb(40, 40, 40),
+                [FacetType.Trench] = Color.FromRgb(80, 70, 60),
+                [FacetType.JustCollision] = Color.FromRgb(255, 0, 255),
                 [FacetType.NormalFoundation] = Color.FromRgb(180, 170, 150),
             };
             Color defaultColor = Color.FromRgb(190, 190, 190);
@@ -370,8 +373,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int panelsDown = Math.Max(1, f.Height / 4);
 
             bool twoTextured = (f.Flags & FacetFlags.TwoTextured) != 0;
-            bool twoSided    = (f.Flags & FacetFlags.TwoSided) != 0;
-            bool isInside    = (f.Flags & FacetFlags.Inside) != 0;
+            bool twoSided = (f.Flags & FacetFlags.TwoSided) != 0;
+            bool isInside = (f.Flags & FacetFlags.Inside) != 0;
             bool readForward = twoSided || isInside;
             int step = twoTextured ? 2 : 1;
             int count = panelsAcross + 1;
@@ -384,12 +387,12 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 if (styleIdxForRow < 0 || styleIdxForRow >= snap.Styles.Length) continue;
                 short dval = snap.Styles[styleIdxForRow];
 
-                double yRow0 = row       * verticalExtent / panelsDown;
+                double yRow0 = row * verticalExtent / panelsDown;
                 double yRow1 = (row + 1) * verticalExtent / panelsDown;
 
                 for (int col = 0; col < panelsAcross; col++)
                 {
-                    int pos = readForward ? col : (panelsAcross - 1 - col);
+                    int pos = readForward ? (panelsAcross - 1 - col) : col;
                     if (!TryResolveTileIdForCell(dval, pos, count, snap, out int tileId, out byte flip))
                         continue;
                     if (tileId < 0) continue;
@@ -418,7 +421,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         texMaterials[key] = new DiffuseMaterial(brush);
                     }
 
-                    double tA = (double)col       / panelsAcross;
+                    double tA = (double)col / panelsAcross;
                     double tB = (double)(col + 1) / panelsAcross;
                     double xA = x0 + (x1 - x0) * tA;
                     double xB = x0 + (x1 - x0) * tB;
@@ -448,8 +451,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             double xBT, double zBT, double yTopB)
         {
             int baseIdx = mesh.Positions.Count;
-            mesh.Positions.Add(new Point3D(xA,  yBotA, zA));    // 0 bottom-A
-            mesh.Positions.Add(new Point3D(xB,  yBotB, zB));    // 1 bottom-B
+            mesh.Positions.Add(new Point3D(xA, yBotA, zA));    // 0 bottom-A
+            mesh.Positions.Add(new Point3D(xB, yBotB, zB));    // 1 bottom-B
             mesh.Positions.Add(new Point3D(xBT, yTopB, zBT));   // 2 top-B
             mesh.Positions.Add(new Point3D(xAT, yTopA, zAT));   // 3 top-A
 

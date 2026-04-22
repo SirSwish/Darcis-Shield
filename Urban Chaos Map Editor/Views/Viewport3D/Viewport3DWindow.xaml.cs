@@ -239,10 +239,10 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             // Arrow-key look: Left/Right = yaw, Up/Down = pitch.
             double yawDelta = 0, pitchDelta = 0;
-            if (_held.Contains(Key.Left))  yawDelta   -= 1;
-            if (_held.Contains(Key.Right)) yawDelta   += 1;
-            if (_held.Contains(Key.Up))    pitchDelta += 1;
-            if (_held.Contains(Key.Down))  pitchDelta -= 1;
+            if (_held.Contains(Key.Left)) yawDelta += 1;
+            if (_held.Contains(Key.Right)) yawDelta -= 1;
+            if (_held.Contains(Key.Up)) pitchDelta += 1;
+            if (_held.Contains(Key.Down)) pitchDelta -= 1;
             if (yawDelta != 0 || pitchDelta != 0)
             {
                 double rate = LookRateRad;
@@ -270,7 +270,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             double sy = Math.Sin(cam.YawRad);
             double cy = Math.Cos(cam.YawRad);
             Vector3D fwdFlat = new Vector3D(sy, 0, cy);
-            Vector3D right = new Vector3D(cy, 0, -sy);
+            Vector3D right = new Vector3D(-cy, 0, sy);
             Vector3D up = new Vector3D(0, 1, 0);
 
             Vector3D delta = fwdFlat * mz + right * mx + up * my;

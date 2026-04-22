@@ -64,7 +64,7 @@
                            FontFamily="Consolas"
                            FontSize="10"
                            Margin="0,4,0,0"
-                           Text="WASD / QE move   Shift = sprint   RMB drag = look   Wheel = speed   Esc = close"/>
+                           Text="WASD / QE move   Shift = sprint   Arrow Keys = look   Wheel = speed   Esc = close"/>
                 <TextBlock x:Name="HudStatus"
                            Foreground="#8888BB"
                            FontFamily="Consolas"
