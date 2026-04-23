@@ -30,7 +30,6 @@
             <ModelVisual3D>
                 <ModelVisual3D.Content>
                     <Model3DGroup>
-                        <!-- Lights -->
                         <AmbientLight Color="#606060"/>
                         <DirectionalLight Color="#C8C8C8" Direction="-0.35,-1,-0.25"/>
                         <DirectionalLight Color="#404040" Direction="0.35,-0.25,1"/>
@@ -38,11 +37,9 @@
                 </ModelVisual3D.Content>
             </ModelVisual3D>
 
-            <!-- Container for dynamic scene content (terrain / facets / prims) -->
             <ModelVisual3D x:Name="SceneRoot"/>
         </Viewport3D>
 
-        <!-- HUD -->
         <Border HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="10"
@@ -64,12 +61,54 @@
                            FontFamily="Consolas"
                            FontSize="10"
                            Margin="0,4,0,0"
-                           Text="WASD / QE move   Shift = sprint   Arrow Keys = look   Wheel = speed   Esc = close"/>
+                           Text="WASD / QE move   Shift = sprint   Arrow keys = look   Wheel = speed   Esc = close"/>
                 <TextBlock x:Name="HudStatus"
                            Foreground="#8888BB"
                            FontFamily="Consolas"
                            FontSize="10"
                            Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Border HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10"
+                Padding="10,8"
+                Background="#A0000000"
+                CornerRadius="4">
+            <StackPanel>
+                <TextBlock Text="3D Layers"
+                           Foreground="White"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,6"/>
+
+                <CheckBox x:Name="ChkTextures"
+                          Content="Textures"
+                          Foreground="White"
+                          Margin="0,2,0,2"
+                          Checked="LayerToggle_Changed"
+                          Unchecked="LayerToggle_Changed"/>
+
+                <CheckBox x:Name="ChkObjects"
+                          Content="Objects"
+                          Foreground="White"
+                          Margin="0,2,0,2"
+                          Checked="LayerToggle_Changed"
+                          Unchecked="LayerToggle_Changed"/>
+
+                <CheckBox x:Name="ChkBuildings"
+                          Content="Buildings"
+                          Foreground="White"
+                          Margin="0,2,0,2"
+                          Checked="LayerToggle_Changed"
+                          Unchecked="LayerToggle_Changed"/>
+
+                <CheckBox x:Name="ChkRoofTiles"
+                          Content="Roof Tiles"
+                          Foreground="White"
+                          Margin="0,2,0,2"
+                          Checked="LayerToggle_Changed"
+                          Unchecked="LayerToggle_Changed"/>
             </StackPanel>
         </Border>
     </Grid>
