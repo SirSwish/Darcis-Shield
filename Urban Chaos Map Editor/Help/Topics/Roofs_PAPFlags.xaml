@@ -10,7 +10,7 @@
         Roofs: PAP Flags
     </Paragraph>
     <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
-        Complete reference for PAP flags and how to apply them.
+        Complete reference for PAP flags, how to view them on the map, and how to apply them safely.
     </Paragraph>
     <BlockUIContainer>
         <Border Height="1" Background="#444" Margin="0,0,0,12"/>
@@ -34,10 +34,65 @@
                 CornerRadius="4" Padding="12">
             <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
                 <Run FontWeight="Bold">Note:</Run>
-                <Run>Not all PAP flags are fully understood or documented. Some may be unused by the engine, or their exact behavior may vary depending on game version. The descriptions below represent the best current understanding.</Run>
+                <Run> Not all PAP flags are fully understood or documented. Some may be unused by the engine, or their exact behavior may vary depending on game version. The descriptions below represent the best current understanding.</Run>
             </TextBlock>
         </Border>
     </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Viewing PAP Flags on the Map
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>PAP Flags layer</Bold> lets you preview flagged cells directly on the map.
+        Matching cells are now highlighted across the
+        <Bold>entire cell area</Bold> , making them
+        much easier to identify than the older corner marker display.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Next to the
+        <Bold>PAP Flags</Bold> layer toggle, there is also a
+        <Bold>multi-select filter dropdown</Bold> . Use this to choose which PAP flags should be
+        shown in the overlay.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Filter Behaviour
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                If you select a single flag such as
+                <Bold>Hidden</Bold> , only cells containing
+                that flag are highlighted.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If you select multiple flags such as
+                <Bold>Hidden</Bold> and
+                <Bold>RoofExists</Bold> , only cells containing
+                <Bold>all selected flags</Bold>
+                are highlighted.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If no specific filter flags are selected, the overlay shows all cells that have
+                any PAP flags set.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        When the PAP Flags layer is visible, you can still
+        <Bold>double-click</Bold> a highlighted
+        cell to open the
+        <Bold>Cell Flags Editor</Bold> for that exact cell.
+    </Paragraph>
 
     <BlockUIContainer>
         <Border Height="1" Background="#444" Margin="0,14,0,12"/>
@@ -70,10 +125,11 @@
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
-        Hidden
+        Hidden (Indoor Cell)
     </Paragraph>
     <Paragraph>
-        Cell is an <Bold>interior cell</Bold> and has a ceiling above it. The player is inside a
+        Cell is an
+        <Bold>interior cell</Bold> and has a ceiling above it. The player is inside a
         structure.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
@@ -82,7 +138,7 @@
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
         <Bold>Critical:</Bold> Required for warehouse buildings to function correctly. Without this
-        flag, warehouse interiors won't render properly.
+        flag, warehouse interiors will not render properly.
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
@@ -122,23 +178,20 @@
         NoGo
     </Paragraph>
     <Paragraph>
-        Player <Bold>cannot enter</Bold> this cell. Functions the same as a No Go Zone in the
+        Player
+        <Bold>cannot enter</Bold> this cell. Functions the same as a No Go Zone in the
         mission file.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
-        <Bold>Usage:</Bold> Use this to block off areas that should be inaccessible to the player,
-        such as decorative areas, out-of-bounds regions, or mission-specific restricted zones.
-    </Paragraph>
-    <Paragraph Margin="0,4,0,0">
-        <Bold>Note:</Bold> This is a <Bold>hard block</Bold> — the player physically cannot move
-        into the cell. Use sparingly to avoid frustrating players.
+        <Bold>Status:</Bold> Unused in map files. This is now handled in Mission (UCM) files.
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
         RoofExists
     </Paragraph>
     <Paragraph>
-        Tells the engine the player should stand on the <Bold>roof altitude height</Bold> rather
+        Tells the engine the player should stand on the
+        <Bold>roof altitude height</Bold> rather
         than the terrain height.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
@@ -146,11 +199,12 @@
         This is the key flag that makes roof surfaces walkable.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
-        <Bold>Critical:</Bold> If you manually set a cell altitude (e.g., for a bridge), you
+        <Bold>Critical:</Bold> If you manually set a cell altitude (for example, for a bridge), you
         <Bold>must</Bold> also set the RoofExists flag, otherwise the player will fall through.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
-        <Bold>Warehouse Note:</Bold> Do <Bold>not</Bold> use RoofExists on warehouse interiors.
+        <Bold>Warehouse Note:</Bold> Do
+        <Bold>not</Bold> use RoofExists on warehouse interiors.
         Warehouses use RF4 tiles for floors and keep this flag off.
     </Paragraph>
 
@@ -162,13 +216,7 @@
         used to create specific areas for mission event trigger points.
     </Paragraph>
     <Paragraph Margin="0,4,0,0">
-        <Bold>Usage:</Bold> Mark cells with zone flags (e.g., Zone 1, Zone 2) and then reference
-        those zones in mission scripts to create event triggers. For example, "when player enters
-        Zone 3, spawn enemies."
-    </Paragraph>
-    <Paragraph Margin="0,4,0,0">
-        <Bold>Benefit:</Bold> Using PAP zone flags in the map file is more flexible than hardcoding
-        zones in mission files, as the zones are baked into the map and can be visually designed.
+        <Bold>Usage:</Bold> Unused in map files. These are now set in Mission (UCM) files.
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
@@ -193,10 +241,6 @@
         <Bold>Status:</Bold> Probably unused or partially implemented. The game may not fully
         support dynamic water tile behavior defined via PAP flags.
     </Paragraph>
-    <Paragraph Margin="0,4,0,0">
-        <Bold>Note:</Bold> If you want water effects, it's safer to use mission scripts or
-        predefined water areas in the map rather than relying solely on this flag.
-    </Paragraph>
 
     <BlockUIContainer>
         <Border Height="1" Background="#444" Margin="0,14,0,12"/>
@@ -206,8 +250,39 @@
         Applying PAP Flags
     </Paragraph>
     <Paragraph>
-        You can apply PAP flags to cells using the <Bold>Drag Area</Bold> tool. This allows you
-        to bulk-apply flags to rectangular areas of the map.
+        You can apply PAP flags to cells using the
+        <Bold>Drag Area</Bold> tool. This allows you
+        to bulk-edit rectangular areas of the map, then verify the result immediately using the
+        highlighted PAP Flags overlay on the canvas.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Tri-State Flag Controls
+    </Paragraph>
+    <Paragraph>
+        Each PAP flag checkbox now has three states so repeated drag operations do not destroy
+        existing flags unintentionally.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Checked</Bold> — apply this flag to the selection
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Filled</Bold> — leave this flag unchanged on the selection
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Unchecked</Bold> — remove this flag from the selection
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        By default, flags start in the
+        <Bold>Filled</Bold> state.
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
@@ -216,25 +291,28 @@
     <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                In the <Bold>PAP Flags</Bold> section of the Roofs tab, check the flags you want
-                to apply (e.g., <Bold>NoGo</Bold> to block off an area).
+                In the
+                <Bold>PAP Flags</Bold> section of the Roofs tab, choose which flags you want
+                to set, leave unchanged, or remove.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click the <Bold>Drag Area</Bold> button. Your cursor changes to indicate flag
+                Click the
+                <Bold>Drag Area</Bold> button. Your cursor changes to indicate flag
                 painting mode.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                On the map canvas, <Bold>click and drag</Bold> to define a rectangular area.
+                On the map canvas,
+                <Bold>click and drag</Bold> to define a rectangular area.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Release the mouse button. All cells in the selected rectangle have the checked
-                flags applied (added to any existing flags).
+                Release the mouse button. All cells in the selected rectangle are updated according
+                to the tri-state checkboxes.
             </Paragraph>
         </ListItem>
         <ListItem>
@@ -248,7 +326,7 @@
                MaxWidth="700" Stretch="Uniform"/>
     </BlockUIContainer>
     <Paragraph Foreground="#888888" FontSize="11" FontStyle="Italic" Margin="0,0,0,8" TextAlignment="Center">
-        Screenshot: PAP Flags panel showing checkboxes for all flag types and Drag Area button, with rectangular selection preview on canvas
+        Screenshot: PAP Flags panel showing tri-state flag controls, Drag Area button, and the map overlay used to highlight cells matching the current PAP flag filter
     </Paragraph>
 
     <BlockUIContainer Margin="0,6,0,0">
@@ -256,11 +334,7 @@
                 CornerRadius="4" Padding="12">
             <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
                 <Run FontWeight="Bold">Important:</Run>
-                <Run>Drag Area</Run>
-                <Run FontWeight="Bold">adds</Run>
-                <Run>flags to cells, it does not replace existing flags. If a cell already has RoofExists set and you apply NoGo via Drag Area, the cell will have</Run>
-                <Run FontWeight="Bold">both</Run>
-                <Run>flags. To remove flags, you must manually clear them in the PAP editor.</Run>
+                <Run> Drag Area no longer blindly replaces the full flag byte. Checked flags are added, unchecked flags are removed, and filled flags are left untouched. This allows multiple drag passes without accidentally clearing other PAP flags.</Run>
             </TextBlock>
         </Border>
     </BlockUIContainer>
@@ -279,7 +353,8 @@
     <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                <Bold>RoofExists</Bold> + <Bold>Hidden</Bold> (if under another structure)
+                <Bold>RoofExists</Bold> +
+                <Bold>Hidden</Bold> (if under another structure)
             </Paragraph>
         </ListItem>
     </List>
@@ -303,36 +378,6 @@
         to render the interior view.
     </Paragraph>
 
-    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
-        Mission Event Zones
-    </Paragraph>
-    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
-        <ListItem>
-            <Paragraph>
-                <Bold>Zone 1</Bold> (or Zone 2, 3, etc.) + other appropriate flags
-            </Paragraph>
-        </ListItem>
-    </List>
-    <Paragraph Margin="16,2,0,6">
-        Mark areas with zone flags for mission script triggers. The zone flag does not affect
-        walkability or appearance — it's purely for mission logic.
-    </Paragraph>
-
-    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
-        Restricted Areas
-    </Paragraph>
-    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
-        <ListItem>
-            <Paragraph>
-                <Bold>NoGo</Bold>
-            </Paragraph>
-        </ListItem>
-    </List>
-    <Paragraph Margin="16,2,0,6">
-        Block player access to decorative or out-of-bounds areas. Use sparingly — it's better
-        to guide players with level design than hard-block them.
-    </Paragraph>
-
     <BlockUIContainer>
         <Border Height="1" Background="#444" Margin="0,14,0,12"/>
     </BlockUIContainer>
@@ -343,35 +388,45 @@
     <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                <Bold>RoofExists</Bold> and <Bold>Hidden</Bold> are the most important flags for
+                <Bold>RoofExists</Bold> and
+                <Bold>Hidden</Bold> are the most important flags for
                 normal building construction. The Auto-Build system handles these automatically.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                <Bold>Zone flags</Bold> are very useful for mission design. Mark key areas (spawn
-                points, objectives, trigger zones) during map creation so mission scripters can
-                easily reference them.
+                <Bold>Zone flags</Bold> are unused in map files. These were replaced with zones in mission files.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Use <Bold>NoGo</Bold> sparingly. Players find invisible walls frustrating. It's
-                better to use visible barriers (fences, walls) combined with level design to guide
-                movement.
+                <Bold>NoGo</Bold> is not used in map files. This is now handled in Mission (UCM) files.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                If a flag's purpose is unclear or marked "probably unused," it's safe to ignore it.
-                Focus on <Bold>RoofExists</Bold>, <Bold>Hidden</Bold>, <Bold>NoGo</Bold>, and
+                If a flag's purpose is unclear or marked "probably unused," it is safe to ignore it.
+                Focus on
+                <Bold>RoofExists</Bold> ,
+                <Bold>Hidden</Bold> ,
+                <Bold>NoGo</Bold> , and
                 <Bold>Zone flags</Bold> — these are the most reliable and well-understood.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
                 Flags can be applied outside of walkables or buildings. For example, you can create
-                elevated bridges using cell altitudes + RoofExists flag without any building facets.
+                elevated bridges using cell altitudes plus RoofExists without any building facets.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use the
+                <Bold>PAP flag filter dropdown</Bold> beside the layer toggle to isolate
+                specific flag combinations on the map. This is especially useful when checking only
+                <Bold>Hidden</Bold> cells, only
+                <Bold>RoofExists</Bold> cells, or cells that must
+                contain both.
             </Paragraph>
         </ListItem>
     </List>

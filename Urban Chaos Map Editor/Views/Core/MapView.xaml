@@ -35,6 +35,14 @@
                         Panel.ZIndex="1"
                         IsHitTestVisible="False"/>
 
+                    <!-- Roof texture overlay (drawn over normal textures when Paint Roofs mode is on) -->
+                    <texOvl:RoofTextureOverlayLayer
+                        x:Name="RoofTextureOverlay"
+                        Width="8192"
+                        Height="8192"
+                        Panel.ZIndex="2"
+                        IsHitTestVisible="False"/>
+
                     <!-- Grid -->
                     <coreOvl:GridLinesLayer
                         Width="8192"
@@ -75,6 +83,7 @@
                         x:Name="CellFlagsOverlay"
                         Width="8192"
                         Height="8192"
+                        FilterMask="{Binding PapFlagsFilterMask}"
                         Visibility="{Binding ShowCellFlags, Converter={StaticResource BoolToVis}}"
                         Panel.ZIndex="200"
                         IsHitTestVisible="True"/>
@@ -127,7 +136,7 @@
                         Height="8192"
                         Visibility="{Binding ShowRoofs, Converter={StaticResource BoolToVis}}"
                         SelectedWalkableId1="{Binding SelectedWalkableId1}"
-                        SelectedRf4Id="{Binding SelectedRf4Id}"
+                        SelectedRf4Id="{Binding SelectedRf4Id, Mode=TwoWay}"
                         Panel.ZIndex="13"/>
 
                     <rfOvl:RoofAltitudesLayer

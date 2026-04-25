@@ -30,6 +30,9 @@ namespace UrbanChaosMapEditor.Models.Core
         SelectTextureArea,  // drag to select a rect of cells; stays highlighted until cancelled
         PasteTexture,       // paste clipboard cells — click to place at cursor top-left
 
+        // Roof textures (.MAP layer)
+        PaintRoofTexture,   // paint into the 128x128 warehouse roof texture array
+
         // Future expansion
         PlacePrim,
         PlaceBuilding,

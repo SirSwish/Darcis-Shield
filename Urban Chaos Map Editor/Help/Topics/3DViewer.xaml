@@ -1,0 +1,251 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        3D Viewer
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to open the 3D viewport, move around the map, and control which layers are shown.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Opening the 3D Viewport
+    </Paragraph>
+    <Paragraph>
+        The
+        <Bold>3D Viewport</Bold> gives you a live three-dimensional visualisation of the
+        current map so you can inspect heights, buildings, objects, textures, and roof areas
+        from an in-world perspective.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        To open it, press
+        <Bold>Ctrl+3</Bold> from the Map Editor. This launches the 3D Viewer
+        window and loads the current map using the same editor state you are already working with.
+    </Paragraph>
+    <BlockUIContainer Margin="0,4,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>The 3D Viewer is intended as a visualisation tool for checking your work from
+another angle. It updates in real time, so changes made in the Map Editor are reflected in the
+3D view while both windows are open.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,16,0,4">
+        Layer Visibility
+    </Paragraph>
+    <Paragraph>
+        The 3D Viewer inherits the same layer visibility state as the main Map Editor when it is
+        opened. This means the layers you currently have enabled in 2D are passed through into the
+        3D view automatically.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Once the viewer is open, you can directly control the displayed layers using the
+        <Bold>Layer checkboxes</Bold> on the right-hand side of the 3D Viewer window.
+        These let you quickly show or hide supported map elements without needing to switch back
+        to the main editor.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This makes it easy to inspect the map in different ways - for example, viewing only
+        buildings and roof surfaces, or hiding textures so the structure of the map is easier to
+        read.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Camera Controls
+    </Paragraph>
+    <Paragraph>
+        The 3D Viewer uses keyboard controls for movement and looking around the map.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Moving the Camera
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                <Bold>W</Bold> = move forward
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>S</Bold> = move backward
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>A</Bold> = move left
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>D</Bold> = move right
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>E</Bold> = move upward / elevate the camera
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Q</Bold> = move downward / lower the camera
+            </Paragraph>
+        </ListItem>
+    </List>
+
+
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Looking Around
+    </Paragraph>
+    <Paragraph>
+        Use the
+        <Bold>Arrow keys</Bold> to rotate the camera view and look around the map.
+        This allows you to examine structures, terrain, and object placement from different angles.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,4">
+        <Image Source="pack://application:,,,/UrbanChaosMapEditor;component/Help/Images/3dviewer.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,4,0,8">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Navigation advice:</Run>
+                <Run>Use </Run>
+                <Run FontWeight="Bold">WASD</Run>
+                <Run> and </Run>
+                <Run FontWeight="Bold">Q/E</Run>
+                <Run> together to position the camera, then use the </Run>
+                <Run FontWeight="Bold">Arrow keys</Run>
+                <Run> to line up the angle you want. This is especially useful when checking roof
+heights, building placement, and the overall feel of a street or courtyard.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Live Updates and Performance
+    </Paragraph>
+    <Paragraph>
+        The 3D Viewport updates in real time as the map changes, allowing you to inspect edits as
+        they happen. This is useful for quickly checking how the map looks from a gameplay-style
+        perspective.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Because the viewer is rendering a 3D representation of the map, updates may take time to
+        appear - especially on larger maps or when many layers are visible at once.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For best results, do most of your detailed editing work in the 2D Map Editor first, then
+        open the 3D Viewer when you want to review the result. This usually gives the smoothest
+        experience and avoids unnecessary redraw overhead while you are making frequent changes.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,4,0,8">
+        <Border Background="#3A2F2A" BorderBrush="#8A6A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#F0D0A0">
+                <Run FontWeight="Bold">Performance note:</Run>
+                <Run>If the 3D view feels slow to refresh, close the 3D Viewer while doing heavy
+2D editing and reopen it afterwards with </Run>
+                <Run FontWeight="Bold">Ctrl+3</Run>
+                <Run> when you are ready to inspect the map again.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Worked Example
+    </Paragraph>
+    <Paragraph>
+        A common workflow is to build or adjust part of the map in 2D, then open the 3D Viewer to
+        verify the result from a playable angle.
+    </Paragraph>
+    <Paragraph Margin="0,8,0,2">
+        <Bold>Step 1:</Bold> In the main Map Editor, enable the layers you want to inspect, such
+        as textures, buildings, objects, or roof tiles.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,2">
+        <Bold>Step 2:</Bold> Press
+        <Bold>Ctrl+3</Bold> to open the 3D Viewport.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,2">
+        <Bold>Step 3:</Bold> Use
+        <Bold>WASD</Bold> to move across the map and
+        <Bold>Q</Bold> /
+        <Bold>E</Bold>
+        to raise or lower the camera.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,2">
+        <Bold>Step 4:</Bold> Use the
+        <Bold>Arrow keys</Bold> to look around and inspect the area from
+        different angles.
+    </Paragraph>
+    <Paragraph Margin="0,4,0,2">
+        <Bold>Step 5:</Bold> Use the layer checkboxes on the right-hand side to refine what is shown
+        until you have the clearest view of the feature you want to check.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Tips
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>Use
+                <Bold>Ctrl+3</Bold> to quickly open the 3D Viewer whenever you want a
+                fast visual check of the current map.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>The 3D Viewer starts with the same layer visibility state as the Map Editor,
+                so set up your 2D layers first if you already know what you want to inspect.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Use the right-hand layer checkboxes to simplify the scene when too much is
+                visible at once.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>Use
+                <Bold>Q</Bold> and
+                <Bold>E</Bold> often when checking rooftops, upper
+                walkways, and building heights.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>If performance drops during heavy editing, close the 3D Viewer and reopen it
+                after your 2D work is done.</Paragraph>
+        </ListItem>
+    </List>
+
+</FlowDocument>

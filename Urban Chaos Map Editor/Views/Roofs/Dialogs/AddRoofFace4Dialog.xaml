@@ -83,7 +83,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="16"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -99,18 +98,10 @@
                        Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Roof Type Selection -->
+        <!-- Roof Type (flat roof only — single tile is added via map click) -->
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Roof Type:" Style="{StaticResource FieldLabel}"/>
-            <StackPanel Margin="8,0,0,0">
-                <RadioButton x:Name="RbFlatRoof" 
-                             Content="Fill entire Walkable" 
-                             IsChecked="True"
-                             Checked="RoofType_Changed"/>
-                <RadioButton x:Name="RbSingleTile" 
-                             Content="Add Single Tile" 
-                             Checked="RoofType_Changed"/>
-            </StackPanel>
+            <TextBlock Text="Fills the entire walkable area with flat roof tiles."
+                       Foreground="{StaticResource Subtle}" FontSize="12"/>
         </StackPanel>
 
         <!-- Common Settings -->
@@ -132,56 +123,9 @@
             </StackPanel>
         </Grid>
 
-        <!-- Single Tile Settings -->
-        <StackPanel Grid.Row="5" x:Name="PnlSingleTileSettings" Visibility="Collapsed" Margin="0,16,0,0">
-            <TextBlock Text="Tile Position &amp; Corners:" Style="{StaticResource FieldLabel}"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="4"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="RX" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="RZ" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="DY0 (SW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
-                           ToolTip="SW corner delta — corner1 = SE + (DY0 &lt;&lt; ROOF_SHIFT)"/>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="DY1 (NW)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
-                           ToolTip="NW corner delta — corner2 = SE + (DY1 &lt;&lt; ROOF_SHIFT)"/>
-                <TextBlock Grid.Row="0" Grid.Column="8" Text="DY2 (NE)" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"
-                           ToolTip="NE corner delta — corner3 = SE + (DY2 &lt;&lt; ROOF_SHIFT)"/>
-
-                <TextBox Grid.Row="2" Grid.Column="0" x:Name="TxtRX" Text="0"/>
-                <TextBox Grid.Row="2" Grid.Column="2" x:Name="TxtRZ" Text="0"/>
-                <TextBox Grid.Row="2" Grid.Column="4" x:Name="TxtDY0" Text="0"/>
-                <TextBox Grid.Row="2" Grid.Column="6" x:Name="TxtDY1" Text="0"/>
-                <TextBox Grid.Row="2" Grid.Column="8" x:Name="TxtDY2" Text="0"/>
-            </Grid>
-
-            <CheckBox x:Name="ChkWalkable"
-                      Content="Walkable (0x08)"
-                      IsChecked="True"
-                      Margin="0,8,0,0"/>
-
-            <TextBlock Text="Corner Layout: Y=SE (base), DY0=SW, DY1=NW, DY2=NE"
-                       Foreground="{StaticResource Subtle}"
-                       FontSize="10"
-                       Margin="0,8,0,0"/>
-        </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="6" 
+        <StackPanel Grid.Row="5"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"
                     Margin="0,20,0,0">

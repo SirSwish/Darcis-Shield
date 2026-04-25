@@ -29,27 +29,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             // Seed in Quarter Storeys: walkable.Y / 2 = QS (same as RF4 Y / 64)
             TxtAltitude.Text = (walkable.Y / 2).ToString();
 
-            RoofType_Changed(this, new RoutedEventArgs());
-        }
-
-        private void RoofType_Changed(object sender, RoutedEventArgs e)
-        {
-            if (PnlSingleTileSettings == null)
-                return;
-
-            bool isSingle = RbSingleTile.IsChecked == true;
-            PnlSingleTileSettings.Visibility = isSingle ? Visibility.Visible : Visibility.Collapsed;
-
-            if (RbFlatRoof.IsChecked == true)
-            {
-                int width = _walkable.X2 - _walkable.X1;
-                int depth = _walkable.Z2 - _walkable.Z1;
-                BtnAdd.Content = $"Add Flat Roof ({width * depth} tiles)";
-            }
-            else
-            {
-                BtnAdd.Content = "Add Single Tile";
-            }
+            BtnAdd.Content = $"Add Flat Roof ({width * depth} tiles)";
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
@@ -71,29 +51,7 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             short altitude = (short)(altitudeQS * 64);
 
             var adder = new RoofFace4Adder(MapDataService.Instance);
-            RoofFace4Result result;
-
-            if (RbFlatRoof.IsChecked == true)
-            {
-                result = adder.TryCreateFlatRoof(_walkableId1, altitude);
-            }
-            else
-            {
-                if (!byte.TryParse(TxtRX.Text, out byte rx) ||
-                    !byte.TryParse(TxtRZ.Text, out byte rz) ||
-                    !sbyte.TryParse(TxtDY0.Text, out sbyte dy0) ||
-                    !sbyte.TryParse(TxtDY1.Text, out sbyte dy1) ||
-                    !sbyte.TryParse(TxtDY2.Text, out sbyte dy2))
-                {
-                    MessageBox.Show("Invalid tile position or corner values.", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                byte drawFlags = (byte)(ChkWalkable.IsChecked == true ? 0x08 : 0x00);
-
-                result = adder.TryAddRoofFace4(_walkableId1, rx, rz, altitude, dy0, dy1, dy2, drawFlags);
-            }
+            var result = adder.TryCreateFlatRoof(_walkableId1, altitude);
 
             if (result.IsSuccess)
             {

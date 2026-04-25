@@ -7,7 +7,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<NuGetAudit>False</NuGetAudit>
 		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
-		<Version>1.17.0</Version>
+		<Version>1.19.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

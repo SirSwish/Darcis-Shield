@@ -36,6 +36,28 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public int Number { get; init; }          // parsed ### from key
     }
 
+    /// <summary>One entry in the PAP flag overlay filter dropdown.</summary>
+    public sealed class PapFlagFilterItem : INotifyPropertyChanged
+    {
+        public string Name { get; }
+        public ushort Mask { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected == value) return;
+                _isSelected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+            }
+        }
+
+        public PapFlagFilterItem(string name, ushort mask) { Name = name; Mask = mask; }
+        public event PropertyChangedEventHandler? PropertyChanged;
+    }
+
     // Add this simple model (public so XAML can see it)
     public sealed class PrimButton
     {
@@ -182,6 +204,48 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             }
         }
 
+        /// <summary>Items for the PAP flag overlay filter dropdown.</summary>
+        public ObservableCollection<PapFlagFilterItem> PapFlagFilterItems { get; } = BuildPapFlagFilterItems();
+
+        private static ObservableCollection<PapFlagFilterItem> BuildPapFlagFilterItems() => new(new PapFlagFilterItem[]
+        {
+            new("Shadow1",    0x0001), new("Shadow2",    0x0002), new("Shadow3",    0x0004),
+            new("Reflective", 0x0008), new("Hidden",     0x0010), new("SinkSquare", 0x0020),
+            new("SinkPoint",  0x0040), new("NoUpper",    0x0080), new("NoGo",       0x0100),
+            new("RoofExists", 0x0200), new("Zone1",      0x0400), new("Zone2",      0x0800),
+            new("Zone3",      0x1000), new("Zone4",      0x2000), new("FlatRoof",   0x4000),
+            new("Water",      0x8000),
+        });
+
+        private ushort _papFlagsFilterMask;
+        /// <summary>AND-mask derived from the checked items in PapFlagFilterItems. 0 = show any flagged cell.</summary>
+        public ushort PapFlagsFilterMask
+        {
+            get => _papFlagsFilterMask;
+            private set
+            {
+                if (_papFlagsFilterMask == value) return;
+                _papFlagsFilterMask = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PapFlagFilterSummary));
+            }
+        }
+
+        /// <summary>Short label shown on the filter dropdown button.</summary>
+        public string PapFlagFilterSummary
+        {
+            get
+            {
+                var selected = PapFlagFilterItems.Where(f => f.IsSelected).ToList();
+                return selected.Count switch
+                {
+                    0 => "Any",
+                    1 => selected[0].Name,
+                    _ => $"{selected.Count} flags"
+                };
+            }
+        }
+
         private bool _showRoofAltitudes;
         public bool ShowRoofAltitudes
         {
@@ -195,11 +259,11 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         }
 
 
-        /// <summary>The flag bitmask selected in the HeightsTab PAP flags checkboxes.</summary>
-        public ushort PapFlagsMask { get; set; }
+        /// <summary>Flags explicitly set to Checked — will be ORed onto each cell.</summary>
+        public ushort PapFlagsSetMask { get; set; }
 
-        /// <summary>If true, CLEAR the flags (AND NOT). If false, SET them (OR).</summary>
-        public bool PapFlagsClearMode { get; set; }
+        /// <summary>Flags explicitly set to Unchecked — will be ANDed-NOT onto each cell.</summary>
+        public ushort PapFlagsClearMask { get; set; }
 
         // ===== Area Set Height painting state (for rectangle selection and overlay) =====
         private bool _isAreaSettingHeight;
@@ -774,7 +838,30 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             }
         }
 
-        // Selection used by PaintTexture tool
+        // ===== Roof texture painting mode =====
+        private bool _paintRoofMode;
+
+        /// <summary>
+        /// When true, clicking a texture thumbnail paints into the .MAP roof texture array
+        /// instead of the normal IAM ground texture layer.
+        /// </summary>
+        public bool PaintRoofMode
+        {
+            get => _paintRoofMode;
+            set
+            {
+                if (_paintRoofMode == value) return;
+                _paintRoofMode = value;
+                OnPropertyChanged();
+                // Switch tool automatically when toggling mode while the texture tools are active
+                if (value && SelectedTool == EditorTool.PaintTexture)
+                    SelectedTool = EditorTool.PaintRoofTexture;
+                else if (!value && SelectedTool == EditorTool.PaintRoofTexture)
+                    SelectedTool = EditorTool.PaintTexture;
+            }
+        }
+
+        // Selection used by PaintTexture / PaintRoofTexture tools
         private TexturesAccessor.TextureGroup _selectedTextureGroup = TexturesAccessor.TextureGroup.World;
         public TexturesAccessor.TextureGroup SelectedTextureGroup
         {
@@ -1073,11 +1160,15 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         public ObservableCollection<PrimButton> PrimButtons { get; } = new();
 
-        // NEW: constructor - put the two lines here
         public MapViewModel()
         {
             System.Diagnostics.Debug.WriteLine("[MapVM] ctor: starting up-");
 
+            // Subscribe to PAP flag filter item changes so the mask stays in sync.
+            foreach (var item in PapFlagFilterItems)
+                item.PropertyChanged += (_, _) => RecomputePapFlagsFilterMask();
+
+            _ = RoofTextureService.Instance;
             var mapSvc = MapDataService.Instance;
             IsMapLoaded = mapSvc.IsLoaded;
 
@@ -1707,14 +1798,19 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             int maxZ = Math.Min(MapConstants.TilesPerSide - 1, Math.Max(ty1, ty2));
 
             var accessor = new AltitudeAccessor(MapDataService.Instance);
-            var flagsToWrite = (PapFlags)PapFlagsMask;
+            var setMask   = (PapFlags)PapFlagsSetMask;
+            var clearMask = (PapFlags)PapFlagsClearMask;
             int count = 0;
 
             for (int tx = minX; tx <= maxX; tx++)
             {
                 for (int ty = minZ; ty <= maxZ; ty++)
                 {
-                    accessor.WriteFlags(tx, ty, flagsToWrite);
+                    // Non-destructive: apply only the explicitly checked/unchecked bits.
+                    // Indeterminate bits (absent from both masks) are left untouched.
+                    PapFlags current = accessor.ReadFlags(tx, ty);
+                    PapFlags updated = (current & ~clearMask) | setMask;
+                    accessor.WriteFlags(tx, ty, updated);
                     count++;
                 }
             }
@@ -1722,9 +1818,22 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             MapDataService.Instance.MarkDirty();
 
             if (Application.Current.MainWindow?.DataContext is MainWindowViewModel mainVm)
-                mainVm.StatusMessage = $"Wrote flags 0x{PapFlagsMask:X4} to {count} cells ({minX},{minZ}) to ({maxX},{maxZ})";
+            {
+                string summary = PapFlagsSetMask == 0 && PapFlagsClearMask == 0
+                    ? $"No flag changes applied to {count} cells."
+                    : $"Flags set=0x{PapFlagsSetMask:X4} clear=0x{PapFlagsClearMask:X4} applied to {count} cells ({minX},{minZ})-({maxX},{maxZ})";
+                mainVm.StatusMessage = summary;
+            }
 
-            Debug.WriteLine($"[PapFlags] Wrote 0x{PapFlagsMask:X4} on {count} cells ({minX},{minZ})-({maxX},{maxZ})");
+            Debug.WriteLine($"[PapFlags] set=0x{PapFlagsSetMask:X4} clear=0x{PapFlagsClearMask:X4} on {count} cells ({minX},{minZ})-({maxX},{maxZ})");
+        }
+
+        private void RecomputePapFlagsFilterMask()
+        {
+            ushort mask = 0;
+            foreach (var item in PapFlagFilterItems)
+                if (item.IsSelected) mask |= item.Mask;
+            PapFlagsFilterMask = mask;
         }
 
         /// <summary>

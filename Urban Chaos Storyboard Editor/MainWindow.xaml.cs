@@ -1,8 +1,11 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Shapes;
 using UrbanChaosStoryboardEditor.Models;
 using UrbanChaosStoryboardEditor.Services;
@@ -13,9 +16,13 @@ namespace UrbanChaosStoryboardEditor
 {
     public partial class MainWindow : Window
     {
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
         public MainWindow()
         {
             InitializeComponent();
+            SourceInitialized += OnSourceInitialized;
 
             DataContext = new MainWindowViewModel();
 
@@ -28,6 +35,23 @@ namespace UrbanChaosStoryboardEditor
             svc.Missions.CollectionChanged += (_, __) => UpdateCounts();
 
             UpdateUI();
+        }
+
+        private void OnSourceInitialized(object? sender, EventArgs e)
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+                int dark = 1;
+                if (DwmSetWindowAttribute(hwnd, 20, ref dark, sizeof(int)) != 0)
+                    DwmSetWindowAttribute(hwnd, 19, ref dark, sizeof(int));
+                int caption = 0x001E1E1E;
+                DwmSetWindowAttribute(hwnd, 35, ref caption, sizeof(int));
+                int text = 0x00FFFFFF;
+                DwmSetWindowAttribute(hwnd, 36, ref text, sizeof(int));
+            }
+            catch { }
         }
 
         private void OnDistrictsChanged(object? sender, NotifyCollectionChangedEventArgs e)

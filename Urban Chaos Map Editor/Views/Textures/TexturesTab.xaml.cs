@@ -27,12 +27,16 @@ namespace UrbanChaosMapEditor.Views.Textures
 
             var map = shell.Map;
 
-            // Enter texture paint tool and set the chosen texture
-            map.SelectedTool = EditorTool.PaintTexture;
-            map.SelectedTextureGroup = thumb.Group;
+            // Route to the appropriate paint tool depending on mode
+            map.SelectedTool = map.PaintRoofMode
+                ? EditorTool.PaintRoofTexture
+                : EditorTool.PaintTexture;
+
+            map.SelectedTextureGroup  = thumb.Group;
             map.SelectedTextureNumber = thumb.Number;
 
-            shell.StatusMessage = $"Texture paint: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) — click a tile to apply";
+            string modeLabel = map.PaintRoofMode ? " [ROOF]" : "";
+            shell.StatusMessage = $"Texture paint{modeLabel}: {thumb.RelativeKey} (rot {map.SelectedRotationIndex}) — click a tile to apply";
         }
 
         private void RotateLeft_Click(object sender, RoutedEventArgs e)
@@ -62,6 +66,20 @@ namespace UrbanChaosMapEditor.Views.Textures
                 if (!_digits.IsMatch(text)) e.CancelCommand();
             }
             else e.CancelCommand();
+        }
+
+        private void PaintRoofs_Checked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel shell) return;
+            shell.Map.PaintRoofMode = true;
+            shell.StatusMessage = "Paint Roofs ON — click a texture to paint the .MAP roof texture layer";
+        }
+
+        private void PaintRoofs_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel shell) return;
+            shell.Map.PaintRoofMode = false;
+            shell.StatusMessage = "Paint Roofs OFF — painting targets the normal ground texture layer";
         }
 
         private void Eyedropper_Click(object sender, RoutedEventArgs e)

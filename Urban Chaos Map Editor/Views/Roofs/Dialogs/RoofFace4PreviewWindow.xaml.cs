@@ -79,9 +79,10 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         {
             // Y is stored as raw RF4 units; display in Quarter Storeys (1 QS = 64 raw)
             TxtY.Text = (_rf.Y / 64).ToString();
-            TxtDY0.Text = _rf.DY0.ToString();
-            TxtDY1.Text = _rf.DY1.ToString();
-            TxtDY2.Text = _rf.DY2.ToString();
+            // NW/SW/NE shown as absolute QS from ground (same scale as SE)
+            TxtDY0.Text = FormatCornerQS(_rf.Y, _rf.DY0);
+            TxtDY1.Text = FormatCornerQS(_rf.Y, _rf.DY1);
+            TxtDY2.Text = FormatCornerQS(_rf.Y, _rf.DY2);
 
             // RX: bits 0-6 = tile X (0-127), bit 7 = diagonal flag
             TxtTileX.Text = (_rf.RX & 0x7F).ToString();
@@ -183,19 +184,21 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
         {
             y = 0; dy0 = dy1 = dy2 = 0; rx = rz = drawFlags = 0; next = 0;
 
-            // Y is entered in Quarter Storeys; convert to raw RF4 units (1 QS = 64 raw)
-            if (!short.TryParse(TxtY.Text, out short yQS) ||
-                !sbyte.TryParse(TxtDY0.Text, out dy0) ||
-                !sbyte.TryParse(TxtDY1.Text, out dy1) ||
-                !sbyte.TryParse(TxtDY2.Text, out dy2) ||
-                !byte.TryParse(TxtTileX.Text, out byte tileX) ||
+            // Y is entered in Quarter Storeys; convert to raw RF4 units first — needed to compute DY deltas.
+            if (!short.TryParse(TxtY.Text, out short yQS)) return false;
+            y = (short)(yQS * 64);
+
+            // NW/SW/NE are entered as absolute QS; convert back to raw pixel deltas (sbyte).
+            if (!TryParseCornerQS(TxtDY0.Text, y, out dy0)) return false;
+            if (!TryParseCornerQS(TxtDY1.Text, y, out dy1)) return false;
+            if (!TryParseCornerQS(TxtDY2.Text, y, out dy2)) return false;
+
+            if (!byte.TryParse(TxtTileX.Text, out byte tileX) ||
                 !byte.TryParse(TxtTileZ.Text, out byte tileZ) ||
                 !short.TryParse(TxtNext.Text, out next))
                 return false;
 
             if (tileX > 127 || tileZ > 127) return false;
-
-            y = (short)(yQS * 64);
 
             // Repack RX: bits 0-6 = X, bit 7 = diagonal flag
             rx = (byte)(tileX | (ChkDiagonal.IsChecked == true ? 0x80 : 0x00));
@@ -203,6 +206,31 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
             rz = (byte)(tileZ | (ChkRzBit7.IsChecked == true ? 0x80 : 0x00));
 
             drawFlags = ReadDrawFlagChecks();
+            return true;
+        }
+
+        /// <summary>Format an absolute corner height as QS, with one decimal place if not integer.</summary>
+        private static string FormatCornerQS(short baseY, sbyte dy)
+        {
+            double qs = (baseY + dy) / 64.0;
+            return qs == Math.Floor(qs) ? $"{(int)qs}" : $"{qs:F1}";
+        }
+
+        /// <summary>
+        /// Parse an absolute QS corner value and compute the raw pixel delta relative to baseRawY.
+        /// Clamps to sbyte range (−128..127).
+        /// </summary>
+        private static bool TryParseCornerQS(string text, short baseRawY, out sbyte dy)
+        {
+            dy = 0;
+            if (!double.TryParse(text.Trim(),
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out double absQS))
+                return false;
+            int rawDelta = (int)Math.Round(absQS * 64.0) - baseRawY;
+            rawDelta = Math.Clamp(rawDelta, sbyte.MinValue, sbyte.MaxValue);
+            dy = (sbyte)rawDelta;
             return true;
         }
 

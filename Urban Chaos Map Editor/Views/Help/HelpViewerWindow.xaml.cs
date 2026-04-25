@@ -61,6 +61,7 @@ namespace UrbanChaosMapEditor.Views.Help
             Register("Roofs_CellAltitudes", "Roofs: Cell Altitudes");
             Register("Roofs_PAPFlags", "Roofs: PAP Flags");
             Register("Prims_Overview", "Prims & Objects");
+            Register("3DViewer", "3D Viewer");
             Register("Keyboard_Shortcuts", "Keyboard Shortcuts");
             Register("File_Format", "IAM File Format Reference");
             Register("Troubleshooting", "Troubleshooting");

@@ -549,32 +549,59 @@ namespace UrbanChaosMapEditor.Views.Roofs
         // PAP Cell Flags
         // ====================================================================
 
-        private ushort GetSelectedPapFlags()
+        /// <summary>
+        /// Returns (setMask, clearMask) from the tri-state PAP flag checkboxes.
+        /// Checked = bit goes into setMask, Unchecked = bit goes into clearMask,
+        /// Indeterminate = bit is absent from both (leave unchanged).
+        /// </summary>
+        private (ushort setMask, ushort clearMask) GetPapFlagMasks()
         {
             CheckBox[] boxes = { PapShadow1, PapShadow2, PapShadow3, PapReflective,
                                  PapHidden, PapSinkSquare, PapSinkPoint, PapNoUpper,
                                  PapNoGo, PapRoofExists, PapZone1, PapZone2,
                                  PapZone3, PapZone4, PapFlatRoof, PapWater };
-            ushort flags = 0;
+            ushort setMask = 0, clearMask = 0;
             for (int i = 0; i < boxes.Length; i++)
-                if (boxes[i].IsChecked == true) flags |= (ushort)(1 << i);
-            return flags;
+            {
+                if (boxes[i].IsChecked == true)  setMask   |= (ushort)(1 << i);
+                else if (boxes[i].IsChecked == false) clearMask |= (ushort)(1 << i);
+                // null (Indeterminate) = leave unchanged — contributes to neither mask
+            }
+            return (setMask, clearMask);
         }
 
         private void PapFlag_Changed(object sender, RoutedEventArgs e)
         {
-            if (TxtPapFlagsSummary != null)
-                TxtPapFlagsSummary.Text = $"0x{GetSelectedPapFlags():X4}";
+            // PapWater is the last checkbox declared — if it's null we're still inside InitializeComponent
+            if (TxtPapFlagsSummary == null || PapWater == null) return;
+            var (setMask, clearMask) = GetPapFlagMasks();
+            if (setMask == 0 && clearMask == 0)
+                TxtPapFlagsSummary.Text = "(no change)";
+            else if (clearMask == 0)
+                TxtPapFlagsSummary.Text = $"+0x{setMask:X4}";
+            else if (setMask == 0)
+                TxtPapFlagsSummary.Text = $"-0x{clearMask:X4}";
+            else
+                TxtPapFlagsSummary.Text = $"+0x{setMask:X4} -0x{clearMask:X4}";
         }
 
         private void PapFlagsDragArea_Click(object sender, RoutedEventArgs e)
         {
             if (Application.Current.MainWindow?.DataContext is not MainWindowViewModel mainVm) return;
 
-            ushort flags = GetSelectedPapFlags();
-            mainVm.Map.PapFlagsMask = flags;
+            var (setMask, clearMask) = GetPapFlagMasks();
+            mainVm.Map.PapFlagsSetMask = setMask;
+            mainVm.Map.PapFlagsClearMask = clearMask;
             mainVm.Map.SelectedTool = EditorTool.AreaSetPapFlags;
-            mainVm.StatusMessage = $"PAP flags: drag on map to write 0x{flags:X4} to cells.";
+
+            if (setMask == 0 && clearMask == 0)
+                mainVm.StatusMessage = "PAP flags: all Indeterminate — drag will not change any flags.";
+            else if (clearMask == 0)
+                mainVm.StatusMessage = $"PAP flags: drag on map to set 0x{setMask:X4}.";
+            else if (setMask == 0)
+                mainVm.StatusMessage = $"PAP flags: drag on map to clear 0x{clearMask:X4}.";
+            else
+                mainVm.StatusMessage = $"PAP flags: drag on map to set 0x{setMask:X4}, clear 0x{clearMask:X4}.";
         }
 
         // ====================================================================

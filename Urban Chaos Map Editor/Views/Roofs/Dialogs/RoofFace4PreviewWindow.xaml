@@ -132,8 +132,8 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox x:Name="TxtDY1" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
                                                          Width="44" Padding="3,2" HorizontalContentAlignment="Right"
-                                                         ToolTip="NW corner delta — corner2 = SE + (DY1 &lt;&lt; ROOF_SHIFT)"/>
-                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                                         ToolTip="NW corner absolute height in Quarter Storeys"/>
+                                                <TextBlock Text="QS" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -145,8 +145,8 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox x:Name="TxtDY2" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
                                                          Width="44" Padding="3,2" HorizontalContentAlignment="Right"
-                                                         ToolTip="NE corner delta — corner3 = SE + (DY2 &lt;&lt; ROOF_SHIFT)"/>
-                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                                         ToolTip="NE corner absolute height in Quarter Storeys"/>
+                                                <TextBlock Text="QS" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -158,8 +158,8 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBox x:Name="TxtDY0" Background="#2A2A2A" Foreground="White" BorderBrush="#555"
                                                          Width="44" Padding="3,2" HorizontalContentAlignment="Right"
-                                                         ToolTip="SW corner delta — corner1 = SE + (DY0 &lt;&lt; ROOF_SHIFT)"/>
-                                                <TextBlock Text="px" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                                         ToolTip="SW corner absolute height in Quarter Storeys"/>
+                                                <TextBlock Text="QS" Foreground="#666" FontSize="10" VerticalAlignment="Center" Margin="4,0,0,0"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -179,7 +179,7 @@
                                 </Grid>
                             </Border>
                             <TextBlock Foreground="#444" FontSize="9" Margin="0,4,0,0" Width="190" TextWrapping="Wrap"
-                                       Text="SE = Y (base)   NW = Y+DY1&#x0A;SW = Y+DY0      NE = Y+DY2"/>
+                                       Text="All corners shown as absolute QS from ground.&#x0A;SE is the base; NW/SW/NE share the same scale."/>
                         </StackPanel>
                     </Grid>
                 </Border>

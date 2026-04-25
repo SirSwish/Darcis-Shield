@@ -356,31 +356,31 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <CheckBox x:Name="PapShadow1"    Content="Shadow1"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapShadow2"    Content="Shadow2"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapShadow3"    Content="Shadow3"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapReflective" Content="Reflective" Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapHidden"     Content="Hidden"     Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapSinkSquare" Content="SinkSquare" Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapSinkPoint"  Content="SinkPoint"  Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapNoUpper"    Content="NoUpper"    Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapShadow1"    Content="Shadow1"    Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapShadow2"    Content="Shadow2"    Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapShadow3"    Content="Shadow3"    Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapReflective" Content="Reflective" Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapHidden"     Content="Hidden (Indoor Cell)"     Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapSinkSquare" Content="SinkSquare" Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapSinkPoint"  Content="SinkPoint"  Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapNoUpper"    Content="NoUpper"    Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
-                                <CheckBox x:Name="PapNoGo"       Content="NoGo"       Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapRoofExists" Content="RoofExists" Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapZone1"      Content="Zone1"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapZone2"      Content="Zone2"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapZone3"      Content="Zone3"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapZone4"      Content="Zone4"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapFlatRoof"   Content="FlatRoof"   Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
-                                <CheckBox x:Name="PapWater"      Content="Water"      Foreground="#FFD4D4D4" FontSize="10" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapNoGo"       Content="NoGo"       Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapRoofExists" Content="RoofExists" Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone1"      Content="Zone1"      Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone2"      Content="Zone2"      Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone3"      Content="Zone3"      Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapZone4"      Content="Zone4"      Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapFlatRoof"   Content="FlatRoof"   Foreground="#FFD4D4D4" FontSize="10" FontWeight="Bold" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
+                                <CheckBox x:Name="PapWater"      Content="Water"      Foreground="#FFD4D4D4" FontSize="10" IsThreeState="True" IsChecked="{x:Null}" Checked="PapFlag_Changed" Unchecked="PapFlag_Changed" Indeterminate="PapFlag_Changed"/>
                             </StackPanel>
                         </Grid>
                     </Border>
                 </Expander>
 
                 <Button Padding="8,5" Click="PapFlagsDragArea_Click"
-                        ToolTip="Drag a rectangle on the map to overwrite flags on all cells in the area.">
+                        ToolTip="Drag a rectangle on the map to apply the selected flags. Checked = force ON, Unchecked = force OFF, Indeterminate = leave unchanged.">
                     <StackPanel Orientation="Horizontal">
                         <Grid Width="16" Height="16" Margin="0,0,4,0">
                             <Rectangle Fill="#886622" RadiusX="2" RadiusY="2"/>

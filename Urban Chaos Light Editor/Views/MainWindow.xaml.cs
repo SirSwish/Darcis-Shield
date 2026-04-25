@@ -1,5 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using UrbanChaosLightEditor.ViewModels;
 
 namespace UrbanChaosLightEditor
@@ -10,6 +13,27 @@ namespace UrbanChaosLightEditor
         {
             InitializeComponent();
             DataContext = new MainWindowViewModel();
+            SourceInitialized += OnSourceInitialized;
+        }
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private void OnSourceInitialized(object? sender, EventArgs e)
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+                int dark = 1;
+                if (DwmSetWindowAttribute(hwnd, 20, ref dark, sizeof(int)) != 0)
+                    DwmSetWindowAttribute(hwnd, 19, ref dark, sizeof(int));
+                int caption = 0x001E1E1E;
+                DwmSetWindowAttribute(hwnd, 35, ref caption, sizeof(int));
+                int text = 0x00FFFFFF;
+                DwmSetWindowAttribute(hwnd, 36, ref text, sizeof(int));
+            }
+            catch { }
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

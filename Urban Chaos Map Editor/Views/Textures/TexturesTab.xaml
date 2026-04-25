@@ -242,6 +242,13 @@
                     <CheckBox Margin="8,0,0,0"
                               Content="Use Beta Textures"
                               IsChecked="{Binding Map.UseBetaTextures, Mode=TwoWay}"/>
+                    <CheckBox x:Name="PaintRoofsCheckBox"
+                              Margin="16,0,0,0"
+                              Content="Paint Roofs"
+                              IsChecked="{Binding Map.PaintRoofMode, Mode=TwoWay}"
+                              ToolTip="When checked, texture painting writes to the .MAP warehouse roof texture layer instead of the normal ground layer."
+                              Checked="PaintRoofs_Checked"
+                              Unchecked="PaintRoofs_Unchecked"/>
                 </StackPanel>
 
                 <!-- Rotation + Brush -->

@@ -606,7 +606,8 @@ namespace UrbanChaosMapEditor.Views.Core
                 return;
             }
 
-            if (vm.SelectedTool == EditorTool.PaintTexture)
+            if (vm.SelectedTool == EditorTool.PaintTexture ||
+                vm.SelectedTool == EditorTool.PaintRoofTexture)
             {
                 Point mousePos = e.GetPosition(Surface);
                 int tx = (int)Math.Floor(mousePos.X / MapConstants.TileSize);
@@ -615,8 +616,9 @@ namespace UrbanChaosMapEditor.Views.Core
                 if (tx < 0 || tx >= MapConstants.TilesPerSide || ty < 0 || ty >= MapConstants.TilesPerSide)
                     return;
 
-                // Snapshot once per gesture so the whole stroke/rect/click is one undo step.
-                UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
+                // Snapshot IAM bytes once per gesture (roof tex writes are outside MapBytes).
+                if (vm.SelectedTool == EditorTool.PaintTexture)
+                    UndoService.Instance.RecordSnapshot(MapDataService.Instance.GetBytesCopy());
 
                 _textureMouseDownPos = mousePos;
                 _isTextureDragging = false;
@@ -628,20 +630,31 @@ namespace UrbanChaosMapEditor.Views.Core
                 vm.TextureSelectionEndX = tx;
                 vm.TextureSelectionEndY = ty;
 
+                bool isRoofMode = vm.SelectedTool == EditorTool.PaintRoofTexture;
+
                 if (IsShiftDown())
                 {
                     _isTextureStrokePainting = true;
                     _texturePaintedTiles = new HashSet<(int, int)>();
 
-                    ApplyTextureBrush(tx, ty, vm);
+                    if (isRoofMode)
+                        ApplyRoofTextureBrush(tx, ty, vm);
+                    else
+                        ApplyTextureBrush(tx, ty, vm);
 
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Stroke painting {vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000} (brush {vm.BrushSize}-{vm.BrushSize})";
+                    {
+                        string modeLabel = isRoofMode ? "[ROOF] " : "";
+                        mainVm.StatusMessage = $"Stroke painting {modeLabel}{vm.SelectedTextureGroup} #{vm.SelectedTextureNumber:000} (brush {vm.BrushSize}-{vm.BrushSize})";
+                    }
                 }
                 else
                 {
                     if (mainVm != null)
-                        mainVm.StatusMessage = $"Click to paint (brush {vm.BrushSize}-{vm.BrushSize}), drag for rectangle, Shift+drag for stroke";
+                    {
+                        string modeLabel = isRoofMode ? "[ROOF] " : "";
+                        mainVm.StatusMessage = $"{modeLabel}Click to paint (brush {vm.BrushSize}-{vm.BrushSize}), drag for rectangle, Shift+drag for stroke";
+                    }
                 }
 
                 CaptureMouse();
@@ -1138,10 +1151,16 @@ namespace UrbanChaosMapEditor.Views.Core
 
                 if (_isTextureStrokePainting)
                 {
-                    ApplyTextureBrush(tx, ty, vm);
+                    if (vm.SelectedTool == EditorTool.PaintRoofTexture)
+                        ApplyRoofTextureBrush(tx, ty, vm);
+                    else
+                        ApplyTextureBrush(tx, ty, vm);
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Stroke painting at [{tx},{ty}] (brush {vm.BrushSize}-{vm.BrushSize})";
+                    {
+                        string modeLabel = vm.SelectedTool == EditorTool.PaintRoofTexture ? "[ROOF] " : "";
+                        shell.StatusMessage = $"{modeLabel}Stroke painting at [{tx},{ty}] (brush {vm.BrushSize}-{vm.BrushSize})";
+                    }
                     return;
                 }
 
@@ -1339,6 +1358,8 @@ namespace UrbanChaosMapEditor.Views.Core
             if (DataContext is MapViewModel vmTex && vmTex.IsPaintingTexture)
             {
                 var rect = vmTex.GetTextureSelectionRect();
+                bool isRoofMode = vmTex.SelectedTool == EditorTool.PaintRoofTexture;
+                string modeLabel = isRoofMode ? "[ROOF] " : "";
 
                 if (_isTextureStrokePainting)
                 {
@@ -1347,30 +1368,48 @@ namespace UrbanChaosMapEditor.Views.Core
                     _isTextureStrokePainting = false;
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
-                        shell.StatusMessage = $"Stroke painted {tilesCount} tiles with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                        shell.StatusMessage = $"{modeLabel}Stroke painted {tilesCount} tiles with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                 }
                 else if (_isTextureDragging && rect.HasValue)
                 {
-                    var acc = new TexturesAccessor(MapDataService.Instance);
-                    int world = vmTex.TextureWorld;
                     int tileCount = 0;
 
-                    for (int ty = rect.Value.MinY; ty <= rect.Value.MaxY; ty++)
+                    if (isRoofMode)
                     {
-                        for (int tx = rect.Value.MinX; tx <= rect.Value.MaxX; tx++)
-                        {
-                            acc.WriteTileTexture(tx, ty, vmTex.SelectedTextureGroup, vmTex.SelectedTextureNumber, vmTex.SelectedRotationIndex, world);
-                            tileCount++;
-                        }
-                    }
+                        ushort roofValue = RoofTextureService.EncodeFromTextureSelection(
+                            vmTex.SelectedTextureGroup,
+                            vmTex.SelectedTextureNumber,
+                            vmTex.SelectedRotationIndex);
 
-                    TexturesChangeBus.Instance.NotifyChanged();
+                        RoofTextureService.Instance.WriteRegionUI(
+                            rect.Value.MinX, rect.Value.MinY, rect.Value.MaxX, rect.Value.MaxY,
+                            roofValue);
+
+                        RoofTexturesChangeBus.Instance.NotifyChanged();
+                        tileCount = (rect.Value.MaxX - rect.Value.MinX + 1) * (rect.Value.MaxY - rect.Value.MinY + 1);
+                    }
+                    else
+                    {
+                        var acc = new TexturesAccessor(MapDataService.Instance);
+                        int world = vmTex.TextureWorld;
+
+                        for (int ty = rect.Value.MinY; ty <= rect.Value.MaxY; ty++)
+                        {
+                            for (int tx = rect.Value.MinX; tx <= rect.Value.MaxX; tx++)
+                            {
+                                acc.WriteTileTexture(tx, ty, vmTex.SelectedTextureGroup, vmTex.SelectedTextureNumber, vmTex.SelectedRotationIndex, world);
+                                tileCount++;
+                            }
+                        }
+
+                        TexturesChangeBus.Instance.NotifyChanged();
+                    }
 
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     {
                         int width = rect.Value.MaxX - rect.Value.MinX + 1;
                         int height = rect.Value.MaxY - rect.Value.MinY + 1;
-                        shell.StatusMessage = $"Rectangle painted {width}-{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                        shell.StatusMessage = $"{modeLabel}Rectangle painted {width}-{height} ({tileCount} tiles) with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                     }
                 }
                 else if (rect.HasValue)
@@ -1378,15 +1417,18 @@ namespace UrbanChaosMapEditor.Views.Core
                     int centerTx = rect.Value.MinX;
                     int centerTy = rect.Value.MinY;
 
-                    ApplyTextureBrush(centerTx, centerTy, vmTex);
+                    if (isRoofMode)
+                        ApplyRoofTextureBrush(centerTx, centerTy, vmTex);
+                    else
+                        ApplyTextureBrush(centerTx, centerTy, vmTex);
 
                     int brushSize = vmTex.BrushSize;
                     if (Application.Current.MainWindow?.DataContext is MainWindowViewModel shell)
                     {
                         if (brushSize == 1)
-                            shell.StatusMessage = $"Painted tile [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                            shell.StatusMessage = $"{modeLabel}Painted tile [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                         else
-                            shell.StatusMessage = $"Brush painted {brushSize}-{brushSize} at [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
+                            shell.StatusMessage = $"{modeLabel}Brush painted {brushSize}-{brushSize} at [{centerTx},{centerTy}] with {vmTex.SelectedTextureGroup} #{vmTex.SelectedTextureNumber:000}";
                     }
                 }
 
@@ -1427,6 +1469,44 @@ namespace UrbanChaosMapEditor.Views.Core
             }
 
             TexturesChangeBus.Instance.NotifyChanged();
+        }
+
+        private void ApplyRoofTextureBrush(int centerTx, int centerTy, MapViewModel vm)
+        {
+            var svc = RoofTextureService.Instance;
+            ushort roofValue = RoofTextureService.EncodeFromTextureSelection(
+                vm.SelectedTextureGroup,
+                vm.SelectedTextureNumber,
+                vm.SelectedRotationIndex);
+
+            int brushSize = Math.Max(1, vm.BrushSize);
+            int half = (brushSize - 1) / 2;
+
+            for (int dy = -half; dy <= half; dy++)
+            {
+                for (int dx = -half; dx <= half; dx++)
+                {
+                    int tx = centerTx + dx;
+                    int ty = centerTy + dy;
+
+                    if (tx >= 0 && tx < MapConstants.TilesPerSide &&
+                        ty >= 0 && ty < MapConstants.TilesPerSide)
+                    {
+                        if (_texturePaintedTiles != null)
+                        {
+                            if (_texturePaintedTiles.Contains((tx, ty)))
+                                continue;
+                            _texturePaintedTiles.Add((tx, ty));
+                        }
+
+                        int gx = MapConstants.TilesPerSide - 1 - tx;
+                        int gz = MapConstants.TilesPerSide - 1 - ty;
+                        svc.WriteEntry(gx, gz, roofValue);
+                    }
+                }
+            }
+
+            RoofTexturesChangeBus.Instance.NotifyChanged();
         }
 
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -2068,7 +2148,9 @@ namespace UrbanChaosMapEditor.Views.Core
             if (GhostLayer == null) return;
             if (DataContext is not MapViewModel vm) return;
 
-            if (vm.SelectedTool != EditorTool.PaintTexture && vm.SelectedTool != EditorTool.PasteTexture)
+            if (vm.SelectedTool != EditorTool.PaintTexture &&
+                vm.SelectedTool != EditorTool.PasteTexture &&
+                vm.SelectedTool != EditorTool.PaintRoofTexture)
             {
                 GhostLayer.SetHoverTile(null, null);
                 return;
@@ -2185,6 +2267,13 @@ namespace UrbanChaosMapEditor.Views.Core
             return rRight >= vpLeft && rLeft <= vpRight
                 && rBottom >= vpTop && rTop  <= vpBottom;
         }
+
+        /// <summary>
+        /// Loads the given RF4 data into the RoofsLayer clipboard and enters paste mode.
+        /// Called from MainWindow when the user presses Ctrl+V after copying an RF4.
+        /// </summary>
+        public void BeginRf4Paste(short y, sbyte dy0, sbyte dy1, sbyte dy2, byte drawFlags)
+            => RoofsOverlay.BeginPaste(y, dy0, dy1, dy2, drawFlags);
 
         private static void SnapUiToVertexIfCtrl(ref int uiX, ref int uiZ)
         {

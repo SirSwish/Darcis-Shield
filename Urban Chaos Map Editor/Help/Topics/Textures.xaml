@@ -138,6 +138,23 @@ will then load the custom world exactly like any built-in world.</Run>
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
+        Painting Roof Textures
+    </Paragraph>
+    <Paragraph>
+        The Textures tab can also be used to paint
+        <Bold>roof top textures</Bold> . To do this, enable the
+        <Bold>Paint Roof Textures</Bold> checkbox and then select a texture from the palette in
+        the usual way. From that point on, painting behaves just like normal texture painting.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Roof textures can be painted onto any cell, but they will only actually display on the
+        map and in-game if the painted cell contains an
+        <Bold>RF4 tile</Bold> . Painting a cell that does not contain RF4 data will store the
+        roof texture value, but nothing will be visibly drawn there until that cell has a valid
+        RF4 roof tile.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
         Rotating Textures
     </Paragraph>
     <Paragraph>
@@ -205,7 +222,7 @@ will then load the custom world exactly like any built-in world.</Run>
     <Paragraph>
         If you want to reuse a texture that is already painted somewhere on the map, you can
         sample it directly rather than hunting for it in the palette. This is done with the
-        <Bold>Eye (sample) tool</Bold>.
+        <Bold>Eye (sample) tool</Bold> .
     </Paragraph>
     <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
         <ListItem>
@@ -239,7 +256,8 @@ will then load the custom world exactly like any built-in world.</Run>
         Selecting an Area (Rectangle Select, Copy and Paste)
     </Paragraph>
     <Paragraph>
-        The <Bold>Select Area</Bold> tool lets you copy a rectangular block of existing map
+        The
+        <Bold>Select Area</Bold> tool lets you copy a rectangular block of existing map
         textures and paste them elsewhere — useful for duplicating patterns, mirroring sections,
         or moving a finished area to a new location.
     </Paragraph>
@@ -248,7 +266,8 @@ will then load the custom world exactly like any built-in world.</Run>
         Making a Selection
     </Paragraph>
     <Paragraph>
-        Switch to the <Bold>Select</Bold> tool in the Textures tab, then click and drag on the
+        Switch to the
+        <Bold>Select</Bold> tool in the Textures tab, then click and drag on the
         map canvas to draw a rectangular selection. A dashed outline appears over the selected
         region as you drag.
     </Paragraph>
@@ -271,10 +290,12 @@ will then load the custom world exactly like any built-in world.</Run>
         Pasting
     </Paragraph>
     <Paragraph>
-        Press <Bold>Ctrl+V</Bold> to enter paste mode. A
+        Press
+        <Bold>Ctrl+V</Bold> to enter paste mode. A
         <Bold>ghost preview</Bold> of the copied block appears under your cursor, showing
         exactly how the textures will land when placed. Move your cursor to the desired
-        position and <Bold>click to place</Bold> the block.
+        position and
+        <Bold>click to place</Bold> the block.
     </Paragraph>
     <BlockUIContainer Margin="0,4,0,8">
         <Image Source="pack://application:,,,/Help/Images/textures_select_area_paste.png"
@@ -282,7 +303,9 @@ will then load the custom world exactly like any built-in world.</Run>
     </BlockUIContainer>
     <Paragraph>
         After placing, the ghost remains active so you can stamp the same block multiple times.
-        Press <Bold>Escape</Bold> or <Bold>right-click</Bold> to cancel the paste and return
+        Press
+        <Bold>Escape</Bold> or
+        <Bold>right-click</Bold> to cancel the paste and return
         to the normal tool.
     </Paragraph>
 
@@ -370,6 +393,13 @@ will then load the custom world exactly like any built-in world.</Run>
         <ListItem>
             <Paragraph>
                 <Bold>Ctrl+C / Ctrl+V</Bold> works on the current selection — copy a finished section of the map and paste it elsewhere to replicate patterns without repainting tile by tile.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                When
+                <Bold>Paint Roof Textures</Bold> is enabled, you can paint roof texture data in exactly the same way as normal textures. Just remember that it will only become visible on cells that contain a valid
+                <Bold>RF4</Bold> roof tile.
             </Paragraph>
         </ListItem>
     </List>

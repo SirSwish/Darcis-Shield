@@ -1,0 +1,85 @@
+<Window x:Class="UrbanChaosPrimEditor.Views.Dialogs.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About Urban Chaos Prim Editor"
+        Width="420" Height="260"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Urban Chaos Prim Editor"
+                   FontSize="20" FontWeight="Bold"
+                   Foreground="{StaticResource Accent}"
+                   HorizontalAlignment="Center"/>
+
+        <!-- Subtitle -->
+        <TextBlock Grid.Row="1"
+                   Text="Part of the Darcis Shield modding toolkit"
+                   FontSize="12"
+                   Foreground="{StaticResource TextMuted}"
+                   HorizontalAlignment="Center"
+                   Margin="0,4,0,0"/>
+
+        <!-- Version info -->
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                           Text="Version:"
+                           Style="{StaticResource MutedTextStyle}"
+                           HorizontalAlignment="Right" Margin="0,0,8,4"/>
+                <TextBlock Grid.Row="0" Grid.Column="1"
+                           x:Name="VersionText"
+                           Style="{StaticResource ValueTextStyle}"
+                           Margin="0,0,0,4"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                           Text="Target:"
+                           Style="{StaticResource MutedTextStyle}"
+                           HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1"
+                           Text=".NET 8 / WPF"
+                           Style="{StaticResource ValueTextStyle}"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Description -->
+        <TextBlock Grid.Row="3"
+                   Text="Enables viewing and editing of Urban Chaos .prm prim files, with export to Wavefront .obj format."
+                   FontSize="11"
+                   Foreground="{StaticResource TextMuted}"
+                   TextWrapping="Wrap"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   Margin="0,16,0,0"/>
+
+        <!-- Close button -->
+        <Button Grid.Row="4"
+                Content="Close"
+                Width="90"
+                HorizontalAlignment="Center"
+                Margin="0,16,0,0"
+                IsDefault="True"
+                IsCancel="True"
+                Click="Close_Click"/>
+    </Grid>
+</Window>

@@ -272,10 +272,28 @@ namespace UrbanChaosMapEditor.Views.Heights.MapOverlays
             }
             else if (_vm.SelectedTool == EditorTool.AreaSetPapFlags)
             {
-                string papText = _vm.PapFlagsClearMode
-                    ? $"Clear 0x{_vm.PapFlagsMask:X4}"
-                    : $"Set 0x{_vm.PapFlagsMask:X4}";
-                Brush papColour = _vm.PapFlagsClearMode ? Brushes.Orange : Brushes.Lime;
+                string papText;
+                Brush papColour;
+                if (_vm.PapFlagsSetMask == 0 && _vm.PapFlagsClearMask == 0)
+                {
+                    papText = "(no change)";
+                    papColour = Brushes.Gray;
+                }
+                else if (_vm.PapFlagsClearMask == 0)
+                {
+                    papText = $"+0x{_vm.PapFlagsSetMask:X4}";
+                    papColour = Brushes.Lime;
+                }
+                else if (_vm.PapFlagsSetMask == 0)
+                {
+                    papText = $"-0x{_vm.PapFlagsClearMask:X4}";
+                    papColour = Brushes.Orange;
+                }
+                else
+                {
+                    papText = $"+0x{_vm.PapFlagsSetMask:X4} -0x{_vm.PapFlagsClearMask:X4}";
+                    papColour = Brushes.Cyan;
+                }
                 var ft = new FormattedText(papText, CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight, typeface, 14, papColour, ppd);
                 dc.DrawText(ft, new Point(x + 4, y - 20));

@@ -172,6 +172,39 @@ namespace DarciShield.Launcher
                     MessageBoxImage.Error);
             }
         }
+        private void PrimEditor_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string primEditorExe = Path.Combine(baseDir, "UrbanChaosPrimEditor.exe");
+
+                if (!File.Exists(primEditorExe))
+                {
+                    MessageBox.Show(
+                        $"Could not find Prim Editor executable:\n{primEditorExe}",
+                        "Prim Editor not found",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = primEditorExe,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.ToString(),
+                    "Error launching Prim Editor",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         private void Window_DragMove(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)

@@ -256,6 +256,76 @@
                                           IsChecked="{Binding Map.ShowHeights}" ToolTip="Ctrl+H"/>
                             <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="PAP Flags"
                                           IsChecked="{Binding Map.ShowCellFlags}" ToolTip="Show PAP_HI cell flags"/>
+                            <!-- PAP flag filter dropdown -->
+                            <Grid Margin="2,0,0,0">
+                                <ToggleButton x:Name="PapFilterDropdownToggle"
+                                              Padding="5,4"
+                                              MinWidth="0"
+                                              Background="#3C3C3C"
+                                              Foreground="#CCC"
+                                              BorderBrush="#555"
+                                              ToolTip="Filter: which PAP flags to highlight (AND match)"
+                                              Click="PapFilterDropdownToggle_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Map.PapFlagFilterSummary}" VerticalAlignment="Center" FontSize="10"/>
+                                        <TextBlock Text=" ▾" VerticalAlignment="Center" FontSize="9" Foreground="#AAA"/>
+                                    </StackPanel>
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="Padding" Value="5,4"/>
+                                            <Setter Property="Background" Value="#3C3C3C"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="#555"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border x:Name="bd"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="3"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="bd" Property="BorderBrush" Value="#888"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                                <Popup x:Name="PapFilterPopup"
+                                       PlacementTarget="{Binding ElementName=PapFilterDropdownToggle}"
+                                       Placement="Bottom"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       Closed="PapFilterPopup_Closed">
+                                    <Border Background="#252528"
+                                            BorderBrush="#555"
+                                            BorderThickness="1"
+                                            CornerRadius="3"
+                                            Padding="6">
+                                        <StackPanel>
+                                            <TextBlock Text="Highlight cells where:" Foreground="#AAA" FontSize="10" Margin="0,0,0,4"/>
+                                            <ItemsControl ItemsSource="{Binding Map.PapFlagFilterItems}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Content="{Binding Name}"
+                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  Foreground="#DDD"
+                                                                  FontSize="11"
+                                                                  Margin="0,1"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                            </Grid>
                         </StackPanel>
                     </StackPanel>
 

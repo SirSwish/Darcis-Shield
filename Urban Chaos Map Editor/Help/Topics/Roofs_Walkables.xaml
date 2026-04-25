@@ -20,8 +20,10 @@
         Viewing Walkables
     </Paragraph>
     <Paragraph>
-        Walkables appear as numbered circles on the <Bold>Walkable layer</Bold> (toggle with the
-        layer button in the toolbar). They are also listed in the <Bold>Walkables panel</Bold> on
+        Walkables appear as numbered circles on the
+        <Bold>Walkable layer</Bold> (toggle with the
+        layer button in the toolbar). They are also listed in the
+        <Bold>Walkables panel</Bold> on
         the right side of the Roofs tab.
     </Paragraph>
     <Paragraph Margin="0,6,0,0">
@@ -87,28 +89,34 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click the <Bold>Add button</Bold> next to the Walkables panel.
+                Click the
+                <Bold>Add button</Bold> next to the Walkables panel.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                On the map canvas, <Bold>click and drag</Bold> to define the walkable area.
-                An <Bold>orange box</Bold> highlights the region as you drag.
+                On the map canvas,
+                <Bold>click and drag</Bold> to define the walkable area.
+                An
+                <Bold>orange box</Bold> highlights the region as you drag.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Release the mouse button. The <Bold>Add Walkable Region</Bold> dialog appears.
+                Release the mouse button. The
+                <Bold>Add Walkable Region</Bold> dialog appears.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Set the <Bold>Height</Bold> in quarter storeys (e.g., 8 for 2 storeys high).
+                Set the
+                <Bold>Height</Bold> in quarter storeys (e.g., 8 for 2 storeys high).
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click <Bold>Add Walkable</Bold>. The walkable is created and appears in the list.
+                Click
+                <Bold>Add Walkable</Bold> . The walkable is created and appears in the list.
             </Paragraph>
         </ListItem>
     </List>
@@ -144,17 +152,20 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                The <Bold>Walkable Preview</Bold> window appears showing the walkable's properties.
+                The
+                <Bold>Walkable Preview</Bold> window appears showing the walkable's properties.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Change the <Bold>Height</Bold> value (in quarter storeys).
+                Change the
+                <Bold>Height</Bold> value (in quarter storeys).
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click <Bold>Apply</Bold> to commit the height change.
+                Click
+                <Bold>Apply</Bold> to commit the height change.
             </Paragraph>
         </ListItem>
     </List>
@@ -174,7 +185,8 @@
         Deleting a Walkable
     </Paragraph>
     <Paragraph>
-        Deleting a walkable removes it and <Bold>all RF4 tiles it contains</Bold>. This is a
+        Deleting a walkable removes it and
+        <Bold>all RF4 tiles it contains</Bold> . This is a
         destructive operation.
     </Paragraph>
     <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
@@ -185,7 +197,9 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click the <Bold>Delete</Bold> button, or press the <Bold>Delete</Bold> key.
+                Click the
+                <Bold>Delete</Bold> button, or press the
+                <Bold>Delete</Bold> key.
             </Paragraph>
         </ListItem>
         <ListItem>
@@ -203,10 +217,34 @@
         Adding Roof Tiles (RF4)
     </Paragraph>
     <Paragraph>
-        Roof tiles are typically added to <Bold>warehouse buildings</Bold> (for floors) or
-        <Bold>houses with sloped roofs</Bold>. Roof tiles must be added to an existing walkable
+        Roof tiles are typically added to
+        <Bold>warehouse buildings</Bold> (for floors) or
+        <Bold>houses with sloped roofs</Bold> . Roof tiles must be added to an existing walkable
         container.
     </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can now also work directly from the map canvas at the cell level. Select a
+        <Bold>walkable</Bold> , then
+        <Bold>double-click</Bold> an individual cell inside that
+        walkable:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                If the cell does
+                <Bold>not</Bold> already contain an RF4 tile, a new RF4 tile is
+                created at that cell within the selected walkable.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                If the cell
+                <Bold>already contains</Bold> an RF4 tile, the existing tile opens in
+                the
+                <Bold>Roof Tile Editor</Bold> instead.
+            </Paragraph>
+        </ListItem>
+    </List>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
         Step-by-Step
@@ -214,13 +252,15 @@
     <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                Select the <Bold>desired walkable</Bold> from the Walkables list that should
+                Select the
+                <Bold>desired walkable</Bold> from the Walkables list that should
                 contain the roof tiles.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click the <Bold>Add button</Bold> next to the Roof Tiles panel. The
+                Click the
+                <Bold>Add button</Bold> next to the Roof Tiles panel. The
                 <Bold>Add Roof Face to Walkable</Bold> window appears.
             </Paragraph>
         </ListItem>
@@ -244,13 +284,16 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                Set the <Bold>Height</Bold> in quarter storeys. It should automatically match the
+                Set the
+                <Bold>Height</Bold> in quarter storeys. It should automatically match the
                 walkable's height, but you can adjust it.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click <Bold>Add Flat Roof</Bold> to fill the walkable, or <Bold>Add Tile</Bold>
+                Click
+                <Bold>Add Flat Roof</Bold> to fill the walkable, or
+                <Bold>Add Tile</Bold>
                 to add a single tile.
             </Paragraph>
         </ListItem>
@@ -271,7 +314,8 @@
         Editing Roof Tiles
     </Paragraph>
     <Paragraph>
-        Editing individual roof tiles allows you to create <Bold>sloped roofs</Bold> by adjusting
+        Editing individual roof tiles allows you to create
+        <Bold>sloped roofs</Bold> by adjusting
         corner heights.
     </Paragraph>
 
@@ -281,19 +325,31 @@
     <List MarkerStyle="Decimal" Margin="16,6,0,6" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                <Bold>Double-click</Bold> a roof tile on the <Bold>Roof Tiles layer</Bold> on the
+                <Bold>Double-click</Bold> a roof tile on the
+                <Bold>Roof Tiles layer</Bold> on the
                 map canvas, OR
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                <Bold>Double-click</Bold> a roof tile entry in the <Bold>Roof Face 4 Entries</Bold>
+                Select a
+                <Bold>walkable</Bold> and
+                <Bold>double-click</Bold> an individual cell
+                inside it on the map canvas. If that cell already has an RF4 tile, the existing
+                tile opens in the editor. If not, a new RF4 tile is created there first.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Double-click</Bold> a roof tile entry in the
+                <Bold>Roof Face 4 Entries</Bold>
                 panel (shown when a walkable is selected).
             </Paragraph>
         </ListItem>
     </List>
     <Paragraph>
-        The <Bold>Roof Tile Editor</Bold> window appears with three sections:
+        The
+        <Bold>Roof Tile Editor</Bold> window appears with three sections:
     </Paragraph>
 
     <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">
@@ -313,7 +369,8 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                <Bold>NW, NE, SW Corner Offsets</Bold> — Height deltas in <Bold>pixels</Bold>
+                <Bold>NW, NE, SW Corner Offsets</Bold> — Height deltas in
+                <Bold>pixels</Bold>
                 (not quarter storeys). Negative values create downward slopes; positive values
                 create upward slopes.
             </Paragraph>
@@ -396,7 +453,9 @@
         </ListItem>
         <ListItem>
             <Paragraph>
-                Click the <Bold>Delete</Bold> button or press the <Bold>Delete</Bold> key.
+                Click the
+                <Bold>Delete</Bold> button or press the
+                <Bold>Delete</Bold> key.
             </Paragraph>
         </ListItem>
     </List>
@@ -411,25 +470,37 @@
     <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
         <ListItem>
             <Paragraph>
-                Use <Bold>Fill Entire Walkable</Bold> when creating flat warehouse floors or flat
+                Use
+                <Bold>Fill Entire Walkable</Bold> when creating flat warehouse floors or flat
                 rooftops. This creates RF4 tiles across the entire bounding box automatically.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                For <Bold>sloped roofs</Bold>, first fill the walkable, then edit individual tiles
+                For
+                <Bold>sloped roofs</Bold> , first fill the walkable, then edit individual tiles
                 (or use Apply to Selection) to set corner height offsets.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                Corner height offsets are in <Bold>pixels</Bold>, not quarter storeys. 1 QS = 64 pixels,
+                For quick cell-by-cell work, select a
+                <Bold>walkable</Bold> and
+                <Bold>double-click</Bold> cells directly on the map: empty cells create a new RF4
+                tile, while occupied cells open the existing tile in the editor.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Corner height offsets are in
+                <Bold>pixels</Bold> , not quarter storeys. 1 QS = 64 pixels,
                 so a typical slope might use offsets of -32, -64, etc.
             </Paragraph>
         </ListItem>
         <ListItem>
             <Paragraph>
-                The <Bold>Apply to Selection</Bold> button is very useful for creating sloped roofs
+                The
+                <Bold>Apply to Selection</Bold> button is very useful for creating sloped roofs
                 on one side of a building without affecting the other sides.
             </Paragraph>
         </ListItem>

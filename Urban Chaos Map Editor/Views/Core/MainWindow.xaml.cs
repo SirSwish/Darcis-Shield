@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
+using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Textures;
@@ -24,6 +25,8 @@ namespace UrbanChaosMapEditor.Views.Core
         private bool _heightHotkeyLatched;
         private PrimListItem? _copiedPrim;
         private bool _lastCopyWasPrim;
+        private (short Y, sbyte DY0, sbyte DY1, sbyte DY2, byte DrawFlags)? _copiedRf4;
+        private bool _lastCopyWasRf4;
         private const double MinExpandedEditorWidth = 300;
         private const double CollapsedRailWidth = 28;
         private double _lastDrawerWidth = MinExpandedEditorWidth;
@@ -49,6 +52,16 @@ namespace UrbanChaosMapEditor.Views.Core
             AddHandler(Keyboard.PreviewKeyUpEvent, new KeyEventHandler(MainWindow_PreviewKeyUp), handledEventsToo: true);
 
             CommandBindings.Add(new CommandBinding(Open3DViewportCommand, (_, __) => Open3DViewport()));
+        }
+
+        private void PapFilterDropdownToggle_Click(object sender, RoutedEventArgs e)
+        {
+            PapFilterPopup.IsOpen = PapFilterDropdownToggle.IsChecked == true;
+        }
+
+        private void PapFilterPopup_Closed(object sender, EventArgs e)
+        {
+            PapFilterDropdownToggle.IsChecked = false;
         }
 
         private void Open3DViewport_Click(object sender, RoutedEventArgs e) => Open3DViewport();
@@ -464,8 +477,25 @@ namespace UrbanChaosMapEditor.Views.Core
                 PixelZ = sel.PixelZ
             };
             _lastCopyWasPrim = true;
+            _lastCopyWasRf4 = false;
 
             shell.StatusMessage = $"Copied \"{sel.Name}\" (#{sel.PrimNumber:000}). Ctrl+V to paste.";
+        }
+
+        private void CopySelectedRf4(MainWindowViewModel shell)
+        {
+            int rf4Id = shell.Map?.SelectedRf4Id ?? -1;
+            if (rf4Id < 0) return;
+
+            var snap = new BuildingsAccessor(MapDataService.Instance).ReadSnapshot();
+            if (snap.RoofFaces4 == null || rf4Id >= snap.RoofFaces4.Length) return;
+
+            var rf4 = snap.RoofFaces4[rf4Id];
+            _copiedRf4 = (rf4.Y, rf4.DY0, rf4.DY1, rf4.DY2, rf4.DrawFlags);
+            _lastCopyWasPrim = false;
+            _lastCopyWasRf4 = true;
+
+            shell.StatusMessage = $"Copied RF4 #{rf4Id} (SE={rf4.Y / 64} QS). Ctrl+V to paste.";
         }
 
         private void PastePrimAtCursor()
@@ -521,6 +551,7 @@ namespace UrbanChaosMapEditor.Views.Core
                     {
                         map.CopyTextureCellsCommand.Execute(null);
                         _lastCopyWasPrim = false;
+                        _lastCopyWasRf4 = false;
                         shell.StatusMessage = $"Copied {map.TextureClipboard?.Width}\u00d7{map.TextureClipboard?.Height} cells. Ctrl+V to paste.";
                         e.Handled = true;
                         return;
@@ -529,6 +560,10 @@ namespace UrbanChaosMapEditor.Views.Core
                     if (map.SelectedPrim != null)
                     {
                         CopySelectedPrim();
+                    }
+                    else if (map.SelectedRf4Id >= 0)
+                    {
+                        CopySelectedRf4(shell);
                     }
                     else
                     {
@@ -549,9 +584,16 @@ namespace UrbanChaosMapEditor.Views.Core
 
                     var map = shell.Map;
 
-                    // Paste whichever was copied most recently.
-                    // If a prim was the last thing copied, paste the prim.
-                    // Only fall through to texture paste if no prim has been copied since the last texture copy.
+                    // Paste whichever was copied most recently (last-copy-wins ordering).
+                    if (_lastCopyWasRf4 && _copiedRf4.HasValue)
+                    {
+                        var cb = _copiedRf4.Value;
+                        MapViewControl.BeginRf4Paste(cb.Y, cb.DY0, cb.DY1, cb.DY2, cb.DrawFlags);
+                        shell.StatusMessage = "Click an RF4 tile in the same walkable to paste. Esc to cancel.";
+                        e.Handled = true;
+                        return;
+                    }
+
                     if (_lastCopyWasPrim && _copiedPrim != null)
                     {
                         PastePrimAtCursor();
@@ -567,7 +609,13 @@ namespace UrbanChaosMapEditor.Views.Core
                         return;
                     }
 
-                    if (_copiedPrim != null)
+                    if (_copiedRf4.HasValue)
+                    {
+                        var cb = _copiedRf4.Value;
+                        MapViewControl.BeginRf4Paste(cb.Y, cb.DY0, cb.DY1, cb.DY2, cb.DrawFlags);
+                        shell.StatusMessage = "Click an RF4 tile in the same walkable to paste. Esc to cancel.";
+                    }
+                    else if (_copiedPrim != null)
                     {
                         PastePrimAtCursor();
                     }

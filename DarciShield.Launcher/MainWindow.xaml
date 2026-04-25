@@ -63,6 +63,43 @@
     </Window.Resources>
 
     <Grid MouseLeftButtonDown="Window_DragMove" Background="Transparent">
+
+        <!-- Close button -->
+        <Button Content="✕"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Width="32" Height="32"
+                Margin="0,6,6,0"
+                FontSize="14"
+                Foreground="White"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                Panel.ZIndex="10"
+                Click="Exit_Click">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Foreground" Value="#AAFFFFFF"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#44FF4444"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Style>
+        </Button>
         <!-- Leather background -->
         <Image Source="/Assets/Images/Backgrounds/leather.png"
            Stretch="Fill"
@@ -115,9 +152,9 @@
                     Click="StoryEditor_Click" RenderTransformOrigin="0.423,0.402"/>
 
                 <Button Style="{StaticResource BadgeButton}"
-                    Width="164"
-                    Content="Exit"
-                    Click="Exit_Click" Margin="0,23,0,20"/>
+                    Width="174"
+                    Content="Prim Editor"
+                    Click="PrimEditor_Click" Margin="0,23,0,20"/>
             </UniformGrid>
         </Border>
     </Grid>

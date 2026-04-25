@@ -149,6 +149,10 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
                 if (buildingId > 0)
                     SyncFromBuildingSelection(buildingId);
             }
+            else if (e.PropertyName == nameof(UrbanChaosMapEditor.ViewModels.Core.MapViewModel.SelectedRf4Id))
+            {
+                SyncRf4SelectionFromMap();
+            }
         }
 
         public RoofsTabViewModel()
@@ -277,6 +281,9 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
 
         private void RebuildWalkablesForBuilding()
         {
+            // Remember current selection so we can restore it after the rebuild.
+            int? prevWalkableId = _selectedWalkable?.WalkableId1;
+
             Walkables.Clear();
             RoofFaces4.Clear();
             SelectedWalkable = null;
@@ -318,10 +325,14 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
 
             OnPropertyChanged(nameof(Walkables));
 
-            // Auto-select first
-            var first = Walkables.FirstOrDefault();
-            if (first != null)
-                SelectedWalkable = first;
+            // Restore previously selected walkable; fall back to first if it no longer exists.
+            var toSelect = prevWalkableId.HasValue
+                ? Walkables.FirstOrDefault(w => w.WalkableId1 == prevWalkableId.Value)
+                : null;
+            toSelect ??= Walkables.FirstOrDefault();
+
+            if (toSelect != null)
+                SelectedWalkable = toSelect;
         }
 
         // ====================================================================
@@ -386,6 +397,8 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
         // Map Selection Sync
         // ====================================================================
 
+        private bool _syncingRf4Selection;
+
         private void SyncWalkableSelectionIntoMap()
         {
             if (_mapViewModel == null) return;
@@ -394,8 +407,27 @@ namespace UrbanChaosMapEditor.ViewModels.Roofs
 
         private void SyncRf4SelectionIntoMap()
         {
+            if (_syncingRf4Selection) return;
             if (_mapViewModel == null) return;
             _mapViewModel.SelectedRf4Id = SelectedRoofFace4?.FaceId ?? -1;
+        }
+
+        /// <summary>
+        /// Called when the map layer signals a new SelectedRf4Id (e.g. user clicked a tile on the canvas).
+        /// Finds and selects the matching entry in the RF4 list without looping back into SyncRf4SelectionIntoMap.
+        /// </summary>
+        private void SyncRf4SelectionFromMap()
+        {
+            if (_syncingRf4Selection) return;
+            int rf4Id = _mapViewModel?.SelectedRf4Id ?? -1;
+            if (rf4Id < 0) return;
+
+            var match = RoofFaces4.FirstOrDefault(f => f.FaceId == rf4Id);
+            if (match == null || match == _selectedRoofFace4) return;
+
+            _syncingRf4Selection = true;
+            try { SelectedRoofFace4 = match; }
+            finally { _syncingRf4Selection = false; }
         }
 
         // ====================================================================

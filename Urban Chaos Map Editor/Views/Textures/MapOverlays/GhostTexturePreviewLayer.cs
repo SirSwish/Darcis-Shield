@@ -127,7 +127,8 @@ namespace UrbanChaosMapEditor.Views.Textures.MapOverlays
                 return;
             }
 
-            if (_vm.SelectedTool != EditorTool.PaintTexture) return;
+            if (_vm.SelectedTool != EditorTool.PaintTexture &&
+                _vm.SelectedTool != EditorTool.PaintRoofTexture) return;
             if (_vm.SelectedTextureNumber <= 0) return;
 
             var cache = TextureCacheService.Instance;

@@ -5,7 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>UrbanChaosMapEditor</RootNamespace>
     <AssemblyName>UrbanChaosMapEditor</AssemblyName>
-    <Version>1.17.0</Version>
+    <Version>1.19.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -30,6 +30,7 @@
     <Resource Remove="Assets\Images\NewFolder\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Help\Images\3dviewer.PNG" />
     <None Remove="Help\Images\buildings_add_dialog.png" />
     <None Remove="Help\Images\buildings_add_wall.png" />
     <None Remove="Help\Images\buildings_auto_options.png" />
@@ -99,6 +100,7 @@
     <None Remove="Help\Images\textures_world_selected.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Remove="Help\Topics\3DViewer.xaml" />
     <Page Remove="Help\Topics\File_Format.xaml" />
     <Page Remove="Help\Topics\Getting_Started.xaml" />
     <Page Remove="Help\Topics\Heights.xaml" />
@@ -128,6 +130,7 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Help\Images\3dviewer.PNG" />
     <Resource Include="Help\Images\buildings_add_dialog.png" />
     <Resource Include="Help\Images\buildings_add_wall.png" />
     <Resource Include="Help\Images\buildings_auto_options.png" />
@@ -195,6 +198,7 @@
     <Resource Include="Help\Images\textures_select_area.png" />
     <Resource Include="Help\Images\textures_select_area_paste.png" />
     <Resource Include="Help\Images\textures_world_selected.png" />
+    <Resource Include="Help\Topics\3DViewer.xaml" />
     <Resource Include="Help\Topics\File_Format.xaml" />
     <Resource Include="Help\Topics\Getting_Started.xaml" />
     <Resource Include="Help\Topics\Heights.xaml" />
