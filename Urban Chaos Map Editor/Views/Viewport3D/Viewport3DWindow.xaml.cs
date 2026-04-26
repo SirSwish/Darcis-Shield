@@ -51,6 +51,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
         private readonly ModelVisual3D _terrainVisual = new();
         private readonly ModelVisual3D _facetsVisual = new();
+        private readonly ModelVisual3D _cablesVisual = new();
         private readonly ModelVisual3D _primsVisual = new();
         private readonly ModelVisual3D _roofTilesVisual = new();
 
@@ -67,6 +68,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             SceneRoot.Children.Add(_terrainVisual);
             SceneRoot.Children.Add(_facetsVisual);
+            SceneRoot.Children.Add(_cablesVisual);
             SceneRoot.Children.Add(_primsVisual);
             SceneRoot.Children.Add(_roofTilesVisual);
         }
@@ -315,6 +317,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         {
             _terrainVisual.Content = null;
             _facetsVisual.Content = null;
+            _cablesVisual.Content = null;
             _primsVisual.Content = null;
             _roofTilesVisual.Content = null;
             HudStatus.Text = "(no map loaded)";
@@ -322,7 +325,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
         private void OnMapWholesaleChanged(object? sender, EventArgs e) => RebuildAll();
         private void OnTerrainChanged(object? sender, EventArgs e) => RebuildTerrain();
-        private void OnFacetsChanged(object? sender, EventArgs e) => RebuildFacets();
+        private void OnFacetsChanged(object? sender, EventArgs e) { RebuildFacets(); RebuildCables(); }
         private void OnPrimsChanged(object? sender, EventArgs e) => RebuildPrims();
         private void OnRoofTilesChanged(object? sender, EventArgs e) => RebuildRoofTiles();
 
@@ -334,6 +337,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         {
             RebuildTerrain();
             RebuildFacets();
+            RebuildCables();
             RebuildPrims();
             RebuildRoofTiles();
         }
@@ -379,6 +383,26 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             catch (Exception ex)
             {
                 HudStatus.Text = $"facets error: {ex.Message}";
+            }
+        }
+
+        private void RebuildCables()
+        {
+            if (_builder is null) return;
+
+            if (!IsLayerEnabled(LayerKind.Buildings))
+            {
+                _cablesVisual.Content = null;
+                return;
+            }
+
+            try
+            {
+                _cablesVisual.Content = _builder.BuildCables();
+            }
+            catch (Exception ex)
+            {
+                HudStatus.Text = $"cables error: {ex.Message}";
             }
         }
 

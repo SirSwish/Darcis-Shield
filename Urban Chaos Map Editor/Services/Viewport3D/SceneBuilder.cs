@@ -44,6 +44,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         private readonly PrimsAccessor _prims;
         private readonly AltitudeAccessor _altitudes;
 
+        // Cached procedural ladder tile (generated once, shared across all ladder facets).
+        private static BitmapSource? _ladderTile;
+
         public SceneBuilder()
         {
             var data = MapDataService.Instance;
@@ -65,15 +68,15 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int tile = MapConstants.TileSize;   // 64
 
             // Read all corner heights once. Corners form an (N+1) x (N+1) grid.
-            // Corner (cx, cz) is at tile boundary; its height = height of tile (cx, cz)
-            // clamped to valid tile range.
+            // In UC the stored height belongs to the SE corner of each tile, so
+            // corner (cx, cz) reads from tile (cx-1, cz-1), clamped to valid range.
             double[,] cornerY = new double[N + 1, N + 1];
             for (int cz = 0; cz <= N; cz++)
             {
                 for (int cx = 0; cx <= N; cx++)
                 {
-                    int tx = Math.Min(cx, N - 1);
-                    int ty = Math.Min(cz, N - 1);
+                    int tx = Math.Max(0, Math.Min(cx - 1, N - 1));
+                    int ty = Math.Max(0, Math.Min(cz - 1, N - 1));
                     sbyte h;
                     try { h = _heights.ReadHeight(tx, ty); }
                     catch { h = 0; }
@@ -120,10 +123,23 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double z0 = ty * tile;
                     double z1 = z0 + tile;
 
-                    double y00 = cornerY[tx, ty] + cellAltWorld;
-                    double y10 = cornerY[tx + 1, ty] + cellAltWorld;
-                    double y01 = cornerY[tx, ty + 1] + cellAltWorld;
-                    double y11 = cornerY[tx + 1, ty + 1] + cellAltWorld;
+                    // If this cell has a roof, suppress terrain vertex heights entirely —
+                    // render it as a perfectly flat quad at the cell altitude.
+                    PapFlags papFlags = PapFlags.None;
+                    try { papFlags = _altitudes.ReadFlags(tx, ty); } catch { }
+
+                    double y00, y10, y01, y11;
+                    if ((papFlags & PapFlags.RoofExists) != 0)
+                    {
+                        y00 = y10 = y01 = y11 = cellAltWorld;
+                    }
+                    else
+                    {
+                        y00 = cornerY[tx, ty]     + cellAltWorld;
+                        y10 = cornerY[tx + 1, ty] + cellAltWorld;
+                        y01 = cornerY[tx, ty + 1] + cellAltWorld;
+                        y11 = cornerY[tx + 1, ty + 1] + cellAltWorld;
+                    }
 
                     BitmapSource? bmp = null;
                     if (!string.IsNullOrEmpty(key))
@@ -289,6 +305,12 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 double y0 = f.Y0 * EngineToViewY;
                 double y1 = f.Y1 * EngineToViewY;
 
+                // Buildings render flat: only fences follow terrain contours.
+                // Without this, uneven terrain bakes different Y0/Y1 into each endpoint,
+                // sloping roofs and wall bases across the terrain shape.
+                if (!IsFenceFacetType(f.Type))
+                    y1 = y0;
+
                 // Wall vertical extent: Height byte is in quarter-storeys.
                 double vertical = Math.Max(
     QuarterStoreyWorld / 4.0,
@@ -309,6 +331,49 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                                 flatMeshes[f.Type] = mesh;
                             }
                             AddFacetFloorStrip(mesh, x0, z0, y0, x1, z1, y1);
+                            break;
+                        }
+
+                    case FacetType.Ladder:
+                        {
+                            // Ladders use a procedural texture (rails + rungs) instead of
+                            // the wall texture looked up from the style index.
+                            const string ladderKey = "12|0|ladder|0|0";
+                            if (!texBuckets.TryGetValue(ladderKey, out var ladderMesh))
+                            {
+                                ladderMesh = new MeshGeometry3D();
+                                texBuckets[ladderKey] = ladderMesh;
+                                var bmp = GetOrBuildLadderTile();
+                                var brush = new ImageBrush(bmp)
+                                {
+                                    TileMode = TileMode.None,
+                                    Stretch = Stretch.Fill
+                                };
+                                brush.Freeze();
+                                texMaterials[ladderKey] = new DiffuseMaterial(brush);
+                            }
+
+                            // Offset the ladder geometry slightly along the wall's outward normal
+                            // so it always renders in front of the wall behind it.
+                            const double LadderBias = 3.0;
+                            double wdx = x1 - x0, wdz = z1 - z0;
+                            double wlen = Math.Sqrt(wdx * wdx + wdz * wdz);
+                            double ox = wlen > 1e-6 ? ( wdz / wlen) * LadderBias : 0.0;
+                            double oz = wlen > 1e-6 ? (-wdx / wlen) * LadderBias : 0.0;
+
+                            // Split into one textured panel per storey (matches 2D preview tiling).
+                            int ladderPanelsDown = Math.Max(1, f.Height / 4);
+                            for (int row = 0; row < ladderPanelsDown; row++)
+                            {
+                                double fracA = (double)row / ladderPanelsDown;
+                                double fracB = (double)(row + 1) / ladderPanelsDown;
+                                AddTexturedWallPanel(
+                                    ladderMesh,
+                                    x0 + ox, z0 + oz, y0 + fracA * vertical,
+                                    x1 + ox, z1 + oz, y1 + fracA * vertical,
+                                    x0 + ox, z0 + oz, y0 + fracB * vertical,
+                                    x1 + ox, z1 + oz, y1 + fracB * vertical);
+                            }
                             break;
                         }
 
@@ -337,8 +402,10 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
             var group = new Model3DGroup();
 
-
-            // Textured walls first.
+            // Textured opaque walls first.
+            // Transparent ladder geometry is deferred until after all opaque draws so its
+            // alpha-zero pixels don't write to the depth buffer before the wall behind renders.
+            GeometryModel3D? ladderModel = null;
             foreach (var kv in texBuckets)
             {
                 kv.Value.Freeze();
@@ -353,7 +420,10 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 if (ShouldRenderBackface(facetType))
                     model.BackMaterial = mat;
 
-                group.Children.Add(model);
+                if (facetType == FacetType.Ladder)
+                    ladderModel = model;   // added last, below
+                else
+                    group.Children.Add(model);
             }
 
             // Flat-color fallbacks.
@@ -374,6 +444,10 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 group.Children.Add(model);
             }
 
+            // Ladder last: transparent facets must follow all opaque geometry.
+            if (ladderModel != null)
+                group.Children.Add(ladderModel);
+
             group.Freeze();
             return group;
         }
@@ -384,6 +458,15 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 || type == FacetType.FenceBrick
                 || type == FacetType.FenceFlat;
         }
+
+        private static bool IsGateFacetType(FacetType type)
+        {
+            return type == FacetType.OutsideDoor;
+        }
+
+        /// <summary>True for types that need black/key-colour rendered as transparent.</summary>
+        private static bool NeedsTransparency(FacetType type)
+            => IsFenceFacetType(type) || IsGateFacetType(type);
 
         private static BitmapSource MakeFenceKeyColorsTransparent(BitmapSource source)
         {
@@ -513,7 +596,11 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int panelsAcross = Math.Max(dxCells, dzCells);
             if (panelsAcross <= 0) return false;
 
-            int panelsDown = Math.Max(1, f.Height / 4);
+            // Fences always use a single panel stretched across the full height —
+            // one texture covers the whole fence regardless of how many storeys tall it is.
+            int panelsDown = IsFenceFacetType(f.Type)
+                ? 1
+                : Math.Max(1, f.Height / 4);
 
             int blockHeight = f.BlockHeight;
             if (blockHeight <= 0) blockHeight = 4;   // safe default
@@ -561,7 +648,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         texBuckets[key] = bucketMesh;
                         BitmapSource materialBmp = bmp;
 
-                        if (IsFenceFacetType(f.Type))
+                        if (NeedsTransparency(f.Type))
                         {
                             materialBmp = MakeDarkPixelsTransparent(bmp, 32);
                         }
@@ -879,6 +966,118 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             return group;
         }
 
+        // =====================================================================
+        // CABLES
+        // =====================================================================
+        public Model3D? BuildCables()
+        {
+            if (!MapDataService.Instance.IsLoaded) return null;
+
+            BuildingArrays snap;
+            try { snap = _buildings.ReadSnapshot(); }
+            catch { return null; }
+
+            if (snap.Cables == null || snap.Cables.Length == 0) return null;
+
+            var mesh = new MeshGeometry3D();
+            const double HalfWidth = 2.0;
+
+            foreach (var cable in snap.Cables)
+            {
+                int segments = Math.Max(1, cable.SegmentCount);
+
+                // World endpoints: X/Z are tile*256, Y is raw engine units.
+                double x1w = cable.WorldX1;
+                double y1w = cable.WorldY1;
+                double z1w = cable.WorldZ1;
+                double x2w = cable.WorldX2;
+                double y2w = cable.WorldY2;
+                double z2w = cable.WorldZ2;
+
+                double dx = (x2w - x1w) / segments;
+                double dy = (y2w - y1w) / segments;
+                double dz = (z2w - z1w) / segments;
+
+                // Sag algorithm mirrors CableFacetPreviewWindow / cable_draw.
+                int   angle   = -512;
+                short dangle1 = cable.SagAngleDelta1;
+                short dangle2 = cable.SagAngleDelta2;
+                int   sagBase = cable.SagBase * 64;   // CableFacet.SagBase = FHeight (not yet *64)
+
+                var points = new Point3D[segments + 1];
+                double cx = x1w, cy = y1w, cz = z1w;
+
+                for (int i = 0; i <= segments; i++)
+                {
+                    int    ang        = angle + 2048;
+                    int    wrapped    = ang & 2047;
+                    double rad        = wrapped * (2.0 * Math.PI / 2048.0);
+                    double sagOffset  = Math.Cos(rad) * sagBase;
+                    double saggedCy   = cy - sagOffset;
+
+                    // Convert world coords → scene coords (same flip as facets).
+                    // WorldX = tileX*256  →  sceneX = (128-tileX)*64 = 8192 - WorldX/4
+                    points[i] = new Point3D(
+                        8192.0 - cx / 4.0,
+                        saggedCy * EngineToViewY,
+                        8192.0 - cz / 4.0);
+
+                    cx += dx;
+                    cy += dy;
+                    cz += dz;
+
+                    angle += dangle1;
+                    if (angle >= -30)
+                        dangle1 = dangle2;
+                }
+
+                for (int i = 0; i < segments; i++)
+                    AppendCableSegment(mesh, points[i], points[i + 1], HalfWidth);
+            }
+
+            if (mesh.Positions.Count == 0) return null;
+            mesh.Freeze();
+
+            var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(30, 30, 30)));
+            var group = new Model3DGroup();
+            group.Children.Add(new GeometryModel3D(mesh, mat) { BackMaterial = mat });
+            group.Freeze();
+            return group;
+        }
+
+        /// <summary>
+        /// Emits a thin flat ribbon quad between two cable segment points, extruded
+        /// perpendicular to the horizontal direction so it is visible from above.
+        /// BackMaterial is set by the caller so it is visible from both sides.
+        /// </summary>
+        private static void AppendCableSegment(MeshGeometry3D mesh, Point3D a, Point3D b, double halfWidth)
+        {
+            double ddx = b.X - a.X;
+            double ddz = b.Z - a.Z;
+            double len = Math.Sqrt(ddx * ddx + ddz * ddz);
+
+            double px = len > 1e-3 ? (-ddz / len) * halfWidth : halfWidth;
+            double pz = len > 1e-3 ? ( ddx / len) * halfWidth : 0.0;
+
+            int baseIdx = mesh.Positions.Count;
+            mesh.Positions.Add(new Point3D(a.X + px, a.Y, a.Z + pz));  // 0
+            mesh.Positions.Add(new Point3D(a.X - px, a.Y, a.Z - pz));  // 1
+            mesh.Positions.Add(new Point3D(b.X - px, b.Y, b.Z - pz));  // 2
+            mesh.Positions.Add(new Point3D(b.X + px, b.Y, b.Z + pz));  // 3
+
+            mesh.TextureCoordinates.Add(new Point(0, 0));
+            mesh.TextureCoordinates.Add(new Point(1, 0));
+            mesh.TextureCoordinates.Add(new Point(1, 1));
+            mesh.TextureCoordinates.Add(new Point(0, 1));
+
+            mesh.TriangleIndices.Add(baseIdx + 0);
+            mesh.TriangleIndices.Add(baseIdx + 1);
+            mesh.TriangleIndices.Add(baseIdx + 2);
+            mesh.TriangleIndices.Add(baseIdx + 0);
+            mesh.TriangleIndices.Add(baseIdx + 2);
+            mesh.TriangleIndices.Add(baseIdx + 3);
+        }
+
         private static void AppendSphere(
             MeshGeometry3D mesh,
             double cx, double cy, double cz,
@@ -928,15 +1127,76 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 || type == FacetType.FenceFlat
                 || type == FacetType.Door
                 || type == FacetType.InsideDoor
-                || type == FacetType.OutsideDoor;
+                || type == FacetType.OutsideDoor
+                || type == FacetType.Ladder;
+        }
+
+        /// <summary>
+        /// Generates (or returns the cached) 64×64 procedural ladder tile.
+        /// The graphic is 67% of the tile width (centred), matching the 2D FacetPreviewWindow
+        /// WidthScale.  Background is fully transparent so the wall behind shows through.
+        /// </summary>
+        private static BitmapSource GetOrBuildLadderTile()
+        {
+            if (_ladderTile != null) return _ladderTile;
+
+            const int W = 64;
+            const int H = 64;
+            const int RailWidth = 4;
+            const int RungHeight = 4;
+            const int RunsPerPanel = 4;
+            const double WidthScale = 0.67;
+
+            // Ladder graphic occupies WidthScale of the tile width, centred.
+            int ladderW = (int)(W * WidthScale); // ~43 px
+            int xOffset = (W - ladderW) / 2;     // ~10 px on each side
+
+            int stride = W * 4; // BGRA32
+            // byte[] default-initialises to 0 → transparent black everywhere.
+            byte[] pixels = new byte[H * stride];
+
+            // White vertical rails within the scaled-width zone.
+            for (int y = 0; y < H; y++)
+            {
+                for (int x = xOffset; x < xOffset + RailWidth; x++)
+                {
+                    int idx = y * stride + x * 4;
+                    pixels[idx + 0] = 255; pixels[idx + 1] = 255; pixels[idx + 2] = 255; pixels[idx + 3] = 255;
+                }
+                for (int x = xOffset + ladderW - RailWidth; x < xOffset + ladderW; x++)
+                {
+                    int idx = y * stride + x * 4;
+                    pixels[idx + 0] = 255; pixels[idx + 1] = 255; pixels[idx + 2] = 255; pixels[idx + 3] = 255;
+                }
+            }
+
+            // White horizontal rungs, evenly spaced, spanning only the ladder width.
+            for (int r = 0; r < RunsPerPanel; r++)
+            {
+                int rungCenterY = (int)((r + 0.5) * H / RunsPerPanel);
+                int rungTop = rungCenterY - RungHeight / 2;
+                for (int y = rungTop; y < rungTop + RungHeight; y++)
+                {
+                    if (y < 0 || y >= H) continue;
+                    for (int x = xOffset; x < xOffset + ladderW; x++)
+                    {
+                        int idx = y * stride + x * 4;
+                        pixels[idx + 0] = 255; pixels[idx + 1] = 255; pixels[idx + 2] = 255; pixels[idx + 3] = 255;
+                    }
+                }
+            }
+
+            _ladderTile = BitmapSource.Create(W, H, 96, 96, PixelFormats.Bgra32, null, pixels, stride);
+            _ladderTile.Freeze();
+            return _ladderTile;
         }
 
         private void AppendRoofFace4s(
-    Model3DGroup group,
-    BuildingArrays snap,
-    int worldNum,
-    string? variant,
-    bool canTexture)
+            Model3DGroup group,
+            BuildingArrays snap,
+            int worldNum,
+            string? variant,
+            bool canTexture)
         {
             if (snap.Walkables == null || snap.Walkables.Length <= 1) return;
             if (snap.RoofFaces4 == null || snap.RoofFaces4.Length <= 1) return;
@@ -946,6 +1206,10 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             var texMeshes = new Dictionary<string, MeshGeometry3D>(StringComparer.Ordinal);
             var texMaterials = new Dictionary<string, Material>(StringComparer.Ordinal);
             MeshGeometry3D? fallbackMesh = null;
+
+            // DY is stored as a signed byte, ROOF_SHIFT = 3, so DY * 8 = engine height delta.
+            // Scale by EngineToViewY to convert to view units: DY * 8 * 0.25 = DY * 2.0.
+            const double DyToView = 8.0 * EngineToViewY;
 
             for (int w = 1; w < snap.Walkables.Length; w++)
             {
@@ -969,50 +1233,57 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
                     var rf4 = snap.RoofFaces4[i];
 
-                    int tileX = rf4.RX & 0x7F;
-                    int tileZ = rf4.RZ - 128;
+                    // Mask off high bits — they are flags, not coordinate bits.
+                    int cellX = rf4.RX & 0x7F;
+                    int cellZ = rf4.RZ & 0x7F;
 
-                    if (tileX < 0 || tileX > 127 || tileZ < 0 || tileZ > 127)
-                        continue;
+                    if (cellX > 127 || cellZ > 127) continue;
 
-                    double x0 = (128 - tileX - 1) * 64.0;
-                    double z0 = (128 - tileZ - 1) * 64.0;
+                    // Convert game cell coords to WPF tile coords using the same
+                    // axis-flip applied by FileIndexForTile in TexturesAccessor.
+                    int wpfTx = 127 - cellX;
+                    int wpfTy = 127 - cellZ;
+
+                    // Scene-space quad corners: same transform as BuildTerrain.
+                    double x0 = wpfTx * 64.0;
+                    double z0 = wpfTy * 64.0;
                     double x1 = x0 + 64.0;
                     double z1 = z0 + 64.0;
 
-                    // RF4 corner semantics from RoofsLayer:
-                    // Y=SE, DY0=SW, DY1=NW, DY2=NE
-                    double ySE = rf4.Y * EngineToViewY;
-                    double ySW = ySE + rf4.DY0 * EngineToViewY;
-                    double yNW = ySE + rf4.DY1 * EngineToViewY;
-                    double yNE = ySE + rf4.DY2 * EngineToViewY;
+                    // Corner heights per spec (ROOF_SHIFT = 3):
+                    //   NW = Y
+                    //   NE = Y + DY0 * 8
+                    //   SW = Y + DY2 * 8
+                    //   SE = Y + DY1 * 8
+                    // Then swapped 180° (NW↔SE, NE↔SW) to correct the rendered orientation.
+                    double baseY = rf4.Y * EngineToViewY;
+                    double yNW = baseY + rf4.DY1 * DyToView;   // spec SE → rendered NW
+                    double yNE = baseY + rf4.DY2 * DyToView;   // spec SW → rendered NE
+                    double ySW = baseY + rf4.DY0 * DyToView;   // spec NE → rendered SW
+                    double ySE = baseY;                          // spec NW → rendered SE
 
+                    // RX high bit: diagonal split direction only — no effect on heights.
                     bool diagNWSE = (rf4.RX & 0x80) != 0;
-
-                    int rot = 0;
-                    string meshKey;
-                    BitmapSource? bmp = null;
 
                     if (canTexture)
                     {
                         if (isWarehouse)
                         {
-                            // User rule: warehouse RF4 default = tex000
-                            meshKey = $"rf4|ware|tex000|diag={(diagNWSE ? 1 : 0)}|rot=0";
+                            // Warehouse RF4: use tex000 from the world texture set.
+                            string meshKey = $"rf4|ware|tex000|diag={(diagNWSE ? 1 : 0)}";
 
                             if (!texMeshes.TryGetValue(meshKey, out var mesh))
                             {
-                                if (!TextureResolver.TryResolve(0, 0, 0, 0, worldNum, variant!, out bmp) || bmp == null)
+                                if (!TextureResolver.TryResolve(0, 0, 0, 0, worldNum, variant!, out var bmp) || bmp == null)
+                                {
+                                    fallbackMesh ??= new MeshGeometry3D();
+                                    AddRf4Quad(fallbackMesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
                                     continue;
+                                }
 
                                 mesh = new MeshGeometry3D();
                                 texMeshes[meshKey] = mesh;
-
-                                var brush = new ImageBrush(bmp)
-                                {
-                                    TileMode = TileMode.None,
-                                    Stretch = Stretch.Fill
-                                };
+                                var brush = new ImageBrush(bmp) { TileMode = TileMode.None, Stretch = Stretch.Fill };
                                 brush.Freeze();
                                 texMaterials[meshKey] = new DiffuseMaterial(brush);
                             }
@@ -1021,39 +1292,35 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         }
                         else
                         {
-                            string groundKey;
-                            try
-                            {
-                                (groundKey, rot) = _textures.GetTileTextureKeyAndRotation(tileX, tileZ);
-                            }
-                            catch
-                            {
-                                groundKey = string.Empty;
-                                rot = 0;
-                            }
+                            // Non-warehouse RF4: sample the normal floor/map texture that sits
+                            // on this cell — the RF4 tile must visually match the floor beneath it.
+                            string texKey;
+                            int texRot;
+                            try { (texKey, texRot) = _textures.GetTileTextureKeyAndRotation(wpfTx, wpfTy); }
+                            catch { texKey = string.Empty; texRot = 0; }
 
-                            if (!string.IsNullOrEmpty(groundKey) && cache.TryGetRelative(groundKey, out bmp) && bmp != null)
+                            if (!string.IsNullOrEmpty(texKey) && cache.TryGetRelative(texKey, out var bmp) && bmp != null)
                             {
-                                meshKey = $"rf4|ground|{groundKey}|diag={(diagNWSE ? 1 : 0)}|rot={rot}";
+                                // BuildTerrain passes (texRot + 180) % 360 to AddTileQuad.
+                                // AddRf4Quad uses a different rotation-zero convention, so to
+                                // produce the same visible UV result we pass (360 - texRot) % 360.
+                                int rf4Rot = (360 - texRot) % 360;
+                                string meshKey = $"rf4|floor|{texKey}|rot={rf4Rot}|diag={(diagNWSE ? 1 : 0)}";
 
                                 if (!texMeshes.TryGetValue(meshKey, out var mesh))
                                 {
                                     mesh = new MeshGeometry3D();
                                     texMeshes[meshKey] = mesh;
-
-                                    var brush = new ImageBrush(bmp)
-                                    {
-                                        TileMode = TileMode.None,
-                                        Stretch = Stretch.Fill
-                                    };
+                                    var brush = new ImageBrush(bmp) { TileMode = TileMode.None, Stretch = Stretch.Fill };
                                     brush.Freeze();
                                     texMaterials[meshKey] = new DiffuseMaterial(brush);
                                 }
 
-                                AddRf4Quad(texMeshes[meshKey], x0, z0, x1, z1, yNW, yNE, ySE, ySW, rot, diagNWSE);
+                                AddRf4Quad(mesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, rf4Rot, diagNWSE);
                             }
                             else
                             {
+                                // Floor texture unavailable — neutral grey so tile is still visible.
                                 fallbackMesh ??= new MeshGeometry3D();
                                 AddRf4Quad(fallbackMesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
                             }
@@ -1077,7 +1344,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             if (fallbackMesh != null)
             {
                 fallbackMesh.Freeze();
-                var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(120, 90, 90)));
+                var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(140, 140, 140)));
                 group.Children.Add(new GeometryModel3D(fallbackMesh, mat) { BackMaterial = mat });
             }
         }

@@ -41,8 +41,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             double maxXZ = MapConstants.MapPixels;
             x = Math.Max(0, Math.Min(maxXZ, x));
             z = Math.Max(0, Math.Min(maxXZ, z));
-            // Y allowed to roam a bit above/below world zero.
+            // Y clamped: no lower than 0 (ground), no higher than 10 000.
             if (double.IsNaN(y) || double.IsInfinity(y)) y = Camera.Y;
+            y = Math.Max(0, Math.Min(10_000, y));
 
             if (Camera.X == x && Camera.Y == y && Camera.Z == z) return;
             Camera.X = x;
