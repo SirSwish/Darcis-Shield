@@ -63,7 +63,7 @@ namespace UrbanChaosPrimEditor.Views
         // Camera convention matches the Map Editor's Viewport3D:
         //   Yaw = 0   → Forward = (0, 0, +1)  (+Z)
         //   Pitch = 0 → level; positive tilts up
-        //   WASD + QE to fly; arrow keys to look; scroll wheel adjusts speed.
+        //   WASD + QE to fly; right-drag to look; scroll wheel adjusts speed.
 
         private double _camX, _camY, _camZ = -400;
         private double _yawRad   = 0.0;   // yaw=0 looks toward +Z
@@ -72,7 +72,7 @@ namespace UrbanChaosPrimEditor.Views
         private double _speed = 200.0;
         private const double MinSpeed    = 5.0;
         private const double MaxSpeed    = 10000.0;
-        private const double LookRateRad = 1.6;
+        private const double MouseLookSensitivity = 0.006; // radians per screen pixel
         private const double PitchLimit  = Math.PI / 2.0 * 0.98; // ~89°
 
         // Model rotation (applied to SceneVisual, independent of camera)
@@ -180,6 +180,16 @@ namespace UrbanChaosPrimEditor.Views
                                 $"Pitch: {_modelPitchDeg % 360,5:F1}°";
         }
 
+        private void ClampCameraAngles()
+        {
+            const double twoPi = 2.0 * Math.PI;
+            _yawRad %= twoPi;
+            if (_yawRad >  Math.PI) _yawRad -= twoPi;
+            if (_yawRad < -Math.PI) _yawRad += twoPi;
+
+            _pitchRad = Math.Max(-PitchLimit, Math.Min(PitchLimit, _pitchRad));
+        }
+
         // ── Render loop ───────────────────────────────────────────────────────
 
         private void OnRender(object? sender, EventArgs e)
@@ -222,34 +232,6 @@ namespace UrbanChaosPrimEditor.Views
                 _modelPitchDeg            += modelPitchDelta * rotRate * dt;
                 _modelYawRotation.Angle    = _modelYawDeg;
                 _modelPitchRotation.Angle  = _modelPitchDeg;
-                moved = true;
-            }
-
-            // ── Look (arrow keys) ────────────────────────────────────────────
-            double yawDelta = 0, pitchDelta = 0;
-            if (_held.Contains(Key.Left))  yawDelta   += 1;
-            if (_held.Contains(Key.Right)) yawDelta   -= 1;
-            if (_held.Contains(Key.Up))    pitchDelta += 1;
-            if (_held.Contains(Key.Down))  pitchDelta -= 1;
-
-            if (yawDelta != 0 || pitchDelta != 0)
-            {
-                double rate = LookRateRad;
-                if (_held.Contains(Key.LeftShift) || _held.Contains(Key.RightShift))
-                    rate *= 2.0;
-
-                _yawRad   += yawDelta   * rate * dt;
-                _pitchRad += pitchDelta * rate * dt;
-
-                // Normalise yaw to [-π, π]
-                const double twoPi = 2.0 * Math.PI;
-                _yawRad %= twoPi;
-                if (_yawRad >  Math.PI) _yawRad -= twoPi;
-                if (_yawRad < -Math.PI) _yawRad += twoPi;
-
-                // Clamp pitch
-                _pitchRad = Math.Max(-PitchLimit, Math.Min(PitchLimit, _pitchRad));
-
                 moved = true;
             }
 
@@ -301,13 +283,24 @@ namespace UrbanChaosPrimEditor.Views
 
         // ── Drag state for "Move Point" tool ─────────────────────────────────
         private bool       _isDraggingPoint;
+        private bool       _isLookingAround;
         private int        _draggedPointId;
         private Vector3D   _dragPlaneNormal;
         private Point3D    _dragPlanePoint;     // a world-space point on the drag plane
+        private Point      _lastLookPoint;
 
         private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Viewport.Focus();
+
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                _isLookingAround = true;
+                _lastLookPoint = e.GetPosition(Viewport);
+                Viewport.CaptureMouse();
+                e.Handled = true;
+                return;
+            }
 
             if (e.ChangedButton != MouseButton.Left) return;
             if (Vm.CurrentModel is null) return;
@@ -356,6 +349,24 @@ namespace UrbanChaosPrimEditor.Views
 
         private void Viewport_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_isLookingAround)
+            {
+                if (e.RightButton != MouseButtonState.Pressed) { EndLookDrag(); return; }
+
+                Point lookPos = e.GetPosition(Viewport);
+                Vector delta = lookPos - _lastLookPoint;
+                _lastLookPoint = lookPos;
+
+                _yawRad += delta.X * MouseLookSensitivity;
+                _pitchRad -= delta.Y * MouseLookSensitivity;
+                ClampCameraAngles();
+
+                PushCameraToWpf();
+                UpdateHud();
+                e.Handled = true;
+                return;
+            }
+
             if (!_isDraggingPoint) return;
             if (e.LeftButton != MouseButtonState.Pressed) { EndPointDrag(); return; }
             if (Vm.CurrentModel is null) { EndPointDrag(); return; }
@@ -377,6 +388,13 @@ namespace UrbanChaosPrimEditor.Views
 
         private void Viewport_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                if (_isLookingAround) EndLookDrag();
+                e.Handled = true;
+                return;
+            }
+
             if (e.ChangedButton != MouseButton.Left) return;
             if (_isDraggingPoint) EndPointDrag();
         }
@@ -384,7 +402,13 @@ namespace UrbanChaosPrimEditor.Views
         private void EndPointDrag()
         {
             _isDraggingPoint = false;
-            if (Viewport.IsMouseCaptured) Viewport.ReleaseMouseCapture();
+            if (!_isLookingAround && Viewport.IsMouseCaptured) Viewport.ReleaseMouseCapture();
+        }
+
+        private void EndLookDrag()
+        {
+            _isLookingAround = false;
+            if (!_isDraggingPoint && Viewport.IsMouseCaptured) Viewport.ReleaseMouseCapture();
         }
 
         private void Viewport_MouseWheel(object sender, MouseWheelEventArgs e)
