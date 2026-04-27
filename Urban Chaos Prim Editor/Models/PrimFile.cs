@@ -11,8 +11,13 @@ namespace UrbanChaosPrimEditor.Models
         /// <summary>Full path to the source .prm file.</summary>
         public string FilePath { get; set; } = string.Empty;
 
+        /// <summary>Display/default name for a new unsaved PRM document.</summary>
+        public string SuggestedFileName { get; set; } = "untitled.prm";
+
         /// <summary>File name without path, displayed in the UI.</summary>
-        public string FileName => Path.GetFileName(FilePath);
+        public string FileName => string.IsNullOrWhiteSpace(FilePath)
+            ? SuggestedFileName
+            : Path.GetFileName(FilePath);
 
         /// <summary>Raw bytes of the file, retained for round-trip saving.</summary>
         public byte[] RawBytes { get; set; } = [];

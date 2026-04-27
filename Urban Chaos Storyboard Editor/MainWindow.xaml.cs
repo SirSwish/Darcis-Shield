@@ -191,19 +191,7 @@ namespace UrbanChaosStoryboardEditor
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            var asm = Assembly.GetExecutingAssembly();
-            string version =
-                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? asm.GetName().Version?.ToString()
-                ?? "Unknown";
-
-            MessageBox.Show(
-                "Urban Chaos Storyboard Editor\n\n" +
-                $"Version: {version}\n" +
-                "Part of the Darcis Shield modding toolkit.",
-                "About",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            new Views.Dialogs.AboutWindow { Owner = this }.ShowDialog();
         }
 
         private void EditDistrictMenuItem_Click(object sender, RoutedEventArgs e)

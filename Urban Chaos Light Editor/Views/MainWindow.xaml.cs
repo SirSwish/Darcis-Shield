@@ -43,19 +43,7 @@ namespace UrbanChaosLightEditor
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            var asm = Assembly.GetExecutingAssembly();
-            string version =
-                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? asm.GetName().Version?.ToString()
-                ?? "Unknown";
-
-            MessageBox.Show(
-                "Urban Chaos Light Editor\n\n" +
-                $"Version: {version}\n" +
-                "Part of the Darcis Shield modding toolkit.",
-                "About",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            new Views.Dialogs.AboutWindow { Owner = this }.ShowDialog();
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

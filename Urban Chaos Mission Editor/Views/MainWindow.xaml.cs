@@ -101,19 +101,7 @@ public partial class MainWindow : Window
 
     private void About_Click(object sender, RoutedEventArgs e)
     {
-        var asm = Assembly.GetExecutingAssembly();
-        string version =
-            asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? asm.GetName().Version?.ToString()
-            ?? "Unknown";
-
-        MessageBox.Show(
-            "Urban Chaos Mission Editor\n\n" +
-            $"Version: {version}\n" +
-            "Part of the Darcis Shield modding toolkit.",
-            "About",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        new Dialogs.AboutWindow { Owner = this }.ShowDialog();
     }
 
     private void EventPointsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)

@@ -875,20 +875,7 @@ namespace UrbanChaosMapEditor.Views.Core
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            var asm = Assembly.GetExecutingAssembly();
-
-            string version =
-                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? asm.GetName().Version?.ToString()
-                ?? "Unknown";
-
-            MessageBox.Show(
-                "Urban Chaos Map Editor\n\n" +
-                $"Version: ({version})\n" +
-                "Urban Chaos Map Editor is a part of the Darcis Shield Editor Project",
-                "About",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            new AboutWindow { Owner = this }.ShowDialog();
         }
     }
 }

@@ -8,7 +8,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>UrbanChaosMissionEditor</RootNamespace>
 		<AssemblyName>UrbanChaosMissionEditor</AssemblyName>
-		<Version>1.20.0</Version>
+		<Version>1.21</Version>
 		<Authors>Darci's Shield Team</Authors>
 		<Description>Urban Chaos Mission Editor - UCM File Editor</Description>
 		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>

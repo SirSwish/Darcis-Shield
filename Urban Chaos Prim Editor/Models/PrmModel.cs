@@ -8,19 +8,19 @@ namespace UrbanChaosPrimEditor.Models
 {
     public sealed class PrmModel
     {
-        public string FileName { get; init; } = string.Empty;
-        public int Signature { get; init; }
-        public string Name { get; init; } = string.Empty;
-        public int FirstPointId { get; init; }
-        public int LastPointId { get; init; }
-        public int FirstQuadrangleId { get; init; }
-        public int LastQuadrangleId { get; init; }
-        public int FirstTriangleId { get; init; }
-        public int LastTriangleId { get; init; }
-        public int CollisionType { get; init; }
-        public int ReactionToImpactByVehicle { get; init; }
-        public int ShadowType { get; init; }
-        public int VariousProperties { get; init; }
+        public string FileName { get; set; } = string.Empty;
+        public int Signature { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int FirstPointId { get; set; }
+        public int LastPointId { get; set; }
+        public int FirstQuadrangleId { get; set; }
+        public int LastQuadrangleId { get; set; }
+        public int FirstTriangleId { get; set; }
+        public int LastTriangleId { get; set; }
+        public int CollisionType { get; set; }
+        public int ReactionToImpactByVehicle { get; set; }
+        public int ShadowType { get; set; }
+        public int VariousProperties { get; set; }
 
         public List<PrmPoint> Points { get; } = new();
         public List<PrmTriangle> Triangles { get; } = new();

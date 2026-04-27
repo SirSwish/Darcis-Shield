@@ -12,8 +12,10 @@
         KeyUp="Window_KeyUp">
 
     <Window.InputBindings>
+        <KeyBinding Key="N" Modifiers="Ctrl"       Command="{Binding NewFileCommand}"/>
         <KeyBinding Key="O" Modifiers="Ctrl"       Command="{Binding OpenFileCommand}"/>
         <KeyBinding Key="D" Modifiers="Ctrl"       Command="{Binding OpenDirectoryCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl"       Command="{Binding SaveCommand}"/>
         <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveAsCommand}"/>
     </Window.InputBindings>
 
@@ -24,18 +26,31 @@
         <!-- ═══════════════════════════════════════════════════════════════ -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem Header="_New File"
+                          Command="{Binding NewFileCommand}"
+                          InputGestureText="Ctrl+N"/>
                 <MenuItem Header="_Open Prim File…"
                           Command="{Binding OpenFileCommand}"
                           InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Import OBJ…"
+                          Command="{Binding ImportObjCommand}"/>
                 <MenuItem Header="Open _Directory…"
                           Command="{Binding OpenDirectoryCommand}"
                           InputGestureText="Ctrl+D"/>
                 <MenuItem Header="Set _Texture Directory…"
                           Command="{Binding SetTextureDirCommand}"
                           ToolTip="Pick the folder containing prim texture files (Tex###hi.tga)"/>
+                <MenuItem Header="I_mport Texture…"
+                          Command="{Binding ImportTextureCommand}"
+                          ToolTip="Import an image as the next available Tex###hi.tga in the texture directory"/>
                 <Separator/>
+                <MenuItem Header="_Save"
+                          Command="{Binding SaveCommand}"
+                          InputGestureText="Ctrl+S"
+                          IsEnabled="{Binding IsFileLoaded}"/>
                 <MenuItem Header="_Save As PRM…"
                           Command="{Binding SaveAsPrmCommand}"
+                          InputGestureText="Ctrl+Shift+S"
                           IsEnabled="{Binding IsFileLoaded}"/>
                 <MenuItem Header="Export As _OBJ…"
                           Command="{Binding SaveAsObjCommand}"
@@ -63,9 +78,17 @@
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
             <WrapPanel>
                 <Button Style="{StaticResource ToolbarButtonStyle}"
+                        Content="New"
+                        Command="{Binding NewFileCommand}"
+                        ToolTip="Create a new .prm file (Ctrl+N)"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}"
                         Content="Open File"
                         Command="{Binding OpenFileCommand}"
                         ToolTip="Open a .prm file (Ctrl+O)"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}"
+                        Content="Import OBJ"
+                        Command="{Binding ImportObjCommand}"
+                        ToolTip="Import Wavefront .obj geometry"/>
                 <Button Style="{StaticResource ToolbarButtonStyle}"
                         Content="Open Directory"
                         Command="{Binding OpenDirectoryCommand}"
@@ -73,6 +96,10 @@
 
                 <Separator Margin="8,2" Background="{StaticResource BorderLightBrush}"/>
 
+                <Button Style="{StaticResource ToolbarButtonStyle}"
+                        Content="Save"
+                        Command="{Binding SaveCommand}"
+                        ToolTip="Save .prm (Ctrl+S)"/>
                 <Button Style="{StaticResource ToolbarButtonStyle}"
                         Content="Save As PRM"
                         Command="{Binding SaveAsPrmCommand}"
@@ -89,6 +116,58 @@
                     <TextBlock Text="Loaded:" Foreground="{StaticResource TextMuted}"
                                VerticalAlignment="Center" Margin="0,0,4,0"/>
                     <TextBlock Text="{Binding LoadedFileName}"
+                               Foreground="{StaticResource AccentLight}"
+                               FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- EDIT TOOLBAR                                                   -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource BackgroundLight}" Padding="6,4"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <WrapPanel>
+                <TextBlock Text="Edit:" Foreground="{StaticResource TextMuted}"
+                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="Select"
+                             IsChecked="{Binding IsToolSelect, Mode=OneWay}"
+                             Command="{Binding SetToolSelectCommand}"
+                             ToolTip="Click a vertex to select it"/>
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="Move Point"
+                             IsChecked="{Binding IsToolMove, Mode=OneWay}"
+                             Command="{Binding SetToolMoveCommand}"
+                             ToolTip="Click and drag a vertex on the camera-facing plane"/>
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="Add Point"
+                             IsChecked="{Binding IsToolAddPoint, Mode=OneWay}"
+                             Command="{Binding SetToolAddPointCommand}"
+                             ToolTip="Click in the viewport to add a new point"/>
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="New Triangle"
+                             IsChecked="{Binding IsToolNewTriangle, Mode=OneWay}"
+                             Command="{Binding SetToolNewTriangleCommand}"
+                             ToolTip="Pick three points to create a triangle face"/>
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="New Quad"
+                             IsChecked="{Binding IsToolNewQuad, Mode=OneWay}"
+                             Command="{Binding SetToolNewQuadCommand}"
+                             ToolTip="Pick four points to create a quadrangle face"/>
+                <RadioButton GroupName="PrimTool" Margin="2,0" Padding="8,3"
+                             Content="Delete Point"
+                             IsChecked="{Binding IsToolDeletePoint, Mode=OneWay}"
+                             Command="{Binding SetToolDeletePointCommand}"
+                             ToolTip="Click a vertex to delete it (only allowed if no face uses it)"/>
+
+                <Separator Margin="8,2" Background="{StaticResource BorderLightBrush}"/>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0">
+                    <TextBlock Text="Selected:" Foreground="{StaticResource TextMuted}"
+                               VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding SelectedPointDisplay}"
                                Foreground="{StaticResource AccentLight}"
                                FontWeight="SemiBold" VerticalAlignment="Center"/>
                 </StackPanel>
@@ -125,59 +204,59 @@
                 <ColumnDefinition x:Name="RightPanelColumn" Width="260" MinWidth="0"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ── LEFT PANEL — File List ─────────────────────────────── -->
+            <!-- ── LEFT PANEL — File List / Textures ────────────────── -->
             <Border Grid.Column="0"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0"
                     Background="{StaticResource BackgroundMedium}"
                     Visibility="{Binding IsFileListPanelOpen, Converter={StaticResource BoolToVis}}">
-                <DockPanel>
-                    <!-- Panel header -->
-                    <Border DockPanel.Dock="Top" Style="{StaticResource PanelHeaderStyle}">
+                <TabControl>
+
+                    <!-- ── Tab 1: PRM Files ── -->
+                    <TabItem Header="PRM Files">
                         <DockPanel>
-                            <TextBlock Text="PRM Files" Style="{StaticResource HeaderTextStyle}"
-                                       VerticalAlignment="Center"/>
-                            <TextBlock DockPanel.Dock="Right"
-                                       Text="{Binding DirectoryLabel}"
+                            <!-- Directory label -->
+                            <Border DockPanel.Dock="Top" Style="{StaticResource PanelHeaderStyle}">
+                                <TextBlock Text="{Binding DirectoryLabel}"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding DirectoryLabel}"/>
+                            </Border>
+
+                            <!-- Set directory button -->
+                            <Button DockPanel.Dock="Top"
+                                    Content="Set Directory…"
+                                    Command="{Binding OpenDirectoryCommand}"
+                                    Margin="6,6,6,2"/>
+
+                            <!-- File count -->
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="{Binding PrmFiles.Count, StringFormat='{}{0} file(s)'}"
                                        Style="{StaticResource MutedTextStyle}"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Right"
-                                       TextTrimming="CharacterEllipsis"
-                                       MaxWidth="130"
-                                       ToolTip="{Binding DirectoryLabel}"/>
+                                       Margin="8,2,8,4"/>
+
+                            <!-- File list -->
+                            <ListBox ItemsSource="{Binding PrmFiles}"
+                                     SelectedItem="{Binding SelectedPrmFile}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,2">
+                                            <TextBlock Text="{Binding FileName}"
+                                                       FontSize="12"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding FileSizeDisplay}"
+                                                       FontSize="10"
+                                                       Foreground="{StaticResource TextMuted}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </DockPanel>
-                    </Border>
+                    </TabItem>
 
-                    <!-- Set directory button -->
-                    <Button DockPanel.Dock="Top"
-                            Content="Set Directory…"
-                            Command="{Binding OpenDirectoryCommand}"
-                            Margin="6,6,6,2"/>
-
-                    <!-- File count -->
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="{Binding PrmFiles.Count, StringFormat='{}{0} file(s)'}"
-                               Style="{StaticResource MutedTextStyle}"
-                               Margin="8,2,8,4"/>
-
-                    <!-- File list -->
-                    <ListBox ItemsSource="{Binding PrmFiles}"
-                             SelectedItem="{Binding SelectedPrmFile}"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,2">
-                                    <TextBlock Text="{Binding FileName}"
-                                               FontSize="12"
-                                               TextTrimming="CharacterEllipsis"
-                                               ToolTip="{Binding FilePath}"/>
-                                    <TextBlock Text="{Binding FileSizeDisplay}"
-                                               FontSize="10"
-                                               Foreground="{StaticResource TextMuted}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
+                    <!-- ── Tab 2: Textures ── --></TabControl>
             </Border>
 
             <!-- ── LEFT TOGGLE STRIP ─────────────────────────────────── -->
@@ -209,6 +288,8 @@
                                 ClipToBounds="True"
                                 Focusable="True"
                                 MouseDown="Viewport_MouseDown"
+                                MouseMove="Viewport_MouseMove"
+                                MouseUp="Viewport_MouseUp"
                                 MouseWheel="Viewport_MouseWheel">
                         <Viewport3D.Camera>
                             <PerspectiveCamera x:Name="Camera"
@@ -260,6 +341,178 @@
                     </StackPanel>
 
                     <!-- HUD overlay (top-left) — shown once a model is loaded -->
+                    <Border VerticalAlignment="Bottom"
+                            Margin="10"
+                            Background="#D0181818"
+                            BorderBrush="#555555"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8,6">
+                                <Button Width="24"
+                                        Padding="0"
+                                        Command="{Binding ToggleTexturePaletteCommand}"
+                                        ToolTip="Collapse or expand textures">
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="&#x25BE;"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsTexturePaletteOpen}" Value="False">
+                                                        <Setter Property="Text" Value="&#x25B8;"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+                                <TextBlock Text="Textures"
+                                           Foreground="{StaticResource AccentLight}"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Margin="6,0,0,0"/>
+                                <TextBlock Text="{Binding TextureLibrary.Count, StringFormat=' ({0})'}"
+                                           Foreground="#BBBBBB"
+                                           VerticalAlignment="Center"
+                                           Margin="4,0,0,0"/>
+                                <Button DockPanel.Dock="Right"
+                                        Content="Set Texture Dir"
+                                        Command="{Binding SetTextureDirCommand}"
+                                        MinWidth="104"
+                                        Padding="8,2"
+                                        ToolTip="Set texture directory"/>
+                                <Button DockPanel.Dock="Right"
+                                        Content="+"
+                                        Command="{Binding ImportTextureCommand}"
+                                        Width="28"
+                                        Padding="0,2"
+                                        Margin="0,0,4,0"
+                                        ToolTip="Import an image as the next available Tex###hi.tga"/>
+                            </DockPanel>
+
+                            <Grid DockPanel.Dock="Bottom">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsTexturePaletteOpen}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="220"/>
+                                </Grid.ColumnDefinitions>
+
+                                <DockPanel Grid.Column="0" Margin="8,0,8,8">
+                                    <TextBlock DockPanel.Dock="Top"
+                                               FontSize="10"
+                                               Foreground="#AAAAAA"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,4">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TextureLibrary.Count}" Value="0">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                        Set a texture directory to load Tex###hi.tga files.
+                                    </TextBlock>
+
+                                    <ListBox ItemsSource="{Binding TextureLibrary}"
+                                             SelectedItem="{Binding SelectedTexture}"
+                                             Height="172"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"
+                                                           ItemWidth="64"/>
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="2"/>
+                                                <Setter Property="Margin" Value="1"/>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Width="58" ToolTip="{Binding FileName}">
+                                                    <Border Width="54" Height="54"
+                                                            BorderBrush="#555555"
+                                                            BorderThickness="1"
+                                                            Background="#1A1A1A">
+                                                        <Image Source="{Binding Thumbnail}"
+                                                               Stretch="UniformToFill"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding TextureId, StringFormat='Tex{0:D3}'}"
+                                                               FontSize="9"
+                                                               HorizontalAlignment="Center"
+                                                               Foreground="#BBBBBB"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </DockPanel>
+
+                                <DockPanel Grid.Column="1" Margin="0,0,8,8">
+                                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                                        <TextBlock Text="UV Region"
+                                                   Foreground="#BBBBBB"
+                                                   FontSize="11"
+                                                   VerticalAlignment="Center"/>
+                                        <Button DockPanel.Dock="Right"
+                                                Content="Reset"
+                                                Width="22"
+                                                Padding="0,2"
+                                                FontSize="10"
+                                                Click="ResetTextureSelection_Click"
+                                                ToolTip="Revert to full texture"/>
+                                    </DockPanel>
+
+                                    <TextBlock DockPanel.Dock="Bottom"
+                                               Text="{Binding TextureSelectionDisplay}"
+                                               FontSize="10"
+                                               Foreground="#AAAAAA"
+                                               Margin="0,3,0,0"/>
+
+                                    <Border Background="#111111"
+                                            BorderBrush="#444444"
+                                            BorderThickness="1"
+                                            Height="86">
+                                        <Grid>
+                                            <Image x:Name="TexturePreviewImage"
+                                                   Source="{Binding SelectedTexture.Thumbnail}"
+                                                   Stretch="Uniform"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                                            <Canvas x:Name="TextureSelectionCanvas"
+                                                    Background="Transparent"
+                                                    Cursor="Cross"
+                                                    MouseDown="TextureCanvas_MouseDown"
+                                                    MouseMove="TextureCanvas_MouseMove"
+                                                    MouseUp="TextureCanvas_MouseUp">
+                                                <Rectangle x:Name="SelectionRect"
+                                                           Stroke="Orange"
+                                                           StrokeThickness="1.5"
+                                                           StrokeDashArray="5,2"
+                                                           Fill="#44FF8C00"
+                                                           Visibility="Collapsed"/>
+                                            </Canvas>
+                                        </Grid>
+                                    </Border>
+                                </DockPanel>
+                            </Grid>
+                        </DockPanel>
+                    </Border>
                     <Border HorizontalAlignment="Left" VerticalAlignment="Top"
                             Margin="10" Padding="8,5"
                             Background="#A0000000" CornerRadius="4"
@@ -390,6 +643,26 @@
                                 </Grid>
                             </GroupBox>
 
+                            <GroupBox Header="Face Materials" Margin="0,0,0,8">
+                                <StackPanel Margin="4">
+                                    <TextBlock Text="Face"
+                                               Style="{StaticResource MutedTextStyle}"
+                                               Margin="0,0,0,3"/>
+                                    <ListBox ItemsSource="{Binding Faces}"
+                                             SelectedItem="{Binding SelectedFace}"
+                                             DisplayMemberPath="DisplayText"
+                                             Height="90"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                                    <Button Content="Rotate UV 90°"
+                                            Command="{Binding RotateTexture90Command}"
+                                            Margin="0,6,0,0"
+                                            ToolTip="Rotate the face's texture UV coordinates 90° clockwise"/>
+                                    <Button Content="Apply Selected Texture"
+                                            Command="{Binding ApplyTextureToFaceCommand}"
+                                            Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </GroupBox>
+
                             <!-- Collision Type -->
                             <GroupBox Header="Collision" Margin="0,0,0,8">
                                 <Grid Margin="4">
@@ -398,96 +671,37 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Type:"
-                                               Style="{StaticResource MutedTextStyle}" Margin="0,2"/>
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding PrimInfo.CollisionTypeDisplay, FallbackValue='—'}"
-                                               Style="{StaticResource ValueTextStyle}" Margin="0,2"
-                                               TextWrapping="Wrap"/>
+                                               Style="{StaticResource MutedTextStyle}" Margin="0,2"
+                                               VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{x:Static vm:PrimInfoViewModel.CollisionTypes}"
+                                              SelectedValue="{Binding PrimInfo.CollisionType, Mode=TwoWay}"
+                                              SelectedValuePath="Key"
+                                              DisplayMemberPath="Value"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
                                 </Grid>
                             </GroupBox>
 
                             <!-- Damage Types -->
                             <GroupBox Header="Damage Types" Margin="0,0,0,8">
-                                <StackPanel Margin="4,4,4,2">
-                                    <StackPanel.Resources>
-                                        <Style x:Key="FlagDot" TargetType="TextBlock">
-                                            <Setter Property="Text" Value="●"/>
-                                            <Setter Property="FontSize" Value="8"/>
-                                            <Setter Property="Foreground" Value="#444444"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                            <Setter Property="Margin" Value="0,0,5,0"/>
-                                        </Style>
-                                        <Style x:Key="FlagLabel" TargetType="TextBlock"
-                                               BasedOn="{StaticResource MutedTextStyle}">
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                    </StackPanel.Resources>
-
-                                    <!-- Is Damageable -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.IsDamageable}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Is Damageable" Style="{StaticResource FlagLabel}"/>
-                                    </StackPanel>
-
-                                    <!-- Explodes -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.Explodes}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Explodes" Style="{StaticResource FlagLabel}"/>
-                                    </StackPanel>
-
-                                    <!-- Crumples -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.Crumples}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Crumples" Style="{StaticResource FlagLabel}"/>
-                                    </StackPanel>
-
-                                    <!-- No Line of Sight -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.NoLineOfSight}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="No Line of Sight" Style="{StaticResource FlagLabel}"/>
-                                    </StackPanel>
-
-                                    <!-- Raw byte hint -->
+                                <StackPanel Margin="4,4,4,4">
+                                    <CheckBox Content="Is Damageable"
+                                              IsChecked="{Binding PrimInfo.IsDamageable, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Explodes"
+                                              IsChecked="{Binding PrimInfo.Explodes, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Crumples"
+                                              IsChecked="{Binding PrimInfo.Crumples, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="No Line of Sight"
+                                              IsChecked="{Binding PrimInfo.NoLineOfSight, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
                                     <TextBlock Margin="0,4,0,0" FontFamily="Consolas" FontSize="10"
                                                Foreground="#555555"
                                                Text="{Binding PrimInfo.RawDamageFlags, StringFormat='raw: 0x{0:X2}'}"/>
@@ -502,160 +716,53 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="Type:"
-                                               Style="{StaticResource MutedTextStyle}" Margin="0,2"/>
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding PrimInfo.ShadowTypeDisplay, FallbackValue='—'}"
-                                               Style="{StaticResource ValueTextStyle}" Margin="0,2"
-                                               TextWrapping="Wrap"/>
+                                               Style="{StaticResource MutedTextStyle}" Margin="0,2"
+                                               VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{x:Static vm:PrimInfoViewModel.ShadowTypes}"
+                                              SelectedValue="{Binding PrimInfo.ShadowType, Mode=TwoWay}"
+                                              SelectedValuePath="Key"
+                                              DisplayMemberPath="Value"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
                                 </Grid>
                             </GroupBox>
 
                             <!-- Various Properties -->
                             <GroupBox Header="Properties" Margin="0,0,0,8">
-                                <StackPanel Margin="4,4,4,2">
-                                    <StackPanel.Resources>
-                                        <Style x:Key="FlagDot2" TargetType="TextBlock">
-                                            <Setter Property="Text" Value="●"/>
-                                            <Setter Property="FontSize" Value="8"/>
-                                            <Setter Property="Foreground" Value="#444444"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                            <Setter Property="Margin" Value="0,0,5,0"/>
-                                        </Style>
-                                        <Style x:Key="FlagLabel2" TargetType="TextBlock"
-                                               BasedOn="{StaticResource MutedTextStyle}">
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                    </StackPanel.Resources>
-
-                                    <!-- Is Light -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.IsLight}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Is Light" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Contains Walkable Faces -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.ContainsWalkableFaces}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Contains Walkable Faces" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Has Glare -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.HasGlare}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Has Glare" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Is Rotating Item -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.IsRotatingItem}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Is Rotating Item" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Is Tree -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.IsTree}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Is Tree" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Env Mapped -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.EnvMapped}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Env Mapped" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Just Floor -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.JustFloor}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="Just Floor" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- On Floor -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource FlagDot2}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding PrimInfo.OnFloor}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="On Floor" Style="{StaticResource FlagLabel2}"/>
-                                    </StackPanel>
-
-                                    <!-- Raw byte hint -->
+                                <StackPanel Margin="4,4,4,4">
+                                    <CheckBox Content="Is Light"
+                                              IsChecked="{Binding PrimInfo.IsLight, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Contains Walkable Faces"
+                                              IsChecked="{Binding PrimInfo.ContainsWalkableFaces, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Has Glare"
+                                              IsChecked="{Binding PrimInfo.HasGlare, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Is Rotating Item"
+                                              IsChecked="{Binding PrimInfo.IsRotatingItem, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Is Tree"
+                                              IsChecked="{Binding PrimInfo.IsTree, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Env Mapped"
+                                              IsChecked="{Binding PrimInfo.EnvMapped, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="Just Floor"
+                                              IsChecked="{Binding PrimInfo.JustFloor, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
+                                    <CheckBox Content="On Floor"
+                                              IsChecked="{Binding PrimInfo.OnFloor, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsFileLoaded}"
+                                              Margin="0,2"/>
                                     <TextBlock Margin="0,4,0,0" FontFamily="Consolas" FontSize="10"
                                                Foreground="#555555"
                                                Text="{Binding PrimInfo.RawVariousProperties, StringFormat='raw: 0x{0:X2}'}"/>
