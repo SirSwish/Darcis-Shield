@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Viewport3D;
 
@@ -22,8 +23,8 @@ namespace UrbanChaosMapEditor.Views.Core.MapOverlays
         private static readonly Brush DotBrush;
 
         // Canvas-pixel size of the cone.
-        private const double Radius = 90.0;       // length from apex/origin to back corners
-        private const double HalfAngleDeg = 28.0; // FOV-like half-angle
+        private const double Radius = EditorUiConstants.CameraMarkerRadius;       // length from apex/origin to back corners
+        private const double HalfAngleDeg = EditorUiConstants.CameraMarkerHalfAngleDeg; // FOV-like half-angle
         private const double PickRadius = 110.0;  // generous hit circle for dragging
 
         static CameraMarkerLayer()

@@ -1,5 +1,6 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using UrbanChaosMissionEditor.Services;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMissionEditor.Models;
 
@@ -8,35 +9,35 @@ namespace UrbanChaosMissionEditor.Models;
 /// </summary>
 public static class CutsceneConstants
 {
-    public const byte CurrentVersion = 2;
+    public const byte CurrentVersion = CutsceneFormatConstants.CurrentVersion;
 
     // Channel Types (CT_*)
-    public const byte CT_UNUSED = 0;
-    public const byte CT_CHAR = 1;      // Character
-    public const byte CT_CAM = 2;       // Camera
-    public const byte CT_WAVE = 3;      // Sound/Wave
-    public const byte CT_FX = 4;        // Visual FX
-    public const byte CT_TEXT = 5;      // Subtitles
+    public const byte CT_UNUSED = CutsceneFormatConstants.ChannelUnused;
+    public const byte CT_CHAR = CutsceneFormatConstants.ChannelCharacter;      // Character
+    public const byte CT_CAM = CutsceneFormatConstants.ChannelCamera;       // Camera
+    public const byte CT_WAVE = CutsceneFormatConstants.ChannelWave;      // Sound/Wave
+    public const byte CT_FX = CutsceneFormatConstants.ChannelFx;        // Visual FX
+    public const byte CT_TEXT = CutsceneFormatConstants.ChannelText;      // Subtitles
 
     // Packet Types (PT_*)
-    public const byte PT_UNUSED = 0;
-    public const byte PT_ANIM = 1;      // Animation
-    public const byte PT_ACTION = 2;    // Action/Task
-    public const byte PT_WAVE = 3;      // Sound
-    public const byte PT_CAM = 4;       // Camera keyframe
-    public const byte PT_TEXT = 5;      // Subtitle text
+    public const byte PT_UNUSED = CutsceneFormatConstants.PacketUnused;
+    public const byte PT_ANIM = CutsceneFormatConstants.PacketAnimation;      // Animation
+    public const byte PT_ACTION = CutsceneFormatConstants.PacketAction;    // Action/Task
+    public const byte PT_WAVE = CutsceneFormatConstants.PacketWave;      // Sound
+    public const byte PT_CAM = CutsceneFormatConstants.PacketCamera;       // Camera keyframe
+    public const byte PT_TEXT = CutsceneFormatConstants.PacketText;      // Subtitle text
 
     // Packet Flags (PF_*)
-    public const byte PF_BACKWARDS = 1;         // Reverse animation / Securicam for cameras
-    public const byte PF_INTERPOLATE_MOVE = 2;  // Linear position interpolation
-    public const byte PF_SMOOTH_MOVE_IN = 4;    // Ease in position
-    public const byte PF_SMOOTH_MOVE_OUT = 8;   // Ease out position
+    public const byte PF_BACKWARDS = CutsceneFormatConstants.FlagBackwards;         // Reverse animation / Securicam for cameras
+    public const byte PF_INTERPOLATE_MOVE = CutsceneFormatConstants.FlagInterpolateMove;  // Linear position interpolation
+    public const byte PF_SMOOTH_MOVE_IN = CutsceneFormatConstants.FlagSmoothMoveIn;    // Ease in position
+    public const byte PF_SMOOTH_MOVE_OUT = CutsceneFormatConstants.FlagSmoothMoveOut;   // Ease out position
     public const byte PF_SMOOTH_MOVE_BOTH = PF_SMOOTH_MOVE_IN | PF_SMOOTH_MOVE_OUT;
-    public const byte PF_INTERPOLATE_ROT = 16;  // Linear rotation interpolation
-    public const byte PF_SMOOTH_ROT_IN = 32;    // Ease in rotation
-    public const byte PF_SMOOTH_ROT_OUT = 64;   // Ease out rotation
+    public const byte PF_INTERPOLATE_ROT = CutsceneFormatConstants.FlagInterpolateRot;  // Linear rotation interpolation
+    public const byte PF_SMOOTH_ROT_IN = CutsceneFormatConstants.FlagSmoothRotIn;    // Ease in rotation
+    public const byte PF_SMOOTH_ROT_OUT = CutsceneFormatConstants.FlagSmoothRotOut;   // Ease out rotation
     public const byte PF_SMOOTH_ROT_BOTH = PF_SMOOTH_ROT_IN | PF_SMOOTH_ROT_OUT;
-    public const byte PF_SLOMO = 128;           // Slow motion
+    public const byte PF_SLOMO = CutsceneFormatConstants.FlagSlomo;           // Slow motion
 }
 
 /// <summary>

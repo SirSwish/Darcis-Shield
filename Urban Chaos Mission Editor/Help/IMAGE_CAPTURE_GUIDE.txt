@@ -1,0 +1,32 @@
+Mission Editor Help Image Capture Guide - Part 1
+===============================================
+
+Overview / Getting Started
+--------------------------
+mission_overview_full_window.png - Full Mission Editor window showing viewport, status bar, quick action toolbar, Mission Info area, Event Points list, and Event Point Details panel.
+mission_overview_layout_annotated.png - Full editor view with main regions visible: menu, quick actions, viewport, event panels, mission info, status/zoom controls.
+mission_overview_status_zoom.png - Bottom status bar and bottom-left zoom/reset zoom controls.
+mission_overview_file_menu.png - File menu open showing New, Open, Save, Save As, Close, Open Map, Open Lights, Mission Properties, and Exit.
+mission_overview_edit_menu.png - Edit menu open showing Add Event Point, Edit Event Point, Copy/Paste EventPoint, and Center on Selected.
+mission_overview_zones_menu.png - Zones menu open showing Paint Zone Mode, Erase Zone Mode, Zone Type, and Clear All Zones.
+mission_overview_view_menu.png - View menu open showing Open 3D Viewport, Zoom In/Out, Reset Zoom, Mission Layers, Map Layers, and Light Layers.
+mission_overview_quick_actions.png - Quick action toolbar showing Open, Map, Edit Map, Lights, Edit Lights, and 3D buttons.
+mission_overview_event_panels.png - Right-side Event Points list and Event Point Details/raw data panel.
+
+Starting New Mission
+--------------------
+mission_start_new_file.png - New blank mission after File -> New or Ctrl+N.
+mission_start_mission_info_panel.png - Mission Info panel visible on the left with mission-level fields.
+mission_start_mission_properties_edit.png - Mission properties/edit window opened from the Mission Info Edit button.
+mission_start_filters_panel.png - Filters box showing colour, letter/group, and event point type filters.
+mission_start_load_map_button.png - Map quick action button or file dialog used to select the map.
+mission_start_map_loaded.png - Viewport after a map has been loaded, with map layers visible.
+mission_start_load_lights_button.png - Lights quick action button or file dialog used to select the light file.
+mission_start_lights_loaded.png - Viewport after lights have been loaded, ideally with Lights/Ranges layers enabled.
+mission_start_loaded_files_section.png - Loaded Files section expanded in Mission Info showing selected map and light filenames.
+
+Event Points
+------------
+mission_eventpoints_overview.png - Mission viewport with several event points visible on the map.
+mission_eventpoints_add_button.png - Event Points panel with the Add button visible.
+mission_eventpoints_add_window.png - Add New EventPoint window showing the list of possible event point types.

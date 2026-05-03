@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosPrimEditor.Models;
 
 namespace UrbanChaosPrimEditor.Services
 {
     public sealed class PrmObjImporterService
     {
-        private const int MaxVertexCount = 5000;
+        private const int MaxVertexCount = PrimFormatConstants.MaxVertexCount;
 
         public PrmObjImportResult Import(string objPath)
         {

@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Shapes;
+using UrbanChaosEditor.Shared.Views.Help;
+using UrbanChaosStoryboardEditor.Help;
 using UrbanChaosStoryboardEditor.Models;
 using UrbanChaosStoryboardEditor.Services;
 using UrbanChaosStoryboardEditor.ViewModels;
@@ -193,6 +195,9 @@ namespace UrbanChaosStoryboardEditor
         {
             new Views.Dialogs.AboutWindow { Owner = this }.ShowDialog();
         }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+            => HelpViewerWindow.ShowHelp("Urban Chaos Storyboard Editor - Help", StoryboardEditorHelpTopics.All, this);
 
         private void EditDistrictMenuItem_Click(object sender, RoutedEventArgs e)
         {

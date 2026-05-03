@@ -75,6 +75,7 @@
                 <MenuItem Header="_Clear Sky" Click="ClearSky_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Style Editor Help" Click="Help_Click"/>
                 <MenuItem Header="_About" Click="About_Click"/>
             </MenuItem>
         </Menu>

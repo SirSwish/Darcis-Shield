@@ -18,6 +18,9 @@ namespace UrbanChaosLightEditor.Views
             Scroller.PreviewMouseWheel += OnMouseWheel;
         }
 
+        /// <summary>The 8192×8192 surface used for rendering layers; exposed for image export.</summary>
+        public Grid ExportSurface => Surface;
+
         private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
         private void OnMouseWheel(object sender, MouseWheelEventArgs e)

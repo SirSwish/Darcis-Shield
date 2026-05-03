@@ -1,0 +1,480 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Adding &amp; Editing Lights
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to create a new light file, open an existing light file, add lights to the map, and edit existing light entries.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- STARTING A LIGHT FILE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Starting a Light File
+    </Paragraph>
+    <Paragraph>
+        To begin editing lights, either open an existing light file or create a new one.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Open Existing Light File
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+O)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Opens an existing
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.lgt</Run>
+        light file for editing.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        New Lights
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+N)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Creates a new blank light file.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_open_file.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Opening an existing light file is the easiest way to learn how Urban Chaos levels use lights.
+                    You can inspect the original light positions, ranges, colours, and height values before creating your own.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OPENING A MAP -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Opening the Associated Map
+    </Paragraph>
+    <Paragraph>
+        If you start a new light file, the editor begins with a blank canvas and no map loaded.
+        For easier editing, open the map file that the light file will be used with.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can open a map by pressing the <Bold>Open Map</Bold> shortcut button in the top bar,
+        or by using:
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        File → Open Map
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+Shift+O)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Loads an Urban Chaos map file so lights can be placed visually against cell textures,
+        buildings, objects, and other map features.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_open_map.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>
+                    A light file can still be edited without a map, but placing lights is much easier when the matching map is loaded.
+                    The map view gives you a clear reference for streets, rooftops, interiors, buildings, and light-emitting objects.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADDING A LIGHT -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a New Light
+    </Paragraph>
+    <Paragraph>
+        Once a map is loaded, select the <Bold>Lights List</Bold> tab and press the
+        <Bold>Add Light</Bold> button in the bottom-right of the list. The Add Light button is
+        shown as a plus symbol.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_add_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Pressing this button opens the <Bold>Add Light Window</Bold>. This window lets you define
+        the initial properties of the light before placing it on the map.
+    </Paragraph>
+
+    <Paragraph Margin="0,6,0,2">
+        In the Add Light Window, you can set:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                The light's <Bold>range</Bold>, from
+                <Run FontFamily="Consolas" Foreground="#E8B84B">0</Run>
+                to
+                <Run FontFamily="Consolas" Foreground="#E8B84B">255</Run>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The light's <Bold>RGB colour</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A live <Bold>colour preview swatch</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The light's <Bold>height</Bold> in QWorld pixels.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_add_window.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- LIGHT HEIGHT -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Setting the Light Height
+    </Paragraph>
+    <Paragraph>
+        Light height is entered in <Bold>QWorld pixels</Bold>. In Urban Chaos scale,
+        <Run FontFamily="Consolas" Foreground="#E8B84B">256</Run>
+        pixels is equal to one storey.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can type a precise height into the <Bold>Total Px</Bold> box, or use the shortcut
+        buttons to quickly move the light up or down by one storey:
+    </Paragraph>
+
+    <Paragraph Margin="24,6,0,0">
+        <Bold Foreground="#E8B84B">+256</Bold> — raises the light by one storey.
+    </Paragraph>
+    <Paragraph Margin="24,2,0,0">
+        <Bold Foreground="#E8B84B">-256</Bold> — lowers the light by one storey.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Use higher Y values for lights placed above the ground, such as street lamps, windows, rooftops,
+                    signs, or lights attached to elevated objects.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PLACING THE LIGHT -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Placing the Light on the Map
+    </Paragraph>
+    <Paragraph>
+        After setting the colour, range, and height, press <Bold>OK</Bold> in the Add Light Window.
+        The light is then loaded into the placement buffer.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Move the mouse over the map and click the position where the light should appear.
+        The editor creates the new light entry at that map location.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_place_on_map.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>
+                    The light is not placed immediately when you press OK. It is first loaded into the placement buffer,
+                    then created when you click a location on the map.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- SELECTING LIGHTS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Selecting Lights
+    </Paragraph>
+    <Paragraph>
+        A light can be selected in two ways:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Select the light entry from the <Bold>Lights List</Bold> table.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the light directly on the visual map display.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        The selected light can then be edited, deleted, copied, or used as the source for a paste operation.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_select_light.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_light_selected_on_map.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- EDITING LIGHTS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Editing a Light
+    </Paragraph>
+    <Paragraph>
+        Once a light is selected, it can be opened for editing in any of the following ways:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Double-click the light on the map.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Double-click the light entry in the Lights List.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the <Bold>Edit Light</Bold> button at the bottom of the list. This button is shown as a pencil icon.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Editing a light allows you to adjust its range, RGB colour, height, and other light properties.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_edit_light.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- DELETING LIGHTS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Deleting a Light
+    </Paragraph>
+    <Paragraph>
+        To remove a light, select it first, then either press the <Bold>Delete Light</Bold> button
+        at the bottom of the Lights List or press the <Bold>Delete</Bold> shortcut key.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The Delete Light button is shown as a waste basket icon.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_delete_light.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>
+                    Deleted lights are removed from the active light file. Save a copy before making large changes
+                    if you want to preserve the original lighting setup.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COPYING AND PASTING LIGHTS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Copying &amp; Pasting Lights
+    </Paragraph>
+    <Paragraph>
+        Lights can be copied and pasted to quickly create similar light entries. This is useful
+        when placing repeated lights, such as street lamps, hallway lights, windows, or lights
+        with the same colour and range.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Copy Light
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+C)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Select a light from the list or map, then press <Bold>Ctrl+C</Bold> or the Copy button.
+        The Copy button is shown as a clipboard icon.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Paste Light
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+V)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Pastes the copied light. When using the <Bold>Ctrl+V</Bold> shortcut, the copied light is
+        pasted at the current mouse pointer position on the map.
+    </Paragraph>
+
+    <Paragraph Margin="24,6,0,0">
+        When using the Paste button, the copied light is pasted near the edge of the visible screen.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/adding_lights_copy_paste.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    For accurate placement, use Ctrl+V while the mouse is positioned exactly where you want the copied light to appear.
+                    This is usually faster and more precise than using the Paste button.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW SUMMARY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Workflow
+    </Paragraph>
+    <Paragraph>
+        The usual workflow for adding lights is:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open an existing
+                <Run FontFamily="Consolas" Foreground="#E8B84B">.lgt</Run>
+                file with <Bold>Ctrl+O</Bold>, or create a new light file with <Bold>Ctrl+N</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Open the associated map with <Bold>Ctrl+Shift+O</Bold> or the Open Map button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select the <Bold>Lights List</Bold> tab.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press the <Bold>Add Light</Bold> button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the light's colour, range, and height.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press <Bold>OK</Bold> to load the light into the placement buffer.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Click the map position where the light should be created.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Select, edit, copy, paste, or delete lights as needed.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- NEXT STEPS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        After learning how to add and edit individual lights, continue to the
+        <Bold>Map Properties</Bold> section for a detailed explanation of ambient lighting,
+        renderer lighting values, prim lighting, and global light file settings.
+    </Paragraph>
+
+</FlowDocument>

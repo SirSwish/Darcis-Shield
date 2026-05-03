@@ -2,6 +2,7 @@
 // FIXED: Correct layout and night flag interpretation based on C++ source code
 using System.Diagnostics;
 using UrbanChaosLightEditor.Models;
+using SharedLights = UrbanChaosEditor.Shared.Constants.LightsFormatConstants;
 
 namespace UrbanChaosLightEditor.Services
 {
@@ -34,22 +35,22 @@ namespace UrbanChaosLightEditor.Services
         }
 
         // ---- Layout constants (CORRECTED from C++ source) ----
-        public const int HeaderSize = 12;
-        public const int EntrySize = 20;
-        public const int EntryCount = 256;  // ED_MAX_LIGHTS = 256 (index 0 is sentinel)
+        public const int HeaderSize = SharedLights.HeaderSize;
+        public const int EntrySize = SharedLights.EntrySize;
+        public const int EntryCount = SharedLights.EntryCount;
 
         // FIXED: Entries start immediately after header - NO padding!
-        public const int EntriesOffset = HeaderSize;                                // 0x000C = 12
-        public const int PropertiesOffset = EntriesOffset + EntrySize * EntryCount; // 0x140C = 5132
-        public const int PropertiesSize = 36;
-        public const int NightColourOffset = PropertiesOffset + PropertiesSize;     // 0x1430 = 5168
-        public const int NightColourSize = 3;
-        public const int TotalSize = NightColourOffset + NightColourSize;           // 5171
+        public const int EntriesOffset = SharedLights.EntriesOffset;
+        public const int PropertiesOffset = SharedLights.PropertiesOffset;
+        public const int PropertiesSize = SharedLights.PropertiesSize;
+        public const int NightColourOffset = SharedLights.NightColourOffset;
+        public const int NightColourSize = SharedLights.NightColourSize;
+        public const int TotalSize = SharedLights.TotalSize;
 
         // Night flag bit definitions (from C++ night.h)
-        public const uint NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS = 1 << 0;   // Bit 0 (0x01): Lamppost lights enabled
-        public const uint NIGHT_FLAG_DARKEN_BUILDING_POINTS = 1 << 1;  // Bit 1 (0x02): Darken wall bottoms
-        public const uint NIGHT_FLAG_DAYTIME = 1 << 2;                 // Bit 2 (0x04): SET = daytime, CLEAR = night
+        public const uint NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS = SharedLights.NIGHT_FLAG_LIGHTS_UNDER_LAMPOSTS;
+        public const uint NIGHT_FLAG_DARKEN_BUILDING_POINTS = SharedLights.NIGHT_FLAG_DARKEN_BUILDING_POINTS;
+        public const uint NIGHT_FLAG_DAYTIME = SharedLights.NIGHT_FLAG_DAYTIME;
 
         private byte[] GetBytesArray()
         {

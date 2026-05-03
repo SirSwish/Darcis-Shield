@@ -15,15 +15,103 @@
   <ItemGroup>
     <None Remove="Assets\Defaults\default.tma" />
     <None Remove="Assets\Defaults\style.tma" />
+    <None Remove="Help\Images\adding_textures_custom_world_created.png" />
+    <None Remove="Help\Images\adding_textures_edit_tile_button.png" />
+    <None Remove="Help\Images\adding_textures_import_batch_button.png" />
+    <None Remove="Help\Images\adding_textures_import_batch_file_select.png" />
+    <None Remove="Help\Images\adding_textures_import_single_button.png" />
+    <None Remove="Help\Images\adding_textures_import_single_result.png" />
+    <None Remove="Help\Images\adding_textures_new_texture_set_button.png" />
+    <None Remove="Help\Images\adding_textures_new_texture_set_window.png" />
+    <None Remove="Help\Images\adding_textures_overview.png" />
+    <None Remove="Help\Images\adding_textures_texture_slots.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_alpha.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_colour_creator.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_overview.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_save.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_tools.png" />
+    <None Remove="Help\Images\adding_textures_tile_editor_view_options.png" />
+    <None Remove="Help\Images\exporting_overview.png" />
+    <None Remove="Help\Images\exporting_select_textures_directory.png" />
+    <None Remove="Help\Images\styles_double_click_style_entry.png" />
+    <None Remove="Help\Images\styles_edit_style_window.png" />
+    <None Remove="Help\Images\styles_load_existing_tma.png" />
+    <None Remove="Help\Images\styles_map_editor_wall_example.png" />
+    <None Remove="Help\Images\styles_overview.png" />
+    <None Remove="Help\Images\styles_pick_texture_window.png" />
+    <None Remove="Help\Images\styles_recipe_slots.png" />
+    <None Remove="Help\Images\styles_save_style_entry.png" />
+    <None Remove="Help\Images\styles_slot_flags.png" />
+    <None Remove="Help\Images\styles_style_name_field.png" />
+    <None Remove="Help\Images\styles_tma_styles_section.png" />
+    <None Remove="Help\Images\style_overview_custom_worlds_bar.png" />
+    <None Remove="Help\Images\style_overview_editor_full_window.png" />
+    <None Remove="Help\Images\style_overview_file_menu.png" />
+    <None Remove="Help\Images\style_overview_footstep_sound.png" />
+    <None Remove="Help\Images\style_overview_main_layout_annotated.png" />
+    <None Remove="Help\Images\style_overview_quick_actions_bar.png" />
+    <None Remove="Help\Images\style_overview_selected_slot.png" />
+    <None Remove="Help\Images\style_overview_sky_image.png" />
+    <None Remove="Help\Images\style_overview_sky_menu.png" />
+    <None Remove="Help\Images\style_overview_textures_menu.png" />
+    <None Remove="Help\Images\style_overview_texture_properties.png" />
+    <None Remove="Help\Images\style_overview_texture_slots.png" />
+    <None Remove="Help\Images\style_overview_tma_styles.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Defaults\default.tma" />
     <Resource Include="Assets\Icons\app.ico" />
+    <Resource Include="Help\Images\adding_textures_custom_world_created.png" />
+    <Resource Include="Help\Images\adding_textures_edit_tile_button.png" />
+    <Resource Include="Help\Images\adding_textures_import_batch_button.png" />
+    <Resource Include="Help\Images\adding_textures_import_batch_file_select.png" />
+    <Resource Include="Help\Images\adding_textures_import_single_button.png" />
+    <Resource Include="Help\Images\adding_textures_import_single_result.png" />
+    <Resource Include="Help\Images\adding_textures_new_texture_set_button.png" />
+    <Resource Include="Help\Images\adding_textures_new_texture_set_window.png" />
+    <Resource Include="Help\Images\adding_textures_overview.png" />
+    <Resource Include="Help\Images\adding_textures_texture_slots.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_alpha.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_colour_creator.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_overview.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_save.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_tools.png" />
+    <Resource Include="Help\Images\adding_textures_tile_editor_view_options.png" />
+    <Resource Include="Help\Images\exporting_overview.png" />
+    <Resource Include="Help\Images\exporting_select_textures_directory.png" />
+    <Resource Include="Help\Images\styles_double_click_style_entry.png" />
+    <Resource Include="Help\Images\styles_edit_style_window.png" />
+    <Resource Include="Help\Images\styles_load_existing_tma.png" />
+    <Resource Include="Help\Images\styles_map_editor_wall_example.png" />
+    <Resource Include="Help\Images\styles_overview.png" />
+    <Resource Include="Help\Images\styles_pick_texture_window.png" />
+    <Resource Include="Help\Images\styles_recipe_slots.png" />
+    <Resource Include="Help\Images\styles_save_style_entry.png" />
+    <Resource Include="Help\Images\styles_slot_flags.png" />
+    <Resource Include="Help\Images\styles_style_name_field.png" />
+    <Resource Include="Help\Images\styles_tma_styles_section.png" />
+    <Resource Include="Help\Images\style_overview_custom_worlds_bar.png" />
+    <Resource Include="Help\Images\style_overview_editor_full_window.png" />
+    <Resource Include="Help\Images\style_overview_file_menu.png" />
+    <Resource Include="Help\Images\style_overview_footstep_sound.png" />
+    <Resource Include="Help\Images\style_overview_main_layout_annotated.png" />
+    <Resource Include="Help\Images\style_overview_quick_actions_bar.png" />
+    <Resource Include="Help\Images\style_overview_selected_slot.png" />
+    <Resource Include="Help\Images\style_overview_sky_image.png" />
+    <Resource Include="Help\Images\style_overview_sky_menu.png" />
+    <Resource Include="Help\Images\style_overview_textures_menu.png" />
+    <Resource Include="Help\Images\style_overview_texture_properties.png" />
+    <Resource Include="Help\Images\style_overview_texture_slots.png" />
+    <Resource Include="Help\Images\style_overview_tma_styles.png" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="Help\Topics\*.xaml" />
+    <Resource Include="Help\Topics\*.xaml" />
   </ItemGroup>
 
 </Project>

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosEditor.Shared.ViewModels;
 using UrbanChaosPrimEditor.Models;
 using UrbanChaosPrimEditor.Services;
@@ -51,7 +52,9 @@ namespace UrbanChaosPrimEditor.ViewModels
             SaveAsCommand          = new RelayCommand(_ => SaveAs(),    _ => IsFileLoaded);
             SaveAsPrmCommand       = new RelayCommand(_ => SaveAsPrm(), _ => IsFileLoaded);
             SaveAsObjCommand       = new RelayCommand(_ => SaveAsObj(), _ => IsFileLoaded);
-            ApplyTextureToFaceCommand    = new RelayCommand(_ => ApplyTextureToSelectedFace(), _ => SelectedFace is not null && SelectedTexture is not null);
+            ApplyTextureToFaceCommand    = new RelayCommand(_ => CommitTexturePreview(), _ => SelectedFace is not null && SelectedTexture is not null);
+            CancelTexturePreviewCommand  = new RelayCommand(_ => CancelTexturePreview(), _ => HasTexturePreview);
+            ResetTextureRegionCommand    = new RelayCommand(_ => TextureSelection = new Rect(0, 0, 1, 1), _ => SelectedFace is not null && SelectedTexture is not null);
             RotateTexture90Command       = new RelayCommand(_ => RotateSelectedFaceTexture(),  _ => SelectedFace is not null);
             ToggleTexturePaletteCommand  = new RelayCommand(_ => IsTexturePaletteOpen = !IsTexturePaletteOpen);
 
@@ -134,6 +137,7 @@ namespace UrbanChaosPrimEditor.ViewModels
                 if (_selectedFace == value) return;
                 _selectedFace = value;
                 RaisePropertyChanged();
+                LoadTextureEditorFromSelectedFace();
                 CommandManager.InvalidateRequerySuggested();
                 RebuildScene();
             }
@@ -148,22 +152,75 @@ namespace UrbanChaosPrimEditor.ViewModels
                 if (_selectedTexture == value) return;
                 _selectedTexture = value;
                 RaisePropertyChanged();
-                TextureSelection = new Rect(0, 0, 1, 1);
+                RaisePropertyChanged(nameof(SelectedTexturePixelWidth));
+                RaisePropertyChanged(nameof(SelectedTexturePixelHeight));
+                if (!_suppressTextureEditorSync)
+                    TextureSelection = new Rect(0, 0, 1, 1);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
 
+        public int SelectedTexturePixelWidth => SelectedTexture?.Thumbnail?.PixelWidth ?? 0;
+        public int SelectedTexturePixelHeight => SelectedTexture?.Thumbnail?.PixelHeight ?? 0;
+
         // UV sub-region selection within the selected texture, in [0,1] normalised coords.
         private Rect _textureSelection = new(0, 0, 1, 1);
+        private bool _suppressTextureEditorSync;
+        private bool _hasTexturePreview;
+        private PrmTriangle? _previewOriginalTriangle;
+        private PrmQuadrangle? _previewOriginalQuadrangle;
+        private PrmFaceListItem? _previewFace;
+
+        public bool HasTexturePreview
+        {
+            get => _hasTexturePreview;
+            private set
+            {
+                if (_hasTexturePreview == value) return;
+                _hasTexturePreview = value;
+                RaisePropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
         public Rect TextureSelection
         {
             get => _textureSelection;
             set
             {
-                _textureSelection = value;
+                Rect next = ClampSelection(value);
+                if (_textureSelection == next) return;
+                _textureSelection = next;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(TextureSelectionDisplay));
+                RaiseTextureRegionProperties();
+                if (!_suppressTextureEditorSync)
+                    PreviewTextureOnSelectedFace();
             }
+        }
+
+        public int TextureRegionX
+        {
+            get => NormalizedToPixel(_textureSelection.X, SelectedTexturePixelWidth);
+            set => SetTextureSelectionPixels(value, TextureRegionY, TextureRegionWidth, TextureRegionHeight);
+        }
+
+        public int TextureRegionY
+        {
+            get => NormalizedToPixel(_textureSelection.Y, SelectedTexturePixelHeight);
+            set => SetTextureSelectionPixels(TextureRegionX, value, TextureRegionWidth, TextureRegionHeight);
+        }
+
+        public int TextureRegionWidth
+        {
+            get => NormalizedToPixel(_textureSelection.Width, SelectedTexturePixelWidth);
+            set => SetTextureSelectionPixels(TextureRegionX, TextureRegionY, value, TextureRegionHeight);
+        }
+
+        public int TextureRegionHeight
+        {
+            get => NormalizedToPixel(_textureSelection.Height, SelectedTexturePixelHeight);
+            set => SetTextureSelectionPixels(TextureRegionX, TextureRegionY, TextureRegionWidth, value);
         }
 
         public string TextureSelectionDisplay
@@ -182,6 +239,50 @@ namespace UrbanChaosPrimEditor.ViewModels
         // the 3D scene is rebuilt from it on every change. PRM serialisation
         // is not yet implemented — edits do not persist when saving.
 
+
+        private void RaiseTextureRegionProperties()
+        {
+            RaisePropertyChanged(nameof(TextureRegionX));
+            RaisePropertyChanged(nameof(TextureRegionY));
+            RaisePropertyChanged(nameof(TextureRegionWidth));
+            RaisePropertyChanged(nameof(TextureRegionHeight));
+        }
+
+        private void SetTextureSelectionPixels(int x, int y, int width, int height)
+        {
+            int texW = Math.Max(1, SelectedTexturePixelWidth);
+            int texH = Math.Max(1, SelectedTexturePixelHeight);
+
+            x = Math.Clamp(x, 0, texW - 1);
+            y = Math.Clamp(y, 0, texH - 1);
+            width = Math.Clamp(width, 1, texW - x);
+            height = Math.Clamp(height, 1, texH - y);
+
+            TextureSelection = new Rect(
+                x / (double)texW,
+                y / (double)texH,
+                width / (double)texW,
+                height / (double)texH);
+        }
+
+        private static int NormalizedToPixel(double value, int size)
+        {
+            if (size <= 0) return 0;
+            return Math.Clamp((int)Math.Round(value * size), 0, size);
+        }
+
+        private static Rect ClampSelection(Rect selection)
+        {
+            double x = Math.Clamp(selection.X, 0.0, 1.0);
+            double y = Math.Clamp(selection.Y, 0.0, 1.0);
+            double width = Math.Clamp(selection.Width, 0.0, 1.0 - x);
+            double height = Math.Clamp(selection.Height, 0.0, 1.0 - y);
+
+            if (width <= 0.0001) width = Math.Min(1.0 - x, 0.001);
+            if (height <= 0.0001) height = Math.Min(1.0 - y, 0.001);
+
+            return new Rect(x, y, width, height);
+        }
 
         private bool _isTexturePaletteOpen = true;
         public bool IsTexturePaletteOpen
@@ -473,6 +574,100 @@ namespace UrbanChaosPrimEditor.ViewModels
                   ?? Faces.FirstOrDefault();
         }
 
+        private void RefreshFaceListPreservingSelection()
+        {
+            var prev = SelectedFace;
+            _suppressTextureEditorSync = true;
+            try
+            {
+                RefreshFaceList();
+                if (prev is not null)
+                {
+                    SelectedFace = Faces.FirstOrDefault(f => f.FaceType == prev.FaceType && f.Index == prev.Index)
+                                   ?? SelectedFace;
+                }
+            }
+            finally
+            {
+                _suppressTextureEditorSync = false;
+            }
+        }
+
+        public void SelectFaceByHint(SelectedFaceHint faceHint)
+        {
+            PrmFaceType type = faceHint.IsTriangle ? PrmFaceType.Triangle : PrmFaceType.Quadrangle;
+            SelectedFace = Faces.FirstOrDefault(f => f.FaceType == type && f.Index == faceHint.Index);
+            if (SelectedFace is not null)
+                StatusMessage = $"Selected {SelectedFace.DisplayText}.";
+        }
+
+        private void LoadTextureEditorFromSelectedFace()
+        {
+            if (_suppressTextureEditorSync) return;
+
+            CancelTexturePreview();
+
+            if (_currentModel is null || SelectedFace is null)
+                return;
+
+            int textureId;
+            Rect selection;
+
+            if (SelectedFace.FaceType == PrmFaceType.Triangle)
+            {
+                PrmTriangle tri = _currentModel.Triangles[SelectedFace.Index];
+                var mapping = PrmUvService.CalculateTriangle(
+                    tri.UA, tri.VA,
+                    tri.UB, tri.VB,
+                    tri.UC, tri.VC,
+                    tri.TexturePage);
+                textureId = mapping.TextureId;
+                selection = SelectionFromUvs(mapping.UV0, mapping.UV1, mapping.UV2);
+            }
+            else
+            {
+                PrmQuadrangle quad = _currentModel.Quadrangles[SelectedFace.Index];
+                var mapping = PrmUvService.CalculateQuad(
+                    quad.UA, quad.VA,
+                    quad.UB, quad.VB,
+                    quad.UC, quad.VC,
+                    quad.UD, quad.VD,
+                    quad.TexturePage);
+                textureId = mapping.TextureId;
+                selection = SelectionFromUvs(mapping.UV0, mapping.UV1, mapping.UV2, mapping.UV3!.Value);
+            }
+
+            _suppressTextureEditorSync = true;
+            try
+            {
+                SelectedTexture = TextureLibrary.FirstOrDefault(t => t.TextureId == textureId) ?? SelectedTexture;
+                TextureSelection = selection;
+            }
+            finally
+            {
+                _suppressTextureEditorSync = false;
+            }
+
+            RaiseTextureRegionProperties();
+        }
+
+        private static Rect SelectionFromUvs(params Point[] uvs)
+        {
+            double minU = uvs.Min(uv => SnapDisplayUv(uv.X));
+            double maxU = uvs.Max(uv => SnapDisplayUv(uv.X));
+            double minV = uvs.Min(uv => SnapDisplayUv(uv.Y));
+            double maxV = uvs.Max(uv => SnapDisplayUv(uv.Y));
+
+            return ClampSelection(new Rect(minU, minV, maxU - minU, maxV - minV));
+        }
+
+        private static double SnapDisplayUv(double value)
+        {
+            if (Math.Abs(value) < 0.00001) return 0.0;
+            if (Math.Abs(value - (31.0 / 32.0)) < 0.00001 || Math.Abs(value - 1.0) < 0.00001) return 1.0;
+            return Math.Clamp(value, 0.0, 1.0);
+        }
+
         private void RefreshTextureLibrary()
         {
             TextureLibrary.Clear();
@@ -495,6 +690,8 @@ namespace UrbanChaosPrimEditor.ViewModels
 
             if (SelectedTexture is null || !TextureLibrary.Any(t => t.TextureId == SelectedTexture.TextureId))
                 SelectedTexture = TextureLibrary.FirstOrDefault();
+
+            LoadTextureEditorFromSelectedFace();
         }
 
         private void ImportTexture()
@@ -562,16 +759,87 @@ namespace UrbanChaosPrimEditor.ViewModels
             catch { return null; }
         }
 
-        private void ApplyTextureToSelectedFace()
+        private void PreviewTextureOnSelectedFace()
         {
             if (_currentModel is null || SelectedFace is null || SelectedTexture is null) return;
+            CapturePreviewOriginalIfNeeded();
 
             TextureTile tile = TextureTileFromSelection(SelectedTexture.TextureId, _textureSelection);
+            ApplyTextureTileToFace(SelectedFace, tile);
 
-            if (SelectedFace.FaceType == PrmFaceType.Triangle)
+            RefreshFaceListPreservingSelection();
+            RebuildScene();
+            StatusMessage = $"Previewing Tex{SelectedTexture.TextureId:D3} on {SelectedFace.DisplayName}. Apply to commit or Cancel to revert.";
+        }
+
+        private void CommitTexturePreview()
+        {
+            if (_currentModel is null || SelectedFace is null || SelectedTexture is null) return;
+            if (!HasTexturePreview)
+                PreviewTextureOnSelectedFace();
+
+            _previewOriginalTriangle = null;
+            _previewOriginalQuadrangle = null;
+            _previewFace = null;
+            HasTexturePreview = false;
+
+            if (_loadedFile is not null)
+                _loadedFile.IsDirty = true;
+
+            string faceName = SelectedFace.DisplayName;
+            RefreshFaceListPreservingSelection();
+            RebuildScene();
+            UpdateWindowTitle();
+            StatusMessage = $"Applied Tex{SelectedTexture.TextureId:D3}hi.tga to {faceName}.";
+        }
+
+        private void CancelTexturePreview()
+        {
+            if (_currentModel is null || _previewFace is null) return;
+
+            if (_previewFace.FaceType == PrmFaceType.Triangle && _previewOriginalTriangle is { } tri)
+                _currentModel.Triangles[_previewFace.Index] = tri;
+            else if (_previewFace.FaceType == PrmFaceType.Quadrangle && _previewOriginalQuadrangle is { } quad)
+                _currentModel.Quadrangles[_previewFace.Index] = quad;
+
+            _previewOriginalTriangle = null;
+            _previewOriginalQuadrangle = null;
+            _previewFace = null;
+            HasTexturePreview = false;
+            LoadTextureEditorFromSelectedFace();
+            RefreshFaceListPreservingSelection();
+            RebuildScene();
+            StatusMessage = "Texture preview cancelled.";
+        }
+
+        private void CapturePreviewOriginalIfNeeded()
+        {
+            if (_currentModel is null || SelectedFace is null) return;
+            if (HasTexturePreview &&
+                _previewFace is not null &&
+                _previewFace.FaceType == SelectedFace.FaceType &&
+                _previewFace.Index == SelectedFace.Index)
             {
-                PrmTriangle tri = _currentModel.Triangles[SelectedFace.Index];
-                _currentModel.Triangles[SelectedFace.Index] = tri with
+                return;
+            }
+
+            CancelTexturePreview();
+            _previewFace = SelectedFace;
+            if (SelectedFace.FaceType == PrmFaceType.Triangle)
+                _previewOriginalTriangle = _currentModel.Triangles[SelectedFace.Index];
+            else
+                _previewOriginalQuadrangle = _currentModel.Quadrangles[SelectedFace.Index];
+            HasTexturePreview = true;
+        }
+
+        private void ApplyTextureTileToFace(PrmFaceListItem face, TextureTile tile)
+        {
+            if (_currentModel is null) return;
+
+            if (face.FaceType == PrmFaceType.Triangle)
+            {
+                PrmTriangle tri = _currentModel.Triangles[face.Index];
+                _currentModel.Triangles[face.Index] = tri with
                 {
                     TexturePage = tile.TexturePage,
                     UA = tile.U0,
@@ -584,8 +852,8 @@ namespace UrbanChaosPrimEditor.ViewModels
             }
             else
             {
-                PrmQuadrangle quad = _currentModel.Quadrangles[SelectedFace.Index];
-                _currentModel.Quadrangles[SelectedFace.Index] = quad with
+                PrmQuadrangle quad = _currentModel.Quadrangles[face.Index];
+                _currentModel.Quadrangles[face.Index] = quad with
                 {
                     TexturePage = tile.TexturePage,
                     UA = tile.U0,
@@ -598,15 +866,6 @@ namespace UrbanChaosPrimEditor.ViewModels
                     VD = tile.V3
                 };
             }
-
-            if (_loadedFile is not null)
-                _loadedFile.IsDirty = true;
-
-            string faceName = SelectedFace.DisplayName;
-            RefreshFaceList();
-            RebuildScene();
-            UpdateWindowTitle();
-            StatusMessage = $"Applied Tex{SelectedTexture.TextureId:D3}hi.tga to {faceName}.";
         }
 
         private void RotateSelectedFaceTexture()
@@ -668,7 +927,7 @@ namespace UrbanChaosPrimEditor.ViewModels
         /// </summary>
         private static TextureTile TextureTileFromSelection(int textureId, Rect selection)
         {
-            const int FacePageOffset = 64 * 11;
+            const int FacePageOffset = PrimFormatConstants.FacePageOffset;
             int page       = textureId + FacePageOffset;
             int texturePage = page / 64;
             int tileIdx    = page % 64;
@@ -778,6 +1037,8 @@ namespace UrbanChaosPrimEditor.ViewModels
         public ICommand SaveAsPrmCommand     { get; }
         public ICommand SaveAsObjCommand     { get; }
         public ICommand ApplyTextureToFaceCommand { get; }
+        public ICommand CancelTexturePreviewCommand { get; }
+        public ICommand ResetTextureRegionCommand { get; }
         public ICommand RotateTexture90Command    { get; }
         public ICommand ToggleTexturePaletteCommand { get; }
 
@@ -1124,11 +1385,13 @@ namespace UrbanChaosPrimEditor.ViewModels
             FilePath = filePath;
             FileName = Path.GetFileName(filePath);
             FileSize = new FileInfo(filePath).Length;
+            Thumbnail = PrmThumbnailService.GetThumbnail(filePath);
         }
 
         public string FilePath { get; }
         public string FileName { get; }
         public long   FileSize { get; }
+        public System.Windows.Media.ImageSource? Thumbnail { get; }
         public string FileSizeDisplay => FileSize < 1024
             ? $"{FileSize} B"
             : $"{FileSize / 1024.0:F1} KB";
@@ -1196,7 +1459,7 @@ namespace UrbanChaosPrimEditor.ViewModels
 
     public readonly record struct TextureTile(byte TexturePage, byte U0, byte V0, byte U1, byte V1, byte U2, byte V2, byte U3, byte V3)
     {
-        private const int FacePageOffset = 64 * 11;
+        private const int FacePageOffset = PrimFormatConstants.FacePageOffset;
 
         public static TextureTile FromTextureId(int textureId)
         {

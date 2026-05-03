@@ -1,5 +1,6 @@
 // Models/Viewport3D/Camera3D.cs
 using System.Windows.Media.Media3D;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMapEditor.Models.Viewport3D
 {
@@ -14,8 +15,8 @@ namespace UrbanChaosMapEditor.Models.Viewport3D
     /// </summary>
     public sealed class Camera3D
     {
-        public const double DefaultHeight = 192.0;  // ~3 storeys above ground
-        public const double PitchLimitRad = 1.5533; // 89° in radians
+        public const double DefaultHeight = CameraConstants.DefaultHeight;  // ~3 storeys above ground
+        public const double PitchLimitRad = CameraConstants.PitchLimitRad; // 89° in radians
 
         public double X { get; set; }
         public double Y { get; set; } = DefaultHeight;

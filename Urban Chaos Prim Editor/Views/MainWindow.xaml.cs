@@ -9,7 +9,10 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using UrbanChaosEditor.Shared.Views.Help;
+using UrbanChaosPrimEditor.Help;
 using UrbanChaosPrimEditor.Models;
+using UrbanChaosPrimEditor.Services;
 using UrbanChaosPrimEditor.ViewModels;
 using UrbanChaosPrimEditor.Views.Dialogs;
 
@@ -31,10 +34,10 @@ namespace UrbanChaosPrimEditor.Views
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-        private const int DWMWA_CAPTION_COLOR = 35;
-        private const int DWMWA_TEXT_COLOR = 36;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_USE_IMMERSIVE_DARK_MODE;
+        private const int DWMWA_CAPTION_COLOR = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_CAPTION_COLOR;
+        private const int DWMWA_TEXT_COLOR = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_TEXT_COLOR;
 
         private void OnSourceInitialized(object? sender, EventArgs e)
         {
@@ -66,19 +69,21 @@ namespace UrbanChaosPrimEditor.Views
         //   WASD + QE to fly; right-drag to look; scroll wheel adjusts speed.
 
         private double _camX, _camY, _camZ = -400;
+        private double _targetX, _targetY, _targetZ;
+        private double _orbitDistance = 400;
         private double _yawRad   = 0.0;   // yaw=0 looks toward +Z
         private double _pitchRad = 0.0;
 
         private double _speed = 200.0;
-        private const double MinSpeed    = 5.0;
-        private const double MaxSpeed    = 10000.0;
-        private const double MouseLookSensitivity = 0.006; // radians per screen pixel
+        private const double MinSpeed    = UrbanChaosEditor.Shared.Constants.CameraConstants.MinSpeed;
+        private const double MaxSpeed    = UrbanChaosEditor.Shared.Constants.CameraConstants.MaxSpeed;
+        private const double MouseLookSensitivity = UrbanChaosEditor.Shared.Constants.CameraConstants.MouseLookSensitivity; // radians per screen pixel
         private const double PitchLimit  = Math.PI / 2.0 * 0.98; // ~89°
 
         // Model rotation (applied to SceneVisual, independent of camera)
         private double _modelYawDeg   = 0.0;
         private double _modelPitchDeg = 0.0;
-        private const double ModelRotRate = 90.0; // degrees per second
+        private const double ModelRotRate = UrbanChaosEditor.Shared.Constants.CameraConstants.ModelRotRate; // degrees per second
         private readonly AxisAngleRotation3D _modelYawRotation   = new(new Vector3D(0, 1, 0), 0);
         private readonly AxisAngleRotation3D _modelPitchRotation = new(new Vector3D(1, 0, 0), 0);
 
@@ -124,7 +129,11 @@ namespace UrbanChaosPrimEditor.Views
             else if (e.PropertyName == nameof(MainWindowViewModel.SelectedTexture))
             {
                 // Clear the drag-selection overlay whenever a different texture is picked.
-                SelectionRect.Visibility = Visibility.Collapsed;
+                UpdateSelectionOverlayFromVm();
+            }
+            else if (e.PropertyName == nameof(MainWindowViewModel.TextureSelection))
+            {
+                UpdateSelectionOverlayFromVm();
             }
         }
 
@@ -145,6 +154,10 @@ namespace UrbanChaosPrimEditor.Views
             _camX    = 0;
             _camY    = 0;
             _camZ    = -(radius * 2.5);
+            _targetX = 0;
+            _targetY = 0;
+            _targetZ = 0;
+            _orbitDistance = Math.Max(radius * 2.5, 80.0);
             _yawRad  = 0;
             _pitchRad = 0;
             _speed   = Math.Max(MinSpeed, Math.Min(MaxSpeed, radius * 0.5));
@@ -165,17 +178,22 @@ namespace UrbanChaosPrimEditor.Views
             double sy = Math.Sin(_yawRad);
             double cy = Math.Cos(_yawRad);
 
+            var look = new Vector3D(cp * sy, sp, cp * cy);
+            _camX = _targetX - look.X * _orbitDistance;
+            _camY = _targetY - look.Y * _orbitDistance;
+            _camZ = _targetZ - look.Z * _orbitDistance;
+
             Camera.Position      = new Point3D(_camX, _camY, _camZ);
-            Camera.LookDirection = new Vector3D(cp * sy, sp, cp * cy);
+            Camera.LookDirection = look;
             Camera.UpDirection   = new Vector3D(0, 1, 0);
         }
 
         private void UpdateHud()
         {
-            HudCoords.Text    = $"X: {_camX,8:F1}   Y: {_camY,8:F1}   Z: {_camZ,8:F1}";
+            HudCoords.Text    = $"Target X: {_targetX,8:F1}   Y: {_targetY,8:F1}   Z: {_targetZ,8:F1}";
             HudOrient.Text    = $"Yaw: {_yawRad * 180 / Math.PI,6:F1}°   " +
                                 $"Pitch: {_pitchRad * 180 / Math.PI,5:F1}°   " +
-                                $"Speed: {_speed:F0}";
+                                $"Zoom: {_orbitDistance:F0}";
             HudModelRot.Text  = $"Model Yaw: {_modelYawDeg % 360,6:F1}°   " +
                                 $"Pitch: {_modelPitchDeg % 360,5:F1}°";
         }
@@ -262,9 +280,9 @@ namespace UrbanChaosPrimEditor.Views
                 double len = delta.Length;
                 if (len > 0) delta *= (speed * dt) / len;
 
-                _camX += delta.X;
-                _camY += delta.Y;
-                _camZ += delta.Z;
+                _targetX += delta.X;
+                _targetY += delta.Y;
+                _targetZ += delta.Z;
 
                 moved = true;
             }
@@ -323,8 +341,16 @@ namespace UrbanChaosPrimEditor.Views
                 return;
             }
 
-            // Every other tool needs a point under the cursor.
-            if (!TryPickMarker(pos, out int pointId)) return;
+            if (!TryPickMarker(pos, out int pointId))
+            {
+                if ((tool == PrimEditTool.Select || tool == PrimEditTool.MovePoint) &&
+                    TryPickFace(pos, out SelectedFaceHint faceHint))
+                {
+                    Vm.SelectFaceByHint(faceHint);
+                    e.Handled = true;
+                }
+                return;
+            }
 
             if (tool == PrimEditTool.MovePoint)
             {
@@ -414,7 +440,11 @@ namespace UrbanChaosPrimEditor.Views
         private void Viewport_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             double factor = e.Delta > 0 ? 1.25 : 0.8;
-            _speed = Math.Max(MinSpeed, Math.Min(MaxSpeed, _speed * factor));
+            _orbitDistance = Math.Clamp(
+                _orbitDistance / factor,
+                20.0,
+                Math.Max(1000.0, Vm.ThreeD.ModelRadius * 20.0));
+            PushCameraToWpf();
             UpdateHud();
             e.Handled = true;
         }
@@ -450,6 +480,34 @@ namespace UrbanChaosPrimEditor.Views
 
             if (found is null) return false;
             pointId = found.Value;
+            return true;
+        }
+
+        private bool TryPickFace(Point screenPos, out SelectedFaceHint faceHint)
+        {
+            faceHint = default;
+            var lookup = Vm.ThreeD?.FaceHitToFace;
+            if (lookup is null || lookup.Count == 0) return false;
+
+            SelectedFaceHint? found = null;
+            VisualTreeHelper.HitTest(
+                Viewport,
+                null,
+                result =>
+                {
+                    if (result is RayMeshGeometry3DHitTestResult r &&
+                        r.ModelHit is GeometryModel3D g &&
+                        lookup.TryGetValue(g, out SelectedFaceHint hint))
+                    {
+                        found = hint;
+                        return HitTestResultBehavior.Stop;
+                    }
+                    return HitTestResultBehavior.Continue;
+                },
+                new PointHitTestParameters(screenPos));
+
+            if (found is null) return false;
+            faceHint = found.Value;
             return true;
         }
 
@@ -589,6 +647,12 @@ namespace UrbanChaosPrimEditor.Views
             dlg.ShowDialog();
         }
 
+        private void ResetView_Click(object sender, RoutedEventArgs e)
+            => ResetCamera(Vm.ThreeD.ModelRadius);
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+            => HelpViewerWindow.ShowHelp("Urban Chaos Prim Editor - Help", PrimEditorHelpTopics.All, this);
+
         private void ToggleLeftPanel_Click(object sender, RoutedEventArgs e)
         {
             Vm.IsFileListPanelOpen = !Vm.IsFileListPanelOpen;
@@ -697,8 +761,28 @@ namespace UrbanChaosPrimEditor.Views
 
         private void ResetTextureSelection_Click(object sender, RoutedEventArgs e)
         {
-            SelectionRect.Visibility = Visibility.Collapsed;
             Vm.TextureSelection = new Rect(0, 0, 1, 1);
+            UpdateSelectionOverlayFromVm();
+        }
+
+        private void UpdateSelectionOverlayFromVm()
+        {
+            if (TextureSelectionCanvas.ActualWidth <= 0 || TextureSelectionCanvas.ActualHeight <= 0)
+                return;
+
+            Rect imageRect = GetTextureImageRect(TextureSelectionCanvas);
+            Rect selection = Vm.TextureSelection;
+
+            double x = imageRect.X + selection.X * imageRect.Width;
+            double y = imageRect.Y + selection.Y * imageRect.Height;
+            double w = selection.Width * imageRect.Width;
+            double h = selection.Height * imageRect.Height;
+
+            System.Windows.Controls.Canvas.SetLeft(SelectionRect, x);
+            System.Windows.Controls.Canvas.SetTop(SelectionRect, y);
+            SelectionRect.Width = Math.Max(w, 1);
+            SelectionRect.Height = Math.Max(h, 1);
+            SelectionRect.Visibility = Visibility.Visible;
         }
     }
 }

@@ -1,0 +1,159 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Legacy Event Points
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Event Point types that appear to have been developed, prototyped, or retained in the file/editor format, but did not make the final active mission workflow.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        About Legacy Event Points
+    </Paragraph>
+    <Paragraph>
+        Some Event Point types still appear in the editor even though they are not used by the final
+        release mission workflow. These are best treated as <Bold>legacy</Bold>,
+        <Bold>unused</Bold>, <Bold>scrapped</Bold>, or <Bold>partially implemented</Bold> mission
+        features.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        They are documented here so that users understand what they are seeing in the Event Point
+        list, but they should generally not be used when building a new playable mission unless you
+        are deliberately testing old or unfinished behaviour.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Legacy Event Points may still appear in the editor, but that does not mean they are safe or useful for new missions.
+                    Use active mission Event Points for normal objectives, triggers, NPCs, messages, counters, timers, and win/lose logic.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_legacy_eventpoints_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Legacy Event Point Reference
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Burn Prim</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended to set a prim/object on fire or change it to a burning state. This appears to be a
+        legacy or special-case object interaction and is not part of the normal current mission
+        workflow.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">AutoSave</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        At one point in development, automatic mission saving appears to have been planned. This was
+        scrapped. AutoSave should not be used for new missions and should not be relied on for
+        checkpoints, recovery, or mission progression.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Create Map Exit</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Appears to be an older or unused system for creating map exits or mission transition points.
+        Modern mission flow should use the active mission completion and transition systems instead.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Target WayPoint</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Appears to be an old camera or target path waypoint type. In final mission editing, active
+        camera, target, and waypoint logic should be used instead where applicable.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cut Scene</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended for embedded cutscene data or scripted cinematic playback. This appears to be a
+        legacy or unfinished path and is not recommended for new mission authoring unless specifically
+        testing old cutscene support.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Teleport</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended as a teleport entry or activation point. It appears to be legacy or unfinished in the
+        final mission workflow. Avoid relying on it for normal mission progression unless tested.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Teleport Target</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended as the paired destination for a Teleport Event Point. Like Teleport, this appears to
+        be legacy/unfinished and should be treated with caution.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Shout</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Appears to relate to old shout/dialogue trigger behaviour. Modern mission dialogue should use
+        the active message, conversation, radio, or text Event Points instead.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Create Bomb</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended to create a bomb or explosive object. It appears to be unused or special-case in the
+        final release workflow. Use current supported trap, object, or mission hazard Event Points
+        where available.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Interesting</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Likely a marker or debug/development Event Point used to mark a point of interest. It does
+        not appear to be part of the normal final mission scripting workflow.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dynamic Light</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Intended to create or control dynamic/animated light behaviour from mission data. Because
+        light files and the Light Editor now handle normal map lighting, this Event Point should be
+        treated as legacy/special-case unless deliberately testing dynamic light behaviour.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Go There Do This</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Appears to be an older high-level scripted instruction Event Point: send an actor somewhere
+        and perform an action. It does not appear to be part of the reliable final mission workflow
+        and should be avoided for new mission logic unless specifically tested.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Recommended Use
+    </Paragraph>
+    <Paragraph>
+        If you find these Event Points in an existing mission, leave a note explaining that they are
+        legacy/unused unless testing proves otherwise. If you are creating a new mission, use the
+        active Event Point types instead.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Use active <Bold>Create Player</Bold>, <Bold>Create NPC</Bold>, <Bold>Create Creature</Bold>, <Bold>Create Item</Bold>, and <Bold>Objective</Bold> logic for normal mission setup.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Dependency</Bold>, <Bold>Timer</Bold>, <Bold>Counter</Bold>, and <Bold>Radius</Bold> triggers for reliable mission sequencing.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use supported <Bold>Message</Bold>, <Bold>Conversation</Bold>, and <Bold>Nav Beacon</Bold> Event Points for player guidance.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>End Game Win</Bold> and <Bold>End Game Lose</Bold> for final mission outcomes.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

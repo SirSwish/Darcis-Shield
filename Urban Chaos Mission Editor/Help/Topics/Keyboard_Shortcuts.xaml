@@ -1,0 +1,24 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Keyboard Shortcuts</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Common mission actions available from the keyboard.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">File and Edit</Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,10">
+        <ListItem><Paragraph>Ctrl+N: New mission</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+O: Open mission</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+S: Save mission</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+Shift+S: Save as</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+W: Close file</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+M: Add event point</Paragraph></ListItem>
+        <ListItem><Paragraph>Delete: Delete selected event point</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+C / Ctrl+V: Copy and paste event point</Paragraph></ListItem>
+    </List>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">View</Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,10">
+        <ListItem><Paragraph>+: Zoom in</Paragraph></ListItem>
+        <ListItem><Paragraph>-: Zoom out</Paragraph></ListItem>
+        <ListItem><Paragraph>Ctrl+0: Reset zoom</Paragraph></ListItem>
+    </List>
+</FlowDocument>

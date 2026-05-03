@@ -134,22 +134,6 @@ namespace UrbanChaosStyleEditor.Views
             row.ChkTransparent = new CheckBox { Content = "Trans", Foreground = Brushes.White, FontSize = 10, Margin = new Thickness(0, 0, 6, 0) };
             row.ChkTiled = new CheckBox { Content = "Tile", Foreground = Brushes.White, FontSize = 10, Margin = new Thickness(0, 0, 6, 0) };
 
-            // Load flags from style if available
-            byte flags = 0;
-            if (index < _style.Pieces.Count && _style.Pieces[index] != null)
-            {
-                // Flags are stored separately in the TMA
-                // For now default to Textured
-                flags = 0x02;
-            }
-
-            // Check if style has explicit flags from a loaded TMA
-            if (_style is StyleEntry se && se.Pieces.Count > index)
-            {
-                // The StylePiece doesn't store flags directly - they come from the StyleEntry
-                // We'll handle this when we have flags on the entry
-            }
-
             row.ChkTextured.IsChecked = true; // Default
 
             flagsPanel.Children.Add(row.ChkFlipX);

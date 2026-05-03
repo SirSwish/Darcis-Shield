@@ -1,0 +1,107 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        AutoSave Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Legacy Event Point retained for documentation only. AutoSave is not used by the current release gameplay.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What AutoSave Was Intended To Do
+    </Paragraph>
+    <Paragraph>
+        The <Bold>AutoSave</Bold> Event Point appears to be a legacy mission feature from earlier
+        development. At one point, automatic mission saving was planned. The Event Point likely
+        existed so a mission could trigger an autosave when the player reached a certain point,
+        completed a section, or passed some internal checkpoint.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This system was scrapped. In the current release workflow, AutoSave is not used for normal
+        missions and should not be relied on for mission progression, checkpoints, recovery, or
+        gameplay scripting.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_autosave_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Do not use for new missions:</Run>
+                <Run>
+                    AutoSave is not in active use anymore. It is a leftover development feature and should be treated as legacy/scrapped.
+                    Use normal mission objectives, triggers, messages, timers, and win/lose Event Points instead.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Why It Still Appears
+    </Paragraph>
+    <Paragraph>
+        AutoSave may still appear in the Event Point type list because the editor and file format
+        expose older Event Point definitions. Not every Event Point in the list is useful in the
+        final release version of the game.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Some Event Points are active and important. Others are unused, partially implemented,
+        development-only, or retained for compatibility with old mission data. AutoSave belongs in
+        the legacy/unused category.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Behaviour in Current Missions
+    </Paragraph>
+    <Paragraph>
+        For current mission authoring, treat AutoSave as having no useful gameplay effect. Do not
+        build mission logic that depends on it. If you need the player to recover progress or advance
+        through a staged mission sequence, use proper mission logic instead.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Use <Bold>Objectives</Bold> and <Bold>Sub Objectives</Bold> to track mission progress.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Dependency</Bold> triggers to sequence mission events.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Messages</Bold>, <Bold>Conversations</Bold>, or <Bold>Nav Beacons</Bold> to guide the player.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Timers</Bold> and <Bold>Counters</Bold> for staged logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>End Game Win</Bold> or <Bold>End Game Lose</Bold> for mission completion or failure.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Recommended Documentation Note
+    </Paragraph>
+    <Paragraph>
+        If you encounter AutoSave in an old mission file, document it as a legacy Event Point and
+        verify whether the mission still behaves correctly without relying on it. If creating a new
+        mission, avoid adding AutoSave unless you are deliberately testing historical or unused
+        functionality.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Summary:</Run>
+                <Run>
+                    AutoSave was planned during development, but the feature was scrapped.
+                    It remains useful to document, but it is not useful for normal playable mission creation.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

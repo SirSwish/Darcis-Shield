@@ -1,0 +1,16 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Editor Roles</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Each editor owns a different part of the Urban Chaos data set.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">What Each Editor Is For</Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,10">
+        <ListItem><Paragraph><Bold>Map Editor:</Bold> IAM terrain, textures, buildings, roofs, walkables, cell altitudes, objects, and 3D map preview.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Light Editor:</Bold> LGT light placement, ranges, ambient lighting, and light map/stat exports.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission Editor:</Bold> UCM event points, zones, mission properties, and map/light overlays.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Style Editor:</Bold> custom texture sets, TMA styles, sky images, texture flags, and footstep groups.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Story Editor:</Bold> STY districts and mission entries.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Prim Editor:</Bold> PRM/NPRIM 3D models, point editing, face materials, OBJ import/export, and PRM saving.</Paragraph></ListItem>
+    </List>
+</FlowDocument>

@@ -42,6 +42,12 @@
         <StackPanel Grid.Row="0" Margin="0,0,0,15">
             <TextBlock Text="Select EventPoint Type" FontSize="18" FontWeight="Bold" Foreground="White"/>
             <TextBlock Text="Choose the type of EventPoint to create" FontSize="12" Foreground="#FF888888" Margin="0,5,0,0"/>
+            <CheckBox Content="Hide Legacy Event Points"
+                      IsChecked="{Binding HideLegacyEventPoints}"
+                      Foreground="#FFCCCCCC"
+                      FontSize="12"
+                      Margin="0,10,0,0"
+                      ToolTip="Hides EventPoint types that are obsolete or non-functional in Urban Chaos"/>
         </StackPanel>
 
         <!-- Search/Filter -->

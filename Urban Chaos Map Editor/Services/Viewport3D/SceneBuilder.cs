@@ -1,4 +1,4 @@
-// Services/Viewport3D/SceneBuilder.cs
+﻿// Services/Viewport3D/SceneBuilder.cs
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -15,6 +15,7 @@ using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.Services.Styles;
 using UrbanChaosMapEditor.Services.Textures;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMapEditor.Services.Viewport3D
 {
@@ -60,7 +61,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         // =====================================================================
         // TERRAIN
         // =====================================================================
-        public Model3D? BuildTerrain()
+        public Model3D? BuildTerrain(ViewportCullRegion? cull = null)
         {
             if (!MapDataService.Instance.IsLoaded) return null;
 
@@ -96,6 +97,14 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             {
                 for (int tx = 0; tx < N; tx++)
                 {
+                    double x0 = tx * tile;
+                    double x1 = x0 + tile;
+                    double z0 = ty * tile;
+                    double z1 = z0 + tile;
+
+                    if (cull.HasValue && !cull.Value.IntersectsBounds(x0, z0, x1, z1))
+                        continue;
+
                     string key;
                     int rot;
                     try { (key, rot) = _textures.GetTileTextureKeyAndRotation(tx, ty); }
@@ -118,12 +127,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     }
 
                     // Quad corners in 2D-canvas XZ.
-                    double x0 = tx * tile;
-                    double x1 = x0 + tile;
-                    double z0 = ty * tile;
-                    double z1 = z0 + tile;
-
-                    // If this cell has a roof, suppress terrain vertex heights entirely —
+                    // If this cell has a roof, suppress terrain vertex heights entirely â€”
                     // render it as a perfectly flat quad at the cell altitude.
                     PapFlags papFlags = PapFlags.None;
                     try { papFlags = _altitudes.ReadFlags(tx, ty); } catch { }
@@ -240,7 +244,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         // =====================================================================
         // FACETS (walls / roofs / etc.)
         // =====================================================================
-        public Model3D? BuildFacets()
+        public Model3D? BuildFacets(ViewportCullRegion? cull = null)
         {
             if (!MapDataService.Instance.IsLoaded) return null;
 
@@ -286,6 +290,20 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int N = MapConstants.TilesPerSide;
 
             TryResolveVariantAndWorld(out string? variant, out int worldNum);
+            if (worldNum <= 0)
+            {
+                try
+                {
+                    worldNum = _textures.ReadTextureWorld();
+                    variant = TextureCacheService.Instance.ActiveSet.Equals("beta", StringComparison.OrdinalIgnoreCase)
+                        ? "Beta"
+                        : "Release";
+                }
+                catch
+                {
+                    worldNum = 0;
+                }
+            }
             bool canTexture = worldNum > 0 && !string.IsNullOrEmpty(variant);
 
             // Facets are stored 1-based; index 0 is a sentinel.
@@ -299,6 +317,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 double z0 = (N - f.Z0) * tile;
                 double x1 = (N - f.X1) * tile;
                 double z1 = (N - f.Z1) * tile;
+
+                if (cull.HasValue && !cull.Value.IntersectsBounds(x0, z0, x1, z1))
+                    continue;
 
                 // Base Y from the stored endpoint Y. Y0/Y1 are in engine units
                 // (1 quarter-storey = 64, so 1 storey = 256); convert to view-Y.
@@ -355,7 +376,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
                             // Offset the ladder geometry slightly along the wall's outward normal
                             // so it always renders in front of the wall behind it.
-                            const double LadderBias = 3.0;
+                            double LadderBias = Scene3DConstants.LadderBias;
                             double wdx = x1 - x0, wdz = z1 - z0;
                             double wlen = Math.Sqrt(wdx * wdx + wdz * wdz);
                             double ox = wlen > 1e-6 ? ( wdz / wlen) * LadderBias : 0.0;
@@ -596,7 +617,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int panelsAcross = Math.Max(dxCells, dzCells);
             if (panelsAcross <= 0) return false;
 
-            // Fences always use a single panel stretched across the full height —
+            // Fences always use a single panel stretched across the full height â€”
             // one texture covers the whole fence regardless of how many storeys tall it is.
             int panelsDown = IsFenceFacetType(f.Type)
                 ? 1
@@ -922,7 +943,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         // =====================================================================
         // PRIMS (red spheres)
         // =====================================================================
-        public Model3D? BuildPrims()
+        public Model3D? BuildPrims(ViewportCullRegion? cull = null)
         {
             if (!MapDataService.Instance.IsLoaded) return null;
 
@@ -933,9 +954,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
             // Share one sphere mesh for all prims; place via one merged mesh (cheaper than per-prim visuals).
             var mesh = new MeshGeometry3D();
-            const double radius = 18.0;
-            const int stacks = 8;
-            const int slices = 10;
+            double radius = Scene3DConstants.CylinderRadius;
+            int stacks = Scene3DConstants.CylinderStacks;
+            int slices = Scene3DConstants.CylinderSlices;
 
             foreach (var p in snap.Prims)
             {
@@ -953,6 +974,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 // Prim Y: file value is in engine units (same convention as facet Y0/Y1).
                 double cy = p.Y * EngineToViewY;
 
+                if (cull.HasValue && !cull.Value.IntersectsBounds(cx - radius, cz - radius, cx + radius, cz + radius))
+                    continue;
+
                 AppendSphere(mesh, cx, cy, cz, radius, stacks, slices);
             }
 
@@ -969,7 +993,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         // =====================================================================
         // CABLES
         // =====================================================================
-        public Model3D? BuildCables()
+        public Model3D? BuildCables(ViewportCullRegion? cull = null)
         {
             if (!MapDataService.Instance.IsLoaded) return null;
 
@@ -994,6 +1018,14 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 double y2w = cable.WorldY2;
                 double z2w = cable.WorldZ2;
 
+                double sx1 = MapConstants.MapPixels - x1w / 4.0;
+                double sz1 = MapConstants.MapPixels - z1w / 4.0;
+                double sx2 = MapConstants.MapPixels - x2w / 4.0;
+                double sz2 = MapConstants.MapPixels - z2w / 4.0;
+
+                if (cull.HasValue && !cull.Value.IntersectsBounds(sx1, sz1, sx2, sz2))
+                    continue;
+
                 double dx = (x2w - x1w) / segments;
                 double dy = (y2w - y1w) / segments;
                 double dz = (z2w - z1w) / segments;
@@ -1015,8 +1047,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double sagOffset  = Math.Cos(rad) * sagBase;
                     double saggedCy   = cy - sagOffset;
 
-                    // Convert world coords → scene coords (same flip as facets).
-                    // WorldX = tileX*256  →  sceneX = (128-tileX)*64 = 8192 - WorldX/4
+                    // Convert world coords â†’ scene coords (same flip as facets).
+                    // WorldX = tileX*256  â†’  sceneX = (128-tileX)*64 = 8192 - WorldX/4
                     points[i] = new Point3D(
                         8192.0 - cx / 4.0,
                         saggedCy * EngineToViewY,
@@ -1132,7 +1164,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         }
 
         /// <summary>
-        /// Generates (or returns the cached) 64×64 procedural ladder tile.
+        /// Generates (or returns the cached) 64Ã—64 procedural ladder tile.
         /// The graphic is 67% of the tile width (centred), matching the 2D FacetPreviewWindow
         /// WidthScale.  Background is fully transparent so the wall behind shows through.
         /// </summary>
@@ -1140,11 +1172,11 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         {
             if (_ladderTile != null) return _ladderTile;
 
-            const int W = 64;
-            const int H = 64;
-            const int RailWidth = 4;
-            const int RungHeight = 4;
-            const int RunsPerPanel = 4;
+            int W = TextureFormatConstants.TileWidth;
+            int H = TextureFormatConstants.TileHeight;
+            int RailWidth = (int)Scene3DConstants.LadderRailWidth;
+            int RungHeight = (int)Scene3DConstants.LadderRungHeight;
+            int RunsPerPanel = Scene3DConstants.LadderRunsPerPanel;
             const double WidthScale = 0.67;
 
             // Ladder graphic occupies WidthScale of the tile width, centred.
@@ -1152,7 +1184,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             int xOffset = (W - ladderW) / 2;     // ~10 px on each side
 
             int stride = W * 4; // BGRA32
-            // byte[] default-initialises to 0 → transparent black everywhere.
+            // byte[] default-initialises to 0 â†’ transparent black everywhere.
             byte[] pixels = new byte[H * stride];
 
             // White vertical rails within the scaled-width zone.
@@ -1196,7 +1228,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             BuildingArrays snap,
             int worldNum,
             string? variant,
-            bool canTexture)
+            bool canTexture,
+            ViewportCullRegion? cull)
         {
             if (snap.Walkables == null || snap.Walkables.Length <= 1) return;
             if (snap.RoofFaces4 == null || snap.RoofFaces4.Length <= 1) return;
@@ -1233,7 +1266,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
                     var rf4 = snap.RoofFaces4[i];
 
-                    // Mask off high bits — they are flags, not coordinate bits.
+                    // Mask off high bits â€” they are flags, not coordinate bits.
                     int cellX = rf4.RX & 0x7F;
                     int cellZ = rf4.RZ & 0x7F;
 
@@ -1250,19 +1283,22 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double x1 = x0 + 64.0;
                     double z1 = z0 + 64.0;
 
+                    if (cull.HasValue && !cull.Value.IntersectsBounds(x0, z0, x1, z1))
+                        continue;
+
                     // Corner heights per spec (ROOF_SHIFT = 3):
                     //   NW = Y
                     //   NE = Y + DY0 * 8
                     //   SW = Y + DY2 * 8
                     //   SE = Y + DY1 * 8
-                    // Then swapped 180° (NW↔SE, NE↔SW) to correct the rendered orientation.
+                    // Then swapped 180Â° (NWâ†”SE, NEâ†”SW) to correct the rendered orientation.
                     double baseY = rf4.Y * EngineToViewY;
-                    double yNW = baseY + rf4.DY1 * DyToView;   // spec SE → rendered NW
-                    double yNE = baseY + rf4.DY2 * DyToView;   // spec SW → rendered NE
-                    double ySW = baseY + rf4.DY0 * DyToView;   // spec NE → rendered SW
-                    double ySE = baseY;                          // spec NW → rendered SE
+                    double yNW = baseY + rf4.DY1 * DyToView;   // spec SE â†’ rendered NW
+                    double yNE = baseY + rf4.DY2 * DyToView;   // spec SW â†’ rendered NE
+                    double ySW = baseY + rf4.DY0 * DyToView;   // spec NE â†’ rendered SW
+                    double ySE = baseY;                          // spec NW â†’ rendered SE
 
-                    // RX high bit: diagonal split direction only — no effect on heights.
+                    // RX high bit: diagonal split direction only â€” no effect on heights.
                     bool diagNWSE = (rf4.RX & 0x80) != 0;
 
                     if (canTexture)
@@ -1293,7 +1329,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         else
                         {
                             // Non-warehouse RF4: sample the normal floor/map texture that sits
-                            // on this cell — the RF4 tile must visually match the floor beneath it.
+                            // on this cell â€” the RF4 tile must visually match the floor beneath it.
                             string texKey;
                             int texRot;
                             try { (texKey, texRot) = _textures.GetTileTextureKeyAndRotation(wpfTx, wpfTy); }
@@ -1320,7 +1356,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                             }
                             else
                             {
-                                // Floor texture unavailable — neutral grey so tile is still visible.
+                                // Floor texture unavailable â€” neutral grey so tile is still visible.
                                 fallbackMesh ??= new MeshGeometry3D();
                                 AddRf4Quad(fallbackMesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
                             }
@@ -1404,7 +1440,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 mesh.TriangleIndices.Add(baseIdx + 2);
             }
         }
-        public Model3D? BuildRoofTiles()
+        public Model3D? BuildRoofTiles(ViewportCullRegion? cull = null)
         {
             if (!MapDataService.Instance.IsLoaded) return null;
 
@@ -1416,7 +1452,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             bool canTexture = worldNum > 0 && !string.IsNullOrEmpty(variant);
 
             var group = new Model3DGroup();
-            AppendRoofFace4s(group, snap, worldNum, variant, canTexture);
+            AppendRoofFace4s(group, snap, worldNum, variant, canTexture, cull);
 
             if (group.Children.Count == 0)
                 return null;

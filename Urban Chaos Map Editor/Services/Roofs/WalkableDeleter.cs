@@ -1,5 +1,6 @@
 // /Services/Buildings/WalkableDeleter.cs
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
@@ -35,10 +36,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
     {
         private readonly MapDataService _svc;
 
-        private const int HeaderSize = 48;
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
-        private const int DBuildingSize = 24;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
 
         public WalkableDeleter(MapDataService svc)
         {

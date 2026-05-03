@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Heights;
 using UrbanChaosMapEditor.Models.Prims;
@@ -25,12 +26,9 @@ namespace UrbanChaosMapEditor.Views.Core
 {
     public partial class MapView : UserControl
     {
-        private const double ZoomStep = 1.10;
-        private const double MinZoom = 0.10;
-        private const double MaxZoom = 8.00;
-
-        private bool _isSettingAltitude;
-        private HashSet<(int, int)>? _altitudePaintedTiles;
+        private const double ZoomStep = EditorUiConstants.MapZoomStep;
+        private const double MinZoom = EditorUiConstants.MinMapZoom;
+        private const double MaxZoom = EditorUiConstants.MaxMapZoom;
 
         private bool _isDrawingWalkableRect;
 
@@ -38,18 +36,24 @@ namespace UrbanChaosMapEditor.Views.Core
         private bool _isTextureStrokePainting;
         private Point _textureMouseDownPos;
         private HashSet<(int, int)>? _texturePaintedTiles;
-        private const double TextureDragThreshold = 16.0;
+        private const double TextureDragThreshold = EditorUiConstants.TextureDragThreshold;
 
         private readonly HeightsAccessor _heights = new HeightsAccessor(MapDataService.Instance);
         private AltitudeAccessor? _altitude = new AltitudeAccessor(MapDataService.Instance);
 
         private bool _isLeveling = false;
         private sbyte _levelSource;
-        private (int tx, int ty)? _lastLeveledTile;
 
         private MapViewModel? _hookedVm;
 
         public event EventHandler? WalkableDrawingCompleted;
+
+        /// <summary>
+        /// The 8192×8192 layered grid that holds all rendered overlays.
+        /// Exposed for the map-image export feature so it can render this
+        /// element to a RenderTargetBitmap.
+        /// </summary>
+        public Grid ExportSurface => Surface;
 
         private sealed class FacetHitCandidate
         {
@@ -407,7 +411,6 @@ namespace UrbanChaosMapEditor.Views.Core
                     _texturePaintedTiles = null;
                     _isDrawingWalkableRect = false;
                     _isLeveling = false;
-                    _lastLeveledTile = null;
 
                     UpdateOverlayHitTesting();
                 });
@@ -908,7 +911,6 @@ namespace UrbanChaosMapEditor.Views.Core
                 case EditorTool.LevelHeight:
                     _levelSource = _heights.ReadHeight(baseTx, baseTy);
                     _isLeveling = true;
-                    _lastLeveledTile = null;
                     CaptureMouse();
 
                     ForEachVertexInBrush(vx, vy, vm.BrushSize, (tx, ty) => ApplyHeightToTile(tx, ty, _levelSource));
@@ -1045,13 +1047,6 @@ namespace UrbanChaosMapEditor.Views.Core
                 int uiX = (int)Math.Clamp(p.X, 0, MapConstants.MapPixels);
                 int uiZ = (int)Math.Clamp(p.Y, 0, MapConstants.MapPixels);
                 vm.UpdateLadderPlacementPreview(uiX, uiZ);
-            }
-
-            if (vm.IsPlacingDoor)
-            {
-                int uiX = (int)Math.Clamp(p.X, 0, MapConstants.MapPixels);
-                int uiZ = (int)Math.Clamp(p.Y, 0, MapConstants.MapPixels);
-                vm.UpdateDoorPlacementPreview(uiX, uiZ);
             }
 
             if (vm.IsPlacingCable)
@@ -1257,7 +1252,6 @@ namespace UrbanChaosMapEditor.Views.Core
             if (_isLeveling)
             {
                 _isLeveling = false;
-                _lastLeveledTile = null;
                 ReleaseMouseCapture();
                 e.Handled = true;
             }
@@ -1746,7 +1740,6 @@ namespace UrbanChaosMapEditor.Views.Core
         private void OnLostMouseCapture(object? sender, MouseEventArgs e)
         {
             _isLeveling = false;
-            _lastLeveledTile = null;
 
             _isTextureDragging = false;
             _isTextureStrokePainting = false;
@@ -1778,7 +1771,6 @@ namespace UrbanChaosMapEditor.Views.Core
                 _heights.WriteHeight(tx, ty, value);
                 HeightsOverlay?.InvalidateVisual();
             }
-            _lastLeveledTile = (tx, ty);
         }
 
         /// <summary>
@@ -1838,7 +1830,6 @@ namespace UrbanChaosMapEditor.Views.Core
             if (_isLeveling)
             {
                 _isLeveling = false;
-                _lastLeveledTile = null;
                 if (IsMouseCaptured) ReleaseMouseCapture();
             }
 
@@ -1950,7 +1941,6 @@ namespace UrbanChaosMapEditor.Views.Core
             if (_isLeveling)
             {
                 _isLeveling = false;
-                _lastLeveledTile = null;
                 if (IsMouseCaptured) ReleaseMouseCapture();
             }
 
@@ -2302,10 +2292,10 @@ namespace UrbanChaosMapEditor.Views.Core
             if (bytes == null || bytes.Length < 8)
                 return;
 
-            const int HeaderBytes = 8;
-            const int BytesPerTile = 6;
-            const int TilesPerSide = 128;
-            const int OffFlags = 2;
+            const int HeaderBytes = UrbanChaosEditor.Shared.Constants.TextureFormatConstants.HeaderBytes;
+            const int BytesPerTile = UrbanChaosEditor.Shared.Constants.TextureFormatConstants.BytesPerTile;
+            const int TilesPerSide = UrbanChaosEditor.Shared.Models.SharedMapConstants.TilesPerSide;
+            int OffFlags = MapFormatConstants.PapFlagsByteIndex;
 
             // Match the same UI->file mapping style already used elsewhere in MapView.
             int fx = TilesPerSide - 1 - ty;

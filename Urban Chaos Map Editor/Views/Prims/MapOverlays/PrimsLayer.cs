@@ -217,7 +217,6 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
         }
 
         // -------- Existing move drag state (kept) --------
-        private bool _dragStarted;
         // _pressedIndex and _pressedItem are declared above (shared with yaw)
 
         protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)

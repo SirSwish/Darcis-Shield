@@ -1,0 +1,320 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Using the 3D Preview
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to preview light files in 3D, toggle lighting effects, control map layers, and navigate the viewport.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OPENING THE 3D PREVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Opening the 3D Preview
+    </Paragraph>
+    <Paragraph>
+        The <Bold>3D Preview</Bold> allows you to view the loaded map and light file from a
+        three-dimensional perspective. This is useful for checking how ambient lighting, individual
+        light entries, buildings, objects, and roof tiles appear together.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        There are two ways to open the 3D Preview:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Press the keyboard shortcut
+                <Bold>Ctrl+3</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Press the <Bold>3D</Bold> button in the layer controls section, next to the
+                <Bold>Ranges</Bold> layer button.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_open_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- WHAT THE 3D PREVIEW SHOWS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        What the 3D Preview Shows
+    </Paragraph>
+    <Paragraph>
+        The 3D Preview renders the loaded map using the current light file settings. It applies
+        the ambient light filter and displays placed light entries, giving a reasonably accurate
+        preview of how the lighting will appear in game.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This makes it easier to judge whether the map is too dark, too bright, too strongly tinted,
+        or whether individual lights are positioned correctly.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_view.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>
+                    The 3D Preview is intended as a fast visual guide. For final testing, always check important lighting changes in game as well.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- LIGHTING TOGGLES -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Lighting Toggles
+    </Paragraph>
+    <Paragraph>
+        The 3D Preview includes lighting checkboxes that allow you to quickly compare the scene
+        with different lighting effects enabled or disabled.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Ambient Filter
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The <Bold>Ambient Filter</Bold> checkbox controls whether the global ambient colour filter
+        is applied to the 3D view. Untick this box to temporarily disable the ambient filter and
+        compare the map without the overall colour tint.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_ambient_off_comparison.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Lights
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The <Bold>Lights</Bold> checkbox controls whether individual placed lights are rendered
+        in the 3D view. Untick this box to hide the light contribution and view the map without
+        active light entries.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_lights_off_comparison.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_lighting_toggles.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Toggle Ambient Filter and Lights on and off while previewing the same area. This makes it easier to see which parts of the scene are affected by the global lighting and which parts are affected by individual light entries.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- MAP LAYERS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        3D Map Layers
+    </Paragraph>
+    <Paragraph>
+        As with the Map Editor 3D Viewport, the Light Editor 3D Preview allows individual map
+        layers to be switched on and off. This helps you focus on specific parts of the scene while
+        testing lighting.
+    </Paragraph>
+
+    <Paragraph Margin="0,6,0,2">
+        The available map layers include:
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Textures</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Shows the ground texture cells from the loaded map.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Prim Objects</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Shows placed prim objects, such as street lamps, vehicles, crates, and other map objects.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Buildings</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Shows building facets and other structural geometry.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Roof Tiles</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Shows roof tile geometry, allowing you to preview rooftop surfaces and elevated areas.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_map_layers.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- CAMERA CONTROLS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Camera Controls
+    </Paragraph>
+    <Paragraph>
+        Use the keyboard to move through the 3D Preview and inspect the map from different angles.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/using_3d_preview_camera_controls.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <StackPanel>
+                <TextBlock Foreground="#E0E0E0" FontWeight="SemiBold" Margin="0,0,0,6">
+                    Movement
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">W</Run><Run> — Move forward</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">S</Run><Run> — Move backward</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">A</Run><Run> — Strafe left</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">D</Run><Run> — Strafe right</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">Q</Run><Run> — Lower the camera</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">E</Run><Run> — Raise the camera</Run>
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">Shift</Run><Run> — Hold to sprint / move faster</Run>
+                </TextBlock>
+
+                <TextBlock Foreground="#E0E0E0" FontWeight="SemiBold" Margin="0,10,0,6">
+                    Looking Around
+                </TextBlock>
+                <TextBlock Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,3">
+                    <Run FontWeight="Bold" Foreground="#E8B84B">Arrow Keys</Run><Run> — Look around the scene</Run>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- RECOMMENDED WORKFLOW -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Recommended Preview Workflow
+    </Paragraph>
+    <Paragraph>
+        A useful workflow when checking a light file is:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open the associated map and light file.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Open the 3D Preview using <Bold>Ctrl+3</Bold> or the <Bold>3D</Bold> button.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Navigate to an area containing lights, buildings, and objects.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Toggle <Bold>Ambient Filter</Bold> to compare the scene with and without the global colour filter.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Toggle <Bold>Lights</Bold> to compare the scene with and without placed light entries.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Switch map layers on or off to isolate textures, objects, buildings, or roof tiles.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Return to the Light Editor to adjust light positions, ranges, colours, or map properties as needed.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- IMPORTANT NOTE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer Margin="0,10,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>
+                    The 3D Preview gives a strong approximation of the final lighting, but the actual game renderer may still differ slightly. Use it for fast editing feedback, then test important lighting changes in game.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

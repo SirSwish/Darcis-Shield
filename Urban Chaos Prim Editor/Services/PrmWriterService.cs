@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosPrimEditor.Models;
 
 namespace UrbanChaosPrimEditor.Services
 {
     public sealed class PrmWriterService
     {
-        private const int PointSize = 6;
-        private const int TriangleSize = 28;
-        private const int QuadrangleSize = 34;
-        private const int NprimHeaderSize = 50;
-        private const int PrimHeaderSize = 56;
+        private const int PointSize = PrimFormatConstants.PointSize;
+        private const int TriangleSize = PrimFormatConstants.TriangleSize;
+        private const int QuadrangleSize = PrimFormatConstants.QuadrangleSize;
+        private const int NprimHeaderSize = PrimFormatConstants.NprimHeaderSize;
+        private const int PrimHeaderSize = PrimFormatConstants.PrimHeaderSize;
 
         public byte[] Encode(PrmModel model, byte[] originalBytes)
         {

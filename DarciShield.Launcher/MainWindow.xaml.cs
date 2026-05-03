@@ -2,6 +2,9 @@
 using System.IO;
 using System.Windows;
 
+using DarciShield.Launcher.Help;
+using UrbanChaosEditor.Shared.Views.Help;
+
 namespace DarciShield.Launcher
 {
     public partial class MainWindow : Window
@@ -214,6 +217,9 @@ namespace DarciShield.Launcher
         {
             Close(); // or Application.Current.Shutdown();
         }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+            => HelpViewerWindow.ShowHelp("Darci's Shield - Help", LauncherHelpTopics.All, this);
 
     }
 }

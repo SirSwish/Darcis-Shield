@@ -1,3 +1,4 @@
+using UrbanChaosEditor.Shared.Constants;
 // Views/EditorTabs/BuildingsTab.xaml.cs
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +21,6 @@ namespace UrbanChaosMapEditor.Views.Buildings
 {
     public partial class BuildingsTab : UserControl
     {
-        private bool _isWaitingForWalkableDrawing;
-
         // True only for a brief window when the user has physically interacted
         // with the FacetsList (mouse click or keyboard arrow/home/end/page).
         // Jump-to-facet is gated on this flag so programmatic SelectedFacet

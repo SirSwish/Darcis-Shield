@@ -10,9 +10,26 @@ namespace UrbanChaosMissionEditor.ViewModels;
 /// </summary>
 public class NewEventPointDialogViewModel : BaseViewModel
 {
+    private static readonly HashSet<WaypointType> LegacyWaypointTypes = new()
+    {
+        WaypointType.BurnPrim,
+        WaypointType.Autosave,
+        WaypointType.CreateMapExit,
+        WaypointType.TargetWaypoint,
+        WaypointType.CutScene,
+        WaypointType.Teleport,
+        WaypointType.TeleportTarget,
+        WaypointType.Shout,
+        WaypointType.CreateBomb,
+        WaypointType.Interesting,
+        WaypointType.DynamicLight,
+        WaypointType.GothereDothis,
+    };
+
     private string _searchText = string.Empty;
     private WaypointTypeItem? _selectedType;
     private ObservableCollection<WaypointTypeItem> _filteredTypes = new();
+    private bool _hideLegacyEventPoints = true;
 
     public NewEventPointDialogViewModel()
     {
@@ -78,6 +95,18 @@ public class NewEventPointDialogViewModel : BaseViewModel
 
     public bool HasSelection => SelectedType != null;
 
+    public bool HideLegacyEventPoints
+    {
+        get => _hideLegacyEventPoints;
+        set
+        {
+            if (SetProperty(ref _hideLegacyEventPoints, value))
+            {
+                ApplyFilter();
+            }
+        }
+    }
+
     /// <summary>
     /// Get the selected WaypointType value
     /// </summary>
@@ -85,9 +114,16 @@ public class NewEventPointDialogViewModel : BaseViewModel
 
     private void ApplyFilter()
     {
+        IEnumerable<WaypointTypeItem> source = AllWaypointTypes;
+
+        if (_hideLegacyEventPoints)
+        {
+            source = source.Where(t => !LegacyWaypointTypes.Contains(t.Type));
+        }
+
         var filtered = string.IsNullOrWhiteSpace(_searchText)
-            ? AllWaypointTypes.ToList()
-            : AllWaypointTypes
+            ? source.ToList()
+            : source
                 .Where(t => t.DisplayName.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
                            t.Category.ToString().Contains(_searchText, StringComparison.OrdinalIgnoreCase))
                 .ToList();

@@ -1,3 +1,4 @@
+using UrbanChaosEditor.Shared.Constants;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -29,7 +30,7 @@ namespace UrbanChaosMapEditor.Views.Prims.Dialogs
         public byte InsideIndexValue { get; private set; }
         public int ResultHeight { get; private set; }
 
-        private const double VisualHeightPx = 64.0;   // one tile only
+        private const double VisualHeightPx = EditorUiConstants.WallCanvasHeight;   // one tile only
         private bool _dragging;
 
         // Height state

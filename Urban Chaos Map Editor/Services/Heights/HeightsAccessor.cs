@@ -1,4 +1,5 @@
 // /Services/Accessors/HeightsAccessor.cs
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -13,9 +14,9 @@ namespace UrbanChaosMapEditor.Services.Heights
     public sealed class HeightsAccessor
     {
         private readonly MapDataService _data;
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
-        private const int HeightByteIndex = 4; // 0-based within the 6-byte slice
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
+        private const int HeightByteIndex = MapFormatConstants.HeightByteIndex; // 0-based within the 6-byte slice
 
         public HeightsAccessor(MapDataService data)
         {

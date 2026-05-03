@@ -1,0 +1,29 @@
+Mission Editor Help Image Manifest - Part 3 Target EP Fix
+=====================================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateCreatureEventPoint.xaml
+-----------------------------
+mission_creature_overview.png
+mission_creature_add_type.png
+mission_creature_common_properties.png
+mission_creature_type_count.png
+mission_creature_trigger_settings.png
+mission_creature_rotate_facing.png
+
+CreateNpcEnemyEventPoint.xaml
+-----------------------------
+mission_npc_overview.png
+mission_npc_grouping_example.png
+mission_npc_two_cops_example.png
+mission_npc_edit_window.png
+mission_adjust_npc_overview.png
+mission_adjust_npc_target_ep.png
+
+NpcMovementAiFlagsReference.xaml
+--------------------------------
+mission_npc_movement_settings.png
+mission_npc_ai_type_settings.png
+mission_npc_flags_panel.png

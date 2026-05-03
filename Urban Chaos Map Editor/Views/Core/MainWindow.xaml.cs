@@ -5,10 +5,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Models.Prims;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
+using UrbanChaosMapEditor.Services.Export;
 using UrbanChaosMapEditor.Services.Prims;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosMapEditor.ViewModels.Core;
@@ -22,17 +24,14 @@ namespace UrbanChaosMapEditor.Views.Core
 {
     public partial class MainWindow : Window
     {
-        private bool _heightHotkeyLatched;
         private PrimListItem? _copiedPrim;
         private bool _lastCopyWasPrim;
         private (short Y, sbyte DY0, sbyte DY1, sbyte DY2, byte DrawFlags)? _copiedRf4;
         private bool _lastCopyWasRf4;
-        private const double MinExpandedEditorWidth = 300;
-        private const double CollapsedRailWidth = 28;
-        private double _lastDrawerWidth = MinExpandedEditorWidth;
-
-        private const double EditorDrawerMinOpenWidth = 366.0;
-        private const double EditorDrawerMaxWidth = 600.0;
+        private const double MinExpandedEditorWidth = EditorUiConstants.MinExpandedEditorWidth;
+        private const double CollapsedRailWidth = EditorUiConstants.CollapsedRailWidth;
+        private const double EditorDrawerMinOpenWidth = EditorUiConstants.EditorDrawerMinOpenWidth;
+        private const double EditorDrawerMaxWidth = EditorUiConstants.EditorDrawerMaxWidth;
 
         private double _lastOpenDrawerWidth = EditorDrawerMinOpenWidth;
 
@@ -49,7 +48,6 @@ namespace UrbanChaosMapEditor.Views.Core
             Loaded += OnLoaded;
 
             AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), handledEventsToo: true);
-            AddHandler(Keyboard.PreviewKeyUpEvent, new KeyEventHandler(MainWindow_PreviewKeyUp), handledEventsToo: true);
 
             CommandBindings.Add(new CommandBinding(Open3DViewportCommand, (_, __) => Open3DViewport()));
         }
@@ -91,10 +89,10 @@ namespace UrbanChaosMapEditor.Views.Core
         [DllImport("uxtheme.dll", EntryPoint = "#136", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern void FlushMenuThemes();
 
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-        private const int DWMWA_CAPTION_COLOR = 35;
-        private const int DWMWA_TEXT_COLOR = 36;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_USE_IMMERSIVE_DARK_MODE;
+        private const int DWMWA_CAPTION_COLOR = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_CAPTION_COLOR;
+        private const int DWMWA_TEXT_COLOR = UrbanChaosEditor.Shared.Constants.WindowsInteropConstants.DWMWA_TEXT_COLOR;
 
         /// <summary>
         /// Called when window handle is available - best time to set DWM attributes
@@ -699,12 +697,6 @@ namespace UrbanChaosMapEditor.Views.Core
             }
         }
 
-        private void MainWindow_PreviewKeyUp(object? sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-                _heightHotkeyLatched = false;
-        }
-
         private void PrimHeight_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel shell) return;
@@ -876,6 +868,222 @@ namespace UrbanChaosMapEditor.Views.Core
         private void About_Click(object sender, RoutedEventArgs e)
         {
             new AboutWindow { Owner = this }.ShowDialog();
+        }
+
+        private async void ExportCurrentMap_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show(this, "No map is loaded.", "Export Map",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var dlg = new ExportMapDialog { Owner = this };
+            if (dlg.ShowDialog() != true) return;
+
+            var sourcePath = MapDataService.Instance.CurrentPath;
+            var defaultName = string.IsNullOrEmpty(sourcePath)
+                ? "map-IMG.png"
+                : $"{System.IO.Path.GetFileNameWithoutExtension(sourcePath)}-IMG.png";
+
+            var sfd = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Export Map as PNG",
+                Filter = "PNG image (*.png)|*.png",
+                FileName = defaultName,
+                AddExtension = true,
+                DefaultExt = ".png",
+            };
+            if (sfd.ShowDialog(this) != true) return;
+
+            await RunExportAsync(async () =>
+                await MapImageExporter.ExportAsync(MapViewControl, dlg.Selection, sfd.FileName));
+        }
+
+        private async void ExportSelectedMaps_Click(object sender, RoutedEventArgs e)
+        {
+            if (MapDataService.Instance.HasChanges)
+            {
+                var resp = MessageBox.Show(this,
+                    "The current map has unsaved changes. Batch export will load other maps in turn and the current changes would be lost. Continue without saving?",
+                    "Unsaved Changes",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                if (resp != MessageBoxResult.OK) return;
+            }
+
+            var ofd = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select Maps to Export",
+                Filter = "Urban Chaos Map (*.iam)|*.iam|All Files (*.*)|*.*",
+                Multiselect = true,
+            };
+            if (ofd.ShowDialog(this) != true || ofd.FileNames.Length == 0) return;
+            var mapPaths = ofd.FileNames;
+
+            var dlg = new ExportMapDialog { Owner = this };
+            if (dlg.ShowDialog() != true) return;
+
+            var folder = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Choose output folder",
+            };
+            if (folder.ShowDialog(this) != true) return;
+            var outDir = folder.FolderName;
+
+            var originalPath = MapDataService.Instance.CurrentPath;
+
+            await RunExportAsync(async () =>
+            {
+                int ok = 0, fail = 0;
+                foreach (var mapPath in mapPaths)
+                {
+                    try
+                    {
+                        await MapDataService.Instance.LoadAsync(mapPath);
+
+                        // Let the layers refresh from MapLoaded events before snapshotting.
+                        await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
+                        var outPath = MapImageExporter.BuildOutputFileName(mapPath, outDir);
+                        await MapImageExporter.ExportAsync(MapViewControl, dlg.Selection, outPath);
+                        ok++;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ExportSelectedMaps] {mapPath}: {ex}");
+                        fail++;
+                    }
+                }
+
+                // Restore the originally-loaded map (if any).
+                try
+                {
+                    if (!string.IsNullOrEmpty(originalPath) && System.IO.File.Exists(originalPath))
+                        await MapDataService.Instance.LoadAsync(originalPath);
+                    else
+                        MapDataService.Instance.Clear();
+                }
+                catch { /* ignore restore failures */ }
+
+                MessageBox.Show(this,
+                    $"Exported {ok} map(s) to:\n{outDir}" + (fail > 0 ? $"\n\n{fail} map(s) failed — see Debug output." : ""),
+                    "Export Complete",
+                    MessageBoxButton.OK, fail > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            });
+        }
+
+        private async void ExportCurrentMapStats_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MapDataService.Instance.IsLoaded)
+            {
+                MessageBox.Show(this, "No map is loaded.", "Export Stats",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var sourcePath = MapDataService.Instance.CurrentPath;
+            var defaultName = string.IsNullOrEmpty(sourcePath)
+                ? "map-Stats.txt"
+                : $"{System.IO.Path.GetFileNameWithoutExtension(sourcePath)}-Stats.txt";
+
+            var sfd = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Export Map Stats",
+                Filter = "Text file (*.txt)|*.txt",
+                FileName = defaultName,
+                AddExtension = true,
+                DefaultExt = ".txt",
+            };
+            if (sfd.ShowDialog(this) != true) return;
+
+            await RunExportAsync(async () =>
+                await MapStatsExporter.ExportAsync(MapDataService.Instance, sfd.FileName));
+        }
+
+        private async void ExportSelectedMapsStats_Click(object sender, RoutedEventArgs e)
+        {
+            if (MapDataService.Instance.HasChanges)
+            {
+                var resp = MessageBox.Show(this,
+                    "The current map has unsaved changes. Batch export will load other maps in turn and the current changes would be lost. Continue without saving?",
+                    "Unsaved Changes",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel);
+                if (resp != MessageBoxResult.OK) return;
+            }
+
+            var ofd = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select Maps to Export Stats",
+                Filter = "Urban Chaos Map (*.iam)|*.iam|All Files (*.*)|*.*",
+                Multiselect = true,
+            };
+            if (ofd.ShowDialog(this) != true || ofd.FileNames.Length == 0) return;
+            var mapPaths = ofd.FileNames;
+
+            var folder = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Choose output folder",
+            };
+            if (folder.ShowDialog(this) != true) return;
+            var outDir = folder.FolderName;
+
+            var originalPath = MapDataService.Instance.CurrentPath;
+
+            await RunExportAsync(async () =>
+            {
+                int ok = 0, fail = 0;
+                foreach (var mapPath in mapPaths)
+                {
+                    try
+                    {
+                        await MapDataService.Instance.LoadAsync(mapPath);
+                        var outPath = MapStatsExporter.BuildOutputFileName(mapPath, outDir);
+                        await MapStatsExporter.ExportAsync(MapDataService.Instance, outPath);
+                        ok++;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ExportSelectedMapsStats] {mapPath}: {ex}");
+                        fail++;
+                    }
+                }
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(originalPath) && System.IO.File.Exists(originalPath))
+                        await MapDataService.Instance.LoadAsync(originalPath);
+                    else
+                        MapDataService.Instance.Clear();
+                }
+                catch { /* ignore restore failures */ }
+
+                MessageBox.Show(this,
+                    $"Exported stats for {ok} map(s) to:\n{outDir}" + (fail > 0 ? $"\n\n{fail} map(s) failed — see Debug output." : ""),
+                    "Export Complete",
+                    MessageBoxButton.OK, fail > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            });
+        }
+
+        private async Task RunExportAsync(Func<Task> action)
+        {
+            Cursor previous = Cursor;
+            try
+            {
+                Cursor = Cursors.Wait;
+                IsEnabled = false;
+                await action();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Export failed: {ex.Message}", "Export Map",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsEnabled = true;
+                Cursor = previous;
+            }
         }
     }
 }

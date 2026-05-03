@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+using UrbanChaosEditor.Shared.Constants;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -118,7 +119,7 @@ namespace UrbanChaosLightEditor.Views.Dialogs
         }
 
         // Canvas height in pixels — must match Wall Height in XAML.
-        private const double WallCanvasHeight = 64.0;
+        private const double WallCanvasHeight = EditorUiConstants.WallCanvasHeight;
 
         private void UpdateHeightUi()
         {

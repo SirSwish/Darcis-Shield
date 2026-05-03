@@ -1,0 +1,128 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Exporting PRM Objects
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to save a completed PRM object for use in Urban Chaos or export it as OBJ for another editor.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- SAVE AS PRM -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Saving as PRM
+    </Paragraph>
+    <Paragraph>
+        Once the object has been modelled, textured, and configured, save it as a PRM file using
+        <Bold>Save As PRM</Bold>. This opens a save dialog in the prim directory and allows you to
+        choose the PRM file name or slot to overwrite.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_export_save_as_prm.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Urban Chaos loads prims by number. The engine checks
+        <Run FontFamily="Consolas" Foreground="#E8B84B">NPRIM</Run>
+        entries first, and if no matching file is found there, it then checks
+        <Run FontFamily="Consolas" Foreground="#E8B84B">PRIM</Run>
+        entries. This means the file name and slot number matter.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        At the moment, all 255 prim slots are considered occupied. If you are adding a custom object,
+        you normally need to overwrite an existing slot. Refer to the project documentation or wiki
+        for PRM objects that are not used or make good overwrite candidates.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Always keep backups of original PRM files before overwriting game files.
+                    Once a slot is replaced, maps that reference that prim number may show your new object instead.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- EXPORT OBJ -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Exporting as OBJ
+    </Paragraph>
+    <Paragraph>
+        You can also export the current model as an
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.OBJ</Run>
+        file by selecting <Bold>Export OBJ</Bold>. This is useful if you want to continue editing the
+        object in another 3D package or keep an interchange-format backup of the mesh.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        OBJ export is separate from game export. Saving as OBJ does not make the object available to
+        the game. To use the object in Urban Chaos, it must still be saved as a PRM file in the
+        correct prim directory and referenced by the appropriate prim number.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_export_obj.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- FINAL CHECKS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Before Exporting
+    </Paragraph>
+    <Paragraph>
+        Before saving a final PRM, check the following:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>The texture directory is correct and all textures display properly.</Paragraph></ListItem>
+        <ListItem><Paragraph>Every face that should be visible has a texture assigned.</Paragraph></ListItem>
+        <ListItem><Paragraph>UV regions are correct and are not accidentally using the wrong part of a texture.</Paragraph></ListItem>
+        <ListItem><Paragraph>Collision type, damage type, shadow type, and object flags are set appropriately.</Paragraph></ListItem>
+        <ListItem><Paragraph>The object is low-poly enough for practical game use.</Paragraph></ListItem>
+        <ListItem><Paragraph>The model stays below the approximate 5000-vertex engine limit.</Paragraph></ListItem>
+        <ListItem><Paragraph>You have backed up the original PRM file if you are overwriting an existing slot.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Recommended Export Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Set the texture directory.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the game prim directory.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create, import, or load the model.</Paragraph></ListItem>
+        <ListItem><Paragraph>Edit geometry and confirm the face structure.</Paragraph></ListItem>
+        <ListItem><Paragraph>Texture every required face and adjust UV regions.</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure collision, damage, shadow, and special flags.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save as PRM to the intended prim slot.</Paragraph></ListItem>
+        <ListItem><Paragraph>Optionally export OBJ as a backup or for further editing.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

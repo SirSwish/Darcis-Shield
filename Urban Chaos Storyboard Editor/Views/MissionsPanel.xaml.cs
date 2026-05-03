@@ -1,5 +1,6 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
+using UrbanChaosEditor.Shared.Constants;
 using System.Windows.Input;
 using UrbanChaosStoryboardEditor.Models;
 using UrbanChaosStoryboardEditor.Services;
@@ -9,8 +10,8 @@ namespace UrbanChaosStoryboardEditor.Views
 {
     public partial class MissionsPanel : UserControl
     {
-        private const int MaxMissions = 20;
-        private const int StartingMissionId = 14;
+        private const int MaxMissions = EditorLimitConstants.StoryboardMaxMissions;
+        private const int StartingMissionId = EditorLimitConstants.StoryboardStartingMissionId;
 
         public MissionsPanel()
         {

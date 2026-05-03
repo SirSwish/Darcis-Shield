@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // LightEditor/Views/MapOverlays/LightLayer.cs
 // ============================================================
 // NOTE: The Light Editor's LightLayer is a Canvas-based interactive layer
@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using System.Windows.Shapes;
 using UrbanChaosLightEditor.Services;
 using UrbanChaosLightEditor.ViewModels;
@@ -44,7 +45,7 @@ namespace UrbanChaosLightEditor.Views.MapOverlays
         private Shape? _dragShape;
         private double _dragRadius;
 
-        private const double DragThreshold = 4.0;
+        private const double DragThreshold = EditorUiConstants.DragThreshold;
 
         public LightLayer()
         {

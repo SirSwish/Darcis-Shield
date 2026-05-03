@@ -1,6 +1,7 @@
 ﻿// /Services/ReadOnlyMapDataService.cs
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosLightEditor.Services
 {
@@ -108,7 +109,7 @@ namespace UrbanChaosLightEditor.Services
             }
 
             // Fallback to V1 heuristic
-            const int tileBytes = 128 * 128 * 6;
+            int tileBytes = MapFormatConstants.TileDataBytes;
             int buildingStart = 8 + tileBytes;
             int buildingEnd = Math.Clamp(objectOffset, 0, bytes.Length);
             int buildingLen = buildingEnd - buildingStart;

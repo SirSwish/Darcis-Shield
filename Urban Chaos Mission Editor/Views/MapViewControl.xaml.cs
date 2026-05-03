@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using UrbanChaosEditor.Shared.Constants;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UrbanChaosMissionEditor.ViewModels;
@@ -12,9 +13,9 @@ namespace UrbanChaosMissionEditor.Views;
 /// </summary>
 public partial class MapViewControl : UserControl
 {
-    private const double MapSize = 8192.0;
-    private const int GridSize = 128;
-    private const double TileSize = MapSize / GridSize; // 64 pixels per tile
+    private const double MapSize = UrbanChaosEditor.Shared.Models.SharedMapConstants.MapPixels;
+    private const int GridSize = UrbanChaosEditor.Shared.Models.SharedMapConstants.TilesPerSide;
+    private const double TileSize = UrbanChaosEditor.Shared.Models.SharedMapConstants.TileSize; // 64 pixels per tile
     private const int PixelMoveAmount = 4; // World units per arrow key press (1 pixel = 4 world units)
 
     private EventPointViewModel? _hoveredEventPoint;

@@ -10,6 +10,7 @@
 //   dstoreys:  nextStorey  entries × 6 bytes
 
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using System.IO;
@@ -18,12 +19,12 @@ namespace UrbanChaosMapEditor.Services.Buildings
 {
     public sealed class BuildingAdder
     {
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int DFacetSize = 26;
-        private const int DStyleSize = 2;
-        private const int DStoreySize = 6;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int DStyleSize = BuildingFormatConstants.DStyleSize;
+        private const int DStoreySize = BuildingFormatConstants.DStoreySize;
 
         private readonly MapDataService _svc;
 

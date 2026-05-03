@@ -1,6 +1,7 @@
 // /Services/DoorGateAdder.cs
 // Specialized service for adding doors and gates to buildings/fences
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -13,10 +14,10 @@ namespace UrbanChaosMapEditor.Services.Buildings
         private readonly MapDataService _svc;
 
         // Standard heights (in Height units where real_height = Height * 64)
-        public const byte STANDARD_DOOR_HEIGHT = 4;   // 256 world units (1 storey)
-        public const byte STANDARD_GATE_HEIGHT = 2;   // 128 world units (half storey)
-        public const byte TALL_GATE_HEIGHT = 3;       // 192 world units
-        public const byte LOW_FENCE_HEIGHT = 1;       // 64 world units
+        public const byte STANDARD_DOOR_HEIGHT = BuildingFormatConstants.StandardDoorHeight;   // 256 world units (1 storey)
+        public const byte STANDARD_GATE_HEIGHT = BuildingFormatConstants.StandardGateHeight;   // 128 world units (half storey)
+        public const byte TALL_GATE_HEIGHT = BuildingFormatConstants.TallGateHeight;       // 192 world units
+        public const byte LOW_FENCE_HEIGHT = BuildingFormatConstants.LowFenceHeight;       // 64 world units
 
         public DoorGateAdder(MapDataService svc)
         {
@@ -243,13 +244,13 @@ namespace UrbanChaosMapEditor.Services.Buildings
         public static class CommonStyles
         {
             // These are example values - verify against actual TMA data
-            public const ushort WoodenDoor = 15;
-            public const ushort MetalDoor = 16;
-            public const ushort GlassDoor = 17;
-            public const ushort ChainLinkGate = 22;
-            public const ushort MetalGate = 23;
-            public const ushort WoodenGate = 24;
-            public const ushort WarehouseDoor = 25;
+            public const ushort WoodenDoor = BuildingFormatConstants.WoodenDoorStyle;
+            public const ushort MetalDoor = BuildingFormatConstants.MetalDoorStyle;
+            public const ushort GlassDoor = BuildingFormatConstants.GlassDoorStyle;
+            public const ushort ChainLinkGate = BuildingFormatConstants.ChainLinkGateStyle;
+            public const ushort MetalGate = BuildingFormatConstants.MetalGateStyle;
+            public const ushort WoodenGate = BuildingFormatConstants.WoodenGateStyle;
+            public const ushort WarehouseDoor = BuildingFormatConstants.WarehouseDoorStyle;
         }
     }
 

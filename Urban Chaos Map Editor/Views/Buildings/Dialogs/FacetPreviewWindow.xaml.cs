@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // /Views/Dialogs/Buildings/FacetPreviewWindow.xaml.cs
 // DROP-IN REPLACEMENT
 // ============================================================
@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Constants;
 using System.Windows.Shapes;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
@@ -24,8 +25,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 {
     public partial class FacetPreviewWindow : Window
     {
-        private const int PanelPx = 64;
-        private const string TexturesAsm = "UrbanChaosEditor.Shared";
+        private const int PanelPx = TextureFormatConstants.TileWidth;
+        private const string TexturesAsm = ApplicationConstants.SharedAssemblyName;
 
         private DFacetRec _facet;
         private readonly int _facetIndex1;

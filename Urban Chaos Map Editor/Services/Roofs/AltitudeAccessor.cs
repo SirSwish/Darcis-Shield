@@ -1,5 +1,6 @@
 // /Services/Accessors/AltitudeAccessor.cs
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -54,17 +55,17 @@ namespace UrbanChaosMapEditor.Services.Roofs
     public sealed class AltitudeAccessor
     {
         private readonly MapDataService _data;
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
-        private const int FlagsByteIndex = 2;  // bytes 2-3 are Flags (UWORD)
-        private const int AltByteIndex = 5;    // byte 5 is Alt (floor altitude)
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
+        private const int FlagsByteIndex = MapFormatConstants.PapFlagsByteIndex;  // bytes 2-3 are Flags (UWORD)
+        private const int AltByteIndex = MapFormatConstants.PapAltitudeByteIndex;    // byte 5 is Alt (floor altitude)
 
         /// <summary>
         /// The shift value used to convert between stored Alt and world altitude.
         /// World altitude = Alt << PAP_ALT_SHIFT
         /// Alt = World altitude >> PAP_ALT_SHIFT
         /// </summary>
-        public const int PAP_ALT_SHIFT = 3;
+        public const int PAP_ALT_SHIFT = MapFormatConstants.PapAltitudeShift;
 
         public AltitudeAccessor(MapDataService data)
         {
@@ -142,7 +143,6 @@ namespace UrbanChaosMapEditor.Services.Roofs
         public void WriteWorldAltitude(int tx, int ty, int worldAltitude)
         {
             int rawAlt = worldAltitude >> PAP_ALT_SHIFT;
-            rawAlt = rawAlt >> PAP_ALT_SHIFT;
             rawAlt = Math.Clamp(rawAlt, sbyte.MinValue, sbyte.MaxValue);
             WriteAltRaw(tx, ty, (sbyte)rawAlt);
         }

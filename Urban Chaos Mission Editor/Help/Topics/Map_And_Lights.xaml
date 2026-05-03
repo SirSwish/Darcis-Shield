@@ -1,0 +1,13 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Map &amp; Lights Overlays</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Display the IAM map, object graphics, and light data underneath mission markers.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Reference Layers</Paragraph>
+    <Paragraph>Grid, textures, buildings, objects, lights, light ranges, event points, and event point radii can be toggled independently. Use map layers for spatial editing and light layers when checking visibility or ambience around mission events.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">3D View</Paragraph>
+    <Paragraph>The 3D view plots event points with their EP number and radius while retaining their colour order. Light overlays can be shown or hidden separately when the mission has companion lighting data.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Companion Editors</Paragraph>
+    <Paragraph><Bold>Edit Map</Bold> and <Bold>Edit Lights</Bold> launch the loaded files in the dedicated editors, keeping the mission workflow connected when a placement issue belongs to map geometry or lighting.</Paragraph>
+</FlowDocument>

@@ -1,0 +1,373 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Map Properties
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to configure the overall lighting, ambient colour, night mode, lamp behaviour, and renderer lighting settings for a light file.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Opening Map Properties
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Map Properties</Bold> tab contains the overall lighting settings for the loaded
+        light file. These settings affect the whole map and are used alongside individual placed
+        light entries.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        To begin editing these values, select the <Bold>Map Properties</Bold> button or tab from
+        the main editor display.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_overview.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_full_panel.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- FLAGS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Lighting Flags
+    </Paragraph>
+    <Paragraph>
+        The first section contains flags that control broad map lighting behaviour. Set these
+        according to the type of atmosphere you want the level to have.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_flags.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Night Enabled
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Enables night-time lighting for the map. Use this when the level should appear as a night
+        scene or a very dark environment.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Note:</Run>
+                <Run>
+                    In Urban Chaos, enabling night mode also means the map is treated as raining.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Lamps On
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Controls whether street lamps and other light-emitting prims are switched on.
+        If this box is checked, lamp prims will emit light. If it is not checked, those lamps
+        remain switched off.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Darken Walls
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Slightly darkens the lower portion of facet textures. This can help walls appear less flat
+        and can add extra depth to building surfaces.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- AMBIENT LIGHT -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Ambient Light
+    </Paragraph>
+    <Paragraph>
+        The most important overall value to set is <Bold>Ambient</Bold>. Ambient light acts like
+        a global colour filter applied across the whole map. It controls the general colour mood
+        of the level.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can set the Ambient RGB values to any colour you want. For example, setting Ambient to
+        <Run FontFamily="Consolas" Foreground="#E8B84B">0, 0, 255</Run>
+        gives the whole map a strong blue tone. This can be useful for early morning, cold,
+        night-time, or low-light scenes.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_ambient.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Think of Ambient as the overall colour grade of the level. Individual lights add local colour and brightness,
+                    but Ambient defines the general atmosphere of the whole map.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PREVIEW D3D LIGHTING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,14,0,2">
+        Previewing the Ambient Result
+    </Paragraph>
+    <Paragraph>
+        To preview the effect of the current lighting values, press the
+        <Bold>Preview D3D Lighting</Bold> button at the bottom of the Map Properties tab.
+        This opens a quick comparison preview showing how the lighting is applied to a base image.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is useful for quickly judging whether the map feels too bright, too dark, too warm,
+        too cold, or too strongly tinted before testing it in the 3D viewport.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_preview_d3d_lighting.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- D3D COLOR -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        D3D Color
+    </Paragraph>
+    <Paragraph>
+        <Bold>D3D Color</Bold> is a supporting renderer lighting value used by the Direct3D display
+        path. Direct3D is the graphics system used by the game to draw the 3D scene, so this value
+        can be thought of as an additional renderer-side lighting colour used alongside the main
+        Ambient setting.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        In practical terms, Ambient is usually the value you will notice first, while D3D Color
+        helps support the way the 3D scene is shaded. If you are unsure what to change, adjust
+        Ambient first and leave D3D Color close to its default value.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        D3D Color includes RGB channels and, where shown by the editor, an Alpha channel.
+        The RGB values define the colour, while the Alpha value represents the extra channel stored
+        with that colour value. A preview swatch appears underneath so you can quickly see the
+        selected colour.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_d3d_color.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- SPECULAR COLOR -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Specular Color
+    </Paragraph>
+    <Paragraph>
+        <Bold>Specular Color</Bold> controls the colour used for lighting highlights. These are
+        the brighter reflective highlights that can appear on surfaces when light catches them.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Specular Color includes RGB channels and an Alpha channel. The RGB values define the
+        highlight colour, while the Alpha value controls the additional stored intensity/alpha
+        component for that specular colour. A preview swatch appears underneath the controls.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_specular_color.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Specular settings are usually more subtle than Ambient. Use them to tune highlights rather than to set the main mood of the level.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PRIM LIGHTING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Prim Lighting
+    </Paragraph>
+    <Paragraph>
+        <Bold>Prim Lighting</Bold> controls the colour emitted by light-producing prims. The most
+        noticeable example is the light coming from street lamp prims.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The default Prim Lighting colour is usually a warm yellow-white:
+        <Run FontFamily="Consolas" Foreground="#E8B84B">255, 255, 228</Run>.
+        This gives street lamps a natural warm glow.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        You can change the RGB values to create different effects, such as colder white lamps,
+        blue-tinted lights, red warning lights, or unusual stylised lighting.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Prim Light Radius
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Radius</Bold> value controls how many tiles the prim light will cover. Increasing
+        the radius makes light-emitting prims affect a wider area of the map.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_prim_lighting.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- NIGHT SKY COLOR -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Night Sky Color
+    </Paragraph>
+    <Paragraph>
+        <Bold>Night Sky Color</Bold> appears to be an unused legacy feature. The game now colours
+        the sky using a
+        <Run FontFamily="Consolas" Foreground="#E8B84B">sky.tga</Run>
+        texture file instead.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        It is likely that before textured skies were implemented, the sky used a single default
+        colour value. In most modern light files, this setting does not need to be changed.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/map_properties_night_sky_color.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- RECOMMENDED WORKFLOW -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Recommended Workflow
+    </Paragraph>
+    <Paragraph>
+        When setting up the overall lighting for a map, a simple workflow is:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                Open the <Bold>Map Properties</Bold> tab.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the required flags, such as <Bold>Night Enabled</Bold>, <Bold>Lamps On</Bold>, and <Bold>Darken Walls</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Set the <Bold>Ambient</Bold> RGB value to define the overall colour mood.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Use <Bold>Preview D3D Lighting</Bold> to check the result against the preview image.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Adjust <Bold>D3D Color</Bold>, <Bold>Specular Color</Bold>, and <Bold>Prim Lighting</Bold> only as needed.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Test the result in the map view or 3D viewport.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- IMPORTANT NOTE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer Margin="0,10,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>
+                    Ambient lighting can strongly change the appearance of the whole map. Save a copy of the light file before making major changes to the global lighting values.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- NEXT STEPS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        After configuring the overall map lighting, continue to the
+        <Bold>Using the 3D Preview</Bold> section to preview how the lighting looks in a
+        three-dimensional view of the map.
+    </Paragraph>
+
+</FlowDocument>

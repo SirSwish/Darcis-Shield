@@ -1,6 +1,7 @@
 ﻿<Window x:Class="UrbanChaosLightEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:UrbanChaosLightEditor"
         xmlns:local="clr-namespace:UrbanChaosLightEditor.Views"
         Title="{Binding WindowTitle}" 
         Width="1400" Height="900"
@@ -16,6 +17,7 @@
         <KeyBinding Key="Delete" Command="{Binding DeleteLightCommand}"/>
         <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyLightCommand}"/>
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteLightCommand}"/>
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{x:Static app:MainWindow.Open3DViewportCommand}"/>
     </Window.InputBindings>
 
     <Window.Resources>
@@ -98,10 +100,19 @@
                 <MenuItem Header="_Open Lights File..." Command="{Binding OpenLightsCommand}" InputGestureText="Ctrl+O"/>
                 <MenuItem Header="Open _Map..." Command="{Binding OpenMapCommand}" InputGestureText="Ctrl+Shift+O" ToolTip="Open a map for display (textures/buildings)"/>
                 <Separator/>
-                <MenuItem Header="_Save Lights" Command="{Binding SaveLightsCommand}" InputGestureText="Ctrl+S" 
+                <MenuItem Header="_Save Lights" Command="{Binding SaveLightsCommand}" InputGestureText="Ctrl+S"
                           IsEnabled="{Binding IsLightsLoaded}"/>
                 <MenuItem Header="Save Lights _As..." Command="{Binding SaveLightsAsCommand}" InputGestureText="Ctrl+Shift+S"
                           IsEnabled="{Binding IsLightsLoaded}"/>
+                <Separator/>
+                <MenuItem Header="_Export Map">
+                    <MenuItem Header="_Current Loaded Map..." Click="ExportCurrentLightMap_Click"/>
+                    <MenuItem Header="_Select Maps..."        Click="ExportSelectedLightMaps_Click"/>
+                </MenuItem>
+                <MenuItem Header="Export _Stats">
+                    <MenuItem Header="_Current Loaded Lights..." Click="ExportCurrentLightStats_Click"/>
+                    <MenuItem Header="_Select Lights..."         Click="ExportSelectedLightStats_Click"/>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="E_xit" Click="Exit_Click"/>
             </MenuItem>
@@ -117,6 +128,8 @@
                 <MenuItem Header="Deselect All" Command="{Binding DeselectAllCommand}"/>
             </MenuItem>
             <MenuItem Header="_View">
+                <MenuItem Header="Open _3D Viewport..." Click="Open3DViewport_Click" InputGestureText="Ctrl+3"/>
+                <Separator/>
                 <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding ShowTextures}"/>
                 <MenuItem Header="Show _Grid Lines" IsCheckable="True" IsChecked="{Binding ShowGridLines}"/>
                 <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding ShowBuildings}"/>
@@ -130,6 +143,7 @@
                 <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Light Editor Help" Click="Help_Click"/>
                 <MenuItem Header="_About" Click="About_Click"/>
             </MenuItem>
         </Menu>
@@ -165,6 +179,10 @@
                 <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="🔆 Ranges" 
                               IsChecked="{Binding ShowLightRanges}" IsEnabled="{Binding IsLightsLoaded}"
                               ToolTip="Show/hide light range circles"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="3D"
+                        Click="Open3DViewport_Click"
+                        ToolTip="Open 3D viewport (Ctrl+3)"
+                        IsEnabled="{Binding IsMapViewLoaded}"/>
             </WrapPanel>
         </Border>
 

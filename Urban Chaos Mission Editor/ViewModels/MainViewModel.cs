@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
@@ -1407,31 +1407,26 @@ public class MainViewModel : BaseViewModel
         foreach (var other in EventPoints.Where(e => e.Index != targetIndex))
         {
             bool references = false;
-            string referenceType = "";
 
             // Check EPRef
             if (other.EPRef == targetIndex)
             {
                 references = true;
-                referenceType = "EPRef";
             }
             // Check EPRefBool
             else if (other.Model.EPRefBool == targetIndex)
             {
                 references = true;
-                referenceType = "EPRefBool";
             }
             // Check Next pointer
             else if (other.Model.Next == targetIndex)
             {
                 references = true;
-                referenceType = "Next";
             }
             // Check Prev pointer  
             else if (other.Model.Prev == targetIndex)
             {
                 references = true;
-                referenceType = "Prev";
             }
             // Check Data array for common reference patterns
             else
@@ -1445,7 +1440,6 @@ public class MainViewModel : BaseViewModel
                         if (other.Model.Data[1] == targetIndex || other.Model.Data[2] == targetIndex)
                         {
                             references = true;
-                            referenceType = "Conversation participant";
                         }
                         break;
 
@@ -1454,7 +1448,6 @@ public class MainViewModel : BaseViewModel
                         if (other.Model.Data[6] == targetIndex)
                         {
                             references = true;
-                            referenceType = "Target enemy";
                         }
                         break;
 
@@ -1463,7 +1456,6 @@ public class MainViewModel : BaseViewModel
                         if (other.Model.Data[0] == targetIndex)
                         {
                             references = true;
-                            referenceType = "Move target";
                         }
                         break;
 
@@ -1472,7 +1464,6 @@ public class MainViewModel : BaseViewModel
                         if (other.Model.Data[2] == targetIndex)
                         {
                             references = true;
-                            referenceType = "Vehicle target";
                         }
                         break;
 
@@ -1482,7 +1473,6 @@ public class MainViewModel : BaseViewModel
                             other.Model.Data[2] != 0xFFFF && other.Model.Data[2] != 0xFFFE)
                         {
                             references = true;
-                            referenceType = "Message speaker";
                         }
                         break;
 
@@ -1491,7 +1481,6 @@ public class MainViewModel : BaseViewModel
                         if (other.Model.Data[0] == targetIndex)
                         {
                             references = true;
-                            referenceType = "Kill target";
                         }
                         break;
                 }

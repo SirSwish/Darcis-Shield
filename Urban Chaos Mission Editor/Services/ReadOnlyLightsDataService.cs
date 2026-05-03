@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using UrbanChaosMissionEditor.Models;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMissionEditor.Services;
 
@@ -16,12 +17,12 @@ public sealed class ReadOnlyLightsDataService
     private readonly object _sync = new();
 
     // Layout constants
-    private const int HeaderSize = 12;
-    private const int ReservedPad = 20;
-    private const int EntrySize = 20;
-    private const int EntryCount = 255;
-    private const int EntriesOffset = HeaderSize + ReservedPad;
-    private const int TotalMinSize = 5171;
+    private const int HeaderSize = LightsFormatConstants.HeaderSize;
+    private const int ReservedPad = LightsFormatConstants.MissionPreviewReservedPad;
+    private const int EntrySize = LightsFormatConstants.EntrySize;
+    private const int EntryCount = LightsFormatConstants.MissionPreviewEntryCount;
+    private const int EntriesOffset = LightsFormatConstants.MissionPreviewEntriesOffset;
+    private const int TotalMinSize = LightsFormatConstants.MissionPreviewTotalMinSize;
 
     private ReadOnlyLightsDataService()
     {

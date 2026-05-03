@@ -1,19 +1,23 @@
-﻿namespace UrbanChaosMissionEditor.Models;
+// Thin wrapper around UrbanChaosEditor.Shared.Models.SharedMapConstants.
+
+using SharedMap = UrbanChaosEditor.Shared.Models.SharedMapConstants;
+
+namespace UrbanChaosMissionEditor.Models;
 
 /// <summary>
-/// Constants for map data
+/// Constants for map data. Re-exports values from <see cref="SharedMap"/>.
 /// </summary>
 public static class MapConstants
 {
-    public const int TilesPerSide = 128;
-    public const int TotalTiles = TilesPerSide * TilesPerSide;
-    public const int PixelsPerTile = 64;
-    public const int MapPixelSize = TilesPerSide * PixelsPerTile; // 8192
+    public const int TilesPerSide = SharedMap.TilesPerSide;
+    public const int TotalTiles = SharedMap.TotalTiles;
+    public const int PixelsPerTile = SharedMap.PixelsPerTile;
+    public const int MapPixelSize = SharedMap.MapPixelSize;
 
-    public const int CellsPerSide = 32;
-    public const int PixelsPerCell = 256;
+    public const int CellsPerSide = SharedMap.CellsPerSide;
+    public const int PixelsPerCell = SharedMap.PixelsPerCell;
 
     // World coordinate range
-    public const int WorldSize = 32768;
-    public const int WorldToPixelDivisor = 4; // 32768 / 8192
+    public const int WorldSize = SharedMap.WorldSize;
+    public const int WorldToPixelDivisor = SharedMap.WorldToPixelDivisor;
 }

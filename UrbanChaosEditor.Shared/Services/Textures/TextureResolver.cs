@@ -1,4 +1,4 @@
-﻿// /Services/Textures/TextureResolver.cs
+// /Services/Textures/TextureResolver.cs
 // Shared helper for resolving textures from cache, embedded resources, or disk.
 // Use this instead of direct pack:// URIs to support custom textures.
 
@@ -8,12 +8,13 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosEditor.Shared.Services.Textures
 {
     public static class TextureResolver
     {
-        private const string TexturesAsm = "UrbanChaosEditor.Shared";
+        private const string TexturesAsm = ApplicationConstants.SharedAssemblyName;
 
         /// <summary>
         /// Resolve a texture by page/tx/ty/flip for a given world and variant.

@@ -1,4 +1,5 @@
-﻿using UrbanChaosMissionEditor.Models;
+﻿using UrbanChaosEditor.Shared.Constants;
+using UrbanChaosMissionEditor.Models;
 
 namespace UrbanChaosMissionEditor.Services;
 
@@ -8,8 +9,8 @@ namespace UrbanChaosMissionEditor.Services;
 public sealed class ReadOnlyTexturesAccessor
 {
     private readonly ReadOnlyMapDataService _data;
-    private const int HeaderBytes = 8;
-    private const int BytesPerTile = 6;
+    private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+    private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
 
     public ReadOnlyTexturesAccessor(ReadOnlyMapDataService data)
     {

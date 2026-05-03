@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Views.Help;
+using UrbanChaosStyleEditor.Help;
 using UrbanChaosStyleEditor.Models;
 using UrbanChaosStyleEditor.ViewModels;
 
@@ -54,6 +56,9 @@ namespace UrbanChaosStyleEditor.Views
         {
             new AboutWindow { Owner = this }.ShowDialog();
         }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+            => HelpViewerWindow.ShowHelp("Urban Chaos Style Editor - Help", StyleEditorHelpTopics.All, this);
 
         private void ImportTexture_Click(object sender, RoutedEventArgs e) => Vm.ImportTexture();
         private void ImportBatch_Click(object sender, RoutedEventArgs e) => Vm.ImportBatch();

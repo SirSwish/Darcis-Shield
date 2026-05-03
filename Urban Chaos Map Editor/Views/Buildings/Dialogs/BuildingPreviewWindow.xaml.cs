@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
@@ -11,7 +12,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 {
     public partial class BuildingPreviewWindow : Window, INotifyPropertyChanged
     {
-        private const int DBuildingSize = 24;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
 
         // ============================================================
         // Identity / snapshot
@@ -115,7 +116,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         }
 
         // ============================================================
-        // Apply — only world X/Y/Z
+        // Apply ï¿½ only world X/Y/Z
         // ============================================================
 
         private void BtnApply_Click(object sender, RoutedEventArgs e)

@@ -1,18 +1,20 @@
-﻿// /Services/Terrain/CellFlagsLayerService.cs
+// /Services/Terrain/CellFlagsLayerService.cs
 // Reads PAP_HI flags for all 128x128 cells and provides flag data
 // for the Cell Flags visual layer on the map canvas.
 
 using System;
+using UrbanChaosEditor.Shared.Constants;
+using UrbanChaosEditor.Shared.Models;
 using UrbanChaosMapEditor.Services.Core;
 
 namespace UrbanChaosMapEditor.Services.Heights
 {
     public static class CellFlagsLayerService
     {
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
-        private const int TilesPerSide = 128;
-        private const int Off_Flags = 2;
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
+        private const int TilesPerSide = SharedMapConstants.TilesPerSide;
+        private const int Off_Flags = MapFormatConstants.PapFlagsByteIndex;
 
         /// <summary>
         /// Returns a 128x128 array of flag values.

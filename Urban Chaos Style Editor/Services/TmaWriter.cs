@@ -2,19 +2,20 @@
 using System;
 using System.IO;
 using System.Text;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosStyleEditor.Models;
 
 namespace UrbanChaosStyleEditor.Services
 {
     public static class TmaWriter
     {
-        private const int TotalRows = 200;     // fixed total rows expected by the game
-        private const int EntriesPerStyle = 5;
-        private const int NameLength = 21;
-        private const uint SaveType = 5;
+        private const int TotalRows = TextureFormatConstants.TotalRows;     // fixed total rows expected by the game
+        private const int EntriesPerStyle = TextureFormatConstants.EntriesPerStyle;
+        private const int NameLength = TextureFormatConstants.NameLength;
+        private const uint SaveType = TextureFormatConstants.SaveType;
 
         // POLY_GT = POLY_FLAG_GOURAD | POLY_FLAG_TEXTURED = 0x03
-        private const byte DefaultFlag = 0x03;
+        private const byte DefaultFlag = TextureFormatConstants.DefaultFlag;
 
         public static void Write(string outputPath, StyleProject project)
         {

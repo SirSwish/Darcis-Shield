@@ -2,6 +2,7 @@
 // Service for adding and deleting RoofFace4 entries
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 
@@ -10,12 +11,12 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
     public sealed class RoofFace4Adder
     {
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int DFacetSize = 26;
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
 
         private readonly MapDataService _svc;
 

@@ -1,9 +1,10 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMissionEditor.Models;
 
 namespace UrbanChaosMissionEditor.Controls;
@@ -17,11 +18,11 @@ public partial class TimelineControl : UserControl
     // ========================================
     // Constants
     // ========================================
-    private const double ChannelHeight = 40;
-    private const double HeaderWidth = 120;
-    private const double RulerHeight = 30;
-    private const double MinPacketWidth = 10;
-    private const int SnapGridSize = 5; // Snap to every 5 frames
+    private const double ChannelHeight = EditorUiConstants.TimelineChannelHeight;
+    private const double HeaderWidth = EditorUiConstants.TimelineHeaderWidth;
+    private const double RulerHeight = EditorUiConstants.TimelineRulerHeight;
+    private const double MinPacketWidth = EditorUiConstants.TimelineMinPacketWidth;
+    private const int SnapGridSize = EditorUiConstants.TimelineSnapGridSize; // Snap to every 5 frames
 
     // ========================================
     // Colors

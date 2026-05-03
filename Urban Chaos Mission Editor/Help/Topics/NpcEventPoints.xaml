@@ -1,0 +1,558 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        NPC Event Points
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Create NPC / Create Enemy, Adjust NPC / Adjust Enemy, and Enemy Flags Event Points.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Overview
+    </Paragraph>
+    <Paragraph>
+        NPC Event Points are used to create and control non-playable characters in a mission. This
+        includes police, enemies, civilians, gang members, named characters, and special AI-driven
+        actors.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        There are three closely related Event Point types that should not be confused:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Create NPC / Create Enemy</Bold> — creates or spawns a new NPC into the mission.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Adjust NPC / Adjust Enemy</Bold> — modifies an existing NPC’s properties later,
+                such as movement or AI behaviour. It requires a <Bold>Target EP</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Enemy Flags</Bold> — modifies only the behaviour/zone/restriction flags of an
+                existing NPC. This is required when you need to change flags such as Guilty, Fake Wander,
+                Can Carry, Invulnerable, zone restrictions, and similar flag values. It also requires
+                a <Bold>Target EP</Bold>.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical distinction:</Run>
+                <Run>
+                    Adjust NPC / Adjust Enemy does not change the behaviour flag mask.
+                    If you need to change flags such as Guilty, Fake Wander, Can Carry, Invulnerable,
+                    zone restrictions, or other behaviour flags, use the separate Enemy Flags Event Point.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Suggested Grouping
+    </Paragraph>
+    <Paragraph>
+        NPC Event Points can quickly become hard to manage, so it helps to use consistent letter and
+        colour groups. This is not mandatory, but it makes large missions much easier to debug.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Group C / Blue</Bold> — police officers.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Group C / Red</Bold> — enemies or hostile gang members.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Group C / White</Bold> — civilians.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        These groupings are only examples. You can use any grouping scheme that keeps your mission
+        readable.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_grouping_example.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create NPC / Create Enemy
+    </Paragraph>
+    <Paragraph>
+        <Bold>Create NPC / Create Enemy</Bold> spawns a new NPC into the mission. This is the Event
+        Point used when you want to place a police officer, civilian, enemy, gang member, named
+        character, or similar actor.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Example: Adding Two Police Officers
+    </Paragraph>
+    <Paragraph>
+        In this example, two police officers are added in <Bold>Group C</Bold> with the colour
+        <Bold>Blue</Bold>.
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Create NPC</Bold> or <Bold>Create Enemy</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the letter group to <Bold>C</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the colour to <Bold>Blue</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the NPC type to <Bold>Cop</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the first police officer on the map.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the created officer and press <Bold>Ctrl+C</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Move the cursor to the desired second position and press <Bold>Ctrl+V</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Rotate each officer using the orange direction handle so they face the intended target, such as a Baalrog.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Copying and pasting an Event Point preserves the colour and letter grouping. This makes it
+        faster to duplicate similar NPCs without repeatedly setting their group data.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_two_cops_example.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Create NPC Properties
+    </Paragraph>
+    <Paragraph>
+        Double-click a Create NPC / Create Enemy Event Point to edit it. The type-specific
+        properties determine who the NPC is, how much health they have, how they move, what AI
+        behaviour they use, what weapons they carry, and what item they may drop when searched.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_edit_window.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        NPC Type
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Type</Bold> field controls what kind of character is spawned. Available types
+        include civilians, police, gang members, named characters, and variations with starting
+        weapons.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Civilian</Bold> and <Bold>Civilian With Balloon</Bold> — these appear to behave the same.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Woman</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Fat Woman</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Workman with Green Overalls</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Black Gang Member</Bold> — clothing colour can change depending on the Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>White Gang Member</Bold> variants, including Bish and McClean.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gordansky</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Old Man in Leather Jacket</Bold> / Wild Bill.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>MIB</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Darci</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Roper</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Various versions of these types with starting weapons.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Count
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Count</Bold> field is available for editing, but testing suggests that only one
+        NPC spawns per Event Point regardless of the count entered. To spawn multiple NPCs, create
+        or copy multiple Event Points.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Health
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Health</Bold> value controls the amount of health the NPC has.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Starting Weapons
+    </Paragraph>
+    <Paragraph>
+        Starting Weapons define the weapons that the NPC has in their possession when spawned.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Item Drops
+    </Paragraph>
+    <Paragraph>
+        Item Drops define what can be found when the NPC is searched after being arrested or killed.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    NPC Count appears editable but generally only one character spawns per Event Point.
+                    Use copy/paste for multiple NPCs.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Adjust NPC / Adjust Enemy
+    </Paragraph>
+    <Paragraph>
+        <Bold>Adjust NPC</Bold> or <Bold>Adjust Enemy</Bold> modifies an NPC that already exists in
+        the mission. It does not spawn a new NPC. It targets an existing Create NPC / Create Enemy
+        Event Point and changes that NPC later.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Use Adjust NPC / Adjust Enemy when you need to change non-flag properties such as movement,
+        AI type, target references, follow behaviour, guard target, or similar NPC behaviour fields.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical required field:</Run>
+                <Run>
+                    Adjust NPC / Adjust Enemy must have Target EP set.
+                    Target EP must be the Event Point number of the existing NPC you want to change.
+                    For example, if the NPC is Event Point 12, set Target EP to 12.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_adjust_npc_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Target EP: The NPC Being Adjusted
+    </Paragraph>
+    <Paragraph>
+        <Bold>Target EP</Bold> tells the game which existing NPC should be modified. This must be the
+        <Bold>Event Point number</Bold> of the NPC created by Create NPC / Create Enemy.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Example:
+Create NPC is Event Point 12.
+Adjust NPC must use Target EP = 12.
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Target EP does <Bold>not</Bold> mean the Adjust NPC Event Point’s own index number. It means
+        the index number of the NPC being changed.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If Target EP points to the wrong Event Point, the wrong NPC may be adjusted, or the
+        adjustment may appear to do nothing.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_adjust_npc_target_ep.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        What Adjust NPC Does Not Do
+    </Paragraph>
+    <Paragraph>
+        <Bold>Adjust NPC / Adjust Enemy does not change the NPC flag mask.</Bold> This means it is
+        not the correct Event Point for changing behaviour flags such as:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Lazy.</Paragraph></ListItem>
+        <ListItem><Paragraph>Diligent.</Paragraph></ListItem>
+        <ListItem><Paragraph>Gang.</Paragraph></ListItem>
+        <ListItem><Paragraph>Fight Back.</Paragraph></ListItem>
+        <ListItem><Paragraph>Just Kill Player.</Paragraph></ListItem>
+        <ListItem><Paragraph>Robotic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Restricted Movement.</Paragraph></ListItem>
+        <ListItem><Paragraph>Only Player Kills.</Paragraph></ListItem>
+        <ListItem><Paragraph>Blue/Cyan/Yellow/Magenta zone flags.</Paragraph></ListItem>
+        <ListItem><Paragraph>Invulnerable.</Paragraph></ListItem>
+        <ListItem><Paragraph>Guilty.</Paragraph></ListItem>
+        <ListItem><Paragraph>Fake Wander.</Paragraph></ListItem>
+        <ListItem><Paragraph>Can Carry.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        To change those flags after the NPC has spawned, use the separate <Bold>Enemy Flags</Bold>
+        Event Point.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Enemy Flags Event Point
+    </Paragraph>
+    <Paragraph>
+        <Bold>Enemy Flags</Bold> is a separate Event Point used to adjust the behaviour flag mask of
+        an existing NPC. It is similar to Adjust NPC / Adjust Enemy in that it targets an existing
+        NPC, but it is more specific: it only changes flags.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Use Enemy Flags when you need to change behaviour flags, zone restrictions, or other flag
+        values after the NPC has already spawned.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical required field:</Run>
+                <Run>
+                    Enemy Flags must have Target EP set.
+                    Target EP must be the Event Point number of the existing NPC whose flags you want to change.
+                    Enemy Flags does not create a new NPC.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_enemy_flags_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Enemy Flags Target EP
+    </Paragraph>
+    <Paragraph>
+        Enemy Flags must point to the NPC being modified. For example:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Example:
+Create Enemy is Event Point 22.
+Enemy Flags must use Target EP = 22.
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Do not put the Enemy Flags Event Point’s own number into Target EP unless that number is
+        actually the NPC being modified. In normal use, Target EP is the number of the existing NPC
+        created by Create NPC / Create Enemy.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_enemy_flags_target_ep.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        When to Use Adjust NPC vs Enemy Flags
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#555" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" Margin="0,0,0,6">
+                    <Run FontWeight="Bold" Foreground="#9FE3A6">Use Adjust NPC / Adjust Enemy when changing:</Run>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" Margin="16,0,0,10">
+                    Movement type, AI type, follow target, guard target, target references, or similar non-flag NPC properties.
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" Margin="0,0,0,6">
+                    <Run FontWeight="Bold" Foreground="#9FE3A6">Use Enemy Flags when changing:</Run>
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" Margin="16,0,0,0">
+                    Behaviour flags, zone flags, Guilty, Fake Wander, Can Carry, Invulnerable, Restricted Movement, Only Player Kills, or similar flag-mask values.
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Example: Change an NPC’s Flags Later
+    </Paragraph>
+    <Paragraph>
+        This example changes an existing NPC so that a flag-based behaviour is applied later in the
+        mission.
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create an NPC using <Bold>Create NPC / Create Enemy</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the NPC’s Event Point number from the Event Points list. For example, it may be <Bold>Event Point 22</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a new Event Point and choose <Bold>Enemy Flags</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Target EP</Bold> to <Bold>22</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the flags you want to apply, such as <Bold>Guilty</Bold>, <Bold>Can Carry</Bold>, <Bold>Fake Wander</Bold>, or <Bold>Invulnerable</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the trigger that should apply the flag change, such as <Bold>Dependency</Bold>, <Bold>Player Enters Radius</Bold>, or <Bold>Timer</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission to confirm the correct NPC receives the flag change.</Paragraph></ListItem>
+    </List>
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+<Paragraph FontSize="22" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Movement, AI Types, and Flags Reference
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Reference for NPC movement modes, AI types, AI targets, behaviour flags, zone flags, Adjust NPC, and Enemy Flags.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Movement Modes
+    </Paragraph>
+    <Paragraph>
+        Movement controls how the NPC moves after it spawns. These movement-style settings are also
+        useful when working with <Bold>Adjust NPC / Adjust Enemy</Bold>, because Adjust NPC can be
+        used to change an existing NPC’s movement later in the mission.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_movement_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Stand Still</Bold> — the NPC does not move.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Patrol Waypoints In Order</Bold> — patrols each subsequent Simple Waypoint Event Point within the same colour and letter group, in numerical order.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Patrol Waypoints Randomly</Bold> — patrols waypoints in the same colour and letter group, but in random order.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Wander</Bold> — wanders around the map aimlessly, similar to civilians, except into No Wander Zones.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Follow</Bold> — follows the Event Point specified in the Follow EP box.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Warm Hands</Bold> — appears unused; likely intended for warming hands near fire.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Follow On See</Bold> — follows the Follow EP target only once that target is in visual range.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Hands Up</Bold> — character has hands in the air; works best with AI Type not set to None and with certain AI types such as Civilian or Cop.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Tied Up</Bold> — appears to behave the same as Hands Up.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        AI Types
+    </Paragraph>
+    <Paragraph>
+        AI Type controls the character’s high-level behaviour. This is separate from movement.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_ai_type_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Civilian</Bold> — acts as an innocent civilian.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cop</Bold> — targets enemies that attack you; only cops can arrest.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Violent Youth</Bold> — actively targets the player if they see you.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Guard a Door</Bold> — no obvious current effect; likely old door-guarding behaviour.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Driver</Bold> — enters the nearest available vehicle.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Bomb Disposer</Bold> — unused.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Biker</Bold> — unused.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Fight Test Dummy</Bold> — tutorial fight dummy; used with combat ability settings.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Bully</Bold> — actively targets the player.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cop Driver</Bold> — driver behaviour for police vehicles.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Suicide</Bold> — immediately dies on spawn.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Flee Player</Bold> — flees once the player is in sight.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Group Genocide</Bold> — unused.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>MIB</Bold> — attacks the player on sight.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Summoner</Bold> — bright white orb appears and the NPC floats upward; likely beta Bane-related behaviour.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Hypochondriac</Bold> — alive but passed out.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Shoot Dead Assassin</Bold> — if armed, targets the Guard EP with unlimited fire until the target is dead, then wanders.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        AI Target Fields
+    </Paragraph>
+    <Paragraph>
+        Some AI behaviours use Event Point references. These references must point to the correct
+        Event Point number or the behaviour will not affect the intended target.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Guard EP</Bold> — used for targeting or guard-related behaviour.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Follow EP</Bold> — used by Follow and Follow On See movement modes.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Target EP for Adjust NPC / Adjust Enemy</Bold> — must be the Event Point number of the existing NPC being modified.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Target EP for Enemy Flags</Bold> — must be the Event Point number of the existing NPC whose flags are being modified.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Target EP warning:</Run>
+                <Run>
+                    For both Adjust NPC / Adjust Enemy and Enemy Flags, Target EP must correspond to the NPC’s Event Point number.
+                    It is the target NPC, not the adjusting event’s own number.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Behaviour and Zone Flags
+    </Paragraph>
+    <Paragraph>
+        Behaviour flags modify how the NPC behaves. They can be set when the NPC is created or
+        changed later using the <Bold>Enemy Flags</Bold> Event Point. <Bold>Adjust NPC / Adjust Enemy
+        does not change these flags.</Bold>
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_npc_flags_panel.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Lazy — Bit 0</Bold> — makes the enemy less alert or reactive.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Diligent — Bit 1</Bold> — opposite of Lazy; more alert or persistent. Original string is misspelled as Dilligent.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gang — Bit 2</Bold> — marks the person as part of a gang or faction.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Fight Back — Bit 3</Bold> — allows the person to fight back when attacked.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Just Kill Player — Bit 4</Bold> — forces hostile intent toward the player specifically.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Robotic — Bit 5</Bold> — makes behaviour more scripted or rigid.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Restricted Movement — Bit 6</Bold> — limits movement, probably within an area, route, or navigation zone.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Only Player Kills — Bit 7</Bold> — only player kills count or are allowed for the NPC.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Blue Zone — Bit 8</Bold> — zone-related flag.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cyan Zone — Bit 9</Bold> — zone-related flag.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Yellow Zone — Bit 10</Bold> — zone-related flag.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Magenta Zone — Bit 11</Bold> — zone-related flag.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Invulnerable — Bit 12</Bold> — prevents lethal damage.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Guilty — Bit 13</Bold> — marks the person as guilty or criminal.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Fake Wander — Bit 14</Bold> — makes the person appear to wander using simplified/faked wandering.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Can Carry — Bit 15</Bold> — allows the person to be carried.</Paragraph></ListItem>
+    </List>
+</FlowDocument>

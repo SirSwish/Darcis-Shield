@@ -1,4 +1,5 @@
 ﻿// /Services/ReadOnlyTexturesAccessor.cs
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosLightEditor.Models;
 
 namespace UrbanChaosLightEditor.Services
@@ -9,8 +10,8 @@ namespace UrbanChaosLightEditor.Services
     public sealed class ReadOnlyTexturesAccessor
     {
         private readonly ReadOnlyMapDataService _data;
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
 
         public ReadOnlyTexturesAccessor(ReadOnlyMapDataService data)
         {

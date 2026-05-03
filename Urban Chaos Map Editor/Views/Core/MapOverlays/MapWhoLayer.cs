@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 
 namespace UrbanChaosMapEditor.Views.Core.MapOverlays
@@ -17,8 +18,8 @@ namespace UrbanChaosMapEditor.Views.Core.MapOverlays
         private static readonly Brush LabelText = Brushes.White;
         private static readonly Brush RedBrush = Brushes.Red;
         private static readonly Brush LabelBg = new SolidColorBrush(Color.FromArgb(180, 20, 20, 20)); // opaque-ish
-        private const double LabelPadX = 4.0;
-        private const double LabelPadY = 2.0;
+        private const double LabelPadX = EditorUiConstants.MapLabelPadX;
+        private const double LabelPadY = EditorUiConstants.MapLabelPadY;
 
         static MapWhoLayer()
         {

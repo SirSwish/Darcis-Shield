@@ -1,5 +1,6 @@
-// /Services/TextureExporter.cs
+﻿// /Services/TextureExporter.cs
 using System;
+using UrbanChaosEditor.Shared.Constants;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
@@ -126,7 +127,7 @@ namespace UrbanChaosStyleEditor.Services
             // bool isCutout = (r == 0 && g == 0 && b == 0);
             //
             // Using a threshold works better for dark "almost black" art.
-            const byte cutoutThreshold = 8;
+            byte cutoutThreshold = TextureFormatConstants.CutoutAlphaThreshold;
 
             for (int i = 0; i < pixels.Length; i += 4)
             {

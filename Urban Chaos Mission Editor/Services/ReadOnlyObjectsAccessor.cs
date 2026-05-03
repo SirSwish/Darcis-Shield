@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using SharedMap = UrbanChaosEditor.Shared.Models.SharedMapConstants;
 
 namespace UrbanChaosMissionEditor.Services;
 
@@ -22,8 +23,8 @@ public sealed class ReadOnlyObjectsAccessor
 {
     private readonly ReadOnlyMapDataService _svc;
 
-    private const int CellsPerSide = 32;
-    private const int PixelsPerCell = 256;
+    private const int CellsPerSide = SharedMap.CellsPerSide;
+    private const int PixelsPerCell = SharedMap.PixelsPerCell;
 
     public ReadOnlyObjectsAccessor(ReadOnlyMapDataService svc)
     {

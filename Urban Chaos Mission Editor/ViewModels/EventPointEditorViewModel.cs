@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using UrbanChaosEditor.Shared.Constants;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -2724,7 +2725,7 @@ public class EventPointEditorViewModel : BaseViewModel
     //          Other = EP index of speaker (player/enemy)
 
     // Special speaker values
-    private const int SPEAKER_RADIO = 0;
+    private const int SPEAKER_RADIO = MissionFormatConstants.SpeakerRadio;
     private const int SPEAKER_PLACE_NAME = 0xFFFF;
     private const int SPEAKER_TUTORIAL = 0xFFFE;
 

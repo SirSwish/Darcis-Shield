@@ -1,4 +1,5 @@
-﻿using UrbanChaosMissionEditor.Constants;
+using UrbanChaosMissionEditor.Constants;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMissionEditor.Models;
 
@@ -7,8 +8,8 @@ namespace UrbanChaosMissionEditor.Models;
 /// </summary>
 public class Mission
 {
-    public const int MaxEventPoints = 512;
-    public const int CurrentVersion = 10;
+    public const int MaxEventPoints = MissionFormatConstants.MaxEventPoints;
+    public const int CurrentVersion = MissionFormatConstants.MissionCurrentVersion;
 
     /// <summary>
     /// File version number

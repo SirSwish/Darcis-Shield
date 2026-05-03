@@ -1,10 +1,10 @@
-﻿﻿// Views/Roofs/Dialogs/RoofFace4PreviewWindow.xaml.cs
+﻿// Views/Roofs/Dialogs/RoofFace4PreviewWindow.xaml.cs
 using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
-using System.Windows;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Roofs;
@@ -13,11 +13,11 @@ namespace UrbanChaosMapEditor.Views.Roofs.Dialogs
 {
     public partial class RoofFace4PreviewWindow : Window
     {
-        private const int RF4_SIZE = 10;
-        private const int DWalkableSize = 22;
-        private const int PAP_HEADER = 8;
-        private const int PAP_TILE_SIZE = 6;
-        private const int PAP_TILES = 128;
+        private const int RF4_SIZE = BuildingFormatConstants.RoofFace4Size;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int PAP_HEADER = MapFormatConstants.PapHeaderBytes;
+        private const int PAP_TILE_SIZE = MapFormatConstants.PapTileBytes;
+        private const int PAP_TILES = UrbanChaosEditor.Shared.Models.SharedMapConstants.TilesPerSide;
 
         private readonly int _index;
         private readonly RoofFace4Rec _rf;

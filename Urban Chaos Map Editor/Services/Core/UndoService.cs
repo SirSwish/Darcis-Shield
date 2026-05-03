@@ -2,6 +2,7 @@
 // Byte-level undo stack. Stores up to MaxEntries full map-byte snapshots.
 // MapDataService calls RecordSnapshot() before every mutation; MainWindow
 // calls TryUndo() on Ctrl+Z.
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMapEditor.Services.Core
 {
@@ -10,7 +11,7 @@ namespace UrbanChaosMapEditor.Services.Core
         private static readonly Lazy<UndoService> _lazy = new(() => new UndoService());
         public static UndoService Instance => _lazy.Value;
 
-        private const int MaxEntries = 10;
+        private const int MaxEntries = EditorLimitConstants.UndoMaxEntries;
 
         // List used as a bounded stack: index 0 = oldest, index Count-1 = newest.
         private readonly List<byte[]> _stack = new();

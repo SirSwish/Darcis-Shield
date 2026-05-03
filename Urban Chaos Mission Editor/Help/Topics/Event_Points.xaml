@@ -1,0 +1,12 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Event Points</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Players, enemies, cameras, pickups, triggers, timers, effects, and other scripted actions.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Creating and Editing</Paragraph>
+    <Paragraph><Bold>Add EventPoint</Bold> opens a type-aware creation flow at the current map position. Double-click an event point, or use <Bold>Edit EventPoint</Bold>, to open the matching editor control for that waypoint type.</Paragraph>
+    <Paragraph Margin="0,6,0,0">The selected event panel shows index, type, group, colour, position, trigger data, flags, text content, and raw data array values for quick diagnostics.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Categories</Paragraph>
+    <Paragraph>Category pills and <Bold>Show/Hide All Categories</Bold> reduce clutter. If a mission has many points, hide categories you are not currently working on.</Paragraph>
+</FlowDocument>

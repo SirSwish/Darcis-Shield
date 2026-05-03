@@ -283,11 +283,30 @@
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                 <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="HeaderTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontWeight="SemiBold"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <!-- Label -->
             <Style TargetType="Label">
                 <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            </Style>
+
+            <!-- CheckBox -->
+            <Style TargetType="CheckBox">
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            </Style>
+
+            <!-- RadioButton -->
+            <Style TargetType="RadioButton">
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             </Style>
 
             <!-- ToolTip -->

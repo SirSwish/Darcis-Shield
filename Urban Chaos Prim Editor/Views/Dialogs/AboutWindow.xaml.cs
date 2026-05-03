@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosPrimEditor.Views.Dialogs
 {
@@ -12,9 +13,9 @@ namespace UrbanChaosPrimEditor.Views.Dialogs
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-        private const int DWMWA_CAPTION_COLOR = 35;
-        private const int DWMWA_TEXT_COLOR = 36;
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = WindowsInteropConstants.DWMWA_USE_IMMERSIVE_DARK_MODE;
+        private const int DWMWA_CAPTION_COLOR = WindowsInteropConstants.DWMWA_CAPTION_COLOR;
+        private const int DWMWA_TEXT_COLOR = WindowsInteropConstants.DWMWA_TEXT_COLOR;
 
         public AboutWindow()
         {

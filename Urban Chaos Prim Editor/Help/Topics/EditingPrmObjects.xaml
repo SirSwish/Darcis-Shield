@@ -1,0 +1,207 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Editing PRM Objects
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to edit existing PRM files, adjust geometry, configure object properties, and import OBJ models.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- LOAD EXISTING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Loading an Existing PRM
+    </Paragraph>
+    <Paragraph>
+        To edit an existing prim, first set the game prim directory from the File Explorer panel.
+        Once the directory is loaded, select a PRM from the list on the left. The selected object is
+        loaded into the 3D viewport with its existing geometry and textures.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is the best way to understand how original Urban Chaos PRMs are built. You can inspect
+        the point count, face layout, texture assignment, UV regions, object flags, collision
+        settings, damage behaviour, and shadow type.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_edit_load_existing_prim.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- GEOMETRY -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Editing Geometry
+    </Paragraph>
+    <Paragraph>
+        Existing PRMs can be edited using the same basic tools used when creating a new prim. You
+        can add new points, remove unnecessary points, and create new triangle or quad faces from
+        selected points.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        When changing geometry, remember that texturing is assigned to faces. If you delete or
+        replace faces, you may need to reassign textures and UV regions afterwards.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Add points</Bold> when you need additional corners or shape detail.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Delete points</Bold> when they are unused or no longer needed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Create triangles</Bold> when a three-point surface is needed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Create quads</Bold> when a four-point surface is needed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Review the face lists</Bold> after changes to confirm the object structure is correct.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_edit_geometry_tools.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PROPERTIES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Prim Properties
+    </Paragraph>
+    <Paragraph>
+        The Prim Information panel controls how the object behaves in game. These settings are just
+        as important as the mesh itself because they determine collision behaviour, damage behaviour,
+        shadow style, and special object flags.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_edit_properties_panel.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Collision Type
+    </Paragraph>
+    <Paragraph>
+        Collision Type controls what happens when the object is hit by a vehicle.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> — no special collision reaction.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Tree</Bold> — the object behaves like a tree and bends over when struck.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Reduces</Bold> — the object shrinks or reduces when struck.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Damage Types
+    </Paragraph>
+    <Paragraph>
+        Damage flags control the visual reaction when the prim is damaged.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Is Damagable</Bold> — the object can react to impact and lean over when struck.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Explodes</Bold> — the object blows up when struck.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Crumples</Bold> — the object crumples or deforms when struck.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>No Line of Sight</Bold> — affects line-of-sight or transparency behaviour after the object is struck.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Shadow Type
+    </Paragraph>
+    <Paragraph>
+        Shadow Type controls the shadow drawn underneath the prim.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> — no special shadow.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Box Edge</Bold> — a box-edge style shadow.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cylinder</Bold> — a rounded/cylindrical style shadow.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Four Legs</Bold> — shadow style for objects with four contact points.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Full Box</Bold> — a full box-style shadow under the object.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Various Object Flags
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph><Bold>Is Light</Bold> — marks the prim as a light-emitting object, such as a street lamp.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Contains Walkable Facets</Bold> — indicates that some faces on the object can be stood on by the player.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Has Glare</Bold> — enables glare-style behaviour, useful for bright ground lights or small glowing objects.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Is Rotating Item</Bold> — makes the prim behave like a rotating pickup item.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Is Tree</Bold> — marks the object as tree-like, including behaviours such as leaves falling when struck.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Env Mapped</Bold> — likely related to environment mapping or reflective rendering. No obvious visible effect has been confirmed in the editor.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>Just Floor</Bold> — purpose not fully confirmed. It may relate to floor-only behaviour or placement rules, but no obvious visible effect has been confirmed.</Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph><Bold>On Floor</Bold> — intended to snap or align the object to the floor, although it does not appear to work reliably for every prim.</Paragraph>
+        </ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- OBJ IMPORT -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Importing an OBJ File
+    </Paragraph>
+    <Paragraph>
+        You can import a model created in Blender or another modelling tool by clicking the
+        <Bold>Import OBJ</Bold> quick action button and selecting an
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.OBJ</Run>
+        file from disk.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        OBJ import is useful because it lets you use a proper 3D modelling tool for the shape, then
+        use the Prim Editor for Urban Chaos-specific setup such as face texturing, UV regions, PRM
+        flags, and saving to the correct PRM slot.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_edit_import_obj.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        MTL texture import is deliberately not supported yet. This means imported OBJ models do not
+        automatically bring in their Blender material assignments. After importing the OBJ, assign
+        textures manually from the Prim Editor texture library.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    The engine supports a maximum of roughly 5000 vertices, but most original prims are much smaller.
+                    For best performance, keep custom prims low-poly whenever possible.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,17 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0" Background="#1E1F22" FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Editing Textures</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">A focused guide to manually editing an individual texture tile.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Opening the Tile Editor</Paragraph>
+    <Paragraph>Select a texture slot, then click <Bold>Edit Tile</Bold>. This opens the tile editor for the currently selected <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run> texture cell.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_overview.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Tools</Paragraph>
+    <Paragraph>Use Pencil, Eraser, Fill, Colour Picker, and Alpha Selection to modify the tile. Alpha values can be applied to selected areas, with <Run FontFamily="Consolas" Foreground="#E8B84B">0</Run> as opaque and <Run FontFamily="Consolas" Foreground="#E8B84B">255</Run> as fully transparent.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_tools.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_alpha.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Saving Changes</Paragraph>
+    <Paragraph>Press <Bold>Save</Bold> to write the edited tile back into the selected texture slot.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_save.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+</FlowDocument>

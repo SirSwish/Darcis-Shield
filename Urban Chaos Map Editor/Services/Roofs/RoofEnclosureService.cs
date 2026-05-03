@@ -157,6 +157,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
             bool anyApplied = false;
             bool anyAltitudeChanged = false;
             bool anyTextureChanged = false;
+            bool anyWalkableChanged = false;
 
             var changedWpfTiles = new List<(int wpfTx, int wpfTy)>();
             var claimedInteriorTiles = new HashSet<(int tx, int ty)>();
@@ -220,8 +221,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
                     if (existingFound && !wantUpdateExisting)
                     {
                         Debug.WriteLine($"[RoofEnclosureService] Polygon already processed for Building #{buildingId1}: " +
-                            $"({minX},{minZ})->({maxX},{maxZ}) existingY={existingStoredY} newY={newStoredY}, skipping");
-                        continue;
+                            $"({minX},{minZ})->({maxX},{maxZ}) existingY={existingStoredY} newY={newStoredY}; reapplying roof tiles/textures");
                     }
 
                     var interiorTiles = GetInteriorTiles(polygon);
@@ -317,6 +317,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                         if (updated)
                         {
+                            anyWalkableChanged = true;
                             Debug.WriteLine($"[RoofEnclosureService] Updated existing walkable #{existingWalkableId1} Y for Building #{buildingId1}: " +
                                 $"({minX},{minZ})->({maxX},{maxZ}) WorldY={walkableWorldY} (replaceHigher={replaceExistingWithHigher})");
 
@@ -336,6 +337,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
 
                             if (walkResult.Success)
                             {
+                                anyWalkableChanged = true;
                                 Debug.WriteLine($"[RoofEnclosureService] Auto-created walkable #{walkResult.WalkableId1} " +
                                     $"for Building #{buildingId1}: ({minX},{minZ})->({maxX},{maxZ}) Height={height} Y0={y0} WorldY={walkableWorldY}");
 
@@ -387,6 +389,12 @@ namespace UrbanChaosMapEditor.Services.Roofs
             if (anyTextureChanged)
             {
                 TexturesChangeBus.Instance.NotifyChanged();
+            }
+
+            if (anyWalkableChanged)
+            {
+                BuildingsChangeBus.Instance.NotifyBuildingChanged(buildingId1, BuildingChangeType.Modified);
+                BuildingsChangeBus.Instance.NotifyChanged();
             }
 
             if (!anyApplied)

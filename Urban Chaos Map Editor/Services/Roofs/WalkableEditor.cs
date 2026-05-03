@@ -2,6 +2,7 @@
 // Service for editing DWalkable fields in-place
 
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 
@@ -28,7 +29,7 @@ namespace UrbanChaosMapEditor.Services.Roofs
     public sealed class WalkableEditor
     {
         private readonly MapDataService _svc;
-        private const int DWalkableSize = 22;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
 
         public WalkableEditor(MapDataService svc)
         {

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Prims;
@@ -46,7 +47,7 @@ namespace UrbanChaosMapEditor.Views.Prims.MapOverlays
         private readonly Dictionary<byte, PrimSprite?> _cache = new();
 
         // 256 steps around a full circle
-        private const double DegreesPerYaw = 360.0 / 256.0;
+        private const double DegreesPerYaw = CameraConstants.DegreesPerYaw;
 
         public PrimGraphicsLayer()
         {

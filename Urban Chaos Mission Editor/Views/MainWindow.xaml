@@ -197,6 +197,7 @@
         <KeyBinding Key="Delete" Command="{Binding DeleteEventPointCommand}"/>
         <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyEventPointCommand}"/>
         <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteEventPointCommand}"/>
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{x:Static local:MainWindow.Open3DViewportCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -263,6 +264,8 @@
                 <MenuItem Header="Clear _All Zones" Command="{Binding ClearAllZonesCommand}" ToolTip="Remove all zone data"/>
             </MenuItem>
             <MenuItem Header="_View">
+                <MenuItem Header="Open _3D Viewport..." Click="Open3DViewport_Click" InputGestureText="Ctrl+3"/>
+                <Separator/>
                 <MenuItem Header="Zoom _In" Command="{Binding ZoomInCommand}" InputGestureText="+"/>
                 <MenuItem Header="Zoom _Out" Command="{Binding ZoomOutCommand}" InputGestureText="-"/>
                 <MenuItem Header="_Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0"/>
@@ -285,7 +288,12 @@
                 <MenuItem Header="_Show All Categories" Command="{Binding ShowAllCategoriesCommand}"/>
                 <MenuItem Header="_Hide All Categories" Command="{Binding HideAllCategoriesCommand}"/>
             </MenuItem>
+            <MenuItem Header="_Debug">
+                <MenuItem Header="_Find Event Point Usage..." Click="FindEventPointUsage_Click"
+                          ToolTip="Scan a directory of UCM files to find missions using a specific event point type"/>
+            </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Mission Editor Help" Click="Help_Click"/>
                 <MenuItem Header="_About" Click="About_Click"/>
             </MenuItem>
         </Menu>
@@ -304,6 +312,9 @@
                 Command="{Binding OpenLightsCommand}" ToolTip="Open Lights File"/>
                 <Button Style="{StaticResource ToolbarButtonStyle}" Content="✏️ Edit Lights"
                 Command="{Binding EditLightsCommand}" ToolTip="Open loaded lights in Light Editor"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="3D"
+                Click="Open3DViewport_Click" ToolTip="Open 3D viewport (Ctrl+3)"
+                IsEnabled="{Binding IsMapLoaded}"/>
 
                 <Separator Margin="8,0" Background="#555"/>
 

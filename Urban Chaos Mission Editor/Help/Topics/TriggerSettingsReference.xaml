@@ -1,0 +1,217 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Settings and Listening Modes
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        A reference for Event Point trigger conditions and listening behaviour.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Trigger Settings Control
+    </Paragraph>
+    <Paragraph>
+        Trigger settings define when an Event Point activates. Some event points activate as soon as
+        the mission starts, while others wait for the player to enter a radius, complete another
+        event, use an object, kill or arrest a target, finish a conversation, or satisfy a counter
+        condition.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Trigger settings are what turn individual Event Points into mission logic. A single event
+        point can create an object, display a message, start a timer, or end the mission, but the
+        trigger decides when that action actually happens.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_triggers_settings_panel.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TRIGGER TYPES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Triggered By Options
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None / Game Starts</Paragraph>
+    <Paragraph Margin="24,0,0,0">The Event Point is active from the start of the mission, or triggers immediately when the mission begins.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when another referenced Event Point has triggered or activated. Uses an Event Point reference.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Enters Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the player enters this Event Point’s radius. Uses the Radius field.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Door Opens</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when an associated door or openable object is opened. Usually tied to nearby or linked door logic.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Tripwire</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a tripwire-style area or line is crossed.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Pressure Pad</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a pressure pad is activated, usually by the player, person, or thing standing on it.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Electric Fence</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers from electric fence interaction or state. This appears to be legacy or special-case mission logic.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Water Level</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers based on water level or environmental state. This appears to be special-case environment logic.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Security Camera</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers from security camera detection or camera state.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Switch</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a switch is used or activated.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Anim Prim</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers from an animated prim or object state.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timer</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers after a timer delay. Uses the time or radius-style numeric field depending on editor mapping.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Shout (all)</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when all required shout conditions in range are satisfied. Uses radius/text-style trigger data.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean AND</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers only when two referenced Event Points or conditions are both true. Uses EPRef and EPRefBool.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean OR</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when either of two referenced Event Points or conditions is true. Uses EPRef and EPRefBool.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Item Held / Specific Item Held / Item Seen</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when an item is held, a specific item is held, or an item is seen/detected.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed or Arrested / Killed Not Arrested / Person Arrested</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers based on the state of a referenced person, such as killed, arrested, or specifically killed but not arrested.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Shout (any)</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when any matching shout condition occurs in range.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Countdown Timer / Visible Countdown Timer</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a countdown completes. Visible Countdown Timer shows the countdown to the player and is the timer type targeted by Extend Timer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Enters Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when an enemy or person enters this Event Point’s radius. Often uses both an EP reference and Radius.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Enters Cuboid</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the player enters a box or cuboid region instead of a circular radius.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Target 50% Damaged / Half Dead</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the referenced target, person, or object reaches roughly half health or damage.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when all relevant members of a group or colour are dead.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Sees Person</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when one referenced enemy/person sees another referenced person. Uses two Event Point references.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Person / Player Uses in Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the player interacts with a referenced person or presses use while inside the Event Point’s radius.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Prim Damaged</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a prim or object is damaged.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Finished</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the referenced Conversation Event Point has completed.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter Reaches Value</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a mission counter reaches a configured value. Used with Increment and Reset Counter logic.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Crime Rate Above / Crime Rate Below</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the mission or world crime rate rises above or drops below a threshold.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Is Murderer</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers if the referenced person is marked as the murderer.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person In Vehicle</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when a referenced person is in a referenced vehicle. Uses two Event Point references.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Thing Stop Direction/Radius / Radius and Direction / Move Radius Direction</Paragraph>
+    <Paragraph Margin="24,0,0,0">Movement, proximity, and direction-related triggers, likely used by moving objects, path logic, or directional checks.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Carries Person</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the player is carrying the referenced person.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Random</Paragraph>
+    <Paragraph Margin="24,0,0,0">Random chance trigger, usually dependent on a referenced Event Point or condition.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Fires a Gun</Paragraph>
+    <Paragraph Margin="24,0,0,0">Triggers when the player fires a weapon.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Darci Has Grabbed Someone / Darci Punches and Kicks</Paragraph>
+    <Paragraph Margin="24,0,0,0">Character-specific triggers for Darci grabbing someone or attacking with punches and kicks.</Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- LISTENING MODE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Listening Mode controls what happens after an Event Point has been triggered. The practical
+        difference is mostly about whether the event point remains true for dependency chains,
+        remains true only while the trigger is happening, stays active temporarily, or dies after
+        firing.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_triggers_listening_mode.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None</Paragraph>
+    <Paragraph Margin="24,0,0,0">No listening mode set. In the original editor this is effectively invalid/default and is usually forced to Active.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active</Paragraph>
+    <Paragraph Margin="24,0,0,0">Activates once, then stays active for the rest of the mission. This is the normal “trigger once and remain true” mode.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active While</Paragraph>
+    <Paragraph Margin="24,0,0,0">Activates whenever its trigger condition is currently true. It is true only while the condition is happening.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Time</Paragraph>
+    <Paragraph Margin="24,0,0,0">Activates when triggered, then remains active only for a fixed time using the AfterTimer value.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Die</Paragraph>
+    <Paragraph Margin="24,0,0,0">Activates once, then becomes dead/inactive afterwards. Useful for one-shot actions that should not remain active as a dependency and should not trigger again.</Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Practical summary:</Run>
+                <Run>
+                    Active = “I happened, and I stay true.”
+                    Active While = “I am true only while the condition is true.”
+                    Active Time = “I become true for X time, then turn off.”
+                    Active Die = “I fire once, then remove/kill myself as a useful trigger.”
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

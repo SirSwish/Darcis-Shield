@@ -1,4 +1,4 @@
-﻿// /Views/TileEditorWindow.xaml.cs
+// /Views/TileEditorWindow.xaml.cs
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,15 +7,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosStyleEditor.Views
 {
     public partial class TileEditorWindow : Window
     {
-        private const int TileWidth = 64;
-        private const int TileHeight = 64;
-        private const int Bpp = 4; // BGRA
-        private const int Stride = TileWidth * Bpp;
+        private const int TileWidth = TextureFormatConstants.TileWidth;
+        private const int TileHeight = TextureFormatConstants.TileHeight;
+        private const int Bpp = TextureFormatConstants.Bpp; // BGRA
+        private const int Stride = TextureFormatConstants.Stride;
 
         private readonly byte[] _pixels = new byte[TileWidth * TileHeight * Bpp];
         private WriteableBitmap _bitmap;

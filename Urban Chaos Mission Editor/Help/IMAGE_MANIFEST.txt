@@ -1,0 +1,35 @@
+Mission Editor Help Image Manifest - Part 1
+==========================================
+
+Place these screenshots under:
+Help/Images/
+
+OverviewGettingStarted.xaml
+---------------------------
+mission_overview_full_window.png
+mission_overview_layout_annotated.png
+mission_overview_status_zoom.png
+mission_overview_file_menu.png
+mission_overview_edit_menu.png
+mission_overview_zones_menu.png
+mission_overview_view_menu.png
+mission_overview_quick_actions.png
+mission_overview_event_panels.png
+
+StartingNewMission.xaml
+-----------------------
+mission_start_new_file.png
+mission_start_mission_info_panel.png
+mission_start_mission_properties_edit.png
+mission_start_filters_panel.png
+mission_start_load_map_button.png
+mission_start_map_loaded.png
+mission_start_load_lights_button.png
+mission_start_lights_loaded.png
+mission_start_loaded_files_section.png
+
+EventPoints.xaml
+----------------
+mission_eventpoints_overview.png
+mission_eventpoints_add_button.png
+mission_eventpoints_add_window.png

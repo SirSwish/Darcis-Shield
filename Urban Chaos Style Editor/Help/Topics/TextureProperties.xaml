@@ -1,0 +1,57 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0" Background="#1E1F22" FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Texture Properties</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">How to assign texture behaviour flags, transparency settings, footstep sounds, and sky box images for a custom texture world.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Overview</Paragraph>
+    <Paragraph>Each selected texture slot can have its own <Bold>Texture Properties</Bold> and <Bold>Footstep Sound</Bold> assigned. These settings are tied to the currently selected texture cell and are exported with the finished custom world.</Paragraph>
+    <Paragraph>Texture properties are exported to <Run FontFamily="Consolas" Foreground="#E8B84B">textype.txt</Run>. Footstep sound selections are exported to the relevant sound mapping file used by the game.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_overview.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8"><Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#AFC8FF"><Run FontWeight="Bold">Tip:</Run><Run> Texture properties apply to the currently selected slot only. Always confirm the correct texture cell is selected before changing flags or sound settings.</Run></TextBlock></Border></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Selecting a Texture Slot</Paragraph>
+    <Paragraph>Select a texture from the <Bold>Texture Slots</Bold> panel. The right-hand Texture Properties and Footstep Sound sections update to show the settings for that selected texture.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_selected_slot.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Texture Behaviour Flags</Paragraph>
+    <Paragraph>The Texture Properties section contains flags that control how the selected texture behaves in game.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_flags_panel.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Transparent</Paragraph>
+    <Paragraph Margin="24,0,0,0">Black pixels render as transparent when this flag is set. Useful for fences, grates, glass edges, signs, and cut-out details.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Wrapping</Paragraph>
+    <Paragraph Margin="24,0,0,0">Allows the texture to wrap or repeat when sampled outside the normal texture boundary. This is useful for repeating floors, roads, walls, and tiled patterns.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Additive Alpha</Paragraph>
+    <Paragraph Margin="24,0,0,0">Enables additive-style blending, where the texture adds colour or brightness to the scene. Useful for glows, light halos, illuminated overlays, and bright signs.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Illumination Map</Paragraph>
+    <Paragraph Margin="24,0,0,0">Indicates that the next texture page is used as a related illumination map, defining which parts of a texture should appear lit.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Self Illuminating</Paragraph>
+    <Paragraph Margin="24,0,0,0">Marks the whole texture as self-illuminating so it appears lit without relying fully on scene lighting.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Exclude Fadeout</Paragraph>
+    <Paragraph Margin="24,0,0,0">Excludes the texture from certain renderer fadeout behaviour. Useful for special overlays or textures that should remain stable when nearby geometry fades.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Alpha Masked</Paragraph>
+    <Paragraph Margin="24,0,0,0">Enables alpha-mask behaviour for controlled visibility or masking beyond simple black-pixel cut-out transparency.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Alpha Transparent</Paragraph>
+    <Paragraph Margin="24,0,0,0">Stores the texture with ARGB alpha data instead of plain RGB. Alpha values can be edited in the Tile Editor.</Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Footstep Sounds</Paragraph>
+    <Paragraph>Each texture tile can also have its own footstep sound category. This controls which sound plays when the player walks over a surface using that texture. Categories are defined in <Run FontFamily="Consolas" Foreground="#E8B84B">SoundFX.ini</Run>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_footstep_sound_panel.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem><Paragraph>Forest</Paragraph></ListItem><ListItem><Paragraph>Glass</Paragraph></ListItem><ListItem><Paragraph>Grass</Paragraph></ListItem><ListItem><Paragraph>Gravel</Paragraph></ListItem><ListItem><Paragraph>Metal</Paragraph></ListItem><ListItem><Paragraph>Road</Paragraph></ListItem><ListItem><Paragraph>Snow</Paragraph></ListItem><ListItem><Paragraph>Tiles / Ice / Rock</Paragraph></ListItem><ListItem><Paragraph>Water</Paragraph></ListItem><ListItem><Paragraph>Wood</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Sky Box Image</Paragraph>
+    <Paragraph>Select the <Bold>Import</Bold> button in the Sky Image section to import a sky box image for the custom world.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_sky_image_section.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph>Examples of sky box images can be found in the default world folders as <Run FontFamily="Consolas" Foreground="#E8B84B">sky.tga</Run>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/texture_properties_sky_tga_example.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8"><Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#E0A0A0"><Run FontWeight="Bold">⚠ Important:</Run><Run> Some texture flags only become visible in game when the texture is used in a way that supports that behaviour. Test transparency, alpha masking, and illumination effects in the game renderer.</Run></TextBlock></Border></BlockUIContainer>
+</FlowDocument>

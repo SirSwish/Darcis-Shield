@@ -1,6 +1,7 @@
 // /Services/Buildings/WalkableAdder.cs
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Buildings;
 
@@ -39,10 +40,10 @@ namespace UrbanChaosMapEditor.Services.Roofs
     /// </summary>
     public sealed class WalkableAdder
     {
-        private const int HeaderSize = 48;     // Buildings region header
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
-        private const int DBuildingSize = 24;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;     // Buildings region header
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
 
         private readonly MapDataService _svc;
 

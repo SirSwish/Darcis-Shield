@@ -1,0 +1,191 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Creating PRM Objects
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to create a new PRM object from points, triangles, and quads.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- START -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Starting a New PRM
+    </Paragraph>
+    <Paragraph>
+        To create a new PRM object, click the <Bold>New</Bold> button, select
+        <Bold>File → New</Bold>, or press <Bold>Ctrl+N</Bold>. This clears the current model and
+        opens a blank editing space in the 3D viewport.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A PRM object is built from points and faces. Points are placed in 3D space, then groups of
+        three points become triangles and groups of four points become quads. These faces form the
+        visible surface of the object and can later be textured.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_create_new_prim.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADD POINT -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Step 1: Add Points
+    </Paragraph>
+    <Paragraph>
+        In the edit bar, change the current mode from <Bold>Select</Bold> to
+        <Bold>Add Point</Bold>. In this mode, clicking inside the 3D viewport places a new point
+        on the editing plane.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Points are the basic building blocks of PRM geometry. They do not form a visible surface by
+        themselves, but they define the corners that faces will use.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_create_add_point_mode.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        For a first test, click four points anywhere on the plane. This gives you enough points to
+        create either one quad or multiple triangles.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_create_points_in_viewport.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    You can hide or collapse the textures panel while placing points if you need more viewport space.
+                    The texture panel becomes more important later when you start assigning materials.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- FACES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Step 2: Convert Points into Faces
+    </Paragraph>
+    <Paragraph>
+        Once points exist in the viewport, they can be grouped into faces. Faces are what actually
+        become visible surfaces on the model.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Creating a Triangle
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Select <Bold>New Triangle</Bold>, then click three points in the viewport. The editor joins
+        those points into one triangular face.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Creating a Quad
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Select <Bold>New Quad</Bold>, then click four points in the viewport. The editor joins
+        those points into one quadrangular face.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_create_new_triangle_quad.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        After a triangle or quad is created, it is added to the corresponding face list under the
+        Face Materials section. This list is important because individual faces are selected from
+        here when you assign textures and UV regions.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_create_face_lists.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Construction Workflow
+    </Paragraph>
+    <Paragraph>
+        To build a simple PRM object from scratch:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create a new PRM with <Bold>File → New</Bold> or <Bold>Ctrl+N</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Switch the edit mode to <Bold>Add Point</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click in the 3D viewport to place the points needed for the shape.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>New Triangle</Bold> to create triangular surfaces.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>New Quad</Bold> to create rectangular or four-sided surfaces.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check the face lists to confirm the faces were created.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select each face and assign textures in the Texturing section.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the prim properties, such as collision type, shadow type, and object flags.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save the finished object as a PRM file.</Paragraph></ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- PRACTICAL LIMITS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Modelling Notes
+    </Paragraph>
+    <Paragraph>
+        The Prim Editor is best suited for simple low-poly objects and small modifications to
+        existing prims. It is not intended to replace a full modelling package. If your model needs
+        detailed curves, complex proportions, or many small components, create the shape in Blender
+        first and import it as OBJ.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The Urban Chaos engine can support up to roughly <Bold>5000 vertices</Bold> for a model, but
+        that should be treated as an upper technical limit, not a recommended target. Most original
+        prim objects are far smaller, often under 100 vertices. Keeping objects simple helps them
+        render faster and keeps them closer to the original game style.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Very high vertex counts can cause performance issues. Use the 5000-vertex limit as a hard ceiling,
+                    not as a normal modelling target.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

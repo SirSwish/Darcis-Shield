@@ -23,7 +23,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
     {
         #region ====== Constants / Services ======
         private const string AppName = "Urban Chaos Map Editor";
-        private readonly IUiDialogService _dialogs;
         #endregion
 
         #region ====== Title & File Labels ======

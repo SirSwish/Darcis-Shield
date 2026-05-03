@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosPrimEditor.Models;
 
 namespace UrbanChaosPrimEditor.Services
@@ -8,15 +9,15 @@ namespace UrbanChaosPrimEditor.Services
     public sealed class PrmParserService
     {
         // ── Struct sizes (bytes) ──────────────────────────────────────────────
-        private const int PointSize       = 6;   // Int16 X, Y, Z
-        private const int TriangleSize    = 28;  // see layout in Decode()
-        private const int QuadrangleSize  = 34;  // see layout in Decode()
+        private const int PointSize       = PrimFormatConstants.PointSize;   // Int16 X, Y, Z
+        private const int TriangleSize    = PrimFormatConstants.TriangleSize;  // see layout in Decode()
+        private const int QuadrangleSize  = PrimFormatConstants.QuadrangleSize;  // see layout in Decode()
 
         // ── Header sizes ─────────────────────────────────────────────────────
         // NPRIM: 2-byte signature at byte 0, then 32-byte name → header = 50
         // PRIM : 32-byte name first, 6 dummy bytes + 2-byte signature at end → header = 56
-        private const int NprimHeaderSize = 50;
-        private const int PrimHeaderSize  = 56;
+        private const int NprimHeaderSize = PrimFormatConstants.NprimHeaderSize;
+        private const int PrimHeaderSize  = PrimFormatConstants.PrimHeaderSize;
 
         public PrmModel Load(string path)
         {

@@ -1,0 +1,75 @@
+Prim Editor Help Image Capture Guide
+====================================
+
+Overview / Getting Started
+--------------------------
+prim_overview_full_window.png
+Full Prim Editor window showing file explorer, 3D viewport, right-hand Prim information panel, bottom textures panel, and status bar.
+
+prim_overview_set_texture_dir.png
+Textures panel with Set Texture Dir visible, ideally after loading TGA files from server\textures\shared\prims.
+
+prim_overview_set_prim_dir.png
+File explorer panel with Set Directory visible and PRM files loaded from server\prims.
+
+prim_overview_3d_navigation.png
+3D viewport showing the navigation hint box or a model positioned in the viewport.
+
+Creating PRM Objects
+--------------------
+prim_create_new_prim.png
+Blank new PRM after pressing New.
+
+prim_create_add_point_mode.png
+Edit bar with mode changed from Select to Add Point.
+
+prim_create_points_in_viewport.png
+Several placed points visible in the 3D viewport.
+
+prim_create_new_triangle_quad.png
+New Triangle or New Quad mode active while selecting points.
+
+prim_create_face_lists.png
+Face Materials / triangle / quad list showing newly created faces.
+
+Editing PRM Objects
+-------------------
+prim_edit_load_existing_prim.png
+Existing PRM loaded from the left file list and displayed textured in the viewport.
+
+prim_edit_geometry_tools.png
+Geometry editing tools or edit bar visible while editing an existing PRM.
+
+prim_edit_properties_panel.png
+Right-hand Prim Information panel showing collision, damage, shadow, and object flags.
+
+prim_edit_import_obj.png
+Import OBJ quick action button or file dialog selecting an OBJ file.
+
+Texturing PRM Objects
+---------------------
+prim_texture_select_face.png
+A face selected from the face list and highlighted yellow in the viewport.
+
+prim_texture_uv_region_preview.png
+Textures panel showing current face texture and UV Region preview.
+
+prim_texture_select_uv_region.png
+Texture preview while dragging a rectangular UV region.
+
+prim_texture_reset_uv.png
+UV Region preview area with the Reset button visible.
+
+prim_texture_library_panel.png
+Bottom texture library panel showing loaded TGA textures.
+
+prim_texture_import_custom_texture.png
+The + import texture button or file dialog used to import a custom texture.
+
+Exporting PRM Objects
+---------------------
+prim_export_save_as_prm.png
+Save As PRM command or save dialog pointing at the game PRM directory.
+
+prim_export_obj.png
+Export OBJ command or save dialog for exporting the current model as OBJ.

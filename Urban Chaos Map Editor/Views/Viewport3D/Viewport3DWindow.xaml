@@ -30,9 +30,9 @@
             <ModelVisual3D>
                 <ModelVisual3D.Content>
                     <Model3DGroup>
-                        <AmbientLight Color="#606060"/>
-                        <DirectionalLight Color="#C8C8C8" Direction="-0.35,-1,-0.25"/>
-                        <DirectionalLight Color="#404040" Direction="0.35,-0.25,1"/>
+                        <AmbientLight x:Name="AmbientSceneLight" Color="#606060"/>
+                        <DirectionalLight x:Name="PrimaryDirectionalLight" Color="#C8C8C8" Direction="-0.35,-1,-0.25"/>
+                        <DirectionalLight x:Name="SecondaryDirectionalLight" Color="#404040" Direction="0.35,-0.25,1"/>
                     </Model3DGroup>
                 </ModelVisual3D.Content>
             </ModelVisual3D>
@@ -40,13 +40,17 @@
             <ModelVisual3D x:Name="SceneRoot"/>
         </Viewport3D>
 
+        <Rectangle x:Name="AmbientFilterOverlay"
+                   IsHitTestVisible="False"
+                   Visibility="Collapsed"/>
+
         <Border HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="10"
                 Padding="8,4"
                 Background="#A0000000"
                 CornerRadius="4">
-            <StackPanel>
+            <StackPanel x:Name="LayerPanel">
                 <TextBlock x:Name="HudCoords"
                            Foreground="White"
                            FontFamily="Consolas"

@@ -6,10 +6,8 @@ using UrbanChaosMapEditor.Services.Buildings;
 
 namespace UrbanChaosMapEditor.ViewModels.Buildings
 {
-    public sealed class BuildingBrowserViewModel : INotifyPropertyChanged
+    public sealed class BuildingBrowserViewModel
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public ObservableCollection<BuildingVM> Buildings { get; } = new();
 
         // NEW: flat list of all cable facets extracted from BuildingArrays.Cables

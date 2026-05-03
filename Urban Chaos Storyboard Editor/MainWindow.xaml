@@ -33,6 +33,7 @@
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Storyboard Editor Help" Click="Help_Click"/>
                 <MenuItem Header="_About Urban Chaos Storyboard Editor" Click="About_Click"/>
             </MenuItem>
         </Menu>

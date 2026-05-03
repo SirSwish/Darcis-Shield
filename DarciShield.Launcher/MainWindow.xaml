@@ -100,6 +100,18 @@
                 </Style>
             </Button.Style>
         </Button>
+        <Button Content="?"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="32" Height="32"
+                Margin="6,6,0,0"
+                FontSize="14"
+                Foreground="White"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                Panel.ZIndex="10"
+                Click="Help_Click"/>
         <!-- Leather background -->
         <Image Source="/Assets/Images/Backgrounds/leather.png"
            Stretch="Fill"

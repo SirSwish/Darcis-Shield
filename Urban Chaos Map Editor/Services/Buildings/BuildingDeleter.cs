@@ -1,6 +1,7 @@
 // /Services/BuildingDeleter.cs
 // Helper class for deleting buildings with all cascading data updates
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Roofs;
@@ -19,12 +20,12 @@ namespace UrbanChaosMapEditor.Services.Buildings
     /// </summary>
     public sealed class BuildingDeleter
     {
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int DFacetSize = 26;
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
 
         private readonly MapDataService _svc;
 
@@ -76,7 +77,7 @@ namespace UrbanChaosMapEditor.Services.Buildings
                     var w = snap.Walkables[i];
                     if (w.Building == buildingId1)
                     {
-                        // Skip soft-deleted (zeroed) walkables — they're already dead
+                        // Skip soft-deleted (zeroed) walkables ï¿½ they're already dead
                         bool isSoftDeleted = w.X1 == 0 && w.Z1 == 0 && w.X2 == 0 && w.Z2 == 0 && w.Y == 0;
                         if (!isSoftDeleted)
                         {

@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.Services.Styles;
@@ -21,8 +22,8 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
     /// </summary>
     public partial class FacetPainterWindow : Window
     {
-        private const int PanelPx = 64;
-        private const int PaletteTileSize = 32;
+        private const int PanelPx = TextureFormatConstants.TileWidth;
+        private const int PaletteTileSize = EditorUiConstants.PaletteTileSize;
         private const int MaxTextureIndex = 127; // Paint bytes use 7 bits (0-127)
 
         private readonly DFacetRec _facet;
@@ -51,7 +52,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         // Palette
         private readonly ObservableCollection<PaletteItemVM> _paletteItems = new();
         private int _selectedTextureIndex = -1; // -1 = eraser mode
-        private bool _flipHorizontal = false;
 
         // Track if changes were made
         public bool ChangesMade { get; private set; } = false;

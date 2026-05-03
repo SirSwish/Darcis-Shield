@@ -642,7 +642,7 @@ namespace UrbanChaosStyleEditor.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    public sealed class DiscoveredWorld : INotifyPropertyChanged
+    public sealed class DiscoveredWorld
     {
         public int WorldNumber { get; init; }
         public string FolderPath { get; init; } = "";
@@ -654,7 +654,5 @@ namespace UrbanChaosStyleEditor.ViewModels
 
         public string DisplayName => $"World {WorldNumber}";
         public string Summary => $"{TextureCount} textures{(HasStyleTma ? " + TMA" : "")}{(HasSky ? " + Sky" : "")}{(HasTexType ? " + TexType" : "")}{(HasSoundFx ? " + SFX" : "")}";
-
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

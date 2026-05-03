@@ -21,6 +21,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -31,12 +32,12 @@ namespace UrbanChaosMapEditor.Services.Buildings
     /// </summary>
     public sealed class FacetPainter
     {
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int DFacetSize = 26;
-        private const int DStyleSize = 2;
-        private const int DStoreySize = 6;    // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int DStyleSize = BuildingFormatConstants.DStyleSize;
+        private const int DStoreySize = BuildingFormatConstants.DStoreySize;    // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
 
         private readonly MapDataService _svc;
 

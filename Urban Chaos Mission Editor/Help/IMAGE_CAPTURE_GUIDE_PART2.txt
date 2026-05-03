@@ -1,0 +1,19 @@
+Mission Editor Help Image Capture Guide - Part 2
+===============================================
+
+PlayerEventPoint.xaml
+---------------------
+mission_player_eventpoint_overview.png - Viewport with a Player Event Point visible, preferably selected.
+mission_player_select_player_type.png - Add New EventPoint window with Player selected.
+mission_player_edit_window.png - Edit EventPoint window after choosing Player.
+mission_player_common_properties.png - Common Properties section showing index, type, letter group, and colour.
+mission_player_select_position_button.png - Select Position on Map button visible in the Edit EventPoint window.
+mission_player_position_on_map.png - Map/viewport while placing or after placing the Player Event Point.
+mission_player_character_selection.png - Player-specific radio buttons showing Darci, Roper, Police Man, and Gang Member/Mako.
+mission_player_trigger_settings.png - Triggered By and Listening Mode controls set to None/Game Starts and Active.
+mission_player_created_in_list.png - Event Points list showing the created Player Event Point.
+
+TriggerSettingsReference.xaml
+-----------------------------
+mission_triggers_settings_panel.png - Trigger settings panel/dropdown showing Triggered By options.
+mission_triggers_listening_mode.png - Listening Mode dropdown or controls showing None, Active, Active While, Active Time, and Active Die.

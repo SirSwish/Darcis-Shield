@@ -1,6 +1,7 @@
 // /Services/FacetDeleter.cs
 // Helper class for deleting individual facets from buildings
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -16,10 +17,10 @@ namespace UrbanChaosMapEditor.Services.Buildings
     /// </summary>
     public sealed class FacetDeleter
     {
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int DFacetSize = 26;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
 
         private readonly MapDataService _svc;
 

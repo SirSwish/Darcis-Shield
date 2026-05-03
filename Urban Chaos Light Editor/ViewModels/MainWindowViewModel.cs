@@ -781,10 +781,8 @@ namespace UrbanChaosLightEditor.ViewModels
     }
 
     // ===== Helper Classes =====
-    public class LightListItem : INotifyPropertyChanged
+    public class LightListItem
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public int Index { get; set; }
         public int X { get; set; }
         public int Y { get; set; }

@@ -1,5 +1,6 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using System.Windows.Media.Imaging;
 using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.ViewModels;
@@ -8,8 +9,8 @@ namespace UrbanChaosMissionEditor.Views.MapOverlays;
 
 public class ZoneOverlay : FrameworkElement
 {
-    private const int GridSize = 128;
-    private const double TileSize = 64.0; // 8192 / 128
+    private const int GridSize = UrbanChaosEditor.Shared.Models.SharedMapConstants.TilesPerSide;
+    private const double TileSize = UrbanChaosEditor.Shared.Models.SharedMapConstants.TileSize; // 8192 / 128
 
     private MainViewModel? _viewModel;
     private WriteableBitmap? _zoneBitmap;

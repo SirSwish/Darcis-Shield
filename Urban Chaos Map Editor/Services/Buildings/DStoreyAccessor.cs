@@ -5,11 +5,12 @@
 //   Header(48) ? Buildings[] ? Pad(14) ? Facets[] ? dstyles[] ? paint_mem[] ? dstoreys[] ? ...
 //
 // Array sizes in file (each includes unused slot 0):
-//   dstyles:   nextStyle   entries × 2 bytes each
+//   dstyles:   nextStyle   entries ï¿½ 2 bytes each
 //   paint_mem: nextPaint   bytes
-//   dstoreys:  nextStorey  entries × 6 bytes each
+//   dstoreys:  nextStorey  entries ï¿½ 6 bytes each
 
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -24,11 +25,11 @@ namespace UrbanChaosMapEditor.Services.Buildings
         private readonly MapDataService _svc;
 
         // Structure sizes
-        private const int DStoreySize = 6;      // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
-        private const int DBuildingSize = 24;
-        private const int DFacetSize = 26;
-        private const int HeaderSize = 48;
-        private const int AfterBuildingsPad = 14;
+        private const int DStoreySize = BuildingFormatConstants.DStoreySize;      // U16 Style + U16 PaintIndex + S8 Count + U8 Padding
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
 
         public DStoreyAccessor(MapDataService svc)
         {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using UrbanChaosLightEditor.Models;
+using SharedLights = UrbanChaosEditor.Shared.Constants.LightsFormatConstants;
 
 namespace UrbanChaosLightEditor.Services
 {
@@ -27,15 +28,15 @@ namespace UrbanChaosLightEditor.Services
         }
 
         // ---- Constants (CORRECTED from C++ source) ----
-        private const int HeaderSize = 12;
-        private const int EntrySize = 20;
-        private const int EntryCount = 256;  // ED_MAX_LIGHTS = 256 (index 0 is sentinel)
-        private const int EntriesOffset = HeaderSize;  // NO padding! Entries at offset 12
-        private const int PropertiesOffset = EntriesOffset + EntrySize * EntryCount;  // 5132
-        private const int PropertiesSize = 36;
-        private const int NightColourOffset = PropertiesOffset + PropertiesSize;  // 5168
-        private const int NightColourSize = 3;
-        private const int TotalSize = NightColourOffset + NightColourSize;  // 5171
+        private const int HeaderSize = SharedLights.HeaderSize;
+        private const int EntrySize = SharedLights.EntrySize;
+        private const int EntryCount = SharedLights.EntryCount;
+        private const int EntriesOffset = SharedLights.EntriesOffset;
+        private const int PropertiesOffset = SharedLights.PropertiesOffset;
+        private const int PropertiesSize = SharedLights.PropertiesSize;
+        private const int NightColourOffset = SharedLights.NightColourOffset;
+        private const int NightColourSize = SharedLights.NightColourSize;
+        private const int TotalSize = SharedLights.TotalSize;
 
         // ---- State ----
         private byte[] _bytes = Array.Empty<byte>();

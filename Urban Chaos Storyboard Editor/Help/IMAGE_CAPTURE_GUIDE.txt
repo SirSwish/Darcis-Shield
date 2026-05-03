@@ -1,0 +1,41 @@
+Storyboard Editor Help Image Capture Guide
+==========================================
+
+Getting Started / Overview
+--------------------------
+storyboard_getting_started_full_window.png - Full Storyboard Editor window showing map view, status bar, quick actions, and right-hand management bar.
+storyboard_getting_started_map_view.png - Overworld map view with one or more district markers visible.
+storyboard_getting_started_status_bar.png - Bottom status bar showing current editor status.
+storyboard_getting_started_file_menu.png - File menu opened showing New, Open, Save, and Save As.
+storyboard_getting_started_quick_actions.png - Quick action toolbar showing New, Open, Save, and District/Mission counts.
+storyboard_getting_started_management_bar.png - Right-hand management bar showing Districts and Missions tabs.
+storyboard_getting_started_open_existing_sty.png - Open dialog or loaded example .sty file showing existing district/mission structure.
+
+Managing Districts
+------------------
+storyboard_districts_new_file.png - New storyboard loaded with the standard overworld image.
+storyboard_districts_tab.png - Districts tab open in the management bar.
+storyboard_districts_add_button.png - Districts tab with Add button clearly visible.
+storyboard_districts_new_marker.png - Map view showing a newly added district marker.
+storyboard_districts_edit_button.png - District list with a district selected and Edit button visible.
+storyboard_districts_edit_window.png - Edit District Window showing ID, District Name, X, and Y fields.
+storyboard_districts_set_position_button.png - District selected with Set Position button visible.
+storyboard_districts_set_position_cursor.png - Map view while Set Position mode is active, ideally showing crosshair/click target.
+storyboard_districts_selected_on_map.png - District marker selected on map, with associated missions visible if possible.
+storyboard_districts_delete_button.png - District selected with Delete button visible.
+
+Managing Missions
+-----------------
+storyboard_missions_tab.png - Missions tab open with Add, Edit, Delete, and Template buttons visible.
+storyboard_missions_template_button.png - Template button visible, ideally before/after creating ten mission entries.
+storyboard_missions_add_button.png - Missions tab with Add button visible and/or new mission row selected.
+storyboard_missions_edit_window.png - Edit Mission box showing Mission ID, Name, File, District ID, Unlocked By, Type, Flags, Audio File, and Briefing fields.
+storyboard_missions_saved_under_district.png - Mission list or district selection showing the saved mission under its assigned district.
+storyboard_missions_delete_button.png - Mission selected with Delete button visible.
+
+Export
+------
+storyboard_export_file_menu.png - File menu showing Save and Save As.
+storyboard_export_save_as_urban_sty.png - Save As dialog naming the file urban.sty in the game data directory.
+storyboard_export_final_checks.png - Completed storyboard with districts/missions filled out before save.
+storyboard_export_complete_status.png - Status bar or dialog showing successful save/export completion.

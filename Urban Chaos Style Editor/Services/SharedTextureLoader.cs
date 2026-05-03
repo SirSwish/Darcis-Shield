@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosStyleEditor.Services
 {
@@ -16,8 +17,8 @@ namespace UrbanChaosStyleEditor.Services
     {
         // Shared textures occupy pages 4-7.  Each page holds 64 slots.
         // Absolute index = page * 64 + ty * 8 + tx  →  256 .. 511
-        private const int FirstIndex = 256;
-        private const int LastIndex  = 511;
+        private const int FirstIndex = TextureFormatConstants.FirstIndex;
+        private const int LastIndex  = TextureFormatConstants.LastIndex;
 
         private static Dictionary<int, BitmapSource>? _cache;
 

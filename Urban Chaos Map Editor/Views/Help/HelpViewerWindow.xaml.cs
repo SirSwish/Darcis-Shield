@@ -219,11 +219,9 @@ namespace UrbanChaosMapEditor.Views.Help
         }
     }
 
-    public sealed class HelpTopic : INotifyPropertyChanged
+    public sealed class HelpTopic
     {
         public string FileName { get; init; } = "";
         public string DisplayName { get; init; } = "";
-
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

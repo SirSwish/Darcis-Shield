@@ -21,6 +21,8 @@ namespace UrbanChaosPrimEditor.ViewModels
             new Dictionary<GeometryModel3D, int>();
         private static readonly IReadOnlyDictionary<int, GeometryModel3D> EmptyIdToMarker =
             new Dictionary<int, GeometryModel3D>();
+        private static readonly IReadOnlyDictionary<GeometryModel3D, SelectedFaceHint> EmptyFaceHitToFace =
+            new Dictionary<GeometryModel3D, SelectedFaceHint>();
 
         public ThreeDViewModel(PrmMeshBuilderService meshBuilder)
         {
@@ -28,6 +30,7 @@ namespace UrbanChaosPrimEditor.ViewModels
             _scene = new Model3DGroup();
             _markerToPointId = EmptyMarkerToId;
             _pointIdToMarker = EmptyIdToMarker;
+            _faceHitToFace = EmptyFaceHitToFace;
         }
 
         // ── Scene ────────────────────────────────────────────────────────────
@@ -54,6 +57,9 @@ namespace UrbanChaosPrimEditor.ViewModels
 
         private IReadOnlyDictionary<int, GeometryModel3D> _pointIdToMarker;
         public IReadOnlyDictionary<int, GeometryModel3D> PointIdToMarker => _pointIdToMarker;
+
+        private IReadOnlyDictionary<GeometryModel3D, SelectedFaceHint> _faceHitToFace;
+        public IReadOnlyDictionary<GeometryModel3D, SelectedFaceHint> FaceHitToFace => _faceHitToFace;
 
         // ── Build / rebuild ──────────────────────────────────────────────────
 
@@ -87,6 +93,7 @@ namespace UrbanChaosPrimEditor.ViewModels
             Scene = new Model3DGroup();
             _markerToPointId = EmptyMarkerToId;
             _pointIdToMarker = EmptyIdToMarker;
+            _faceHitToFace = EmptyFaceHitToFace;
             ModelRadius = 200.0;
         }
 
@@ -95,6 +102,7 @@ namespace UrbanChaosPrimEditor.ViewModels
             Scene = result.Group;
             _markerToPointId = result.MarkerToPointId;
             _pointIdToMarker = result.PointIdToMarker;
+            _faceHitToFace = result.FaceHitToFace;
         }
     }
 }

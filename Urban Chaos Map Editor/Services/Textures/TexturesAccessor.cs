@@ -1,4 +1,5 @@
 // /Services/Accessors/TextureAccessor.cs
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -7,8 +8,8 @@ namespace UrbanChaosMapEditor.Services.Textures
     public sealed class TexturesAccessor
     {
         private readonly MapDataService _data;
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
 
         public enum TextureGroup { World = 0, Shared = 1, Prims = 2 } // (3 also maps to Prims in v1)
 
@@ -17,7 +18,7 @@ namespace UrbanChaosMapEditor.Services.Textures
             _data = data ?? throw new ArgumentNullException(nameof(data));
         }
 
-        // Same mapping as HeightsAccessor (don’t break orientation!)
+        // Same mapping as HeightsAccessor (donï¿½t break orientation!)
         private static int FileIndexForTile(int tx, int ty)
         {
             int fx = MapConstants.TilesPerSide - 1 - ty;

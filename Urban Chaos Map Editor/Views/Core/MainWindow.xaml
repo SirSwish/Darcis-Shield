@@ -130,6 +130,15 @@
                 <MenuItem Header="_Save Map" Command="{Binding SaveMapCommand}" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="Save Map _As..." Command="{Binding SaveAsMapCommand}" InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
+                <MenuItem Header="_Export Map">
+                    <MenuItem Header="_Current Loaded Map..." Click="ExportCurrentMap_Click"/>
+                    <MenuItem Header="_Select Maps..."        Click="ExportSelectedMaps_Click"/>
+                </MenuItem>
+                <MenuItem Header="Export _Stats">
+                    <MenuItem Header="_Current Loaded Map..." Click="ExportCurrentMapStats_Click"/>
+                    <MenuItem Header="_Select Maps..."        Click="ExportSelectedMapsStats_Click"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="_Recent" SubmenuOpened="Recent_SubmenuOpened">
                     <Separator Visibility="Collapsed"/>
                 </MenuItem>

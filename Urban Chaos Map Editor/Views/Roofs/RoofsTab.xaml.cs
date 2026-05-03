@@ -1,4 +1,5 @@
-﻿// Views/Roofs/RoofsTab.xaml.cs
+using UrbanChaosEditor.Shared.Constants;
+// Views/Roofs/RoofsTab.xaml.cs
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;

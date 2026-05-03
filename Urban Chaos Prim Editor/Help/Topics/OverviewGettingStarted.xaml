@@ -1,0 +1,295 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Overview / Getting Started
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        An overview of the Prim Editor layout, required directories, model loading workflow, and 3D viewport controls.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What the Prim Editor Does
+    </Paragraph>
+    <Paragraph>
+        The Prim Editor is used to view, create, edit, texture, import, and export Urban Chaos
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.PRM</Run>
+        objects. These objects are used by the game for many placed models, such as street lamps,
+        signs, bins, crates, small scenery objects, pickups, trees, and other world details.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The editor supports two main workflows. You can build a simple object directly in the editor
+        by placing points and forming triangle or quad faces, or you can import a model from another
+        3D tool such as Blender using the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.OBJ</Run>
+        format. The Prim Editor is then used to assign game textures, configure UV regions, set
+        object flags, and save the result back to a game prim slot.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_overview_full_window.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- MAIN LAYOUT -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Main Interface Layout
+    </Paragraph>
+    <Paragraph>
+        The Prim Editor is arranged around the 3D viewport. The surrounding panels are used to load
+        models, select textures, edit object properties, and manage face data.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Status bar</Bold> — shown at the bottom of the window. It displays useful
+                information such as loaded directories, model counts, current status messages, and
+                file operation results.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>File menu</Bold> — located at the top. This contains commands for creating,
+                saving, importing, and exporting PRM and OBJ files.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Quick action buttons</Bold> — located underneath the menu. These provide fast
+                access to common commands such as New, Import OBJ, Save As PRM, and Export OBJ.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Edit bar</Bold> — located below the quick actions. This controls the current
+                editing mode, such as selection mode, add point mode, new triangle mode, and new quad
+                mode.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>File explorer</Bold> — located on the left. This is where you set the game
+                prim directory and browse existing PRM files.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Textures panel</Bold> — located along the bottom. This displays the available
+                prim texture library and the UV region preview for the selected face.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Prim information panel</Bold> — located on the right. This contains model
+                properties, face material information, object flags, collision settings, damage
+                settings, and shadow settings.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>3D viewport</Bold> — located in the centre. This is where the model is viewed,
+                rotated, inspected, and edited.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Start by loading the texture directory first. Many existing PRMs will appear untextured
+                    or confusing until the correct TGA texture library has been loaded.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TEXTURE DIRECTORY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Step 1: Set the Texture Directory
+    </Paragraph>
+    <Paragraph>
+        Before loading or texturing PRM objects, set the texture directory. This tells the Prim
+        Editor where to find the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.TGA</Run>
+        files used by prim objects. These texture files are normally stored in the shared prim
+        texture directory.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For a standard GOG installation, the directory is usually:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+C:\Program Files (x86)\GOG Galaxy\Games\Urban Chaos\server\textures\shared\prims
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        To set this directory, click the <Bold>Set Texture Dir</Bold> button in the Textures panel.
+        A folder selection dialog opens. Browse to the folder above, select it, and confirm.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Once the directory is selected, the texture library loads all available TGA files from that
+        folder. These textures can then be applied to individual prim faces.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_overview_set_texture_dir.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PRIM DIRECTORY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Step 2: Set the Game Prim Directory
+    </Paragraph>
+    <Paragraph>
+        The game prim directory contains the existing PRM files used by Urban Chaos. Setting this
+        directory allows the editor to discover and list the available prims. It is also the normal
+        location where custom PRM files are saved when you want the game to use them.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For a standard GOG installation, this directory is usually:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+C:\Program Files (x86)\GOG Galaxy\Games\Urban Chaos\server\prims
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Click <Bold>Set Directory</Bold> in the File Explorer panel and select the
+        <Run FontFamily="Consolas" Foreground="#E8B84B">server\prims</Run>
+        folder. Once set, the file explorer populates with discovered PRM files. Selecting one of
+        these entries loads that prim into the viewport.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_overview_set_prim_dir.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- STARTING OPTIONS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        After the Directories Are Set
+    </Paragraph>
+    <Paragraph>
+        Once both directories are configured, you can choose one of three workflows:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Create a new PRM from scratch</Bold> by selecting
+                <Bold>File → New</Bold>, pressing the <Bold>New</Bold> quick action button, or using
+                <Bold>Ctrl+N</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Edit an existing PRM</Bold> by selecting it from the file explorer on the left.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Import an OBJ model</Bold> from a modelling tool such as Blender, then assign
+                textures and PRM-specific game properties inside the Prim Editor.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,8,0,0">
+        The built-in modelling tools are deliberately basic. They are useful for simple objects,
+        small fixes, and low-poly construction. For more complex shapes, it is usually better to
+        build the model in Blender or another 3D editor and then import the finished mesh as OBJ.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- NAVIGATION -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Navigating the 3D Viewport
+    </Paragraph>
+    <Paragraph>
+        The 3D viewport is used to inspect the model, place points, select faces, and confirm
+        texturing. The control hints are shown in the viewport information box.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>W</Bold> — move forward.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>S</Bold> — move backward.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>A</Bold> — strafe left.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>D</Bold> — strafe right.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Q</Bold> — lower the camera.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>E</Bold> — raise the camera.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>[</Bold> and <Bold>]</Bold> — rotate around the model.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>'</Bold> and <Bold>.</Bold> — change pitch.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Right-click and drag</Bold> — rotate the view around the model.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mouse wheel</Bold> — zoom in and out.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>R</Bold> — reset the view.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_overview_3d_navigation.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Recommended first test:</Run>
+                <Run>
+                    Set the texture directory, set the PRM directory, load an existing object, rotate around it,
+                    select a face, and inspect the UV region before attempting to create a new model.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

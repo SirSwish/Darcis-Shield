@@ -1,0 +1,280 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Player Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to add the player start point, configure the player character, set the position, and choose the correct trigger settings.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What the Player Event Point Does
+    </Paragraph>
+    <Paragraph>
+        The first Event Point added to a new mission is usually a <Bold>Player</Bold> Event Point.
+        This event point defines the player character and the position where the player starts when
+        the mission begins.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Without a valid Player Event Point, the mission may not start correctly in game. The player
+        event point is therefore one of the most important setup entries in a new
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.UCM</Run>
+        mission file.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_eventpoint_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Only place one Player Event Point for a normal single-player mission. If two Player Event Points are placed,
+                    the game can treat the mission as a multiplayer-style level.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADD PLAYER EP -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding the Player Event Point
+    </Paragraph>
+    <Paragraph>
+        To add the player start point, open the <Bold>Event Points</Bold> panel and click
+        <Bold>Add</Bold>. In the <Bold>Add New EventPoint</Bold> window, select the
+        <Bold>Player</Bold> Event Point type and click <Bold>OK</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_select_player_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        The editor then opens the <Bold>Edit EventPoint</Bold> window. This window automatically
+        adapts to the selected Event Point type. For a Player Event Point, it displays the common
+        properties, position controls, player selection, trigger settings, and listening mode.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_edit_window.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Player Grouping and Position
+    </Paragraph>
+    <Paragraph>
+        For a Player Event Point, choose a letter and colour that you are unlikely to reuse for
+        other mission logic. A practical example is <Bold>Black A</Bold>. This makes the player start
+        point easy to distinguish from objective chains, enemy groups, item groups, and scripted
+        mission logic.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Use <Bold>Select Position on Map</Bold> to place the player start in a clear, playable
+        location. Enable map layers such as textures, buildings, and objects so the player is not
+        accidentally placed inside geometry, behind a wall, or in an unsuitable area.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_select_position_button.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_position_on_map.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+
+    <!-- ============================================================ -->
+    <!-- PLAYER TYPE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Player Character
+    </Paragraph>
+    <Paragraph>
+        The Player-specific properties allow you to choose which character is used for the mission.
+        Select the desired player radio button.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Darci</Bold> — uses Darci as the player character.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Roper</Bold> — uses Roper as the player character.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Police Man</Bold> — uses the police officer player type.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gang Member / Mako</Bold> — uses the gang member/Mako-style player type.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_character_selection.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TRIGGER SETTINGS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Recommended Trigger Settings for the Player
+    </Paragraph>
+    <Paragraph>
+        Trigger settings define how and when an Event Point begins or becomes active. For the Player
+        Event Point, the normal setup is simple:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        This means the Player Event Point is active as soon as the mission starts and remains active.
+        For a standard mission, this is the expected setup.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Typical Player setup:</Run>
+                <Run>
+                    Darci + Triggered By None/Game Starts + Listening Mode Active is a good basic test configuration.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- SAVE / VERIFY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Saving the Player Event Point
+    </Paragraph>
+    <Paragraph>
+        Once the common properties, position, player character, trigger, and listening mode are set,
+        click <Bold>OK</Bold>. The Player Event Point is added to the Event Points list and appears
+        in the viewport at the selected location.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_player_created_in_list.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TESTING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Testing the Player Start in Game
+    </Paragraph>
+    <Paragraph>
+        After adding the Player Event Point, save the mission file. For example, save it as:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+test.ucm
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Save the file into the game’s levels folder. Then run the game with debug mode enabled and
+        use the <Bold>Ctrl+R</Bold> debug loading method. Select <Bold>Load Level</Bold>, then select
+        the saved
+        <Run FontFamily="Consolas" Foreground="#E8B84B">test.ucm</Run>
+        file.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If the Player Event Point, map file, and light file have been configured correctly, the game
+        should load into the selected map with the chosen player character and selected light file.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Troubleshooting:</Run>
+                <Run>
+                    If the mission loads with the wrong map or wrong lighting, check Mission Properties and confirm
+                    the map and light filenames were saved into the UCM file, not just loaded into the viewport.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- BASIC WORKFLOW -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Player Event Point Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or open a mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Load the map and light file for reference.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Player</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a rarely reused colour and letter group, such as <Bold>Black A</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Select Position on Map</Bold> and place the player start location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the player character, such as <Bold>Darci</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>None / Game Starts</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Listening Mode</Bold> to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold> and save the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the mission in game using debug level loading.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

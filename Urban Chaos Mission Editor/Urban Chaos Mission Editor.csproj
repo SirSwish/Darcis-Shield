@@ -48,6 +48,10 @@
 		<ProjectReference Include="..\Urban Chaos Storyboard Editor\Urban Chaos Storyboard Editor.csproj" />
 		<ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<Page Remove="Help\Topics\*.xaml" />
+		<Resource Include="Help\Topics\*.xaml" />
+	</ItemGroup>
 	
 
 </Project>

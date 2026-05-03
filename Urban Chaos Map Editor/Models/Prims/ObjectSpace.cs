@@ -1,11 +1,13 @@
 // /Services/ObjectSpace.cs
 // File: Models/ObjectSpace.cs
+using SharedMap = UrbanChaosEditor.Shared.Models.SharedMapConstants;
+
 namespace UrbanChaosMapEditor.Models.Prims
 {
     public static class ObjectSpace
     {
-        public const int CellsPerSide = 32;
-        public const int PixelsPerCell = 256;
+        public const int CellsPerSide = SharedMap.CellsPerSide;
+        public const int PixelsPerCell = SharedMap.PixelsPerCell;
 
         // Game grid (row,col) has origin at bottom-right; UI has origin at top-left.
         public static void GameCellToUiRowCol(int gameRow, int gameCol, out int uiRow, out int uiCol)
@@ -23,7 +25,7 @@ namespace UrbanChaosMapEditor.Models.Prims
             GameCellToUiRowCol(gameRow, gameCol, out uiRow, out uiCol);
         }
 
-        // >>> The important bit: invert X and Z inside the 256×256 cell <<<
+        // >>> The important bit: invert X and Z inside the 256ï¿½256 cell <<<
         public static void GamePrimToUiPixels(int mapWhoIndex, byte gameX, byte gameZ, out int uiPixelX, out int uiPixelZ)
         {
             GameIndexToUiRowCol(mapWhoIndex, out int uiRow, out int uiCol);

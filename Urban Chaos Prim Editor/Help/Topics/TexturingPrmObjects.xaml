@@ -1,0 +1,194 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Texturing PRM Objects
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to apply textures to PRM faces, select UV regions, reset texture regions, and import custom textures.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- FACE TEXTURING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        Face-Based Texturing
+    </Paragraph>
+    <Paragraph>
+        PRM objects are textured face by face. A model is made from triangle and quad faces, and each
+        face can reference a texture and a UV region. This allows different parts of the same object
+        to use different textures or different parts of the same texture.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        To begin texturing, select a face from the face list. The selected face is highlighted in
+        yellow in the 3D viewport so you can clearly see which part of the model is being edited.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_select_face.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Once a face is selected, the bottom texture panel shows the texture currently assigned to
+        that face. The right-side preview under <Bold>UV Region</Bold> shows which portion of the
+        texture is being used.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_uv_region_preview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- UV REGIONS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Understanding UV Regions
+    </Paragraph>
+    <Paragraph>
+        A texture file may be
+        <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run>
+        pixels, but a face does not always need to use the entire texture. Often, a single texture
+        contains several useful parts. For example, one texture might contain a metal panel, a small
+        label, a border, and a dark detail area.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The UV region lets you select a rectangular subsection of the texture and apply only that
+        section to the selected face. This is how small details can be reused efficiently without
+        needing many separate texture files.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Selecting a UV Region
+    </Paragraph>
+    <Paragraph>
+        Move the mouse over the texture preview. When the cursor changes to a crosshair, click and
+        drag over the area you want to use. The selected rectangle becomes the UV region for the
+        currently selected face.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_select_uv_region.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Resetting the UV Region
+    </Paragraph>
+    <Paragraph>
+        To make the selected face use the entire texture again, press the <Bold>Reset</Bold> button
+        above the UV Region preview. This restores the full texture area for the selected face.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_reset_uv.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Select the face first, then choose the texture, then adjust the UV region. This keeps the workflow predictable
+                    and avoids accidentally changing the wrong face.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TEXTURE LIBRARY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Texture Library
+    </Paragraph>
+    <Paragraph>
+        The texture library is loaded from the directory set using <Bold>Set Texture Dir</Bold>.
+        This should normally be the game's shared prim texture directory:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+server\textures\shared\prims
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        The bottom texture panel displays the loaded textures. To apply a texture, select the face
+        you want to change, then select the texture from the library. The face can then be adjusted
+        using the UV region controls.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_library_panel.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- IMPORT CUSTOM TEXTURES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Importing Custom Textures
+    </Paragraph>
+    <Paragraph>
+        You can add a new texture to the library by pressing the <Bold>+</Bold> button in the centre
+        of the textures panel. This opens a file selection dialog and allows you to choose an image
+        from disk.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The editor automatically converts the selected image to
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.TGA</Run>
+        and stores it in the currently selected texture library directory. Once imported, the new
+        texture appears in the library and can be applied to PRM faces normally.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosPrimEditor;component/Help/Images/prim_texture_import_custom_texture.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Texturing Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Load or create a PRM object.</Paragraph></ListItem>
+        <ListItem><Paragraph>Make sure the texture directory is set and the texture library is visible.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select a triangle or quad from the face list.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the selected face is highlighted in yellow in the viewport.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the texture to apply from the texture library.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use the UV Region preview to select the part of the texture that should appear on the face.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Reset</Bold> if you want the face to use the full texture again.</Paragraph></ListItem>
+        <ListItem><Paragraph>Repeat for each face until the object is fully textured.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

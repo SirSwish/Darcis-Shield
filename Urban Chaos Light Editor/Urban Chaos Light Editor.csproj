@@ -13,6 +13,41 @@
 	<ItemGroup>
 		<None Remove="Assets\Icons\app.ico" />
 		<None Remove="Assets\Images\Preview-1.PNG" />
+		<None Remove="Help\Images\adding_lights_add_button.png" />
+		<None Remove="Help\Images\adding_lights_add_window.png" />
+		<None Remove="Help\Images\adding_lights_copy_paste.png" />
+		<None Remove="Help\Images\adding_lights_delete_light.png" />
+		<None Remove="Help\Images\adding_lights_edit_light.png" />
+		<None Remove="Help\Images\adding_lights_light_selected_on_map.png" />
+		<None Remove="Help\Images\adding_lights_open_file.png" />
+		<None Remove="Help\Images\adding_lights_open_map.png" />
+		<None Remove="Help\Images\adding_lights_place_on_map.png" />
+		<None Remove="Help\Images\adding_lights_select_light.png" />
+		<None Remove="Help\Images\getting_started_export_map.png" />
+		<None Remove="Help\Images\getting_started_file_menu.png" />
+		<None Remove="Help\Images\getting_started_layer_controls.png" />
+		<None Remove="Help\Images\getting_started_lights_list.png" />
+		<None Remove="Help\Images\getting_started_light_editor_overview.png" />
+		<None Remove="Help\Images\getting_started_main_tabs.png" />
+		<None Remove="Help\Images\getting_started_map_properties.png" />
+		<None Remove="Help\Images\getting_started_preview_d3d_lighting.png" />
+		<None Remove="Help\Images\getting_started_status_bar.png" />
+		<None Remove="Help\Images\getting_started_top_bar.png" />
+		<None Remove="Help\Images\map_properties_ambient.png" />
+		<None Remove="Help\Images\map_properties_d3d_color.png" />
+		<None Remove="Help\Images\map_properties_flags.png" />
+		<None Remove="Help\Images\map_properties_night_sky_color.png" />
+		<None Remove="Help\Images\map_properties_overview.png" />
+		<None Remove="Help\Images\map_properties_preview_d3d_lighting.png" />
+		<None Remove="Help\Images\map_properties_prim_lighting.png" />
+		<None Remove="Help\Images\map_properties_specular_color.png" />
+		<None Remove="Help\Images\using_3d_preview_ambient_off_comparison.png" />
+		<None Remove="Help\Images\using_3d_preview_camera_controls.png" />
+		<None Remove="Help\Images\using_3d_preview_lighting_toggles.png" />
+		<None Remove="Help\Images\using_3d_preview_lights_off_comparison.png" />
+		<None Remove="Help\Images\using_3d_preview_map_layers.png" />
+		<None Remove="Help\Images\using_3d_preview_open_button.png" />
+		<None Remove="Help\Images\using_3d_preview_view.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -24,12 +59,48 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Urban Chaos Map Editor\Urban Chaos Map Editor.csproj" />
 		<ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="Assets\Icons\app.ico" />
 		<Resource Include="Assets\Images\Preview-1.PNG" />
+		<Resource Include="Help\Images\adding_lights_add_button.png" />
+		<Resource Include="Help\Images\adding_lights_add_window.png" />
+		<Resource Include="Help\Images\adding_lights_copy_paste.png" />
+		<Resource Include="Help\Images\adding_lights_delete_light.png" />
+		<Resource Include="Help\Images\adding_lights_edit_light.png" />
+		<Resource Include="Help\Images\adding_lights_light_selected_on_map.png" />
+		<Resource Include="Help\Images\adding_lights_open_file.png" />
+		<Resource Include="Help\Images\adding_lights_open_map.png" />
+		<Resource Include="Help\Images\adding_lights_place_on_map.png" />
+		<Resource Include="Help\Images\adding_lights_select_light.png" />
+		<Resource Include="Help\Images\getting_started_export_map.png" />
+		<Resource Include="Help\Images\getting_started_file_menu.png" />
+		<Resource Include="Help\Images\getting_started_layer_controls.png" />
+		<Resource Include="Help\Images\getting_started_lights_list.png" />
+		<Resource Include="Help\Images\getting_started_light_editor_overview.png" />
+		<Resource Include="Help\Images\getting_started_main_tabs.png" />
+		<Resource Include="Help\Images\getting_started_map_properties.png" />
+		<Resource Include="Help\Images\getting_started_preview_d3d_lighting.png" />
+		<Resource Include="Help\Images\getting_started_status_bar.png" />
+		<Resource Include="Help\Images\getting_started_top_bar.png" />
+		<Resource Include="Help\Images\map_properties_ambient.png" />
+		<Resource Include="Help\Images\map_properties_d3d_color.png" />
+		<Resource Include="Help\Images\map_properties_flags.png" />
+		<Resource Include="Help\Images\map_properties_night_sky_color.png" />
+		<Resource Include="Help\Images\map_properties_overview.png" />
+		<Resource Include="Help\Images\map_properties_preview_d3d_lighting.png" />
+		<Resource Include="Help\Images\map_properties_prim_lighting.png" />
+		<Resource Include="Help\Images\map_properties_specular_color.png" />
+		<Resource Include="Help\Images\using_3d_preview_ambient_off_comparison.png" />
+		<Resource Include="Help\Images\using_3d_preview_camera_controls.png" />
+		<Resource Include="Help\Images\using_3d_preview_lighting_toggles.png" />
+		<Resource Include="Help\Images\using_3d_preview_lights_off_comparison.png" />
+		<Resource Include="Help\Images\using_3d_preview_map_layers.png" />
+		<Resource Include="Help\Images\using_3d_preview_open_button.png" />
+		<Resource Include="Help\Images\using_3d_preview_view.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="..\Urban Chaos Map Editor\Assets\Textures\**\*.png" Link="Assets\Textures\%(RecursiveDir)%(Filename)%(Extension)" />
@@ -38,5 +109,9 @@
 	<ItemGroup>
 		<!-- Link PrimGraphics from Map Editor -->
 		<Resource Include="..\Urban Chaos Map Editor\Assets\Images\PrimGraphics\*.png" Link="Assets\Images\PrimGraphics\%(Filename)%(Extension)" />
+	</ItemGroup>
+	<ItemGroup>
+		<Page Remove="Help\Topics\*.xaml" />
+		<Resource Include="Help\Topics\*.xaml" />
 	</ItemGroup>
 </Project>

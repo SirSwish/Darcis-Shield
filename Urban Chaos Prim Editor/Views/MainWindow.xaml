@@ -67,6 +67,7 @@
                           IsChecked="{Binding IsPrimInfoPanelOpen}"/>
             </MenuItem>
             <MenuItem Header="_Help">
+                <MenuItem Header="_Prim Editor Help" Click="Help_Click"/>
                 <MenuItem Header="_About…" Click="About_Click"/>
             </MenuItem>
         </Menu>
@@ -108,6 +109,10 @@
                         Content="Export OBJ"
                         Command="{Binding SaveAsObjCommand}"
                         ToolTip="Export as Wavefront .obj"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}"
+                        Content="Reset View"
+                        Click="ResetView_Click"
+                        ToolTip="Reset the orbit camera around the model"/>
 
                 <Separator Margin="8,2" Background="{StaticResource BorderLightBrush}"/>
 
@@ -241,15 +246,32 @@
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="0,2">
-                                            <TextBlock Text="{Binding FileName}"
-                                                       FontSize="12"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding FilePath}"/>
-                                            <TextBlock Text="{Binding FileSizeDisplay}"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource TextMuted}"/>
-                                        </StackPanel>
+                                        <Grid Margin="0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="72"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0"
+                                                    Width="64"
+                                                    Height="48"
+                                                    Background="#141414"
+                                                    BorderBrush="#444444"
+                                                    BorderThickness="1">
+                                                <Image Source="{Binding Thumbnail}"
+                                                       Stretch="Uniform"
+                                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding FileName}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding FilePath}"/>
+                                                <TextBlock Text="{Binding FileSizeDisplay}"
+                                                           FontSize="10"
+                                                           Foreground="{StaticResource TextMuted}"/>
+                                            </StackPanel>
+                                        </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
@@ -479,16 +501,38 @@
                                                 ToolTip="Revert to full texture"/>
                                     </DockPanel>
 
-                                    <TextBlock DockPanel.Dock="Bottom"
-                                               Text="{Binding TextureSelectionDisplay}"
-                                               FontSize="10"
-                                               Foreground="#AAAAAA"
-                                               Margin="0,3,0,0"/>
+                                    <StackPanel DockPanel.Dock="Bottom" Margin="0,4,0,0">
+                                        <UniformGrid Columns="4" Margin="0,0,0,3">
+                                            <StackPanel Margin="0,0,3,0">
+                                                <TextBlock Text="X" FontSize="9" Foreground="#AAAAAA"/>
+                                                <TextBox Text="{Binding TextureRegionX, UpdateSourceTrigger=PropertyChanged}"
+                                                         FontSize="10" Padding="2"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,3,0">
+                                                <TextBlock Text="Y" FontSize="9" Foreground="#AAAAAA"/>
+                                                <TextBox Text="{Binding TextureRegionY, UpdateSourceTrigger=PropertyChanged}"
+                                                         FontSize="10" Padding="2"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,3,0">
+                                                <TextBlock Text="W" FontSize="9" Foreground="#AAAAAA"/>
+                                                <TextBox Text="{Binding TextureRegionWidth, UpdateSourceTrigger=PropertyChanged}"
+                                                         FontSize="10" Padding="2"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="H" FontSize="9" Foreground="#AAAAAA"/>
+                                                <TextBox Text="{Binding TextureRegionHeight, UpdateSourceTrigger=PropertyChanged}"
+                                                         FontSize="10" Padding="2"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <TextBlock Text="{Binding TextureSelectionDisplay}"
+                                                   FontSize="10"
+                                                   Foreground="#AAAAAA"/>
+                                    </StackPanel>
 
                                     <Border Background="#111111"
                                             BorderBrush="#444444"
                                             BorderThickness="1"
-                                            Height="86">
+                                            Height="120">
                                         <Grid>
                                             <Image x:Name="TexturePreviewImage"
                                                    Source="{Binding SelectedTexture.Thumbnail}"
@@ -659,6 +703,9 @@
                                             ToolTip="Rotate the face's texture UV coordinates 90° clockwise"/>
                                     <Button Content="Apply Selected Texture"
                                             Command="{Binding ApplyTextureToFaceCommand}"
+                                            Margin="0,4,0,0"/>
+                                    <Button Content="Cancel Texture Preview"
+                                            Command="{Binding CancelTexturePreviewCommand}"
                                             Margin="0,4,0,0"/>
                                 </StackPanel>
                             </GroupBox>

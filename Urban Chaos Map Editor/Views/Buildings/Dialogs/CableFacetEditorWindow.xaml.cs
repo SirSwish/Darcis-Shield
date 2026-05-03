@@ -12,6 +12,7 @@ using UrbanChaosMapEditor.Services.Core;
 using UrbanChaosMapEditor.ViewModels.Buildings;
 using UrbanChaosMapEditor.ViewModels.Core;
 using UrbanChaosMapEditor.Services.Buildings;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
 {
@@ -21,25 +22,10 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private static readonly Regex _signedDigitsOnly = new Regex(@"^-?[0-9]*$");
 
         // DFacet byte offsets (same as CableAdder)
-        private const int OFF_TYPE = 0;
-        private const int OFF_HEIGHT = 1;
-        private const int OFF_X0 = 2;
-        private const int OFF_X1 = 3;
-        private const int OFF_Y0 = 4;
-        private const int OFF_Y1 = 6;
-        private const int OFF_Z0 = 8;
-        private const int OFF_Z1 = 9;
-        private const int OFF_FLAGS = 10;
-        private const int OFF_STYLE = 12;
-        private const int OFF_BUILDING = 14;
-        private const int OFF_STOREY = 16;
-        private const int OFF_FHEIGHT = 18;
-        private const int DFACET_SIZE = 26;
 
         private readonly int _facetId1;
         private readonly DFacetRec _originalFacet;
         private bool _isLoading = true;
-        private bool _hasChanges = false;
 
         public CableFacetEditorWindow(DFacetRec facet, int facetId1)
         {
@@ -94,7 +80,6 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
         private void Field_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_isLoading) return;
-            _hasChanges = true;
             BtnSave.IsEnabled = true;
             UpdatePreview();
         }
@@ -225,7 +210,7 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
                 svc.Edit(bytes =>
                 {
                     // Zero the entire facet
-                    for (int i = 0; i < DFACET_SIZE; i++)
+                    for (int i = 0; i < BuildingFormatConstants.DFacetSize; i++)
                         bytes[facetOffset + i] = 0;
                 });
 
@@ -433,41 +418,41 @@ namespace UrbanChaosMapEditor.Views.Buildings.Dialogs
             svc.Edit(bytes =>
             {
                 // Write the facet data
-                bytes[facetOffset + OFF_TYPE] = (byte)FacetType.Cable; // 9
-                bytes[facetOffset + OFF_HEIGHT] = segments;
-                bytes[facetOffset + OFF_X0] = x0;
-                bytes[facetOffset + OFF_X1] = x1;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetType] = (byte)FacetType.Cable; // 9
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetHeight] = segments;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetX0] = x0;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetX1] = x1;
 
                 // Y0 and Y1 are signed 16-bit little-endian
-                bytes[facetOffset + OFF_Y0] = (byte)(y0 & 0xFF);
-                bytes[facetOffset + OFF_Y0 + 1] = (byte)((y0 >> 8) & 0xFF);
-                bytes[facetOffset + OFF_Y1] = (byte)(y1 & 0xFF);
-                bytes[facetOffset + OFF_Y1 + 1] = (byte)((y1 >> 8) & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetY0] = (byte)(y0 & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetY0 + 1] = (byte)((y0 >> 8) & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetY1] = (byte)(y1 & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetY1 + 1] = (byte)((y1 >> 8) & 0xFF);
 
-                bytes[facetOffset + OFF_Z0] = z0;
-                bytes[facetOffset + OFF_Z1] = z1;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetZ0] = z0;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetZ1] = z1;
 
                 // Flags - keep as unclimbable for cables
                 ushort flags = (ushort)FacetFlags.Unclimbable;
-                bytes[facetOffset + OFF_FLAGS] = (byte)(flags & 0xFF);
-                bytes[facetOffset + OFF_FLAGS + 1] = (byte)((flags >> 8) & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetFlags] = (byte)(flags & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetFlags + 1] = (byte)((flags >> 8) & 0xFF);
 
                 // StyleIndex = step_angle1 (as unsigned representation of signed value)
                 ushort step1U = unchecked((ushort)stepAngle1);
-                bytes[facetOffset + OFF_STYLE] = (byte)(step1U & 0xFF);
-                bytes[facetOffset + OFF_STYLE + 1] = (byte)((step1U >> 8) & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetStyle] = (byte)(step1U & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetStyle + 1] = (byte)((step1U >> 8) & 0xFF);
 
                 // Building = step_angle2 (as unsigned representation of signed value)
                 ushort step2U = unchecked((ushort)stepAngle2);
-                bytes[facetOffset + OFF_BUILDING] = (byte)(step2U & 0xFF);
-                bytes[facetOffset + OFF_BUILDING + 1] = (byte)((step2U >> 8) & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetBuilding] = (byte)(step2U & 0xFF);
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetBuilding + 1] = (byte)((step2U >> 8) & 0xFF);
 
                 // Storey = 0 for cables
-                bytes[facetOffset + OFF_STOREY] = 0;
-                bytes[facetOffset + OFF_STOREY + 1] = 0;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetStorey] = 0;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetStorey + 1] = 0;
 
                 // FHeight = mode/texture style
-                bytes[facetOffset + OFF_FHEIGHT] = fHeight;
+                bytes[facetOffset + BuildingFormatConstants.DFacetOffsetFHeight] = fHeight;
 
                 Debug.WriteLine($"[CableFacetEditor] Saved cable #{_facetId1} at offset 0x{facetOffset:X}");
             });

@@ -1,13 +1,14 @@
 using System;
 using System.Text;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosPrimEditor.Models;
 
 namespace UrbanChaosPrimEditor.Services
 {
     public static class PrmTemplateService
     {
-        private const ushort PrmSignature = 0x16A2;
-        private const int NprimHeaderSize = 50;
+        private const ushort PrmSignature = PrimFormatConstants.PrmSignature;
+        private const int NprimHeaderSize = PrimFormatConstants.NprimHeaderSize;
 
         public static PrmModel CreateEmptyModel(string fileName, string name)
         {

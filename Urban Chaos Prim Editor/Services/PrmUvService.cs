@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosPrimEditor.Services
 {
@@ -18,9 +19,9 @@ namespace UrbanChaosPrimEditor.Services
     //   textureImgNo = page - 64*11        (resolves to TexXXXhi.tga)
     public static class PrmUvService
     {
-        private const int TextureNormSize    = 32;
-        private const int TextureNormSquares = 8;
-        private const int FacePageOffset     = 64 * 11; // 704
+        private const int TextureNormSize    = PrimFormatConstants.TextureNormSize;
+        private const int TextureNormSquares = PrimFormatConstants.TextureNormSquares;
+        private const int FacePageOffset     = PrimFormatConstants.FacePageOffset; // 704
 
         public readonly record struct PrmFaceTextureMapping(
             int TextureId,

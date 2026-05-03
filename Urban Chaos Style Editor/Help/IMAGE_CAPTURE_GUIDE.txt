@@ -1,0 +1,71 @@
+Style Editor Help Image Capture Guide
+====================================
+
+Overview / Getting Started
+--------------------------
+style_overview_editor_full_window.png - Full Style Editor window showing menu bar, quick actions, Custom Worlds list, Texture Slots, Selected Slot, Texture Properties, Footstep Sound, TMA Styles, and Sky Image.
+style_overview_quick_actions_bar.png - Close-up of New Texture Set, Import Texture, Import Batch, and Export World buttons.
+style_overview_main_layout_annotated.png - Full editor view showing the main regions clearly: Custom Worlds, Texture Slots, right-hand property panels, TMA Styles, and Sky Image.
+style_overview_custom_worlds_bar.png - Left-side Custom Worlds list showing one or more detected custom texture projects.
+style_overview_texture_slots.png - Texture Slots panel showing tex000 through several visible slots.
+style_overview_selected_slot.png - Right-hand Selected Slot panel showing selected texture preview and import/clear/edit controls.
+style_overview_texture_properties.png - Texture Properties panel showing all behaviour flags.
+style_overview_footstep_sound.png - Footstep Sound dropdown/selector showing the selected sound category.
+style_overview_tma_styles.png - TMA Styles panel showing style entries.
+style_overview_sky_image.png - Sky Image section showing import/clear controls and ideally a loaded sky image preview.
+style_overview_file_menu.png - File menu opened showing New Texture Set, Export Finished Custom World to Game, and Refresh Worlds.
+style_overview_textures_menu.png - Textures menu opened showing Import Texture, Import Batch, and Clear Slot.
+style_overview_sky_menu.png - Sky menu opened showing Import Sky Box Image and Clear Sky Box Image.
+
+Adding Textures
+---------------
+adding_textures_overview.png - Style Editor with a custom world selected and Texture Slots visible.
+adding_textures_new_texture_set_button.png - Quick actions bar or File menu showing New Texture Set.
+adding_textures_new_texture_set_window.png - New Texture Set Window showing world number input and Create button.
+adding_textures_custom_world_created.png - Custom Worlds column showing the newly created world added.
+adding_textures_texture_slots.png - Texture Slots panel showing available tex000-tex255 slots.
+adding_textures_import_single_button.png - A specific slot selected with Import Texture button visible.
+adding_textures_import_single_result.png - The chosen texture loaded into the selected texture slot.
+adding_textures_import_batch_button.png - Quick action or Textures menu showing Import Batch.
+adding_textures_import_batch_file_select.png - File picker with multiple texture image files selected.
+adding_textures_import_batch_result.png - Texture Slots panel showing several newly populated slots.
+adding_textures_edit_tile_button.png - Selected Slot panel with Edit Tile button visible.
+adding_textures_tile_editor_overview.png - Full Tile Editor window showing tile canvas and tool panels.
+adding_textures_tile_editor_tools.png - Close-up of Pencil, Eraser, Fill, Colour Picker, and Alpha Selection tools.
+adding_textures_tile_editor_alpha.png - Alpha controls showing alpha value and all opaque/all transparent controls.
+adding_textures_tile_editor_colour_creator.png - Colour creator/custom colour controls.
+adding_textures_tile_editor_view_options.png - Zoom, gridlines, and alpha preview toggles.
+adding_textures_tile_editor_save.png - Tile Editor with Save button visible.
+
+Texture Properties
+------------------
+texture_properties_overview.png - Style Editor with a texture selected and Texture Properties plus Footstep Sound visible.
+texture_properties_selected_slot.png - A texture slot selected with right-hand properties updated.
+texture_properties_flags_panel.png - Close-up of all texture property checkboxes/flags.
+texture_properties_footstep_sound_panel.png - Footstep Sound dropdown/list showing categories.
+texture_properties_sky_image_section.png - Sky Image section showing Import button and preview area.
+texture_properties_sky_tga_example.png - Loaded sky image preview or file explorer showing sky.tga in a default world folder.
+
+Styles
+------
+styles_overview.png - Style Editor with TMA Styles section visible.
+styles_tma_styles_section.png - Close-up of the TMA Styles list.
+styles_load_existing_tma.png - File open dialog selecting Style.TMA or button/menu used to load existing TMA.
+styles_double_click_style_entry.png - TMA Styles list with a style entry highlighted.
+styles_edit_style_window.png - Full Edit Style Window.
+styles_style_name_field.png - Close-up of the style name input field.
+styles_recipe_slots.png - The five TMA recipe slots visible.
+styles_click_slot_preview.png - Focus on one recipe slot preview image showing where to click.
+styles_pick_texture_window.png - Pick Texture window showing World Textures and Shared Textures.
+styles_slot_flags.png - Close-up of flags: Flip X, Flip Y, Gour, Tex, Mask, Trans, Tile.
+styles_map_editor_wall_example.png - Map Editor or preview showing a wall/facet using a custom style.
+styles_save_style_entry.png - Edit Style Window with Save button visible.
+
+Exporting
+---------
+exporting_overview.png - Full Style Editor showing a completed custom world.
+exporting_export_contents.png - Overview/composite showing textures, Style.TMA, texture properties, footstep sounds, and sky image sections.
+exporting_export_world_button.png - Quick actions bar with Export World clearly visible.
+exporting_select_textures_directory.png - Folder selection dialog pointed at the game server\textures\ directory.
+exporting_world_number_automatic.png - Custom Worlds list showing selected world number or export confirmation/status showing world number.
+exporting_complete_status.png - Final success/status message after export completes.

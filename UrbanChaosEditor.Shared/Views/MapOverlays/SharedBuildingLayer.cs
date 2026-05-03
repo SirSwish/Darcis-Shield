@@ -6,6 +6,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;
 
@@ -17,10 +18,10 @@ public class SharedBuildingLayer : MapOverlayBase
 {
     #region Building Format Constants (V1)
 
-    protected const int HeaderSize = 48;
-    protected const int DBuildingSize = 24;
-    protected const int AfterBuildingsPad = 14;
-    protected const int DFacetSize = 26;
+    protected const int HeaderSize = BuildingFormatConstants.HeaderSize;
+    protected const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+    protected const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+    protected const int DFacetSize = BuildingFormatConstants.DFacetSize;
 
     #endregion
 

@@ -1,6 +1,7 @@
 // Services/Roofs/RoofTextureService.cs
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Buildings;
@@ -36,12 +37,12 @@ namespace UrbanChaosMapEditor.Services.Roofs
         public static RoofTextureService Instance => _lazy.Value;
 
         // ── .MAP file layout constants ───────────────────────────────────────
-        public const int MapHeaderSize   = 4;
-        public const int MapCellDataSize = 128 * 128 * 12;        // 196 608 bytes
-        public const int RoofTexOffset   = MapHeaderSize + MapCellDataSize; // 196 612
-        public const int RoofTexCount    = 128 * 128;              // 16 384 entries
-        public const int RoofTexByteSize = RoofTexCount * 2;       // 32 768 bytes
-        public const int TotalMapSize    = RoofTexOffset + RoofTexByteSize; // 229 380 bytes
+        public const int MapHeaderSize = RoofFormatConstants.MapHeaderSize;
+        public const int MapCellDataSize = RoofFormatConstants.MapCellDataSize;
+        public const int RoofTexOffset = RoofFormatConstants.RoofTextureOffset;
+        public const int RoofTexCount = RoofFormatConstants.RoofTextureCount;
+        public const int RoofTexByteSize = RoofFormatConstants.RoofTextureByteSize;
+        public const int TotalMapSize = RoofFormatConstants.TotalMapSize;
 
         // ── Internal state ───────────────────────────────────────────────────
         // Indexed [game_x, game_z]; game coords = (127 - UI_tx, 127 - UI_ty)

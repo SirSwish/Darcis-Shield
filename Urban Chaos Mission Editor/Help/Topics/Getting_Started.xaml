@@ -1,0 +1,18 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Getting Started</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Edit .ucm mission data, event points, zones, and linked map/light references.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">The Mission Editor</Paragraph>
+    <Paragraph>The Mission Editor is used to inspect and edit the gameplay markers stored in Urban Chaos mission files. Loading the matching IAM map and LGT lights gives the event points useful spatial context.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Typical Workflow</Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,10">
+        <ListItem><Paragraph>Open a .ucm mission file.</Paragraph></ListItem>
+        <ListItem><Paragraph>Open the map and lights if the references were not loaded automatically.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use the Event Points list to inspect mission logic markers.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save or Save As when the mission edits are complete.</Paragraph></ListItem>
+    </List>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Mission Properties</Paragraph>
+    <Paragraph><Bold>Mission Properties</Bold> edits file references and mission-level settings. Keeping map and lights references correct makes overlays line up with event point data.</Paragraph>
+</FlowDocument>

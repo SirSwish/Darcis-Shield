@@ -2,6 +2,7 @@
 // Captures a building snapshot and applies in-place move or copy operations.
 
 using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Models.Core;
 using UrbanChaosMapEditor.Services.Core;
@@ -12,9 +13,9 @@ namespace UrbanChaosMapEditor.Services.Buildings
 {
     public sealed class BuildingMover
     {
-        private const int DFacetSize = 26;
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
+        private const int DFacetSize = BuildingFormatConstants.DFacetSize;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
 
         private readonly MapDataService _svc;
 
@@ -474,9 +475,9 @@ namespace UrbanChaosMapEditor.Services.Buildings
             //    Building record is at: blockStart + 48 + (N-1)*24 for building N (1-based)
             //    But inserting in the middle of the file is complex — we'll do a MemoryStream rebuild.
 
-            const int HeaderSize       = 48;
-            const int DBuildingSize    = 24;
-            const int AfterBuildingsPad = 14;
+            const int HeaderSize       = BuildingFormatConstants.HeaderSize;
+            const int DBuildingSize    = BuildingFormatConstants.DBuildingSize;
+            const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
 
             int buildingsOff    = blockStart + HeaderSize;
             int oldBuildingsEnd = buildingsOff + (oldNextBuilding - 1) * DBuildingSize;

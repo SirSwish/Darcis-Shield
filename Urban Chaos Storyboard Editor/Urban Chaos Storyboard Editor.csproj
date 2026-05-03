@@ -14,6 +14,32 @@
   <ItemGroup>
     <None Remove="Assets\Icons\app.ico" />
     <None Remove="Assets\Images\storyboard_map.png" />
+    <None Remove="Help\Images\storyboard_districts_add_button.png" />
+    <None Remove="Help\Images\storyboard_districts_delete_button.png" />
+    <None Remove="Help\Images\storyboard_districts_edit_button.png" />
+    <None Remove="Help\Images\storyboard_districts_edit_window.png" />
+    <None Remove="Help\Images\storyboard_districts_new_file.png" />
+    <None Remove="Help\Images\storyboard_districts_new_marker.png" />
+    <None Remove="Help\Images\storyboard_districts_selected_on_map.png" />
+    <None Remove="Help\Images\storyboard_districts_set_position_button.png" />
+    <None Remove="Help\Images\storyboard_districts_set_position_cursor.png" />
+    <None Remove="Help\Images\storyboard_districts_tab.png" />
+    <None Remove="Help\Images\storyboard_export_complete_status.png" />
+    <None Remove="Help\Images\storyboard_export_file_menu.png" />
+    <None Remove="Help\Images\storyboard_export_save_as_urban_sty.png" />
+    <None Remove="Help\Images\storyboard_getting_started_file_menu.png" />
+    <None Remove="Help\Images\storyboard_getting_started_full_window.png" />
+    <None Remove="Help\Images\storyboard_getting_started_management_bar.png" />
+    <None Remove="Help\Images\storyboard_getting_started_map_view.png" />
+    <None Remove="Help\Images\storyboard_getting_started_open_existing_sty.png" />
+    <None Remove="Help\Images\storyboard_getting_started_quick_actions.png" />
+    <None Remove="Help\Images\storyboard_getting_started_status_bar.png" />
+    <None Remove="Help\Images\storyboard_missions_add_button.png" />
+    <None Remove="Help\Images\storyboard_missions_delete_button.png" />
+    <None Remove="Help\Images\storyboard_missions_edit_window.png" />
+    <None Remove="Help\Images\storyboard_missions_saved_under_district.png" />
+    <None Remove="Help\Images\storyboard_missions_tab.png" />
+    <None Remove="Help\Images\storyboard_missions_template_button.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +49,40 @@
   <ItemGroup>
     <Resource Include="Assets\Icons\app.ico" />
     <Resource Include="Assets\Images\storyboard_map.png" />
+    <Resource Include="Help\Images\storyboard_districts_add_button.png" />
+    <Resource Include="Help\Images\storyboard_districts_delete_button.png" />
+    <Resource Include="Help\Images\storyboard_districts_edit_button.png" />
+    <Resource Include="Help\Images\storyboard_districts_edit_window.png" />
+    <Resource Include="Help\Images\storyboard_districts_new_file.png" />
+    <Resource Include="Help\Images\storyboard_districts_new_marker.png" />
+    <Resource Include="Help\Images\storyboard_districts_selected_on_map.png" />
+    <Resource Include="Help\Images\storyboard_districts_set_position_button.png" />
+    <Resource Include="Help\Images\storyboard_districts_set_position_cursor.png" />
+    <Resource Include="Help\Images\storyboard_districts_tab.png" />
+    <Resource Include="Help\Images\storyboard_export_complete_status.png" />
+    <Resource Include="Help\Images\storyboard_export_file_menu.png" />
+    <Resource Include="Help\Images\storyboard_export_save_as_urban_sty.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_file_menu.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_full_window.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_management_bar.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_map_view.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_open_existing_sty.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_quick_actions.png" />
+    <Resource Include="Help\Images\storyboard_getting_started_status_bar.png" />
+    <Resource Include="Help\Images\storyboard_missions_add_button.png" />
+    <Resource Include="Help\Images\storyboard_missions_delete_button.png" />
+    <Resource Include="Help\Images\storyboard_missions_edit_window.png" />
+    <Resource Include="Help\Images\storyboard_missions_saved_under_district.png" />
+    <Resource Include="Help\Images\storyboard_missions_tab.png" />
+    <Resource Include="Help\Images\storyboard_missions_template_button.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="Help\Topics\*.xaml" />
+    <Resource Include="Help\Topics\*.xaml" />
   </ItemGroup>
 
 </Project>

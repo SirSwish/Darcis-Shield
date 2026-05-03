@@ -1,0 +1,553 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Getting Started
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        An overview of the Urban Chaos Light Editor interface, file controls, map view, layers, and lighting properties.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        The Light Editor
+    </Paragraph>
+    <Paragraph>
+        The Light Editor is used to create, edit, preview, and export Urban Chaos light files.
+        Light files control both individual point lights placed on the map and the overall ambient
+        lighting settings used by the level.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A light file can be edited with or without a map loaded, but loading the matching map gives
+        you the full visual context for where lights are placed, how far their ranges extend, and
+        how the lighting will appear against terrain, buildings, and objects.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_light_editor_overview.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- STATUS BAR -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        The Status Bar
+    </Paragraph>
+    <Paragraph>
+        At the bottom of the window is the <Bold>status bar</Bold>. This provides immediate
+        feedback about the editor state and recent actions.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,2">
+        The status bar shows:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                The <Bold>current status message</Bold>, such as whether a file has been opened, saved, or exported.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>currently loaded map file</Bold>, if one is open.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The <Bold>currently loaded light file</Bold>, if one is open.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                The current <Bold>X/Z map coordinate</Bold> under the mouse cursor.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_status_bar.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TOP BAR -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Top Bar &amp; Quick Actions
+    </Paragraph>
+    <Paragraph>
+        The top bar provides fast access to the most common Light Editor actions. These shortcut
+        buttons allow you to open map files, open light files, quickly save the active light file,
+        toggle map layers, and launch the 3D viewport.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_top_bar.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Open Map
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Open Map</Bold> button loads an Urban Chaos map file so that lights can be
+        viewed and edited in their correct world position. This can also be accessed from
+        <Bold>File → Open Map</Bold>
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+Shift+O)</Run>.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Open Light File
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Open Light File</Bold> button opens an existing
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.lgt</Run>
+        light file. This can also be accessed from
+        <Bold>File → Open Light File</Bold>
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+O)</Run>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Automatic map loading:</Run>
+                <Run>
+                    When a light file is opened, the editor automatically looks for a map file with the same name.
+                    If a matching map file exists, it is loaded automatically. If no matching map file is found,
+                    no map is loaded and you can manually select one using the Open Map button or File → Open Map.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Quick Save
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Quick Save</Bold> button saves the currently loaded light file in place.
+        This overwrites the active
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.lgt</Run>
+        file using the current editor values.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>
+                    Quick Save overwrites the currently loaded light file directly. Work on copies of original game files
+                    if you want to preserve the unmodified versions.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- LAYER CONTROLS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Map View &amp; Layer Controls
+    </Paragraph>
+    <Paragraph>
+        The Light Editor uses a map view similar to the Map Editor. Individual layer buttons allow
+        you to control which parts of the map are visible while working with lights.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_layer_controls.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Available Layers
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Cell Textures</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Displays the ground texture cells from the loaded map file. This provides visual reference
+        for placing lights onto streets, rooftops, interiors, alleys, and other map areas.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Buildings</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Displays the building facets from the loaded map. This helps you position lights in relation
+        to walls, fences, doors, ladders, and other structural features.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Objects</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Displays prim objects from the loaded map. This is useful for aligning lights with objects
+        such as street lamps, vehicles, crates, and other environmental details.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Lights</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Displays each individual light entry on the map. This is the main editing layer for seeing
+        where lights are positioned.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Ranges</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Displays the area reached by each light. This helps you understand how far a light will
+        affect the surrounding map and makes it easier to tune range values visually.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">3D View</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Opens the 3D viewport for previewing the map and lighting from a three-dimensional
+        perspective.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- FILE MENU -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        File Menu
+    </Paragraph>
+    <Paragraph>
+        The File menu contains the main commands for creating, opening, saving, and exporting
+        light files.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_file_menu.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">New Lights
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+N)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Creates a new light file.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Open Light File
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+O)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Opens an existing
+        <Run FontFamily="Consolas" Foreground="#E8B84B">.lgt</Run>
+        light file.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Open Map
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+Shift+O)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Opens a map file manually. Use this when the editor cannot automatically locate a matching
+        map for the currently loaded light file.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Save
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+S)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Saves the current light file in place.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Save As
+        <Run FontFamily="Consolas" FontSize="12" Foreground="#808080">(Ctrl+Shift+S)</Run>
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Saves the current light file to a new file location.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- EXPORT MAP -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,14,0,2">
+        Export Map
+    </Paragraph>
+    <Paragraph>
+        The <Bold>File → Export Map</Bold> section allows you to export a PNG image of the map
+        and selected lighting layers.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,2">
+        You can export:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                The <Bold>currently loaded map</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>One or more maps</Bold> selected from the file system.
+            </Paragraph>
+        </ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        During export, you are prompted to choose which layers should be included and what image
+        quality should be used.
+    </Paragraph>
+
+    <Paragraph Margin="0,8,0,0">
+        The Light Editor can also export light file statistics to a text file, including details
+        such as the number of lights, the light file version, and the overall light settings.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_export_map.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- MAIN DISPLAY TABS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Main Display Tabs
+    </Paragraph>
+    <Paragraph>
+        The main editor display is divided into two primary tabs:
+        <Bold>Lights List</Bold> and <Bold>Map Properties</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_main_tabs.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- LIGHTS LIST TAB -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Lights List
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Lights List</Bold> tab displays the currently active light entries in the loaded
+        light file. Each row represents one light.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,2">
+        The table shows each light's key properties, including:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem>
+            <Paragraph>
+                The light's <Bold>position number</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Its <Bold>X/Z map coordinates</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Its <Bold>Y coordinate</Bold>, representing vertical placement.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Its <Bold>range</Bold>, from
+                <Run FontFamily="Consolas" Foreground="#E8B84B">0</Run>
+                to
+                <Run FontFamily="Consolas" Foreground="#E8B84B">255</Run>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                Its <Bold>RGB colour values</Bold>.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                A <Bold>colour preview swatch</Bold>.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Along the bottom of the Lights List are buttons for common light operations:
+        <Bold>Add Light</Bold>, <Bold>Edit Light</Bold>, <Bold>Delete Light</Bold>,
+        <Bold>Copy Light</Bold>, and <Bold>Paste Light</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_lights_list.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- MAP PROPERTIES TAB -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Map Properties
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Map Properties</Bold> tab contains the overall lighting settings for the light
+        file. These values affect the general appearance of the level and work together with
+        individual light entries.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_map_properties.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- FLAGS -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,10,0,2">
+        Light Flags
+    </Paragraph>
+    <Paragraph>
+        The Map Properties tab includes three main flags:
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Night Enabled</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Enables night-time lighting. This is disabled by default. In Urban Chaos, enabling night
+        also means that the map is treated as raining.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Lamps On</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Enables light-emitting prims, such as street lamps and similar objects.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,6,0,1">Darken Walls</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Darkens the lower part of facet textures slightly, giving walls more depth and contrast.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- AMBIENT / D3D / SPECULAR / PRIM LIGHTING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,14,0,2">
+        Ambient Lighting
+    </Paragraph>
+    <Paragraph>
+        <Bold>Ambient</Bold> is the overall colour filter for the light file. It can be thought of
+        like a movie camera filter applied across the level. You can set the RGB values manually,
+        and the editor displays a preview swatch below the controls.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        D3D Colour
+    </Paragraph>
+    <Paragraph>
+        <Bold>D3D Colour</Bold> is the supporting ambient light colour used by the renderer.
+        Like Ambient, it uses RGB values and includes a preview swatch so you can quickly see the
+        selected colour.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Specular Colour
+    </Paragraph>
+    <Paragraph>
+        <Bold>Specular Colour</Bold> controls highlight lighting on the map. This value includes
+        an Alpha channel as well as RGB channels. A preview swatch is shown to help visualise the
+        selected highlight colour.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Prim Lighting
+    </Paragraph>
+    <Paragraph>
+        <Bold>Prim Lighting</Bold> controls the colour of lights emitted by light-producing prims,
+        such as street lamps. This can be set to any RGB colour and previewed using the colour swatch.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,2">
+        Night Sky Colour
+    </Paragraph>
+    <Paragraph>
+        <Bold>Night Sky Colour</Bold> is an unused legacy feature. Before
+        <Run FontFamily="Consolas" Foreground="#E8B84B">sky.tga</Run>
+        was implemented, this value represented the colour used for the sky box.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>
+                    Use the preview swatches as a quick way to compare colour choices before saving the light file.
+                    For the final result, use the map view or 3D viewport to judge how the values work together.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- PREVIEW D3D LIGHTING -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,14,0,2">
+        Preview D3D Lighting
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Preview D3D Lighting</Bold> button provides a quick at-a-glance comparison of
+        how the ambient lighting values will alter the appearance of a normal building on the map.
+        This is useful when tuning the general mood of a level before placing or adjusting individual
+        lights.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Light%20Editor;component/Help/Images/getting_started_preview_d3d_lighting.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- NEXT STEPS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        Once you are familiar with the Light Editor interface, continue to the next help topics:
+        <Bold>Adding &amp; Editing Lights</Bold>, <Bold>Map Properties</Bold>, and
+        <Bold>Using the 3D Preview</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A good starting point is to open an existing game light file, allow the editor to load the
+        matching map automatically, and then inspect how the original levels use ambient settings,
+        point lights, light ranges, and light-emitting prims.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,0">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>
+                    Always work on copies of original light files. Saving a light file overwrites the file directly
+                    unless you use Save As to create a new copy.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

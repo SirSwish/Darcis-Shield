@@ -1,4 +1,5 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using UrbanChaosEditor.Shared.Constants;
 using System.IO;
 
 namespace UrbanChaosLightEditor.Services;
@@ -13,8 +14,6 @@ public sealed class ExternalFileWatcherService
     private static readonly Lazy<ExternalFileWatcherService> _lazy = new(() => new ExternalFileWatcherService());
     public static ExternalFileWatcherService Instance => _lazy.Value;
 
-    private const int PollIntervalMs = 1000;
-
     private Timer? _timer;
     private DateTime _lastMapWriteTime = DateTime.MinValue;
     private bool _reloadingMap;
@@ -22,12 +21,12 @@ public sealed class ExternalFileWatcherService
     private ExternalFileWatcherService() { }
 
     /// <summary>
-    /// Start polling. Safe to call multiple times — subsequent calls are no-ops.
+    /// Start polling. Safe to call multiple times â€” subsequent calls are no-ops.
     /// </summary>
     public void Start()
     {
         if (_timer != null) return;
-        _timer = new Timer(Poll, null, PollIntervalMs, PollIntervalMs);
+        _timer = new Timer(Poll, null, ApplicationConstants.ExternalFilePollIntervalMs, ApplicationConstants.ExternalFilePollIntervalMs);
         Debug.WriteLine("[ExternalFileWatcherService] Started polling");
     }
 
@@ -66,7 +65,7 @@ public sealed class ExternalFileWatcherService
 
         if (_lastMapWriteTime == DateTime.MinValue)
         {
-            // First poll after load — record baseline, don't reload
+            // First poll after load â€” record baseline, don't reload
             _lastMapWriteTime = writeTime;
             return;
         }

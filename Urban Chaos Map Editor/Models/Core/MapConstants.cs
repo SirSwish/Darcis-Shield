@@ -1,14 +1,17 @@
 // /Models/MapConstants.cs
+// Thin wrapper around UrbanChaosEditor.Shared.Models.SharedMapConstants.
+
+using SharedMap = UrbanChaosEditor.Shared.Models.SharedMapConstants;
 
 namespace UrbanChaosMapEditor.Models.Core
 {
     public static class MapConstants
     {
-        public const int TileSize = 64;           // each texture “tile” is 64×64
-        public const int TilesPerSide = 128;      // 128×128 tiles
-        public const int MapPixels = TileSize * TilesPerSide; // 8192
+        public const int TileSize = SharedMap.TileSize;
+        public const int TilesPerSide = SharedMap.TilesPerSide;
+        public const int MapPixels = SharedMap.MapPixels;
 
-        public const int MapWhoCellTiles = 4;                    // 4x4 tiles
-        public const int MapWhoCellSize = MapWhoCellTiles * TileSize; // 256
+        public const int MapWhoCellTiles = SharedMap.MapWhoCellTiles;
+        public const int MapWhoCellSize = SharedMap.MapWhoCellSize;
     }
 }

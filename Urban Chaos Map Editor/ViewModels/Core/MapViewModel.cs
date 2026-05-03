@@ -119,8 +119,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public ICommand ZoomOutCommand { get; }
         public ICommand ResetZoomCommand { get; }
 
-        private IFacetMultiDrawWindow? _facetMultiDrawWindow;
-
         private bool _isMapLoaded;
         public bool IsMapLoaded
         {
@@ -369,7 +367,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         // Facet multi-draw mode state
         private bool _isMultiDrawingFacets;
-        private AddWallWindow? _addFacetWindow;
+        private IFacetMultiDrawWindow? _facetMultiDrawWindow;
         private FacetTemplate? _facetTemplate;
         private int _facetsAddedCount;
         private (byte x, byte z)? _multiDrawFirstPoint;
@@ -377,9 +375,7 @@ namespace UrbanChaosMapEditor.ViewModels.Core
 
         // Door placement mode state
         private bool _isPlacingDoor;
-        private AddDoorWindow? _addDoorWindow;
         //private DoorTemplate? _doorTemplate;
-        private (byte x, byte z)? _doorFirstPoint;
         private (int uiX0, int uiZ0, int uiX1, int uiZ1)? _doorPreviewLine;
 
         /// <summary>True when user is in door placement mode.</summary>
@@ -727,9 +723,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         {
             OnPropertyChanged(nameof(AltitudePaintedTiles));
         }
-
-        private AltitudeAccessor? _altitudeAccessor;
-        public AltitudeAccessor? AltitudeAccessor => _altitudeAccessor;
 
         #region Walkable Drawing Selection
 
@@ -2011,17 +2004,18 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             IsMultiDrawingFacets = false;
             IsPlacingDoor = false;
             MultiDrawPreviewLine = null;
+            DoorPreviewLine = null;
             _multiDrawFirstPoint = null;
 
-            if (_addFacetWindow != null)
+            if (_facetMultiDrawWindow != null)
             {
                 if (facetsAdded > 0)
-                    _addFacetWindow.OnDrawCompleted(facetsAdded);
+                    _facetMultiDrawWindow.OnDrawCompleted(facetsAdded);
                 else
-                    _addFacetWindow.OnDrawCancelled();
+                    _facetMultiDrawWindow.OnDrawCancelled();
             }
 
-            _addFacetWindow = null;
+            _facetMultiDrawWindow = null;
             _facetTemplate = null;
             _facetsAddedCount = 0;
         }
@@ -2260,30 +2254,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
             _addCableWindow = null;
         }
 
-     
-        /// <summary>
-        /// Updates the preview line endpoint as mouse moves during door placement.
-        /// </summary>
-        public void UpdateDoorPlacementPreview(int uiX, int uiZ)
-        {
-            if (!IsPlacingDoor || _doorFirstPoint == null)
-                return;
-
-            // Snap to nearest vertex
-            int snappedUiX = ((uiX + 32) / 64) * 64;
-            int snappedUiZ = ((uiZ + 32) / 64) * 64;
-            snappedUiX = Math.Clamp(snappedUiX, 0, 8192);
-            snappedUiZ = Math.Clamp(snappedUiZ, 0, 8192);
-
-            // Get the first point in UI coords
-            int firstUiX = (128 - _doorFirstPoint.Value.x) * 64;
-            int firstUiZ = (128 - _doorFirstPoint.Value.z) * 64;
-
-            DoorPreviewLine = (firstUiX, firstUiZ, snappedUiX, snappedUiZ);
-        }
-
-   
-
         /// <summary>
         /// Get currently selected facet IDs from the Buildings tab.
         /// Returns null if no facets are selected.
@@ -2308,58 +2278,6 @@ namespace UrbanChaosMapEditor.ViewModels.Core
         public void RefreshAltitudeLayer()
         {
             AltitudeChangeBus.Instance.NotifyAll();
-        }
-
-        /// <summary>
-        /// Handle altitude tool click on a tile.
-        /// </summary>
-        public void HandleAltitudeToolClick(int tx, int ty)
-        {
-            if (_altitudeAccessor == null) return;
-
-            switch (SelectedTool)
-            {
-                case EditorTool.SetAltitude:
-                    // Apply altitude to brush-sized region
-                    int half = (BrushSize - 1) / 2;
-                    for (int dy = -half; dy <= half; dy++)
-                    {
-                        for (int dx = -half; dx <= half; dx++)
-                        {
-                            int ttx = tx + dx;
-                            int tty = ty + dy;
-                            if (ttx >= 0 && ttx < MapConstants.TilesPerSide &&
-                                tty >= 0 && tty < MapConstants.TilesPerSide)
-                            {
-                                _altitudeAccessor.WriteWorldAltitude(ttx, tty, TargetAltitude);
-                            }
-                        }
-                    }
-                    break;
-
-                case EditorTool.SampleAltitude:
-                    // Read altitude from clicked cell
-                    TargetAltitude = _altitudeAccessor.ReadWorldAltitude(tx, ty);
-                    break;
-
-                case EditorTool.ResetAltitude:
-                    // Reset altitude to 0 for brush-sized region
-                    half = (BrushSize - 1) / 2;
-                    for (int dy = -half; dy <= half; dy++)
-                    {
-                        for (int dx = -half; dx <= half; dx++)
-                        {
-                            int ttx = tx + dx;
-                            int tty = ty + dy;
-                            if (ttx >= 0 && ttx < MapConstants.TilesPerSide &&
-                                tty >= 0 && tty < MapConstants.TilesPerSide)
-                            {
-                                _altitudeAccessor.WriteWorldAltitude(ttx, tty, 0);
-                            }
-                        }
-                    }
-                    break;
-            }
         }
 
         private static int ParseNumber(string relativeKey)

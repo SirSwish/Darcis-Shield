@@ -1,0 +1,74 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0" Background="#1E1F22" FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Overview / Getting Started</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">An overview of the Urban Chaos Style Editor interface, texture slots, texture properties, TMA styles, footstep sounds, sky images, and export workflow.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">The Style Editor</Paragraph>
+    <Paragraph>The Style Editor is used to create and manage custom Urban Chaos texture worlds. A texture world contains the ground and wall texture cells used by the game, along with wall style recipes, texture behaviour flags, footstep sound mappings, and the sky image.</Paragraph>
+    <Paragraph>A custom world can be built gradually inside the editor, then exported into the game directory as a complete finished world folder.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_editor_full_window.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Quick Actions Bar</Paragraph>
+    <Paragraph>The quick actions bar provides fast access to the main texture-world commands.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_quick_actions_bar.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">New Texture Set</Paragraph>
+    <Paragraph Margin="24,0,0,0">Creates a new custom texture world project. The world number is displayed next to the button.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Import Texture</Paragraph>
+    <Paragraph Margin="24,0,0,0">Imports a single <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run> texture cell into the selected texture slot.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Import Batch</Paragraph>
+    <Paragraph Margin="24,0,0,0">Imports multiple <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run> texture cells into available texture slots.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Export World</Paragraph>
+    <Paragraph Margin="24,0,0,0">Exports the entire custom world project into a custom world folder in the game directory, including textures, <Run FontFamily="Consolas" Foreground="#E8B84B">Style.TMA</Run>, footstep sounds, texture properties, and sky image.</Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Main Editor Layout</Paragraph>
+    <Paragraph>The main editor is divided into the Custom Worlds list, Texture Slots panel, Selected Slot editor, Texture Properties, Footstep Sound, TMA Styles, and Sky Image section.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_main_layout_annotated.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Custom Worlds Bar</Paragraph>
+    <Paragraph>The Custom Worlds bar scans the editor's <Run FontFamily="Consolas" Foreground="#E8B84B">CustomTextures</Run> directory for in-progress texture world projects. Selecting a custom world loads it into the editor.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_custom_worlds_bar.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Texture Slots</Paragraph>
+    <Paragraph>The Texture Slots section contains <Run FontFamily="Consolas" Foreground="#E8B84B">tex000</Run> through <Run FontFamily="Consolas" Foreground="#E8B84B">tex255</Run>. Each slot represents one <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run> texture cell.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_texture_slots.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Selected Slot</Paragraph>
+    <Paragraph>The Selected Slot section shows the currently selected texture cell. From here, you can import over it, clear it, or open the manual tile editor.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_selected_slot.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Texture Properties, Footsteps, Styles, and Sky</Paragraph>
+    <Paragraph>Texture properties are tied to the selected slot and exported to <Run FontFamily="Consolas" Foreground="#E8B84B">textype.txt</Run>. Footstep sounds define what plays when the player walks on the texture. TMA Styles define wall recipes. The Sky Image section manages the sky box image.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_texture_properties.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_footstep_sound.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_tma_styles.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_sky_image.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Menus</Paragraph>
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">File Menu</Paragraph>
+    <Paragraph>Contains New Texture Set, Export Finished Custom World to Game, and Refresh Worlds.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_file_menu.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Textures Menu</Paragraph>
+    <Paragraph>Contains Import Texture, Import Batch, and Clear Slot.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_textures_menu.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Sky Menu</Paragraph>
+    <Paragraph>Contains Import Sky Box Image and Clear Sky Box Image.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/style_overview_sky_menu.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Basic Workflow</Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem><Paragraph>Create a new texture set.</Paragraph></ListItem>
+        <ListItem><Paragraph>Import individual textures or use Import Batch.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set texture properties and footstep sounds.</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure TMA Styles.</Paragraph></ListItem>
+        <ListItem><Paragraph>Import a sky image if required.</Paragraph></ListItem>
+        <ListItem><Paragraph>Export the finished world to the game directory.</Paragraph></ListItem>
+    </List>
+    <BlockUIContainer Margin="0,8,0,0"><Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#E0A0A0"><Run FontWeight="Bold">⚠ Important:</Run><Run> Exporting writes a complete custom world folder into the game directory. Keep backups of important work-in-progress projects.</Run></TextBlock></Border></BlockUIContainer>
+</FlowDocument>

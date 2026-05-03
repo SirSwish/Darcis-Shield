@@ -1,0 +1,171 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Managing Districts
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        How to create, edit, position, select, and delete district entries on the overworld map.
+    </Paragraph>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Starting a New Storyboard
+    </Paragraph>
+    <Paragraph>
+        To begin creating districts, select <Bold>File → New</Bold> or press <Bold>Ctrl+N</Bold>. This creates a new storyboard and loads the standard overworld image.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_new_file.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Districts Tab
+    </Paragraph>
+    <Paragraph>
+        Districts are the larger areas shown on the overworld map. Missions are grouped under these districts, so districts should usually be created before missions.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Open the <Bold>Districts</Bold> tab in the management bar to begin adding and editing district entries.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_tab.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Adding a District
+    </Paragraph>
+    <Paragraph>
+        To add a district, click the <Bold>Add</Bold> button in the Districts tab. A new district entry is added to the list and a marker is placed on the overworld map.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_add_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_new_marker.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Editing a District
+    </Paragraph>
+    <Paragraph>
+        To edit a district, either double-click it in the district list or highlight it and press the <Bold>Edit</Bold> button.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This opens the <Bold>Edit District Window</Bold>.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_edit_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_edit_window.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">ID</Paragraph>
+    <Paragraph Margin="24,0,0,0">The district ID. This is automatically populated by the editor.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">District Name</Paragraph>
+    <Paragraph Margin="24,0,0,0">The name shown for the district, such as <Bold>Southside</Bold>.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">X / Y Position</Paragraph>
+    <Paragraph Margin="24,0,0,0">The district marker position on the overworld map.</Paragraph>
+    <Paragraph Margin="0,8,0,0">
+        Once the values are correct, press <Bold>OK</Bold> to save the district and place it on the map.
+    </Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Setting a District Position from the Map
+    </Paragraph>
+    <Paragraph>
+        You can also manually place a district by selecting it in the list and pressing <Bold>Set Position</Bold>. This changes the cursor to a crosshair.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Click the desired location on the overworld map and the selected district marker moves to that position.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_set_position_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_set_position_cursor.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>Set Position is the easiest way to align district markers visually against the overworld image.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Selecting Districts on the Map
+    </Paragraph>
+    <Paragraph>
+        You can click a district marker directly on the map to select it. Selecting a district on the map also allows you to see the mission entries associated with that district.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_selected_on_map.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Deleting a District
+    </Paragraph>
+    <Paragraph>
+        To delete a district, highlight it in the Districts list and press the <Bold>Delete</Bold> button.
+    </Paragraph>
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/Urban%20Chaos%20Storyboard%20Editor;component/Help/Images/storyboard_districts_delete_button.png"
+               MaxWidth="700" Stretch="Uniform"/>
+    </BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">⚠ Important:</Run>
+                <Run>Deleting a district can affect missions assigned to that district. Check mission District ID values before saving major changes.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic District Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0" Foreground="#E0E0E0">
+        <ListItem><Paragraph>Create a new storyboard with <Bold>File → New</Bold> or <Bold>Ctrl+N</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Open the <Bold>Districts</Bold> tab.</Paragraph></ListItem>
+        <ListItem><Paragraph>Press <Bold>Add</Bold> to create a new district entry.</Paragraph></ListItem>
+        <ListItem><Paragraph>Double-click the district or press <Bold>Edit</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enter the district name and position values.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Set Position</Bold> if you want to place the marker visually on the map.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click the district marker to view associated mission entries.</Paragraph></ListItem>
+    </List>
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Next Steps
+    </Paragraph>
+    <Paragraph>
+        After creating districts, continue to <Bold>Managing Missions</Bold> to add playable missions and assign them to district IDs.
+    </Paragraph>
+
+</FlowDocument>

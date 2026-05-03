@@ -1,0 +1,66 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0" Background="#1E1F22" FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Adding Textures</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">How to create a new custom texture world, import individual texture cells, import texture batches, and edit tiles manually.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Overview</Paragraph>
+    <Paragraph>Before textures can be imported, create a new custom texture set or select an existing custom world. A texture set contains up to <Run FontFamily="Consolas" Foreground="#E8B84B">256</Run> texture slots, named <Run FontFamily="Consolas" Foreground="#E8B84B">tex000</Run> through <Run FontFamily="Consolas" Foreground="#E8B84B">tex255</Run>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_overview.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Creating a New Texture Set</Paragraph>
+    <Paragraph>Select <Bold>File → New Texture Set</Bold> or press the <Bold>New Texture Set</Bold> quick action button.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_new_texture_set_button.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph>This opens the <Bold>New Texture Set Window</Bold>. Enter the world number for the new custom texture set, then press <Bold>Create</Bold>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_new_texture_set_window.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8"><Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#A0E0A0"><Run FontWeight="Bold">Note:</Run><Run> The world number must be greater than 20. Default game texture worlds occupy world numbers 0–20, so custom worlds should start from 21 or higher.</Run></TextBlock></Border></BlockUIContainer>
+    <Paragraph>The new texture set is created and added to the <Bold>Custom Worlds</Bold> column.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_custom_world_created.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Texture Slots</Paragraph>
+    <Paragraph>After creating or selecting a custom world, you can import textures into individual slots in the <Bold>Texture Slots</Bold> panel. Each slot represents one <Run FontFamily="Consolas" Foreground="#E8B84B">64×64</Run> texture cell.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_texture_slots.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Importing a Single Texture</Paragraph>
+    <Paragraph>Select the slot you want to replace, such as <Run FontFamily="Consolas" Foreground="#E8B84B">tex001</Run>, then press <Bold>Import Texture</Bold> or use <Bold>Textures → Import Texture</Bold>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_import_single_button.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph>Select the texture file from disk. The image is loaded directly into the chosen texture slot.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_import_single_result.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8"><Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#AFC8FF"><Run FontWeight="Bold">Tip:</Run><Run> Import Texture replaces the currently selected slot only. Confirm the correct slot before importing.</Run></TextBlock></Border></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Importing Textures in Bulk</Paragraph>
+    <Paragraph>To import multiple texture cells at once, press <Bold>Import Batch</Bold> or use <Bold>Textures → Import Batch</Bold>.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_import_batch_button.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph>Select the files you want to import, then press <Bold>OK</Bold>. The editor adds the selected textures into the next available slots.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_import_batch_file_select.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_import_batch_result.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF">Editing a Texture Tile</Paragraph>
+    <Paragraph>Select a texture slot and press <Bold>Edit Tile</Bold> in the Selected Slot section.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_edit_tile_button.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <Paragraph>The Tile Editor allows you to paint and modify individual pixels of the selected texture cell.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_overview.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Tile Editor Tools</Paragraph>
+    <Paragraph>The tile editor includes Pencil, Eraser, Fill, Colour Picker, and Alpha Selection tools.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_tools.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Alpha Editing</Paragraph>
+    <Paragraph>Alpha values control transparency for selected areas. <Run FontFamily="Consolas" Foreground="#E8B84B">0</Run> is fully opaque and <Run FontFamily="Consolas" Foreground="#E8B84B">255</Run> is fully transparent. You can also use Set All Opaque or Set All Transparent to reset the tile alpha state.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_alpha.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Colour Creator &amp; View Options</Paragraph>
+    <Paragraph>The Colour Creator lets you define custom colours before painting. View controls allow you to zoom, display gridlines, and show alpha previews.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_colour_creator.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_view_options.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF">Saving Tile Changes</Paragraph>
+    <Paragraph>When you are happy with the tile changes, press <Bold>Save</Bold>. The Tile Editor closes and writes the updated texture back into the selected slot.</Paragraph>
+    <BlockUIContainer Margin="0,6,0,8"><Image Source="pack://application:,,,/UrbanChaosStyleEditor;component/Help/Images/adding_textures_tile_editor_save.png" MaxWidth="700" Stretch="Uniform"/></BlockUIContainer>
+    <BlockUIContainer Margin="0,8,0,8"><Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1" CornerRadius="4" Padding="12"><TextBlock TextWrapping="Wrap" Foreground="#E0A0A0"><Run FontWeight="Bold">⚠ Important:</Run><Run> Manual tile edits modify the selected texture slot. Make sure the correct slot is selected before saving.</Run></TextBlock></Border></BlockUIContainer>
+</FlowDocument>

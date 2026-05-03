@@ -18,5 +18,51 @@
 
   <ItemGroup>
     <Resource Include="Assets\Icons\app.ico" />
+    <Resource Include="Help\Images\prim_create_add_point_mode.png" />
+    <Resource Include="Help\Images\prim_create_face_lists.png" />
+    <Resource Include="Help\Images\prim_create_new_prim.png" />
+    <Resource Include="Help\Images\prim_create_new_triangle_quad.png" />
+    <Resource Include="Help\Images\prim_create_points_in_viewport.png" />
+    <Resource Include="Help\Images\prim_edit_geometry_tools.png" />
+    <Resource Include="Help\Images\prim_edit_import_obj.png" />
+    <Resource Include="Help\Images\prim_edit_load_existing_prim.png" />
+    <Resource Include="Help\Images\prim_edit_properties_panel.png" />
+    <Resource Include="Help\Images\prim_export_obj.png" />
+    <Resource Include="Help\Images\prim_overview_3d_navigation.png" />
+    <Resource Include="Help\Images\prim_overview_full_window.png" />
+    <Resource Include="Help\Images\prim_overview_set_prim_dir.png" />
+    <Resource Include="Help\Images\prim_overview_set_texture_dir.png" />
+    <Resource Include="Help\Images\prim_texture_import_custom_texture.png" />
+    <Resource Include="Help\Images\prim_texture_library_panel.png" />
+    <Resource Include="Help\Images\prim_texture_reset_uv.png" />
+    <Resource Include="Help\Images\prim_texture_select_face.png" />
+    <Resource Include="Help\Images\prim_texture_select_uv_region.png" />
+    <Resource Include="Help\Images\prim_texture_uv_region_preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="Help\Topics\*.xaml" />
+    <Resource Include="Help\Topics\*.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Help\Images\prim_create_add_point_mode.png" />
+    <None Remove="Help\Images\prim_create_face_lists.png" />
+    <None Remove="Help\Images\prim_create_new_prim.png" />
+    <None Remove="Help\Images\prim_create_new_triangle_quad.png" />
+    <None Remove="Help\Images\prim_create_points_in_viewport.png" />
+    <None Remove="Help\Images\prim_edit_geometry_tools.png" />
+    <None Remove="Help\Images\prim_edit_import_obj.png" />
+    <None Remove="Help\Images\prim_edit_load_existing_prim.png" />
+    <None Remove="Help\Images\prim_edit_properties_panel.png" />
+    <None Remove="Help\Images\prim_export_obj.png" />
+    <None Remove="Help\Images\prim_overview_3d_navigation.png" />
+    <None Remove="Help\Images\prim_overview_full_window.png" />
+    <None Remove="Help\Images\prim_overview_set_prim_dir.png" />
+    <None Remove="Help\Images\prim_overview_set_texture_dir.png" />
+    <None Remove="Help\Images\prim_texture_import_custom_texture.png" />
+    <None Remove="Help\Images\prim_texture_library_panel.png" />
+    <None Remove="Help\Images\prim_texture_reset_uv.png" />
+    <None Remove="Help\Images\prim_texture_select_face.png" />
+    <None Remove="Help\Images\prim_texture_select_uv_region.png" />
+    <None Remove="Help\Images\prim_texture_uv_region_preview.png" />
   </ItemGroup>
 </Project>

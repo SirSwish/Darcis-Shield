@@ -1,0 +1,249 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Overview / Getting Started
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        An overview of the Mission Editor interface, menus, quick actions, mission viewport, event point panels, map loading, light loading, and zone controls.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What the Mission Editor Does
+    </Paragraph>
+    <Paragraph>
+        The Mission Editor is used to create and edit playable Urban Chaos mission files. A mission
+        file defines the mission name, map, light file, mission properties, event points, objectives,
+        sub-objectives, bonuses, messages, NPCs, items, traps, camera sequences, mission endings,
+        and many other mission-specific behaviours.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Mission editing is driven almost entirely by <Bold>Event Points</Bold>. Every important
+        mission action is represented by one or more event points. These event points can create the
+        player, spawn enemies, place items, trigger messages, run cutscenes, start timers, award
+        bonuses, end the mission, and link mission logic together.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_full_window.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Core concept:</Run>
+                <Run>
+                    A mission is not just a map with objects on it. It is a network of Event Points.
+                    The map provides the space; the Event Points provide the mission logic.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Main Interface Layout
+    </Paragraph>
+    <Paragraph>
+        The Mission Editor follows the same general style as the other Urban Chaos editors. The
+        centre of the window is the map viewport, with mission information and event point controls
+        arranged around it.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Status bar</Bold> — shown along the bottom of the window. It displays event messages such as adding, removing, editing, copying, or pasting event points.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Zoom controls</Bold> — located at the bottom-left of the map area. These include zoom controls and a reset zoom button.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Menu bar</Bold> — includes File, Edit, Zones, View, and Help menus.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Quick action toolbar</Bold> — provides fast buttons for opening missions, loading maps, loading lights, editing linked files, and opening the 3D viewport.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission Info panel</Bold> — appears when a mission is active. It shows mission metadata and loaded file references.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Event Points panel</Bold> — shown on the right. It contains the list of event points in the loaded mission.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Event Point Details panel</Bold> — shows the raw details for the currently selected event point.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Viewport</Bold> — displays the map, event points, mission layers, map layers, light layers, and zone overlays.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_layout_annotated.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Status Bar and Zoom Controls
+    </Paragraph>
+    <Paragraph>
+        The status bar is used for editor feedback. For example, it can show when an event point has
+        been added, removed, selected, edited, copied, or pasted.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The zoom controls on the bottom-left of the viewport allow you to zoom in, zoom out, and
+        reset the zoom level. These are useful when placing event points precisely on a large map.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_status_zoom.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        File Menu
+    </Paragraph>
+    <Paragraph>
+        The File menu contains commands for creating, opening, saving, closing, and configuring
+        mission files and related map/light resources.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_file_menu.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">New</Paragraph>
+    <Paragraph Margin="24,0,0,0">Starts a new <Run FontFamily="Consolas" Foreground="#E8B84B">.UCM</Run> mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Open</Paragraph>
+    <Paragraph Margin="24,0,0,0">Opens an existing <Run FontFamily="Consolas" Foreground="#E8B84B">.UCM</Run> mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Save</Paragraph>
+    <Paragraph Margin="24,0,0,0">Saves the current mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Save As</Paragraph>
+    <Paragraph Margin="24,0,0,0">Saves the current mission file as a new file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Close</Paragraph>
+    <Paragraph Margin="24,0,0,0">Closes the application.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Open Map...</Paragraph>
+    <Paragraph Margin="24,0,0,0">Loads an arbitrary map file into the viewport for display. This does not have to be the map currently referenced by the mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Open Lights...</Paragraph>
+    <Paragraph Margin="24,0,0,0">Loads an arbitrary light file into the viewport for display. This does not have to be the light file currently referenced by the mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Mission Properties</Paragraph>
+    <Paragraph Margin="24,0,0,0">Opens mission properties such as crime rate, boredom rate, civilian count, map file, light file, and other mission-level settings.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Exit</Paragraph>
+    <Paragraph Margin="24,0,0,0">Exits the application.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Edit Menu
+    </Paragraph>
+    <Paragraph>
+        The Edit menu contains commands for creating, editing, copying, pasting, and navigating
+        event points.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_edit_menu.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Add Event Point</Bold> — adds a new event point to the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Edit Event Point</Bold> — opens the selected event point for editing.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Copy / Paste EventPoint</Bold> — copies the selected event point and pastes it at the current cursor position.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Center on Selected</Bold> — centers the viewport on the selected event point if it is not currently visible.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Zones Menu
+    </Paragraph>
+    <Paragraph>
+        Zones are mission overlays painted onto map cells. They can mark areas with special mission
+        behaviour, such as no-go cells, colour zones, no-wander cells, and other zone types explained
+        in later sections.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_zones_menu.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Paint Zone Mode</Bold> — enables zone painting mode so selected zone types can be added to map cells.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Erase Zone Mode</Bold> — enables zone erasing mode so zoning can be removed from map cells.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Zone Type</Bold> — sets the current zone type used by paint or erase mode.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Clear All Zones</Bold> — clears all zone tiles from the mission. Use this carefully, as it removes all painted zone information.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        View Menu
+    </Paragraph>
+    <Paragraph>
+        The View menu controls the 3D viewport, zoom level, and visible layer groups.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_view_menu.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Open 3D Viewport</Bold> — opens the map in 3D with map layers, lights, prims, buildings, textures, and mission elements.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Zoom In / Zoom Out</Bold> — changes the viewport zoom level.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Reset Zoom</Bold> — returns the viewport to the standard zoom level.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission Layers</Bold> — toggles mission-specific layers on and off.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Map Layers</Bold> — toggles map-related layers such as textures, buildings, and objects.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Light Layers</Bold> — toggles light-related layers such as lights and ranges.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Quick Action Toolbar
+    </Paragraph>
+    <Paragraph>
+        The quick action toolbar gives fast access to the most common Mission Editor workflows.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_quick_actions.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Open</Paragraph>
+    <Paragraph Margin="24,0,0,0">Quickly opens a <Run FontFamily="Consolas" Foreground="#E8B84B">.UCM</Run> mission file.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Map</Paragraph>
+    <Paragraph Margin="24,0,0,0">Selects a custom map for display if no map is loaded, or replaces the map currently shown in the viewport.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Edit Map</Paragraph>
+    <Paragraph Margin="24,0,0,0">Passes the currently loaded map to the Map Editor. A file synchronisation service updates changes made in the Map Editor in real time.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Lights</Paragraph>
+    <Paragraph Margin="24,0,0,0">Selects a custom light file if no light file is loaded, or replaces the light file currently shown in the viewport.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Edit Lights</Paragraph>
+    <Paragraph Margin="24,0,0,0">Passes the currently loaded light file to the Light Editor. The same file synchronisation service updates changes in real time.</Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">3D</Paragraph>
+    <Paragraph Margin="24,0,0,0">Opens the current mission/map view in the 3D viewport.</Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Event Point Panels
+    </Paragraph>
+    <Paragraph>
+        The right side of the editor contains the Event Points list and Event Point Details panel.
+        The Event Points list contains every event point in the loaded mission. Selecting an event
+        point updates the details panel and highlights the point in the viewport.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The Event Point Details panel is a raw-style view of the selected event point. It is useful
+        for checking identifiers, type data, position, grouping, and other low-level values.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_overview_event_panels.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+</FlowDocument>

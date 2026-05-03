@@ -1,0 +1,32 @@
+Mission Editor Help Image Capture Guide - NPC + AutoSave Redone
+=============================================================
+
+CreateCreatureEventPoint.xaml
+-----------------------------
+mission_creature_overview.png - Mission viewport showing a creature Event Point or creature spawn example.
+mission_creature_add_type.png - Add New EventPoint window with Create Creature selected.
+mission_creature_common_properties.png - Edit EventPoint window showing group, colour, and position controls for a creature.
+mission_creature_type_count.png - Creature-specific type/count section showing Bat, Gargoyle, Bane, and Baalrog options.
+mission_creature_trigger_settings.png - Trigger settings set to None/Game Starts and Listening Mode Active.
+mission_creature_rotate_facing.png - Selected creature Event Point showing the orange rotation/facing handle.
+
+NpcEventPoints.xaml
+-------------------
+mission_npc_overview.png - Mission viewport showing one or more NPC/enemy Event Points.
+mission_npc_grouping_example.png - NPC Event Point common properties showing useful group/colour choices.
+mission_npc_two_cops_example.png - Example with two copied police Event Points facing a target.
+mission_npc_edit_window.png - Edit EventPoint window for Create NPC/Create Enemy showing NPC-specific properties.
+mission_adjust_npc_overview.png - Add/Edit EventPoint view showing Adjust NPC / Adjust Enemy as a separate related Event Point type.
+mission_adjust_npc_target_ep.png - Adjust NPC / Adjust Enemy edit window showing Target EP. It must be the Event Point number of the existing NPC being modified.
+mission_enemy_flags_overview.png - Add/Edit EventPoint view showing Enemy Flags as a separate Event Point type.
+mission_enemy_flags_target_ep.png - Enemy Flags edit window showing Target EP. It must be the Event Point number of the existing NPC whose flags are being changed.
+
+NpcMovementAiFlagsReference.xaml
+--------------------------------
+mission_npc_movement_settings.png - Movement settings dropdown or section.
+mission_npc_ai_type_settings.png - AI Type dropdown or section.
+mission_npc_flags_panel.png - NPC behaviour/zone flags panel showing flags such as Lazy, Diligent, Gang, Fight Back, Guilty, Fake Wander, Can Carry, etc.
+
+AutoSaveEventPoint.xaml
+-----------------------
+mission_autosave_overview.png - Add New EventPoint list or Edit EventPoint window showing AutoSave selected.

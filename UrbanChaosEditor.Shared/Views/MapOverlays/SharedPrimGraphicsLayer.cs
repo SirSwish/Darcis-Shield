@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using UrbanChaosEditor.Shared.Constants;
 
 namespace UrbanChaosEditor.Shared.Views.MapOverlays;
 
@@ -47,7 +48,7 @@ public class SharedPrimGraphicsLayer : MapOverlayBase
     #region Constants
 
     // 256 steps around a full circle
-    protected const double DegreesPerYaw = 360.0 / 256.0;
+    protected const double DegreesPerYaw = CameraConstants.DegreesPerYaw;
 
     #endregion
 

@@ -1,0 +1,11 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Zones</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Paint gameplay regions such as inside, reverb, no-wander, no-go, and custom zones.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Painting Zones</Paragraph>
+    <Paragraph>Enable <Bold>Paint Zone Mode</Bold>, choose a Zone Type, then click and drag over cells on the map. Enable <Bold>Erase Zone Mode</Bold> to remove zone data. <Bold>Clear All Zones</Bold> removes every painted mission zone.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Layer Visibility</Paragraph>
+    <Paragraph><Bold>Show Zones</Bold> controls whether painted zones are drawn. This is separate from event point and map layers, so you can inspect zone coverage without hiding mission markers.</Paragraph>
+</FlowDocument>

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Viewport3D;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
@@ -19,6 +20,31 @@ using UrbanChaosMapEditor.ViewModels.Core;
 
 namespace UrbanChaosMapEditor.Views.Viewport3D
 {
+    public sealed class Viewport3DOverlayLayer
+    {
+        public Viewport3DOverlayLayer(string name, ModelVisual3D visual, bool isVisible = true)
+        {
+            Name = name;
+            Visual = visual;
+            IsVisible = isVisible;
+        }
+
+        public Viewport3DOverlayLayer(
+            string name,
+            ModelVisual3D visual,
+            Func<ViewportCullRegion, Model3D?> rebuildContent,
+            bool isVisible = true)
+            : this(name, visual, isVisible)
+        {
+            RebuildContent = rebuildContent;
+        }
+
+        public string Name { get; }
+        public ModelVisual3D Visual { get; }
+        public bool IsVisible { get; set; }
+        public Func<ViewportCullRegion, Model3D?>? RebuildContent { get; }
+    }
+
     public partial class Viewport3DWindow : Window
     {
         private enum LayerKind
@@ -54,23 +80,150 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         private readonly ModelVisual3D _cablesVisual = new();
         private readonly ModelVisual3D _primsVisual = new();
         private readonly ModelVisual3D _roofTilesVisual = new();
+        private readonly List<Viewport3DOverlayLayer> _overlayLayers = new();
 
         private SceneBuilder? _builder;
         private DateTime _lastTick;
+        private readonly DispatcherTimer _cullRefreshTimer;
+        private ViewportCullRegion? _lastBuiltCull;
+        private readonly double? _cullDistance;
+        private readonly double? _cullMargin;
 
         private object? _mapVmObject;
         private INotifyPropertyChanged? _mapVmNotify;
         private bool _syncingLayerButtons;
+        private CheckBox? _ambientFilterCheckBox;
+        private Color _ambientFilterColor = Color.FromArgb(0, 0, 0, 0);
 
         public Viewport3DWindow()
+            : this(null)
+        {
+        }
+
+        public Viewport3DWindow(
+            IEnumerable<Viewport3DOverlayLayer>? overlayLayers,
+            double? cullDistance = null,
+            double? cullMargin = null)
         {
             InitializeComponent();
+
+            _cullDistance = cullDistance;
+            _cullMargin = cullMargin;
+            if (_cullDistance.HasValue)
+                Camera.FarPlaneDistance = Math.Max(256.0, _cullDistance.Value + (_cullMargin ?? CameraConstants.ViewportCullMargin) * 2.0);
+
+            _cullRefreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(CameraConstants.ViewportCullRefreshMilliseconds)
+            };
+            _cullRefreshTimer.Tick += OnCullRefreshTimerTick;
 
             SceneRoot.Children.Add(_terrainVisual);
             SceneRoot.Children.Add(_facetsVisual);
             SceneRoot.Children.Add(_cablesVisual);
             SceneRoot.Children.Add(_primsVisual);
             SceneRoot.Children.Add(_roofTilesVisual);
+
+            if (overlayLayers != null)
+            {
+                foreach (var layer in overlayLayers)
+                    AddOverlayLayer(layer);
+            }
+        }
+
+        private void AddOverlayLayer(Viewport3DOverlayLayer layer)
+        {
+            _overlayLayers.Add(layer);
+
+            if (layer.IsVisible && !SceneRoot.Children.Contains(layer.Visual))
+                SceneRoot.Children.Add(layer.Visual);
+
+            var checkBox = new CheckBox
+            {
+                Content = layer.Name,
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 2, 0, 2),
+                IsChecked = layer.IsVisible,
+                Tag = layer
+            };
+            checkBox.Checked += OverlayLayerToggle_Changed;
+            checkBox.Unchecked += OverlayLayerToggle_Changed;
+            LayerPanel.Children.Add(checkBox);
+        }
+
+        private void OverlayLayerToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            if (sender is not CheckBox { Tag: Viewport3DOverlayLayer layer })
+                return;
+
+            layer.IsVisible = ((CheckBox)sender).IsChecked == true;
+
+            if (layer.IsVisible)
+            {
+                if (layer.RebuildContent != null)
+                    layer.Visual.Content = layer.RebuildContent(CreateCullRegion());
+
+                if (!SceneRoot.Children.Contains(layer.Visual))
+                    SceneRoot.Children.Add(layer.Visual);
+            }
+            else
+            {
+                SceneRoot.Children.Remove(layer.Visual);
+            }
+        }
+
+        public void ConfigureAmbientFilter(Color color, bool isEnabled = true)
+        {
+            _ambientFilterColor = color;
+
+            if (_ambientFilterCheckBox == null)
+            {
+                _ambientFilterCheckBox = new CheckBox
+                {
+                    Content = "Ambient Filter",
+                    Foreground = Brushes.White,
+                    Margin = new Thickness(0, 8, 0, 2),
+                    IsChecked = isEnabled
+                };
+                _ambientFilterCheckBox.Checked += AmbientFilterToggle_Changed;
+                _ambientFilterCheckBox.Unchecked += AmbientFilterToggle_Changed;
+                LayerPanel.Children.Add(_ambientFilterCheckBox);
+            }
+            else
+            {
+                _ambientFilterCheckBox.IsChecked = isEnabled;
+            }
+
+            ApplyAmbientFilter(isEnabled);
+        }
+
+        public bool IsAmbientFilterEnabled => _ambientFilterCheckBox?.IsChecked == true;
+
+        private void AmbientFilterToggle_Changed(object sender, RoutedEventArgs e)
+        {
+            ApplyAmbientFilter(_ambientFilterCheckBox?.IsChecked == true);
+        }
+
+        private void ApplyAmbientFilter(bool enabled)
+        {
+            if (!enabled)
+            {
+                AmbientSceneLight.Color = Color.FromRgb(0x60, 0x60, 0x60);
+                PrimaryDirectionalLight.Color = Color.FromRgb(0xC8, 0xC8, 0xC8);
+                SecondaryDirectionalLight.Color = Color.FromRgb(0x40, 0x40, 0x40);
+                AmbientFilterOverlay.Visibility = Visibility.Collapsed;
+                AmbientFilterOverlay.Fill = null;
+                return;
+            }
+
+            // The Light Editor's Preview D3D Lighting path multiplies source pixels by
+            // the ambient swatch colour. In WPF 3D the closest cheap approximation is to
+            // let ambient light carry the colour and remove white directional fill.
+            AmbientSceneLight.Color = Color.FromRgb(_ambientFilterColor.R, _ambientFilterColor.G, _ambientFilterColor.B);
+            PrimaryDirectionalLight.Color = Colors.Black;
+            SecondaryDirectionalLight.Color = Colors.Black;
+            AmbientFilterOverlay.Visibility = Visibility.Collapsed;
+            AmbientFilterOverlay.Fill = null;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -112,6 +265,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
         private void Window_Closed(object? sender, EventArgs e)
         {
+            _cullRefreshTimer.Stop();
+            _cullRefreshTimer.Tick -= OnCullRefreshTimerTick;
+
             CompositionTarget.Rendering -= OnRender;
 
             Camera3DService.Instance.PositionChanged -= OnCameraChanged;
@@ -311,7 +467,30 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             RebuildAll();
         }
 
-        private void OnCameraChanged(object? sender, EventArgs e) => SyncCameraFromService();
+        private void OnCameraChanged(object? sender, EventArgs e)
+        {
+            SyncCameraFromService();
+            QueueCullRefreshIfNeeded();
+        }
+
+        private void QueueCullRefreshIfNeeded()
+        {
+            if (_builder is null)
+                return;
+
+            var current = CreateCullRegion();
+            if (_lastBuiltCull.HasValue && current.IsSameBucket(_lastBuiltCull.Value))
+                return;
+
+            if (!_cullRefreshTimer.IsEnabled)
+                _cullRefreshTimer.Start();
+        }
+
+        private void OnCullRefreshTimerTick(object? sender, EventArgs e)
+        {
+            _cullRefreshTimer.Stop();
+            RebuildAll();
+        }
 
         private void OnMapClearedHandler(object? sender, EventArgs e)
         {
@@ -335,14 +514,34 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
         private void RebuildAll()
         {
-            RebuildTerrain();
-            RebuildFacets();
-            RebuildCables();
-            RebuildPrims();
-            RebuildRoofTiles();
+            var cull = CreateCullRegion();
+            _lastBuiltCull = cull;
+
+            RebuildTerrain(cull);
+            RebuildFacets(cull);
+            RebuildCables(cull);
+            RebuildPrims(cull);
+            RebuildRoofTiles(cull);
+            RebuildOverlayLayers(cull);
         }
 
-        private void RebuildTerrain()
+        private void RebuildOverlayLayers(ViewportCullRegion cull)
+        {
+            foreach (var layer in _overlayLayers)
+            {
+                if (!layer.IsVisible || layer.RebuildContent == null)
+                    continue;
+
+                layer.Visual.Content = layer.RebuildContent(cull);
+            }
+        }
+
+        public void RebuildCullAwareOverlayLayers()
+        {
+            RebuildOverlayLayers(CreateCullRegion());
+        }
+
+        private void RebuildTerrain(ViewportCullRegion? cull = null)
         {
             if (_builder is null) return;
 
@@ -355,7 +554,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             try
             {
-                _terrainVisual.Content = _builder.BuildTerrain();
+                cull ??= CreateCullRegion();
+                _lastBuiltCull = cull;
+                _terrainVisual.Content = _builder.BuildTerrain(cull);
                 UpdateStatus();
             }
             catch (Exception ex)
@@ -364,7 +565,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             }
         }
 
-        private void RebuildFacets()
+        private void RebuildFacets(ViewportCullRegion? cull = null)
         {
             if (_builder is null) return;
 
@@ -377,7 +578,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             try
             {
-                _facetsVisual.Content = _builder.BuildFacets();
+                cull ??= CreateCullRegion();
+                _lastBuiltCull = cull;
+                _facetsVisual.Content = _builder.BuildFacets(cull);
                 UpdateStatus();
             }
             catch (Exception ex)
@@ -386,7 +589,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             }
         }
 
-        private void RebuildCables()
+        private void RebuildCables(ViewportCullRegion? cull = null)
         {
             if (_builder is null) return;
 
@@ -398,7 +601,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             try
             {
-                _cablesVisual.Content = _builder.BuildCables();
+                cull ??= CreateCullRegion();
+                _lastBuiltCull = cull;
+                _cablesVisual.Content = _builder.BuildCables(cull);
             }
             catch (Exception ex)
             {
@@ -406,7 +611,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             }
         }
 
-        private void RebuildPrims()
+        private void RebuildPrims(ViewportCullRegion? cull = null)
         {
             if (_builder is null) return;
 
@@ -419,7 +624,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             try
             {
-                _primsVisual.Content = _builder.BuildPrims();
+                cull ??= CreateCullRegion();
+                _lastBuiltCull = cull;
+                _primsVisual.Content = _builder.BuildPrims(cull);
                 UpdateStatus();
             }
             catch (Exception ex)
@@ -428,7 +635,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             }
         }
 
-        private void RebuildRoofTiles()
+        private void RebuildRoofTiles(ViewportCullRegion? cull = null)
         {
             if (_builder is null) return;
 
@@ -441,7 +648,9 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             try
             {
-                _roofTilesVisual.Content = _builder.BuildRoofTiles();
+                cull ??= CreateCullRegion();
+                _lastBuiltCull = cull;
+                _roofTilesVisual.Content = _builder.BuildRoofTiles(cull);
                 UpdateStatus();
             }
             catch (Exception ex)
@@ -463,6 +672,28 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
                 $"obj={(IsLayerEnabled(LayerKind.Objects) ? "on" : "off")}  " +
                 $"bld={(IsLayerEnabled(LayerKind.Buildings) ? "on" : "off")}  " +
                 $"roof={(IsLayerEnabled(LayerKind.RoofTiles) ? "on" : "off")}";
+        }
+
+        private ViewportCullRegion CreateCullRegion()
+        {
+            double aspect = Viewport.ActualHeight > 1.0
+                ? Viewport.ActualWidth / Viewport.ActualHeight
+                : 1.0;
+
+            if (_cullDistance.HasValue || _cullMargin.HasValue)
+            {
+                return ViewportCullRegion.FromCamera(
+                    Camera3DService.Instance.Camera,
+                    Camera.FieldOfView,
+                    aspect,
+                    _cullDistance ?? CameraConstants.ViewportCullDistance,
+                    _cullMargin ?? CameraConstants.ViewportCullMargin);
+            }
+
+            return ViewportCullRegion.FromCamera(
+                    Camera3DService.Instance.Camera,
+                    Camera.FieldOfView,
+                    aspect);
         }
 
         private void SyncCameraFromService()

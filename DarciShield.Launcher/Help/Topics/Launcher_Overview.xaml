@@ -1,0 +1,11 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              Foreground="#E0E0E0" Background="#1E1F22"
+              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Darci's Shield Launcher</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">The front door for the Darci's Shield editor suite.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Opening Editors</Paragraph>
+    <Paragraph>Each shield button starts one editor executable from the launcher folder: Map Editor, Light Editor, Mission Editor, Style Editor, Story Editor, or Prim Editor.</Paragraph>
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Troubleshooting Launch Failures</Paragraph>
+    <Paragraph>If an editor cannot be found, the launcher shows the exact executable path it attempted to start. Build or copy the missing editor into the same output folder as the launcher, then try again.</Paragraph>
+</FlowDocument>

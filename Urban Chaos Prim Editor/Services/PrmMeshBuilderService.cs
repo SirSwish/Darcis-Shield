@@ -34,6 +34,7 @@ namespace UrbanChaosPrimEditor.Services
         public Model3DGroup Group { get; init; } = new();
         public Dictionary<GeometryModel3D, int> MarkerToPointId { get; init; } = new();
         public Dictionary<int, GeometryModel3D> PointIdToMarker { get; init; } = new();
+        public Dictionary<GeometryModel3D, SelectedFaceHint> FaceHitToFace { get; init; } = new();
     }
 
     /// <summary>Identifies which face to draw a highlight outline around.</summary>
@@ -57,6 +58,7 @@ namespace UrbanChaosPrimEditor.Services
         private static readonly Material MarkerMaterialFaceBuild = CreateMarkerMaterial(Color.FromRgb(255, 220,  60), Color.FromRgb(220, 180,  40));
         private static readonly Material GridMaterial          = CreateGuideMaterial(Color.FromRgb(70, 70, 70));
         private static readonly Material FaceHighlightMaterial  = CreateFaceHighlightMaterial();
+        private static readonly Material FaceHitTestMaterial = CreateFaceHitTestMaterial();
         private static readonly Material AxisXMaterial = CreateGuideMaterial(Color.FromRgb(230, 70, 70));
         private static readonly Material AxisYMaterial = CreateGuideMaterial(Color.FromRgb(80, 220, 120));
         private static readonly Material AxisZMaterial = CreateGuideMaterial(Color.FromRgb(80, 150, 255));
@@ -110,6 +112,9 @@ namespace UrbanChaosPrimEditor.Services
             var faceBuildSet = faceBuildIds is null ? new HashSet<int>() : new HashSet<int>(faceBuildIds);
             var markerToPointId = new Dictionary<GeometryModel3D, int>(prm.Points.Count);
             var pointIdToMarker = new Dictionary<int, GeometryModel3D>(prm.Points.Count);
+            var faceHitToFace = new Dictionary<GeometryModel3D, SelectedFaceHint>();
+
+            AddFaceHitSurfaces(group, prm, faceHitToFace);
 
             foreach (PrmPoint p in prm.Points)
             {
@@ -144,6 +149,7 @@ namespace UrbanChaosPrimEditor.Services
                 Group           = group,
                 MarkerToPointId = markerToPointId,
                 PointIdToMarker = pointIdToMarker,
+                FaceHitToFace   = faceHitToFace,
             };
         }
 
@@ -470,6 +476,68 @@ namespace UrbanChaosPrimEditor.Services
             group.Children.Add(new EmissiveMaterial(emissive));
             group.Freeze();
             return group;
+        }
+
+        private static Material CreateFaceHitTestMaterial()
+        {
+            var brush = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
+            brush.Freeze();
+            var material = new DiffuseMaterial(brush);
+            material.Freeze();
+            return material;
+        }
+
+        private static void AddFaceHitSurfaces(
+            Model3DGroup group,
+            PrmModel prm,
+            Dictionary<GeometryModel3D, SelectedFaceHint> faceHitToFace)
+        {
+            var pointLookup = prm.Points.ToDictionary(p => p.GlobalId);
+
+            for (int i = 0; i < prm.Triangles.Count; i++)
+            {
+                PrmTriangle t = prm.Triangles[i];
+                if (!pointLookup.TryGetValue(t.PointAId, out PrmPoint a)) continue;
+                if (!pointLookup.TryGetValue(t.PointBId, out PrmPoint b)) continue;
+                if (!pointLookup.TryGetValue(t.PointCId, out PrmPoint c)) continue;
+
+                var mesh = new MeshGeometry3D();
+                mesh.Positions.Add(ToPoint3D(a));
+                mesh.Positions.Add(ToPoint3D(b));
+                mesh.Positions.Add(ToPoint3D(c));
+                mesh.TriangleIndices.Add(2);
+                mesh.TriangleIndices.Add(1);
+                mesh.TriangleIndices.Add(0);
+
+                var model = new GeometryModel3D(mesh, FaceHitTestMaterial) { BackMaterial = FaceHitTestMaterial };
+                group.Children.Add(model);
+                faceHitToFace[model] = new SelectedFaceHint(true, i);
+            }
+
+            for (int i = 0; i < prm.Quadrangles.Count; i++)
+            {
+                PrmQuadrangle q = prm.Quadrangles[i];
+                if (!pointLookup.TryGetValue(q.PointAId, out PrmPoint a)) continue;
+                if (!pointLookup.TryGetValue(q.PointBId, out PrmPoint b)) continue;
+                if (!pointLookup.TryGetValue(q.PointCId, out PrmPoint c)) continue;
+                if (!pointLookup.TryGetValue(q.PointDId, out PrmPoint d)) continue;
+
+                var mesh = new MeshGeometry3D();
+                mesh.Positions.Add(ToPoint3D(a));
+                mesh.Positions.Add(ToPoint3D(b));
+                mesh.Positions.Add(ToPoint3D(c));
+                mesh.Positions.Add(ToPoint3D(d));
+                mesh.TriangleIndices.Add(3);
+                mesh.TriangleIndices.Add(1);
+                mesh.TriangleIndices.Add(0);
+                mesh.TriangleIndices.Add(2);
+                mesh.TriangleIndices.Add(3);
+                mesh.TriangleIndices.Add(0);
+
+                var model = new GeometryModel3D(mesh, FaceHitTestMaterial) { BackMaterial = FaceHitTestMaterial };
+                group.Children.Add(model);
+                faceHitToFace[model] = new SelectedFaceHint(false, i);
+            }
         }
 
         /// <summary>Draws an orange outline around the given face using thick edge tubes.</summary>

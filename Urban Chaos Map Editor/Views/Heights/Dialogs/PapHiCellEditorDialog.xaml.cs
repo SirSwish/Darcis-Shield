@@ -3,16 +3,18 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using UrbanChaosEditor.Shared.Constants;
+using UrbanChaosEditor.Shared.Models;
 using UrbanChaosMapEditor.Services.Core;
 
 namespace UrbanChaosMapEditor.Views.Heights.Dialogs
 {
     public partial class PapHiCellEditorDialog : Window
     {
-        private const int HeaderBytes = 8;
-        private const int BytesPerTile = 6;
-        private const int TilesPerSide = 128;
-        private const int Off_Flags = 2;
+        private const int HeaderBytes = TextureFormatConstants.HeaderBytes;
+        private const int BytesPerTile = TextureFormatConstants.BytesPerTile;
+        private const int TilesPerSide = SharedMapConstants.TilesPerSide;
+        private const int Off_Flags = MapFormatConstants.PapFlagsByteIndex;
 
         private readonly int _gameX;
         private readonly int _gameZ;

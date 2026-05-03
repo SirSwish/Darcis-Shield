@@ -1,6 +1,7 @@
 // UrbanChaosMapEditor/Services/BuildingsAccessor.cs
 using System.Diagnostics;
 using System.IO;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMapEditor.Models.Buildings;
 using UrbanChaosMapEditor.Services.Core;
 
@@ -15,16 +16,16 @@ namespace UrbanChaosMapEditor.Services.Buildings
         private readonly MapDataService _svc;
 
         // Fixed V1 layout we-re targeting (same as renderer):
-        private const int HeaderSize = 48;
-        private const int DBuildingSize = 24;
-        private const int AfterBuildingsPad = 14;
-        private const int InsideStoreySize = 22;
-        private const int StaircaseSize = 10;
-        private const int DWalkableSize = 22;
-        private const int RoofFace4Size = 10;
+        private const int HeaderSize = BuildingFormatConstants.HeaderSize;
+        private const int DBuildingSize = BuildingFormatConstants.DBuildingSize;
+        private const int AfterBuildingsPad = BuildingFormatConstants.AfterBuildingsPad;
+        private const int InsideStoreySize = BuildingFormatConstants.InsideStoreySize;
+        private const int StaircaseSize = BuildingFormatConstants.StaircaseSize;
+        private const int DWalkableSize = BuildingFormatConstants.DWalkableSize;
+        private const int RoofFace4Size = BuildingFormatConstants.RoofFace4Size;
 
-        public const int DFacetSize = 26; // expose for callers
-        private const int DStoreyRecSize = 6;  // U16 Style; U16 PaintIndex; SBYTE Count; UBYTE pad
+        public const int DFacetSize = BuildingFormatConstants.DFacetSize; // expose for callers
+        private const int DStoreyRecSize = BuildingFormatConstants.DStoreySize;  // U16 Style; U16 PaintIndex; SBYTE Count; UBYTE pad
 
         public BuildingsAccessor(MapDataService svc)
         {
@@ -313,9 +314,6 @@ namespace UrbanChaosMapEditor.Services.Buildings
             byte[] roofFacesRaw = Array.Empty<byte>();
             DWalkableRec[] walkables = Array.Empty<DWalkableRec>();
             RoofFace4Rec[] roofFaces4 = Array.Empty<RoofFace4Rec>();
-
-            static short ReadS16(byte[] b, int off) => BitConverter.ToInt16(b, off);
-            static sbyte ReadS8(byte[] b, int off) => unchecked((sbyte)b[off]);
 
             // ---- Indoors chunk (optional) ----
             if (saveType >= 21)
