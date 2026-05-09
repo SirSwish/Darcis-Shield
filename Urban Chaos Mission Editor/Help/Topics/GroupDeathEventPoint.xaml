@@ -1,0 +1,266 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Group Death Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Makes all Event Points in the same colour and letter group die when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Group Death Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Group Death</Bold> Event Point deactivates every Event Point that shares its
+        <Bold>colour</Bold> and <Bold>letter group</Bold>. When it fires, all waypoints in that
+        colour/group combination become dead, meaning they stop processing and become inactive.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Group Death is most commonly used at mission start with a <Bold>None</Bold> trigger to keep
+        a set of enemies or objectives dormant until a later <Bold>Group Life</Bold> brings them
+        alive. It can also be used mid-mission to forcibly kill an entire group at a scripted moment.
+        Like Group Life, it has no type-specific Data settings - the colour and group it targets come
+        from the Event Point's standard common properties.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Set this Event Point's Colour and Group to match the set of Event Points you want to deactivate. When the Group Death fires, every waypoint with that exact colour+group becomes dead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Group Death uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. <Bold>Colour</Bold> and
+        <Bold>letter group</Bold> are the critical fields - they determine which Event Points this
+        Group Death will deactivate. Position is usually not what matters for the deactivation itself,
+        but can be used to keep the Group Death near its target set for organisation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Colour
+    </Paragraph>
+    <Paragraph>
+        Colour is one half of the targeting selector. A Group Death with <Bold>Purple</Bold> affects
+        only Event Points that also use <Bold>Purple</Bold>. All other colours are ignored. The
+        colour field is in the common Event Point properties section.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Group (Letter)
+    </Paragraph>
+    <Paragraph>
+        Group letter is the other half of the selector. A Group Death with letter <Bold>A</Bold>
+        affects only Event Points that also use letter <Bold>A</Bold>. The combination of
+        <Bold>Colour + Group</Bold> is what defines the target set. Purple/A is different from
+        Purple/B or Red/A.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position does not affect which Event Points are deactivated. Group Death targets by
+        colour+group, not by spatial radius. Use position only for placing the Event Point
+        somewhere logical for mission authoring, such as near the group it affects or near the start
+        of the mission sequence.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings control when the group dies. Most retail Group Death Event Points use
+        <Bold>None</Bold> so the group is dead from mission start. Some use <Bold>Dependency</Bold>
+        when the group should be killed at a specific scripted moment.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Existing Group Death examples use <Bold>Active</Bold> or <Bold>Active Die</Bold>. Active is
+        appropriate for a one-time group kill. Active Die is also common at mission start, where it
+        fires once and then the Event Point itself becomes inactive.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Group Death-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Group Death has <Bold>no type-specific Data settings</Bold>. The Event Point's behaviour is
+        entirely determined by the Colour and Group fields in the common properties section, plus
+        the trigger that causes it to fire.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> The mission-start dormant pattern is: create a Group Death with None/Active (or None/Active Die), then create a Group Life with Dependency that brings the group alive at the scripted moment. Both use the same Colour+Group.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Group Death
+    </Paragraph>
+    <Paragraph>
+        Existing Group Death usage focuses on mission-start dormant states and scripted group kills.
+        Useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> or <Bold>Active Die</Bold> - the most common pattern. The group is dead as soon as the mission starts, preventing enemies from being active until a Group Life brings them alive.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - used when the group should be killed at a specific scripted moment, such as after completing an objective or entering a new area.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Group Death affects every Event Point with the matching Colour+Group, not just enemies. Make sure the Colour+Group combination is used only by the Event Points you intend to kill.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Group Death Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Mission-Start Dormant State</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> with <Bold>Active</Bold> (or <Bold>Active Die</Bold>) when a group
+        should be dead from the very beginning of the mission. This is the most common Group Death
+        pattern, typically paired with a Group Life that brings the group alive later.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Group Death <Bold>25</Bold> targets <Bold>Purple/A</Bold> and
+        uses trigger <Bold>None</Bold> with <Bold>Active</Bold>. It immediately makes all Purple/A
+        Event Points dead when the mission starts. This keeps a set of enemies dormant until Group
+        Life <Bold>24</Bold> (also Purple/A) brings them alive via a <Bold>Dependency</Bold>
+        trigger.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Group Death</Bold> Event Point with the target Colour+Group. Set
+        <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to <Bold>Active</Bold>
+        (or <Bold>Active Die</Bold>). This fires at mission load and makes the group dormant. Then
+        create a <Bold>Group Life</Bold> with the same Colour+Group and a <Bold>Dependency</Bold>
+        trigger to bring them alive when needed.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Active Die For Cleanup</Paragraph>
+    <Paragraph>
+        Use <Bold>Active Die</Bold> instead of <Bold>Active</Bold> when the Group Death itself
+        should fire once and then become inactive. This is common at mission start when the Event
+        Point only needs to set the initial dead state.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Group Death <Bold>73</Bold> targets <Bold>Purple/A</Bold>
+        and uses trigger <Bold>None</Bold> with listening mode <Bold>Active Die</Bold>. It makes
+        all Purple/A Event Points dead at mission start, then the Event Point itself becomes
+        inactive and no longer processes.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use <Bold>Active Die</Bold> instead of <Bold>Active</Bold> when the Group Death only needs
+        to fire once. This is slightly cleaner than Active because the Event Point stops processing
+        after it has done its job, but both work for mission-start setup.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Scripted Group Kill</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when a group should be forcibly killed at a specific mission
+        moment, such as after the player completes an objective or enters a new phase.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Group Death <Bold>71</Bold> targets
+        <Bold>Terracotta/O</Bold> and uses <Bold>Dependency</Bold> on Event Point <Bold>65</Bold>
+        with <Bold>Active</Bold>. When Event Point <Bold>65</Bold> fires, all Terracotta/O Event
+        Points are killed.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the
+        Event Point that should cause the group kill. Use listening mode <Bold>Active</Bold>. This
+        is less common than the mission-start dormant pattern, but useful for scripted cleanup or
+        forced group removal.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Multiple Groups With Independent Lifecycles</Paragraph>
+    <Paragraph>
+        Use different Colour+Group combinations when a mission has several independent enemy waves
+        that each need their own dormant/alive lifecycle.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Group Death <Bold>71</Bold> targets
+        <Bold>Terracotta/O</Bold> while Group Death <Bold>73</Bold> targets <Bold>Purple/A</Bold>.
+        Each colour+group represents a separate enemy wave with its own activation and deactivation
+        logic.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Assign each independent enemy wave to its own Colour+Group. Create a Group Death (and
+        usually a Group Life) for each combination. This keeps each wave's lifecycle independent
+        and prevents accidental cross-activation or cross-deactivation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Group Death Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Event Points that should be deactivated together as a group.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set all of those Event Points to the same <Bold>Colour</Bold> and <Bold>Group</Bold> letter combination.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Group Death</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Group Death's <Bold>Colour</Bold> and <Bold>Group</Bold> to match the target set.</Paragraph></ListItem>
+        <ListItem><Paragraph>For mission-start dormant state, set <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to <Bold>Active</Bold> or <Bold>Active Die</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted group kill, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that should kill the group.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the group should come alive later, add a <Bold>Group Life</Bold> Event Point with the same Colour+Group and a <Bold>Dependency</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the mission and confirm the group is dead at the intended moment and that the correct Event Points are affected.</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify that no unintended Event Points share the same Colour+Group, which would cause them to die along with the intended group.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The Group Death's Colour+Group matches the target Event Points exactly, the trigger fires only at the correct mission moment, and no unintended Event Points share that Colour+Group combination.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

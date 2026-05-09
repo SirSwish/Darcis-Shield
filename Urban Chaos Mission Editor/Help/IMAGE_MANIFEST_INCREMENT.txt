@@ -1,0 +1,15 @@
+Mission Editor Help Image Manifest - Increment
+============================================
+
+Place these screenshots under:
+Help/Images/
+
+IncrementEventPoint.xaml
+------------------------
+mission_increment_overview.png
+mission_increment_add_type.png
+mission_increment_common_properties.png
+mission_increment_properties.png
+mission_increment_counter_trigger.png
+mission_increment_trigger_settings.png
+mission_increment_two_enemy_example.png

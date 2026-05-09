@@ -1,0 +1,17 @@
+Mission Editor Help Image Manifest - Activate Prim
+================================================
+
+Place these screenshots under:
+Help/Images/
+
+ActivatePrimEventPoint.xaml
+---------------------------
+mission_activate_prim_overview.png
+mission_activate_prim_add_type.png
+mission_activate_prim_common_properties.png
+mission_activate_prim_position_near_gate.png
+mission_activate_prim_type_dropdown.png
+mission_activate_prim_gate_switch_setup.png
+mission_activate_prim_simple_waypoint_switch.png
+mission_activate_prim_dependency_settings.png
+mission_activate_prim_electric_fence.png

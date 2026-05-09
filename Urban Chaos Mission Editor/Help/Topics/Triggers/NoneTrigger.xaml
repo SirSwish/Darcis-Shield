@@ -1,0 +1,219 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        None Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point becomes active immediately when the mission starts. No trigger condition is required. This is the most common trigger type, used by 61% of all Event Points (9,983 instances across retail missions).
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What None Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>None</Bold> means the Event Point has no trigger condition and becomes active the instant the
+        mission starts. This is the default, unconditional activation used for mission setup, ambient NPCs,
+        player spawn, placed vehicles, and any Event Point that should be present from the beginning. Nearly
+        two-thirds of all Event Points in retail missions use <Bold>None</Bold> trigger.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Event Points with <Bold>None</Bold> trigger are typically paired with <Bold>Active</Bold> listening
+        mode, making them active at mission start and keeping them active for the rest of the mission. This
+        is the standard pattern for mission initialization and persistent world state.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use None trigger for Event Points that should be active from the moment the mission starts. This includes player spawn, ambient NPCs, placed vehicles, initial objectives, and any setup logic.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use None Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> trigger when the Event Point should become active at mission start without
+        any trigger condition. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Player spawn</Bold> - The player character starts at a specific location</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Ambient NPCs</Bold> - Civilians, guards, or other characters present from mission start</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Placed vehicles</Bold> - Cars, vans, or other vehicles in the world from the beginning</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Initial objectives</Bold> - The first objective message or marker shown at mission start</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission setup</Bold> - Any initialization logic that should run immediately</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Persistent world state</Bold> - Objects, lights, or other elements that exist from the start</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>None</Bold> trigger requires no additional fields. There are no trigger-specific parameters
+        because the Event Point fires unconditionally at mission start.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the mission loads, all Event Points with <Bold>None</Bold> trigger become active immediately.
+        The Event Point fires on the first game frame and typically stays active (if using <Bold>Active</Bold>
+        listening mode) for the rest of the mission.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Create NPC Event Point with <Bold>None</Bold> trigger and <Bold>Active</Bold>
+        listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission loads</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active on the first frame</Paragraph></ListItem>
+        <ListItem><Paragraph>NPC spawns at the specified location</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point stays active for the rest of the mission</Paragraph></ListItem>
+        <ListItem><Paragraph>Other Event Points can depend on this Event Point as a marker that the NPC was spawned</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Player Start Position
+    </Paragraph>
+    <Paragraph>
+        A Player Spawn Event Point with <Bold>None</Bold> trigger and <Bold>Active</Bold> listening mode
+        places the player character at a specific location when the mission starts. This is present in nearly
+        every mission and is typically the first Event Point in the mission.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Ambient NPC Population
+    </Paragraph>
+    <Paragraph>
+        Multiple Create NPC Event Points with <Bold>None</Bold> trigger and <Bold>Active</Bold> listening
+        mode spawn civilians, guards, or other characters at mission start. These NPCs populate the world
+        and create the initial atmosphere. This is the most common use of <Bold>None</Bold> trigger in retail
+        missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Initial Objective Message
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>None</Bold> trigger and <Bold>Active</Bold> listening mode shows
+        the first objective or mission briefing when the mission starts. This tells the player what to do
+        and stays visible until the objective is completed.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Placed Vehicles
+    </Paragraph>
+    <Paragraph>
+        A Create Vehicle Event Point with <Bold>None</Bold> trigger and <Bold>Active</Bold> listening mode
+        places a car, van, or other vehicle at a specific location at mission start. The vehicle is immediately
+        available for the player to use.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Dependency Source for First Objective Chain
+    </Paragraph>
+    <Paragraph>
+        A marker Event Point with <Bold>None</Bold> trigger and <Bold>Active</Bold> listening mode becomes
+        active at mission start. Later Event Points use <Bold>Dependency</Bold> trigger on this marker to
+        begin the first objective chain. This is a common pattern for structuring mission logic.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>None</Bold> trigger is used in 9,983 Event Points across retail missions — 61% of all Event
+        Points. Nearly every mission begins with multiple <Bold>None</Bold> trigger Event Points for player
+        spawn, ambient NPCs, and initial setup. The first 20-50 Event Points in a typical retail mission
+        use <Bold>None</Bold> trigger.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions typically place all None trigger Event Points at the beginning of the event list, followed by conditional Event Points (Dependency, Radius, etc.). This keeps mission setup organized and easy to understand.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>None</Bold> fires at mission start with no condition. <Bold>Dependency</Bold> fires when another
+        Event Point becomes active. Use <Bold>None</Bold> for mission initialization. Use <Bold>Dependency</Bold>
+        for sequenced mission chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>None</Bold> fires at mission start. <Bold>Radius</Bold> fires when the player enters a circular
+        area. Use <Bold>None</Bold> for events that should happen immediately. Use <Bold>Radius</Bold> for
+        location-based triggers.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None vs Cuboid</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>None</Bold> fires at mission start. <Bold>Cuboid</Bold> fires when the player enters a rectangular
+        box area. Use <Bold>None</Bold> for unconditional events. Use <Bold>Cuboid</Bold> for precise area
+        triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic None Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify Event Points that should be active from mission start (player spawn, NPCs, vehicles, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point and configure its type and parameters</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>None</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode to <Bold>Active</Bold> (most common) or another mode if needed</Paragraph></ListItem>
+        <ListItem><Paragraph>Place <Bold>None</Bold> trigger Event Points at the beginning of the event list for organization</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that Event Points become active immediately when the mission starts</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify that dependent Event Points can use these as dependency sources</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> None trigger with Active listening mode is the default pattern for mission setup. Group all None trigger Event Points together at the start of your event list to keep your mission organized and readable.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

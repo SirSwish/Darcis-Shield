@@ -1,0 +1,293 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Boolean Or Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point combines two conditions and fires when either one becomes true. Used by 121 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Boolean Or Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Boolean Or</Bold> creates logical OR combinations of two Event Points. This trigger fires when
+        either of the referenced Event Points becomes active. It's used for branching mission paths, alternative
+        objectives, and fail-safe conditions. For example: "progress to next phase when the player kills the
+        target OR arrests the target" or "trigger alarm when player is seen by camera OR enters restricted area."
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger enables flexible mission design where multiple paths lead to the same outcome. Instead
+        of requiring both Event A and Event B like Boolean And, Boolean Or fires when either Event A OR Event B
+        becomes active (or both). This is essential for giving players choices, creating redundant triggers,
+        and handling multiple win/lose conditions.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Boolean Or when this Event Point should fire when either of two other Event Points becomes active. Set EP Ref to the first condition and EP Ref Bool to the second condition.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Boolean Or Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean Or</Bold> trigger when the Event Point should fire when either of two conditions
+        becomes true. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Alternative objectives</Bold> - Win by killing the target OR arresting the target</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Branching mission paths</Bold> - Progress when player completes path A OR path B</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Multiple alarm triggers</Bold> - Alert enemies when seen by camera OR entered restricted area</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Redundant fail conditions</Bold> - Lose if hostage dies OR time runs out</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Multiple entry points</Bold> - Event fires when player enters from door A OR door B</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Choice-based progression</Bold> - Player can choose which objective to complete first</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (First Condition)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the first Event Point to check. This is one of the two conditions that can trigger
+        the Boolean Or. The EP Ref field uses zero-based indexing (0 = first Event Point, 1 = second Event
+        Point, etc.).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref Bool (Second Condition)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the second Event Point to check. This is the other condition that can trigger the
+        Boolean Or. When either EP Ref or EP Ref Bool Event Point becomes active, the trigger condition
+        is met. The EP Ref Bool field also uses zero-based indexing.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> Unlike Boolean And, Boolean Or doesn't strictly require both Event Points
+        to use Active listening mode. However, using Active is still recommended for predictable behavior.
+        If one source uses Active Die and fires first, the Boolean Or will fire before the second condition
+        is ever checked.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if either referenced Event Point is active. When either EP Ref
+        or EP Ref Bool Event Point becomes active, the trigger condition is met. Whether this Event Point
+        fires immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when either condition is true, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while at least one condition is true</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when either condition becomes true, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when either condition is true, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Boolean Or</Bold> trigger (EP Ref = 5, EP Ref Bool = 12)
+        and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point 5 is a Killed trigger for "kill target" path</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point 12 is a Person Arrested trigger for "arrest target" path</Paragraph></ListItem>
+        <ListItem><Paragraph>This Message Event Point waits for either condition to be true</Paragraph></ListItem>
+        <ListItem><Paragraph>Player chooses to arrest the target instead of killing</Paragraph></ListItem>
+        <ListItem><Paragraph>Player arrests the target, Event Point 12 becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Boolean Or trigger fires (one condition is true)</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "Target neutralized" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Mission progresses regardless of which path the player chose</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Alternative Objective Completion
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Killed trigger on a target (Active). Event Point B is a Person Arrested trigger
+        on the same target (Active). Event Point C is a Message "Objective complete" with Boolean Or trigger
+        (EP Ref = A, EP Ref Bool = B) and Active listening mode. The player can choose to kill or arrest,
+        and the mission progresses either way. This is the most common use of Boolean Or in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Multiple Alarm Triggers
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Security Camera trigger (Active). Event Point B is a Cuboid trigger marking
+        restricted area entry (Active). Event Point C is a Group Life (enemy reinforcement spawn) with
+        Boolean Or trigger (EP Ref = A, EP Ref Bool = B) and Active listening mode. Reinforcements spawn
+        if the player is seen by camera OR enters the restricted area. This creates multiple alarm conditions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Branching Mission Paths
+    </Paragraph>
+    <Paragraph>
+        Event Point A tracks completion of "stealthy path" (Active). Event Point B tracks completion of
+        "aggressive path" (Active). Event Point C is the next mission phase with Boolean Or trigger
+        (EP Ref = A, EP Ref Bool = B) and Active listening mode. The player can complete the mission
+        stealthily or aggressively, and the next phase unlocks either way.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Multiple Entry Point Detection
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Radius trigger at the front entrance (Active). Event Point B is a Radius trigger
+        at the back entrance (Active). Event Point C is a Group Life (enemy spawn) with Boolean Or trigger
+        (EP Ref = A, EP Ref Bool = B) and Active listening mode. Enemies spawn when the player enters from
+        either entrance, creating consistent encounter design regardless of approach.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Redundant Fail Conditions
+    </Paragraph>
+    <Paragraph>
+        Event Point A detects hostage death (Killed trigger, Active). Event Point B is a Countdown timer
+        (Active). Event Point C is a Lose Event Point with Boolean Or trigger (EP Ref = A, EP Ref Bool = B)
+        and Active listening mode. The mission fails if the hostage dies OR time runs out. This creates
+        multiple failure conditions.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Boolean Or</Bold> trigger appears in 121 Event Points across retail missions. It's commonly
+        used for alternative objectives, branching paths, and multiple alarm conditions. Retail missions use
+        Boolean Or about one-third as often as Boolean And (359 instances), but it's essential for player
+        choice and flexible mission design.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use Boolean Or for kill-or-arrest objectives: kill_target → Active, arrest_target → Active, objective_complete → Boolean Or(kill_target, arrest_target). This gives players tactical choice while maintaining mission flow.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Fires on first condition:</Run>
+                <Run> Boolean Or fires as soon as either condition becomes true. It doesn't wait for both. If you need both conditions, use Boolean And instead. Test both paths to ensure the Boolean Or fires correctly regardless of which condition triggers first.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Can't distinguish which fired:</Run>
+                <Run> Boolean Or triggers when either condition is true, but it doesn't tell you which one. If you need to know which path the player chose, use separate Event Points with Dependency on each condition instead of Boolean Or.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Mutually exclusive conditions:</Run>
+                <Run> Boolean Or works well when the conditions are mutually exclusive (kill OR arrest). Be careful when conditions can both be true — the Boolean Or will fire when the first one triggers, which may be earlier than intended.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean Or vs Boolean And</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean Or</Bold> fires when either condition is true. <Bold>Boolean And</Bold> fires when
+        both conditions are true. Use <Bold>Boolean Or</Bold> for "complete either objective" or "multiple
+        paths to same outcome" logic. Use <Bold>Boolean And</Bold> for "complete both objectives" logic.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean Or vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean Or</Bold> requires one of two Event Points to be active. <Bold>Dependency</Bold>
+        requires one specific Event Point to be active. Use <Bold>Boolean Or</Bold> for alternative conditions.
+        Use <Bold>Dependency</Bold> for simple linear chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean Or vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean Or</Bold> waits for one of two conditions. <Bold>None</Bold> fires at mission start.
+        Use <Bold>Boolean Or</Bold> for branching conditional logic. Use <Bold>None</Bold> for immediate,
+        unconditional activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Boolean Or Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the two alternative conditions (either can be true)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the first condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the first condition Event Point uses Active listening mode (recommended)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the first condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the second condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the second condition Event Point uses Active listening mode (recommended)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the second condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when either condition is true</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Boolean Or</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the first condition Event Point index</Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref Bool to the second condition Event Point index</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent state changes)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by triggering only the first condition</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Boolean Or Event Point fires when first condition becomes true</Paragraph></ListItem>
+        <ListItem><Paragraph>Reset and test the second condition path</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Boolean Or Event Point fires when second condition becomes true</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point does NOT fire until at least one condition is met</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> When using Boolean Or for alternative objectives, test both paths thoroughly. Make sure the mission progresses correctly regardless of which condition fires first. Consider creating path-specific Event Points with Dependency on the individual conditions if you need different outcomes for each path.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

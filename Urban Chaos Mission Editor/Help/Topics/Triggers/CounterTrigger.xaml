@@ -1,0 +1,296 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Counter Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when a mission counter reaches or exceeds a threshold value. Used with Increment Event Points to track progress toward numeric goals.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Counter Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Counter</Bold> checks if a mission counter variable has reached a specific threshold. Counters
+        are incremented by Increment Event Points and can be reset by Reset Counter Event Points. This trigger
+        is essential for "collect X items," "eliminate X enemies," or "complete X objectives" style missions.
+        When the counter reaches the threshold value, the trigger fires.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The counter system is Urban Chaos's way of tracking numeric progress. Each mission has multiple counter
+        variables (identified by counter ID) that can be incremented throughout gameplay. Counter triggers
+        watch these variables and fire when the target value is reached. This enables flexible objective
+        tracking beyond simple "kill this one target" missions.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Counter when this Event Point should fire after a counter variable reaches a threshold. Set EP Ref to the counter ID and Radius to the threshold value. Combine with Increment Event Points to track progress.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Counter Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Counter</Bold> trigger when the Event Point should fire after reaching a numeric goal.
+        This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Elimination quotas</Bold> - "Eliminate 10 enemies to proceed"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Collection objectives</Bold> - "Collect 5 evidence items"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Multi-step objectives</Bold> - "Complete 3 of 4 optional objectives"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Progressive difficulty</Bold> - Spawn reinforcements after killing a certain number of enemies</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Score-based progression</Bold> - Unlock next phase when score reaches threshold</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Partial completion</Bold> - "You've rescued 3 of 5 hostages"</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Counter ID)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The ID of the counter variable to watch. This is a mission-wide counter that can be incremented by
+        Increment Event Points and reset by Reset Counter Event Points. The counter ID should match the
+        counter ID used in the Increment Event Points that increase this counter.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> Counter IDs are arbitrary but should be consistent. If you use counter ID 5
+        for "enemies killed," all Increment Event Points that track enemy kills should use counter ID 5, and
+        the Counter trigger should also use counter ID 5.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius (Threshold Value)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The threshold value the counter must reach for the trigger to fire. When the counter (identified by
+        EP Ref) reaches or exceeds this value, the trigger condition is met. For example, if Radius = 10,
+        the trigger fires when the counter reaches 10.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Note:</Bold> Despite the field name "Radius," this is actually the threshold value for Counter
+        triggers. The field is context-dependent — it means radius for Radius triggers but threshold for
+        Counter triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if the counter variable (EP Ref) is greater than or equal to
+        the threshold (Radius). When the counter reaches the threshold, the trigger condition is met. Whether
+        this Event Point fires immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when counter reaches threshold, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while counter is at or above threshold (deactivates if counter is reset)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when counter reaches threshold, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when counter reaches threshold, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Counter</Bold> trigger (EP Ref = 5 [counter ID],
+        Radius = 10 [threshold]) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, counter ID 5 is initialized to 0</Paragraph></ListItem>
+        <ListItem><Paragraph>This Message Event Point waits for counter 5 to reach 10</Paragraph></ListItem>
+        <ListItem><Paragraph>Player kills an enemy, Increment Event Point adds 1 to counter 5 (counter = 1)</Paragraph></ListItem>
+        <ListItem><Paragraph>Counter trigger still waits (1 &lt; 10)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player continues killing enemies, counter increments each time (2, 3, 4...)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player kills the 10th enemy, counter 5 reaches 10</Paragraph></ListItem>
+        <ListItem><Paragraph>Counter trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "All enemies eliminated" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active and stays active (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Elimination Quota
+    </Paragraph>
+    <Paragraph>
+        Multiple Group Life Event Points spawn enemies. Each has an Increment Event Point with Person Killed
+        trigger that increments counter ID 5 when the enemy dies (Active Die listening mode). A Message Event
+        Point with Counter trigger (EP Ref = 5, Radius = 10) and Active listening mode shows "All targets
+        eliminated" when 10 enemies are killed. This is the most common counter pattern in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Collection Objective
+    </Paragraph>
+    <Paragraph>
+        Multiple Item Event Points place evidence in the world. Each has an Increment Event Point with Item
+        Held trigger that increments counter ID 3 when the player picks up the item (Active Die listening mode).
+        A Counter trigger Event Point (EP Ref = 3, Radius = 5) with Active listening mode fires when all 5
+        evidence items are collected, unlocking the next objective.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Progressive Messages
+    </Paragraph>
+    <Paragraph>
+        Multiple Counter triggers watch the same counter ID but with different thresholds. Counter trigger
+        at threshold 5 shows "Halfway there" (Active Die). Counter trigger at threshold 10 shows "Almost done"
+        (Active Die). Counter trigger at threshold 15 shows "Objective complete" (Active). This creates
+        progress feedback as the counter increases.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Progressive Difficulty
+    </Paragraph>
+    <Paragraph>
+        An Increment Event Point increments counter ID 8 each time the player kills an enemy (Active Die).
+        A Counter trigger (EP Ref = 8, Radius = 10) with Active listening mode spawns reinforcements when
+        10 enemies are killed. This creates escalating difficulty based on player performance.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Optional Objectives
+    </Paragraph>
+    <Paragraph>
+        Four optional objectives each have an Increment Event Point that increments counter ID 12 when
+        completed (Active Die). A Counter trigger (EP Ref = 12, Radius = 3) with Active listening mode
+        unlocks a bonus when 3 of 4 optional objectives are complete. This creates flexible completion
+        requirements.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Counter</Bold> trigger appears in retail missions for elimination quotas and collection objectives.
+        Retail missions commonly pair Counter triggers with Killed triggers and Increment Event Points to
+        create "kill X enemies" objectives. The pattern is: enemy dies → Increment counter → Counter trigger
+        at threshold → objective complete.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use counter ID 0 for primary kill objectives and higher IDs for optional counters. Always use Active Die listening mode on Increment Event Points to avoid incrementing the counter multiple times.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Counter ID must match:</Run>
+                <Run> The Counter trigger's EP Ref (counter ID) must match the counter ID used in the Increment Event Points. If you use counter ID 5 in the Counter trigger but counter ID 3 in the Increment, the counter will never reach the threshold.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Use Active Die on Increment:</Run>
+                <Run> Increment Event Points should almost always use Active Die listening mode. If you use Active, the Increment will fire every frame while its trigger condition is true, incrementing the counter hundreds of times per second. Active Die fires once and stops.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Counter starts at zero:</Run>
+                <Run> Mission counters are initialized to 0 at mission start (unless set otherwise). If you set Radius = 0, the Counter trigger will fire immediately at mission start. Use Radius = 1 or higher for meaningful thresholds.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Counter</Bold> fires when a numeric threshold is reached. <Bold>Dependency</Bold> fires when
+        an Event Point becomes active. Use <Bold>Counter</Bold> for "kill 10 enemies" style objectives. Use
+        <Bold>Dependency</Bold> for simple "when this happens, do that" chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter vs Killed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Counter</Bold> tracks multiple kills toward a threshold. <Bold>Killed</Bold> fires when one
+        specific NPC dies. Use <Bold>Counter</Bold> (with Increment on Killed) for "eliminate X enemies."
+        Use <Bold>Killed</Bold> for "eliminate this specific target."
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter vs Group Dead</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Counter</Bold> fires at a specific numeric threshold (can be less than total). <Bold>Group Dead</Bold>
+        fires when all members of a Colour+Group are dead (always 100%). Use <Bold>Counter</Bold> for partial
+        quotas ("kill 10 of 15 enemies"). Use <Bold>Group Dead</Bold> for total elimination ("all enemies dead").
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Counter Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what you're counting (enemies killed, items collected, objectives completed, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a counter ID (0-255, must be unique per counter purpose in the mission)</Paragraph></ListItem>
+        <ListItem><Paragraph>Determine the threshold value (how many increments before the Counter trigger fires)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create Increment Event Points for each thing to count</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Increment Event Point's trigger to detect the countable event (Killed, Item Held, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Increment Event Point's counter ID to the chosen counter ID</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Increment Event Point's listening mode to <Bold>Active Die</Bold> (critical!)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when the threshold is reached</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Counter</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the counter ID (must match Increment Event Points)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to the threshold value</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent objectives)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by triggering one countable event</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Counter trigger does NOT fire (counter below threshold)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger additional countable events until reaching the threshold</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Counter trigger fires exactly when the threshold is reached</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Document your counter IDs in comments or in a reference file. For example: "Counter ID 0 = enemies killed, Counter ID 1 = hostages rescued, Counter ID 2 = evidence collected." This makes counter-based missions much easier to maintain and debug.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

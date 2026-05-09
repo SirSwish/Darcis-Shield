@@ -1,0 +1,232 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Nav Beacon Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Create an on-screen navigation target that guides the player toward a mission person, destination, safe zone, finish point, drop point, or other current objective.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Nav Beacon Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Nav Beacon</Bold> Event Point gives the player directional guidance. It is used when
+        the mission needs to point the player toward someone or somewhere important, such as a
+        named character, a safe zone, a finish point, a bomb drop point, or the next objective area.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Nav Beacons are guidance objects, not objective logic by themselves. They should usually be
+        paired with the Event Points that actually define the mission state: Messages, Conversations,
+        Create NPC/Vehicle/Item points, counters, win/lose conditions, or trigger chains.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Nav Beacon when the player knows what to do but needs help finding where to go. Use Message or Conversation to explain the objective, then use Nav Beacon to point at it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Nav Beacon uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        keeping the beacon grouped with the objective chain it belongs to.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The position is the beacon's world target when it is not attached to a person. Place it at
+        the destination the player should travel toward: the safe zone, finish point, door, vehicle,
+        drop point, objective item, or area entrance.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the beacon becomes active. A beacon with <Bold>None</Bold> is
+        available from the start. A beacon with <Bold>Dependency</Bold> appears after another Event
+        Point has fired. A beacon with <Bold>Conversation Over</Bold> appears after dialogue has
+        finished.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Nav Beacon-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Nav Beacon has a small set of type-specific settings. These control the text shown by the
+        beacon and whether the beacon is attached to a person Event Point.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Beacon Text</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The beacon text is the label shown to the player. Existing missions use short labels such as
+        <Italic>Beck</Italic>, <Italic>Johnson</Italic>, <Italic>Safe Zone.</Italic>,
+        <Italic>FINISH</Italic>, and <Italic>Bomb drop point 2</Italic>. Keep this text short,
+        because it is navigation UI rather than a full message line.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person EP</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person EP</Bold> stores the Event Point index of the person the beacon should attach
+        to. Use this when the beacon should track or point to a specific character, such as Beck,
+        Johnson, Baalrog, or another mission person. Use <Bold>0</Bold> when the beacon should point
+        at the Nav Beacon's own position instead of a person.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> If the target is a moving or mission-spawned person, set Person EP. If the target is a location, leave Person EP as 0 and place the beacon at the destination.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Nav Beacons
+    </Paragraph>
+    <Paragraph>
+        Nav Beacons are usually either active from the start or revealed by mission progress. The
+        most useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> - used when the beacon should be visible from the beginning of the mission or objective section.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - used when the beacon should appear after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Over</Bold> - used when dialogue introduces the next destination and the beacon should appear after the conversation.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Person In Vehicle</Bold> - used for vehicle or escort logic where the beacon depends on someone being in a vehicle.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cuboid / Killed</Bold> - used rarely for area-specific or target-state guidance.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run> A Nav Beacon should appear when that destination is relevant. If it appears too early, the player can be sent toward an objective before the mission has explained it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Nav Beacon Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Pointing To A Person</Paragraph>
+    <Paragraph>
+        Use Person EP when the player should find or follow a specific character. The beacon label
+        should usually be that character's name or role.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Nav Beacon <Bold>4</Bold> is labelled
+        <Italic>Beck</Italic> and is attached to Event Point <Bold>3</Bold>. It is triggered by a
+        dependency, so the beacon points to Beck only after the relevant earlier mission step.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create or identify the person Event Point first. Create the Nav Beacon, enter the person's
+        name as the Beacon Text, set <Bold>Person EP</Bold> to that person's Event Point index, and
+        trigger the beacon when finding that person becomes the current objective.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Pointing To A Destination</Paragraph>
+    <Paragraph>
+        Use Person EP <Bold>0</Bold> when the beacon should point to a fixed location. This is the
+        right setup for safe zones, finish points, gates, drop points, or other map destinations.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed examples</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Nav Beacon <Bold>200</Bold> is labelled
+        <Italic>Safe Zone.</Italic> and uses its own map position as the target. In
+        <Bold>Assault1.ucm</Bold>, Nav Beacon <Bold>52</Bold> is labelled
+        <Italic>FINISH</Italic> and is placed at the finish destination.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Leave <Bold>Person EP</Bold> as <Bold>0</Bold>, enter a short Beacon Text label, and place
+        the Nav Beacon at the exact destination the player should reach. If the destination is only
+        relevant later, trigger it by Dependency or Conversation Over.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Beacon After Dialogue</Paragraph>
+    <Paragraph>
+        Use <Bold>Conversation Over</Bold> when the mission explains the next objective in dialogue
+        and then shows the player where to go after the conversation finishes.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>AWOL1.ucm</Bold>, Nav Beacon <Bold>4</Bold> is labelled
+        <Italic>Beck</Italic>, attached to Event Point <Bold>3</Bold>, and triggered by
+        <Bold>Conversation Over</Bold> referencing Event Point <Bold>27</Bold>. This means the
+        beacon appears after the conversation has finished.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Beacon After Mission Progress</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when the beacon should appear after a previous step has been
+        completed. This is useful for staged objectives, rescue chains, and targets that should not
+        be revealed too early.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, a Nav Beacon labelled <Italic>Bomb drop point 2</Italic> is
+        triggered by a dependency. This pattern points the player to the next drop location only
+        after the mission has reached that stage.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Nav Beacon Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide whether the beacon points to a person or a fixed location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Nav Beacon</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enter short <Bold>Beacon Text</Bold>, such as a character name or objective label.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the beacon should follow a person, set <Bold>Person EP</Bold> to that person's Event Point index.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the beacon should point at a location, leave <Bold>Person EP</Bold> as <Bold>0</Bold> and place the beacon at the destination.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger that makes the beacon relevant: None, Dependency, Conversation Over, Person In Vehicle, or another mission-specific condition.</Paragraph></ListItem>
+        <ListItem><Paragraph>Pair the beacon with a Message or Conversation if the player also needs an explanation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the beacon appears only when the target is the current objective.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Beacon Text is short, Person EP is correct or zero, the beacon position is correct for fixed destinations, and the trigger matches the objective stage where the player should see it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -8,15 +8,11 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>UrbanChaosMissionEditor</RootNamespace>
 		<AssemblyName>UrbanChaosMissionEditor</AssemblyName>
-		<Version>1.21</Version>
+		<Version>1.22</Version>
 		<Authors>Darci's Shield Team</Authors>
 		<Description>Urban Chaos Mission Editor - UCM File Editor</Description>
 		<ApplicationIcon>Assets\Icons\app.ico</ApplicationIcon>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Views\Editors\SimpleWaypointEditorControl.xaml.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="Assets\Defaults\default.ucm" />
@@ -25,10 +21,6 @@
 
 	<ItemGroup>
 		<Content Include="Assets\Icons\app.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Views\Editors\SimpleWaypointEditorControl.xaml.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -49,8 +41,8 @@
 		<ProjectReference Include="..\UrbanChaosEditor.Shared\UrbanChaosEditor.Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Page Remove="Help\Topics\*.xaml" />
-		<Resource Include="Help\Topics\*.xaml" />
+		<Page Remove="Help\Topics\**\*.xaml" />
+		<Resource Include="Help\Topics\**\*.xaml" />
 	</ItemGroup>
 	
 

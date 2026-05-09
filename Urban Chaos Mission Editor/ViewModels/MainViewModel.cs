@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using UrbanChaosEditor.Shared.Constants;
 using UrbanChaosMissionEditor.Constants;
 using UrbanChaosMissionEditor.Infrastructure;
 using UrbanChaosMissionEditor.Models;
@@ -21,6 +24,7 @@ public class MainViewModel : BaseViewModel
     private Mission? _currentMission;
     private string? _currentFilePath;
     private EventPointViewModel? _selectedEventPoint;
+    private EventPointEditorViewModel? _currentEditorVm;
     private string _statusMessage = "Ready";
     private double _mapZoom = 1.0;
     private double _mapOffsetX = 0;
@@ -33,6 +37,8 @@ public class MainViewModel : BaseViewModel
     private bool _showGridLines = false;
     private bool _showBuildings = true;
     private bool _showPrimGraphics = true;
+    private bool _showRoofTiles = false;
+    private bool _showRoofAltitudes = false;
     private bool _showLights = false;
     private bool _showLightRanges = false;
     private bool _showEventPoints = true;
@@ -55,6 +61,12 @@ public class MainViewModel : BaseViewModel
     private string _searchText = string.Empty;
     private int _selectedColorFilter = -1;  // -1 = All colors
     private int _selectedGroupFilter = -1;  // -1 = All groups
+    private bool _filterByMapView;
+    // Visible 2D viewport in map-pixel space (0..8192). Pushed in by MapViewControl on scroll/zoom/resize.
+    private double _viewportPixelLeft;
+    private double _viewportPixelTop;
+    private double _viewportPixelRight = 8192;
+    private double _viewportPixelBottom = 8192;
 
     /// <summary>
     /// Callback to get current world position for placing new EventPoints.
@@ -190,6 +202,13 @@ public class MainViewModel : BaseViewModel
         _fileService = fileService;
         _dialogService = dialogService;
 
+        // Filtered, live view over EventPoints used by the EventPoint ListView. Filtered-out items
+        // are physically absent from the view, so the scrollbar extent reflects the visible count.
+        EventPointsView = new ListCollectionView(EventPoints)
+        {
+            Filter = obj => obj is EventPointViewModel ep && ep.IsVisible
+        };
+
         // Subscribe to service events
         ReadOnlyMapDataService.Instance.MapLoaded += (s, e) => OnPropertyChanged(nameof(IsMapLoaded));
         ReadOnlyMapDataService.Instance.MapCleared += (s, e) => OnPropertyChanged(nameof(IsMapLoaded));
@@ -221,9 +240,12 @@ public class MainViewModel : BaseViewModel
         ToggleCategoryCommand = new RelayCommand<CategoryFilterViewModel>(ExecuteToggleCategory);
         ShowAllCategoriesCommand = new RelayCommand(ExecuteShowAllCategories);
         HideAllCategoriesCommand = new RelayCommand(ExecuteHideAllCategories);
-        EditEventPointCommand = new RelayCommand(ExecuteEditEventPoint, () => SelectedEventPoint != null);
         AddEventPointCommand = new RelayCommand(ExecuteAddEventPoint, () => HasMission);
         DeleteEventPointCommand = new RelayCommand(ExecuteDeleteEventPoint, () => SelectedEventPoint != null);
+        RevertEventPointCommand = new RelayCommand(ExecuteRevertEventPoint, () => CurrentEditorVm != null);
+        SelectPositionOnMapCommand = new RelayCommand(ExecuteSelectPositionOnMap, () => CurrentEditorVm != null);
+        BumpYUpCommand = new RelayCommand(() => BumpY(+QuarterStoreyGameUnits), () => CurrentEditorVm != null);
+        BumpYDownCommand = new RelayCommand(() => BumpY(-QuarterStoreyGameUnits), () => CurrentEditorVm != null);
 
         CopyEventPointCommand = new RelayCommand(ExecuteCopyEventPoint, () => SelectedEventPoint != null);
         PasteEventPointCommand = new RelayCommand(ExecutePasteEventPoint, () => _clipboardEventPoint != null && HasMission);
@@ -240,6 +262,13 @@ public class MainViewModel : BaseViewModel
     // Collections
 
     public ObservableCollection<EventPointViewModel> EventPoints { get; } = new();
+
+    /// <summary>
+    /// Filtered live view of <see cref="EventPoints"/> for list binding. Items not passing
+    /// <see cref="EventPointViewModel.IsVisible"/> are removed from the view (rather than hidden),
+    /// so the ListView's scroll extent matches the filtered count.
+    /// </summary>
+    public ICollectionView EventPointsView { get; }
     public ObservableCollection<CategoryFilterViewModel> CategoryFilters { get; } = new();
     // Color filter options (for ComboBox)
     public ObservableCollection<ColorFilterOption> ColorFilterOptions { get; } = new();
@@ -279,9 +308,16 @@ public class MainViewModel : BaseViewModel
     public ICommand ToggleCategoryCommand { get; }
     public ICommand ShowAllCategoriesCommand { get; }
     public ICommand HideAllCategoriesCommand { get; }
-    public ICommand EditEventPointCommand { get; }
     public ICommand AddEventPointCommand { get; }
     public ICommand DeleteEventPointCommand { get; }
+    public ICommand RevertEventPointCommand { get; }
+    public ICommand SelectPositionOnMapCommand { get; }
+    public ICommand BumpYUpCommand { get; }
+    public ICommand BumpYDownCommand { get; }
+
+    // 1 storey = 256 game units (vertical); a quarter storey is 256/4 = 64.
+    // Y is edited in raw game units so this applies directly to WorldY.
+    private const int QuarterStoreyGameUnits = MissionFormatConstants.GameUnitsPerQuarterStorey;
     public ICommand CopyEventPointCommand { get; }
     public ICommand PasteEventPointCommand { get; }
     public ICommand ClearFiltersCommand { get; }
@@ -311,6 +347,18 @@ public class MainViewModel : BaseViewModel
     {
         get => _showPrimGraphics;
         set => SetProperty(ref _showPrimGraphics, value);
+    }
+
+    public bool ShowRoofTiles
+    {
+        get => _showRoofTiles;
+        set => SetProperty(ref _showRoofTiles, value);
+    }
+
+    public bool ShowRoofAltitudes
+    {
+        get => _showRoofAltitudes;
+        set => SetProperty(ref _showRoofAltitudes, value);
     }
 
     public bool ShowLights
@@ -387,6 +435,36 @@ public class MainViewModel : BaseViewModel
         }
     }
 
+    public bool FilterByMapView
+    {
+        get => _filterByMapView;
+        set
+        {
+            if (SetProperty(ref _filterByMapView, value))
+            {
+                ApplyFilters();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Updates the cached 2D viewport bounds in map-pixel space (0..8192).
+    /// Called by the View on scroll, zoom, or resize. Re-applies filters only
+    /// when the map-view filter is active.
+    /// </summary>
+    public void UpdateMapViewport(double pixelLeft, double pixelTop, double pixelRight, double pixelBottom)
+    {
+        _viewportPixelLeft = pixelLeft;
+        _viewportPixelTop = pixelTop;
+        _viewportPixelRight = pixelRight;
+        _viewportPixelBottom = pixelBottom;
+
+        if (_filterByMapView)
+        {
+            ApplyFilters();
+        }
+    }
+
     public bool IsMapLoaded => ReadOnlyMapDataService.Instance.IsLoaded;
     public bool IsLightsLoaded => ReadOnlyLightsDataService.Instance.IsLoaded;
 
@@ -450,10 +528,50 @@ public class MainViewModel : BaseViewModel
                 if (value != null)
                     value.IsSelected = true;
 
+                BuildEditorVmFor(value);
+
                 OnPropertyChanged(nameof(HasSelection));
                 ((RelayCommand)CenterOnSelectedCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)RevertEventPointCommand).RaiseCanExecuteChanged();
             }
         }
+    }
+
+    /// <summary>
+    /// Live-edit ViewModel for the currently selected EventPoint. Bound to the
+    /// right-hand sidebar so changes persist as the user types.
+    /// </summary>
+    public EventPointEditorViewModel? CurrentEditorVm
+    {
+        get => _currentEditorVm;
+        private set => SetProperty(ref _currentEditorVm, value);
+    }
+
+    private void BuildEditorVmFor(EventPointViewModel? wrapper)
+    {
+        if (_currentEditorVm != null)
+            _currentEditorVm.PropertyChanged -= OnCurrentEditorVmPropertyChanged;
+
+        if (wrapper == null)
+        {
+            CurrentEditorVm = null;
+            return;
+        }
+
+        var vm = new EventPointEditorViewModel(wrapper.Model);
+        vm.PropertyChanged += OnCurrentEditorVmPropertyChanged;
+        CurrentEditorVm = vm;
+    }
+
+    private void OnCurrentEditorVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        // Any setter on the editor VM has touched the underlying model.
+        // Keep IsDirty, the list-row wrapper, and the map overlay in sync.
+        IsDirty = true;
+        _selectedEventPoint?.Refresh();
+
+        // Tell MapViewControl to redraw — it listens for SelectedEventPoint changes.
+        OnPropertyChanged(nameof(SelectedEventPoint));
     }
 
     public string StatusMessage
@@ -564,6 +682,7 @@ public class MainViewModel : BaseViewModel
         SearchText = string.Empty;
         SelectedColorFilter = -1;
         SelectedGroupFilter = -1;
+        FilterByMapView = false;
 
         // Enable all category filters
         foreach (var filter in CategoryFilters)
@@ -609,9 +728,21 @@ public class MainViewModel : BaseViewModel
                     visible = false;
             }
 
+            // Map view filter — only show EPs whose pixel position is in the current 2D viewport
+            if (visible && _filterByMapView)
+            {
+                if (ep.PixelX < _viewportPixelLeft || ep.PixelX > _viewportPixelRight ||
+                    ep.PixelZ < _viewportPixelTop || ep.PixelZ > _viewportPixelBottom)
+                {
+                    visible = false;
+                }
+            }
+
             ep.IsVisible = visible;
         }
 
+        // Re-apply the filter on the list view so filtered items leave the scroll extent.
+        EventPointsView.Refresh();
         OnPropertyChanged(nameof(VisibleEventPoints));
     }
     private void ExecuteNewFile()
@@ -712,13 +843,23 @@ public class MainViewModel : BaseViewModel
         var filePath = _dialogService.ShowOpenFileDialog(
             "Open UCM Mission File",
             "UCM Files (*.ucm)|*.ucm|All Files (*.*)|*.*",
-            @"C:\Fallen\Levels"
+            ResolveInitialDirectory(EditorSettingsService.Instance.LastUcmDirectory, @"C:\Fallen\Levels")
         );
 
         if (filePath != null)
         {
             LoadMission(filePath);
         }
+    }
+
+    private static string? ResolveInitialDirectory(params string?[] candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            if (!string.IsNullOrWhiteSpace(candidate) && Directory.Exists(candidate))
+                return candidate;
+        }
+        return null;
     }
 
     private void ExecuteSaveFile()
@@ -751,7 +892,10 @@ public class MainViewModel : BaseViewModel
         var filePath = _dialogService.ShowSaveFileDialog(
             "Save UCM Mission File",
             "UCM Files (*.ucm)|*.ucm|All Files (*.*)|*.*",
-            _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : @"C:\Fallen\Levels",
+            ResolveInitialDirectory(
+                _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : null,
+                EditorSettingsService.Instance.LastUcmDirectory,
+                @"C:\Fallen\Levels"),
             _currentFilePath != null ? Path.GetFileName(_currentFilePath) : "mission.ucm"
         );
 
@@ -763,6 +907,10 @@ public class MainViewModel : BaseViewModel
                 CurrentFilePath = filePath;
                 IsDirty = false;
                 StatusMessage = $"Saved as {Path.GetFileName(filePath)}";
+
+                var savedDir = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(savedDir))
+                    EditorSettingsService.Instance.LastUcmDirectory = savedDir;
             }
             catch (Exception ex)
             {
@@ -834,7 +982,9 @@ public class MainViewModel : BaseViewModel
         var filePath = _dialogService.ShowOpenFileDialog(
             "Open Map File",
             "IAM Map Files (*.iam)|*.iam|All Files (*.*)|*.*",
-            _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : null
+            ResolveInitialDirectory(
+                EditorSettingsService.Instance.LastMapDirectory,
+                _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : null)
         );
 
         if (filePath != null)
@@ -848,7 +998,9 @@ public class MainViewModel : BaseViewModel
         var filePath = _dialogService.ShowOpenFileDialog(
             "Open Lights File",
             "LGT Light Files (*.lgt)|*.lgt|All Files (*.*)|*.*",
-            _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : null
+            ResolveInitialDirectory(
+                EditorSettingsService.Instance.LastLightsDirectory,
+                _currentFilePath != null ? Path.GetDirectoryName(_currentFilePath) : null)
         );
 
         if (filePath != null)
@@ -938,105 +1090,38 @@ public class MainViewModel : BaseViewModel
             filter.IsEnabled = false;
     }
 
-    private void ExecuteEditEventPoint()
+    private void ExecuteRevertEventPoint()
     {
-        if (SelectedEventPoint == null) return;
+        var editor = CurrentEditorVm;
+        if (editor == null) return;
 
-        // Use a loop to handle position selection reopening
-        var editorVm = new EventPointEditorViewModel(SelectedEventPoint.Model);
+        editor.RevertChanges();
+        // RevertChanges fires PropertyChanged(string.Empty) which our handler
+        // catches: IsDirty=true, wrapper.Refresh(), map redraw — same as a normal edit.
+        StatusMessage = $"Reverted EventPoint {editor.Index} to selection-time state";
+    }
 
-        while (true)
+    private void ExecuteSelectPositionOnMap()
+    {
+        var editor = CurrentEditorVm;
+        if (editor == null) return;
+
+        var mainWindow = System.Windows.Application.Current.MainWindow as Views.MainWindow;
+        if (mainWindow?.MapViewControl == null) return;
+
+        mainWindow.MapViewControl.EnterPositionSelectionMode((worldX, worldZ) =>
         {
-            var window = new Views.EventPointEditorWindow
-            {
-                DataContext = editorVm,
-                Owner = System.Windows.Application.Current.MainWindow
-            };
+            editor.WorldX = worldX;
+            editor.WorldZ = worldZ;
+        });
+        StatusMessage = "Click on the map to set EventPoint position (Esc to cancel)";
+    }
 
-            var result = window.ShowDialog();
-
-            // Check if user wants to select position from map
-            if (window.NeedsPositionSelection)
-            {
-                // Get the MainWindow and MapViewControl
-                var mainWindow = System.Windows.Application.Current.MainWindow as Views.MainWindow;
-                if (mainWindow?.MapViewControl != null)
-                {
-                    var positionSelected = false;
-                    var selectedX = 0;
-                    var selectedZ = 0;
-
-                    // Enter position selection mode
-                    mainWindow.MapViewControl.EnterPositionSelectionMode((worldX, worldZ) =>
-                    {
-                        selectedX = worldX;
-                        selectedZ = worldZ;
-                        positionSelected = true;
-                    });
-
-                    // Hook escape to cancel
-                    void OnKeyDown(object s, System.Windows.Input.KeyEventArgs e)
-                    {
-                        if (e.Key == System.Windows.Input.Key.Escape)
-                        {
-                            mainWindow.MapViewControl.ExitPositionSelectionMode();
-                            positionSelected = false;
-                            e.Handled = true;
-                        }
-                    }
-                    mainWindow.PreviewKeyDown += OnKeyDown;
-
-                    // Process events until position is selected or cancelled
-                    while (mainWindow.MapViewControl.IsInPositionSelectionMode)
-                    {
-                        // Process WPF message queue
-                        System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
-                            System.Windows.Threading.DispatcherPriority.Background,
-                            new Action(delegate { }));
-                        System.Threading.Thread.Sleep(10);
-                    }
-
-                    mainWindow.PreviewKeyDown -= OnKeyDown;
-
-                    // Update position if selected
-                    if (positionSelected)
-                    {
-                        editorVm.WorldX = selectedX;
-                        editorVm.WorldZ = selectedZ;
-                    }
-
-                    // Loop back to reopen dialog
-                    continue;
-                }
-            }
-
-            if (result == true)
-            {
-                // Changes were applied directly to the model
-                // Refresh the view
-                OnPropertyChanged(nameof(SelectedEventPoint));
-                StatusMessage = $"Updated EventPoint {SelectedEventPoint.Index}";
-
-                // Mark mission as modified
-                IsDirty = true;
-
-                // TODO: civilian variant padding disabled until UI editing is re-enabled
-                // var updatedModel = SelectedEventPoint.Model;
-                // if (updatedModel.WaypointType == Constants.WaypointType.CreateEnemies)
-                // {
-                //     int et = (updatedModel.Data[0] & 0xFFFF) - 1;
-                //     if (et == 0 || et == 1)
-                //         ApplyCivilianPadding(updatedModel.Index);
-                // }
-            }
-            else
-            {
-                // User cancelled - revert changes
-                editorVm.RevertChanges();
-            }
-
-            break; // Exit loop after handling OK/Cancel
-        }
+    private void BumpY(int deltaGameUnits)
+    {
+        var editor = CurrentEditorVm;
+        if (editor == null) return;
+        editor.WorldY = editor.WorldY + deltaGameUnits;
     }
 
     private void ExecuteAddEventPoint()
@@ -1636,6 +1721,10 @@ public class MainViewModel : BaseViewModel
             CurrentFilePath = filePath;
             IsDirty = false; // Fresh load, no changes yet
 
+            var ucmDir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(ucmDir))
+                EditorSettingsService.Instance.LastUcmDirectory = ucmDir;
+
             LoadEventPoints();
             UpdateCategoryCounts();
             ApplyFilters();
@@ -1762,6 +1851,10 @@ public class MainViewModel : BaseViewModel
             StatusMessage = $"Loading map: {Path.GetFileName(path)}...";
             await ReadOnlyMapDataService.Instance.LoadAsync(path);
 
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                EditorSettingsService.Instance.LastMapDirectory = dir;
+
             OnPropertyChanged(nameof(LoadedMapFileName));
             OnPropertyChanged(nameof(IsMapLoaded));
             StatusMessage = $"Loaded map: {Path.GetFileName(path)}";
@@ -1780,6 +1873,11 @@ public class MainViewModel : BaseViewModel
         {
             StatusMessage = $"Loading lights: {Path.GetFileName(path)}...";
             await ReadOnlyLightsDataService.Instance.LoadAsync(path);
+
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                EditorSettingsService.Instance.LastLightsDirectory = dir;
+
             OnPropertyChanged(nameof(LoadedLightsFileName));
             OnPropertyChanged(nameof(IsLightsLoaded));
             StatusMessage = $"Loaded lights: {Path.GetFileName(path)}";

@@ -1,0 +1,260 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Link Platform Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Configures a moving platform built into the level geometry, supplying its speed and movement flags.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Link Platform Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Link Platform</Bold> Event Point attaches movement settings to a platform that exists
+        as part of the level geometry. The Event Point itself is not the platform - it sits at the
+        platform's location and tells the engine how that platform should move when the mission runs.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The Event Point supplies two pieces of information through Data slots: a <Bold>speed</Bold>
+        value and a <Bold>flags</Bold> bitmask that controls axis locking, rotation locking, and
+        whether the platform behaves as a rocket. Without a Link Platform pointing at it, a platform
+        in the level will not have these movement parameters set.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Place a Link Platform on or at the platform you want to configure. Its position is what associates it with that piece of geometry. Speed and flags then describe how it moves.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Link Platform uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group are useful for
+        keeping a set of platforms that belong to the same sequence visually grouped, for example a
+        line of climbing platforms or a single rocket and its trigger chain.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position is how the engine identifies which platform this Event Point configures. The Event
+        Point should sit on the platform geometry, not somewhere abstract. If the Link Platform is
+        placed too far from the platform it intends to configure, the link can be missed entirely.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Y Altitude
+    </Paragraph>
+    <Paragraph>
+        Y altitude matters for the same reason as X and Z: the Link Platform is associated with a
+        specific piece of platform geometry by location. Retail Link Platforms use a wide range of
+        Y values, from low rooftops up to elevated launch positions, depending on where the platform
+        sits in the level.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Most retail Link Platforms use <Bold>None</Bold> with listening mode <Bold>Active</Bold>. The
+        Event Point exists only to configure the platform's parameters, not to fire a one-off action,
+        so it does not need an external trigger. The exception is rocket-style platforms, which use a
+        <Bold>Dependency</Bold> trigger so the rocket only launches when a specific mission Event Point
+        fires.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Link Platform-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Link Platform has two type-specific settings, both stored in the Event Point's Data array.
+        From <Bold>platformSetup.cpp</Bold>, <Bold>Data[0]</Bold> is the platform speed and
+        <Bold>Data[1]</Bold> is the flags bitmask.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Speed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Speed sets how quickly the platform moves. Retail values include <Bold>50</Bold>,
+        <Bold>60</Bold>, <Bold>70</Bold>, and <Bold>90</Bold>. Higher numbers move the platform
+        faster. There is no automatic clamp other than the integer Data slot itself, so test the
+        chosen speed in-game to confirm the platform is reachable and not too fast or slow for the
+        intended jump or climb.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Lock To Axis</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Lock to axis (<Bold>Data[1]</Bold> bit 0) constrains the platform to a single movement axis.
+        This is the most common flag in retail data and is set on the majority of moving platforms,
+        including standard climbing-platform sequences and rocket platforms.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Lock Rotation</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Lock rotation (<Bold>Data[1]</Bold> bit 1) prevents the platform from rotating during its
+        motion. It is not used by any retail mission, so any setup that turns it on should be tested
+        carefully against actual platform geometry.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Is A Rocket</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Is a rocket (<Bold>Data[1]</Bold> bit 2) marks the platform as a rocket. Retail rockets always
+        combine this with <Bold>Lock to axis</Bold>. Rocket platforms are typically driven by a
+        <Bold>Dependency</Bold> trigger so the launch only happens at the scripted mission moment.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Speed and flags configure how the platform moves. They do not place geometry. The platform itself must already exist in the level - the Link Platform only describes its motion.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Link Platform
+    </Paragraph>
+    <Paragraph>
+        Existing Link Platform usage falls into two clear patterns. Useful trigger setups are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - the standard pattern for static platform configuration. The Event Point exists only to provide the speed and flags for a platform that is always available.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - used when the platform should only become active after another Event Point has fired. This is the rocket-launch pattern.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Default to None/Active. Only switch to Dependency when there is a clear scripted moment that should start the platform's motion, such as a rocket launch sequence.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Link Platform Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Climbing Or Traversal Platform Sequence</Paragraph>
+    <Paragraph>
+        Use a series of Link Platforms with <Bold>Lock to axis</Bold> to configure a chain of moving
+        platforms the player traverses. Each platform gets its own Event Point at its position with
+        an appropriate speed.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Assassin1.ucm</Bold>, Link Platforms <Bold>2</Bold>, <Bold>4</Bold>, and
+        <Bold>5</Bold> are placed across the map with <Bold>Speed 70</Bold> and the
+        <Bold>Lock to axis</Bold> flag, while Link Platforms <Bold>6</Bold> and <Bold>7</Bold> use
+        <Bold>Speed 90</Bold>. Each uses trigger <Bold>None</Bold> with listening mode
+        <Bold>Active</Bold>, so they configure their respective platforms continuously rather than
+        firing once.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a Link Platform Event Point at the position of each moving platform piece. Set
+        <Bold>Speed</Bold> to a value that matches the desired traversal pace and enable
+        <Bold>Lock to axis</Bold>. Leave the trigger as <Bold>None</Bold> with <Bold>Active</Bold>.
+        Group all platforms in the same chain by colour and letter so the sequence is easy to find
+        and edit later.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Rocket Launch Sequence</Paragraph>
+    <Paragraph>
+        Use the <Bold>Is a rocket</Bold> flag together with <Bold>Lock to axis</Bold> when a platform
+        should behave as a rocket triggered by mission logic. Pair it with a <Bold>Dependency</Bold>
+        trigger pointing at the Event Point that signals the launch.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>snow2.ucm</Bold>, Link Platform <Bold>60</Bold> is configured with
+        <Bold>Speed 50</Bold> and the flags <Bold>Lock to axis</Bold> and <Bold>Is a rocket</Bold>. It
+        uses <Bold>Dependency</Bold> on Event Point <Bold>59</Bold> with listening mode
+        <Bold>Active</Bold>. Event Point <Bold>59</Bold> is the on-screen message
+        <Bold>"Missile launch sequence initiated!"</Bold>, so the rocket launches in sync with the
+        cue.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Link Platform on the rocket geometry. Set <Bold>Speed</Bold> to the desired launch
+        pace, enable <Bold>Lock to axis</Bold> and <Bold>Is a rocket</Bold>, then set
+        <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> with <Bold>EP Ref</Bold> set to the Event
+        Point that represents the launch cue.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Mixed Speeds Across A Single Group</Paragraph>
+    <Paragraph>
+        Speed does not have to be uniform across a sequence. Use different speeds when later
+        platforms in a climb or traversal should move faster or slower than earlier ones.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Assassin1.ucm</Bold>, the <Bold>B</Bold> group uses <Bold>Speed 70</Bold> while
+        the <Bold>C</Bold> group uses <Bold>Speed 90</Bold>. Each group's platforms share their own
+        speed value, which makes it easy to tune one segment of the climb without touching the rest.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Keep speed consistent within a single platform-segment group, then change it between groups
+        when the gameplay difficulty or rhythm should change. Letter groups make it obvious which
+        platforms belong together when reviewing the mission later.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Link Platform Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the platform geometry that should move and confirm it exists in the level.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Link Platform</Bold> Event Point at the platform's position, including its Y altitude.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Speed</Bold> to the desired movement value. <Bold>50-90</Bold> covers the retail range.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enable <Bold>Lock to axis</Bold> for any platform that should move along a single axis. This matches the most common retail setup.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enable <Bold>Is a rocket</Bold> only for rocket-style behaviour, and pair it with a <Bold>Dependency</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Leave <Bold>Lock rotation</Bold> off unless a specific platform needs it - no retail mission uses it.</Paragraph></ListItem>
+        <ListItem><Paragraph>For static platform configuration, leave the trigger as <Bold>None</Bold> with listening mode <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For triggered platforms, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that should start the motion.</Paragraph></ListItem>
+        <ListItem><Paragraph>Group related Link Platforms by colour and letter so each platform sequence is easy to identify in the editor.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game and confirm the platform reaches its endpoints, the speed is appropriate, and the player can complete the intended traversal or witness the intended launch.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The Link Platform is placed at the platform's position, Speed and flags match the intended motion, the trigger is None for static platforms or Dependency for scripted launches, and the resulting movement has been tested in-game.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

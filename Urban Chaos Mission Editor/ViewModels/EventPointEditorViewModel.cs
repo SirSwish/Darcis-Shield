@@ -184,28 +184,87 @@ public class EventPointEditorViewModel : BaseViewModel
     }
 
     // Position
-    // The editor shows game world coordinates (same as hover display)
-    // These are stored directly in the model
+    // The file stores horizontal coordinates in native engine units
+    // (32768-wide map, 256 per tile). The editor surfaces X/Z in map pixels
+    // (8192-wide map, 64 per tile) because that matches the 2D viewport.
 
     public int WorldX
     {
         get => _model.X;
-        set { _model.X = value; OnPropertyChanged(); OnPropertyChanged(nameof(GridPositionText)); }
+        set
+        {
+            _model.X = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PixelX));
+            OnPropertyChanged(nameof(GridPositionText));
+        }
     }
 
+    public int PixelX
+    {
+        get => (int)Math.Round(_model.PixelX);
+        set
+        {
+            _model.X = PixelToWorld(value);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(WorldX));
+            OnPropertyChanged(nameof(GridPositionText));
+        }
+    }
+
+    // Y is shown in native game units so that the engine's storey constant
+    // (256 game units = 1 storey) maps directly to what the user sees and edits.
     public int WorldY
     {
         get => _model.Y;
-        set { _model.Y = value; OnPropertyChanged(); }
+        set
+        {
+            _model.Y = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(QuarterStoreyText));
+        }
+    }
+
+    public string QuarterStoreyText
+    {
+        get
+        {
+            double quarterStoreys = _model.Y / (double)MissionFormatConstants.GameUnitsPerQuarterStorey;
+            return $"{quarterStoreys:0.##} quarter storeys";
+        }
     }
 
     public int WorldZ
     {
         get => _model.Z;
-        set { _model.Z = value; OnPropertyChanged(); OnPropertyChanged(nameof(GridPositionText)); }
+        set
+        {
+            _model.Z = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PixelZ));
+            OnPropertyChanged(nameof(GridPositionText));
+        }
+    }
+
+    public int PixelZ
+    {
+        get => (int)Math.Round(_model.PixelZ);
+        set
+        {
+            _model.Z = PixelToWorld(value);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(WorldZ));
+            OnPropertyChanged(nameof(GridPositionText));
+        }
     }
 
     public string GridPositionText => $"({_model.MapX}, {_model.MapZ})";
+
+    private static int PixelToWorld(int pixel)
+    {
+        int clamped = Math.Clamp(pixel, 0, Models.MapConstants.MapPixelSize);
+        return (Models.MapConstants.MapPixelSize - clamped) * Models.MapConstants.WorldToPixelDivisor;
+    }
 
     // Direction
     public byte Direction
@@ -2859,10 +2918,20 @@ public class EventPointEditorViewModel : BaseViewModel
         }
     }
 
-    // Revert to original state (for cancel)
+    // Revert to original state (for cancel/revert button)
     public void RevertChanges()
     {
         CopyEventPoint(_originalState, _model);
+        RefreshAll();
+    }
+
+    /// <summary>
+    /// Re-evaluate every binding on this VM. Call after the underlying model is
+    /// mutated outside of the normal property setters (e.g. RevertChanges).
+    /// </summary>
+    public void RefreshAll()
+    {
+        OnPropertyChanged(string.Empty);
     }
 
     // Clone helper

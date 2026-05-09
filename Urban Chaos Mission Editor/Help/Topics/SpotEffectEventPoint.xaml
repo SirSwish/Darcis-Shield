@@ -1,0 +1,254 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Spot Effect Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Places a small environmental effect at a fixed world position, such as a fountain, drip, smokestack, or chimney smoke.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Spot Effect Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Spot Effect</Bold> Event Point creates a focused environmental effect at one
+        specific location. Unlike a general Visual Effect, it does not combine multiple effect flags.
+        It chooses one spot effect type, then places that effect at the Event Point position.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Spot Effects are commonly used as scenery and atmosphere: water fountains, water drips,
+        dark smokestack smoke, and light chimney smoke. They can be active from the start of the
+        mission, or they can wait for mission logic before appearing.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Spot Effect for small fixed environmental particles. Use Visual Effect instead when you need flare, fire dome, shockwave, smoke trails, bonfire, or combined scripted spectacle.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Spot Effect uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful when
+        the Spot Effect belongs to a larger area setup, objective chain, or set of linked scenery
+        effects.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position is the most important common property for Spot Effect. The effect is anchored to
+        this world location, so place it exactly where water should emit, smoke should rise, or a
+        drip should originate. Check the Y value carefully if the effect appears inside a wall,
+        under the floor, or too high above the source object.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide whether the effect exists from mission start or appears later.
+        <Bold>None</Bold> with <Bold>Active</Bold> is the normal setup for permanent environmental
+        effects. <Bold>Dependency</Bold> is used when the effect should start after another Event
+        Point, such as a mission state change or scripted activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Spot Effect-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Spot Effect has two type-specific settings. <Bold>Data[0]</Bold> stores the selected spot
+        effect type as an index into the Spot FX list. <Bold>Data[1]</Bold> stores the scale.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Effect Type</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Effect Type chooses the single Spot FX visual to place. The available types are:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>Water Fountain</Bold> - a fixed fountain-style water effect.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Water Drip</Bold> - a smaller dripping water effect.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dark Smokestack Smoke</Bold> - darker smoke for industrial stacks or heavy smoke sources.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Light Chimney Smoke</Bold> - lighter smoke for chimneys and softer ambient smoke sources.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Scale</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Scale controls the size or strength of the spot effect and is clamped by the editor to
+        <Bold>0-1024</Bold>. Most existing Spot Effects use <Bold>0</Bold> for default scale.
+        Small non-zero values, such as <Bold>4</Bold> or <Bold>5</Bold>, are used in some missions
+        for subtle adjustment.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Choose the effect type first, place it precisely, then adjust scale only if the default effect is visibly too small or too strong in context.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Spot Effects
+    </Paragraph>
+    <Paragraph>
+        Existing Spot Effect usage is mostly environmental. The common trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> - use for effects that should exist from mission start.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - use when another Event Point should enable the effect.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the normal listening mode for permanent and one-shot activation.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - useful when the effect should remain tied to a condition instead of being a simple permanent activation.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical placement detail:</Run>
+                <Run> Spot Effects are fixed to their Event Point position. If the effect looks wrong, correct its position and altitude before changing trigger logic.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Spot Effect Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Always-On Chimney Smoke</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> and <Bold>Active</Bold> for chimney or smokestack effects that are
+        part of the level atmosphere from the start of the mission.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Spot Effects <Bold>50-57</Bold> are
+        <Bold>Light Chimney Smoke</Bold> entries using trigger <Bold>None</Bold> and listening mode
+        <Bold>Active</Bold>. They are placed as a set of ambient smoke points.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add one Spot Effect per smoke source, choose <Bold>Light Chimney Smoke</Bold> or
+        <Bold>Dark Smokestack Smoke</Bold>, leave the trigger as <Bold>None</Bold>, and place the
+        point at the top of the chimney or stack.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Always-On Water Features</Paragraph>
+    <Paragraph>
+        Use <Bold>Water Fountain</Bold> or <Bold>Water Drip</Bold> for decorative water sources or
+        environmental detail that should be visible throughout the mission.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>BAALROG1.ucm</Bold>, Spot Effects <Bold>87</Bold> and <Bold>88</Bold> are
+        <Bold>Water Fountain</Bold> entries with trigger <Bold>None</Bold> and listening mode
+        <Bold>Active</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Event Point at the fountain or drip source, choose the appropriate water effect,
+        and test the altitude so the effect originates from the visible geometry rather than below
+        or above it.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dependency-Enabled Fountain Group</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when a fountain, drip, or other spot effect should appear only
+        after another mission condition has fired. This is useful for toggled scenery, objective
+        state changes, or scripted environmental reveals.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanic1.ucm</Bold>, Spot Effects <Bold>56-59</Bold> are
+        <Bold>Water Fountain</Bold> effects and Spot Effect <Bold>60</Bold> is
+        <Bold>Water Drip</Bold>. They all use <Bold>Dependency</Bold> on Event Point
+        <Bold>39</Bold>, so the group is controlled by the same mission condition.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the Event Point that should control the effect group first. Add the Spot Effects,
+        place each one at its source, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold>, and
+        set <Bold>EP Ref</Bold> to the controlling Event Point.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Condition-Linked Ambient Effect</Paragraph>
+    <Paragraph>
+        Use <Bold>Active While</Bold> when the effect should stay tied to a condition rather than
+        simply becoming active once. This is useful when the engine should treat the effect as
+        present only while its dependency remains valid.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanicc.ucm</Bold>, Spot Effects <Bold>56-59</Bold> are
+        <Bold>Water Fountain</Bold> effects using <Bold>Dependency</Bold> on Event Point
+        <Bold>39</Bold> with listening mode <Bold>Active While</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Small Scaled Adjustment</Paragraph>
+    <Paragraph>
+        Use Scale sparingly for fine adjustment. Existing missions generally keep Spot Effects at
+        default scale, with small non-zero values used only where the effect needs to read slightly
+        differently in the scene.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>MIB.ucm</Bold>, Spot Effect <Bold>490</Bold> uses
+        <Bold>Dark Smokestack Smoke</Bold> at <Bold>Scale 5</Bold>, while Spot Effect
+        <Bold>498</Bold> uses <Bold>Water Drip</Bold> at <Bold>Scale 5</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Spot Effect Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide whether the effect is permanent scenery or controlled by mission logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Spot Effect</Bold> Event Point at the exact source location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the <Bold>Effect Type</Bold>: Water Fountain, Water Drip, Dark Smokestack Smoke, or Light Chimney Smoke.</Paragraph></ListItem>
+        <ListItem><Paragraph>Leave <Bold>Scale</Bold> at 0 unless the effect needs a visible size adjustment.</Paragraph></ListItem>
+        <ListItem><Paragraph>For permanent scenery, use <Bold>None</Bold> and <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted scenery, use <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the controlling Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check the effect in context with nearby buildings, roofs, objects, and map altitude.</Paragraph></ListItem>
+        <ListItem><Paragraph>Group related Spot Effects by colour and letter when they belong to the same area or trigger chain.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Effect Type is correct, Scale is intentional, the point is placed at the source, Y altitude is correct, and the trigger matches whether the effect is permanent or mission-controlled.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Media3D;
+using Microsoft.Win32;
 using UrbanChaosEditor.Shared.Views.Help;
 using UrbanChaosMissionEditor.Help;
 using UrbanChaosMissionEditor.Services;
@@ -31,6 +32,10 @@ public partial class MainWindow : Window
     private Viewport3DWindow? _viewport3DWindow;
     private ModelVisual3D? _eventPointOverlayVisual;
     private ModelVisual3D? _lightOverlayVisual;
+    private GridLength _lastLeftPanelWidth = new(280);
+    private GridLength _lastRightPanelWidth = new(420);
+    private bool _isLeftPanelCollapsed;
+    private bool _isRightPanelCollapsed;
 
     public MainWindow()
     {
@@ -52,6 +57,7 @@ public partial class MainWindow : Window
         // Hook preview mouse events for position selection mode
         PreviewMouseLeftButtonDown += MainWindow_PreviewMouseLeftButtonDown;
         PreviewMouseMove += MainWindow_PreviewMouseMove;
+        PreviewKeyDown += MainWindow_PreviewKeyDown;
 
         CommandBindings.Add(new CommandBinding(Open3DViewportCommand, async (_, __) => await Open3DViewportAsync()));
     }
@@ -108,6 +114,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && MapView.IsInPositionSelectionMode)
+        {
+            MapView.ExitPositionSelectionMode();
+            e.Handled = true;
+        }
+    }
+
     private void CategoryPill_Click(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement element &&
@@ -128,6 +143,90 @@ public partial class MainWindow : Window
         win.Show();
     }
 
+    private void FindTriggerUsage_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new Dialogs.TriggerUsageFinderWindow(LoadMissionFromUsageFinder) { Owner = this };
+        win.Show();
+    }
+
+    private async void ExportAllEventPoints_Click(object sender, RoutedEventArgs e)
+    {
+        string initialDirectory = GetInitialDebugDirectory();
+        var folderDialog = new OpenFolderDialog
+        {
+            Title = "Select UCM workspace directory",
+            InitialDirectory = initialDirectory
+        };
+
+        if (folderDialog.ShowDialog(this) != true)
+            return;
+
+        EditorSettingsService.Instance.LastDebugSearchDirectory = folderDialog.FolderName;
+
+        var saveDialog = new SaveFileDialog
+        {
+            Title = "Export all Event Points to JSON",
+            Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+            FileName = $"event-points-{DateTime.Now:yyyyMMdd-HHmmss}.json",
+            InitialDirectory = folderDialog.FolderName,
+            AddExtension = true,
+            DefaultExt = ".json",
+            OverwritePrompt = true
+        };
+
+        if (saveDialog.ShowDialog(this) != true)
+            return;
+
+        try
+        {
+            IsEnabled = false;
+            var exporter = new EventPointJsonExportService();
+            var summary = await Task.Run(() => exporter.ExportDirectory(folderDialog.FolderName, saveDialog.FileName));
+
+            MessageBox.Show(this,
+                $"Exported {summary.EventPointCount:N0} Event Points from {summary.ExportedMissionCount:N0} of {summary.UcmFileCount:N0} UCM files.\n\nOutput:\n{summary.OutputPath}" +
+                (summary.FailedFileCount > 0 ? $"\n\n{summary.FailedFileCount:N0} file(s) could not be read; see the failures section in the JSON." : string.Empty),
+                "Event Point Export Complete",
+                MessageBoxButton.OK,
+                summary.FailedFileCount > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                $"Event Point export failed:\n\n{ex.Message}",
+                "Event Point Export Failed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsEnabled = true;
+        }
+    }
+
+    private string GetInitialDebugDirectory()
+    {
+        if (DataContext is MainViewModel vm &&
+            !string.IsNullOrWhiteSpace(vm.CurrentFilePath))
+        {
+            var currentMissionDirectory = System.IO.Path.GetDirectoryName(vm.CurrentFilePath);
+            if (!string.IsNullOrWhiteSpace(currentMissionDirectory) &&
+                System.IO.Directory.Exists(currentMissionDirectory))
+            {
+                return currentMissionDirectory;
+            }
+        }
+
+        var lastDebugDirectory = EditorSettingsService.Instance.LastDebugSearchDirectory;
+        if (!string.IsNullOrWhiteSpace(lastDebugDirectory) &&
+            System.IO.Directory.Exists(lastDebugDirectory))
+        {
+            return lastDebugDirectory;
+        }
+
+        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    }
+
     private void LoadMissionFromUsageFinder(string ucmPath)
     {
         if (DataContext is MainViewModel vm)
@@ -141,6 +240,56 @@ public partial class MainWindow : Window
 
     private async void Open3DViewport_Click(object sender, RoutedEventArgs e)
         => await Open3DViewportAsync();
+
+    private void ToggleLeftPanel_Click(object sender, RoutedEventArgs e)
+    {
+        _isLeftPanelCollapsed = !_isLeftPanelCollapsed;
+
+        if (_isLeftPanelCollapsed)
+        {
+            _lastLeftPanelWidth = LeftPanelColumn.Width.Value > 0 ? LeftPanelColumn.Width : _lastLeftPanelWidth;
+            LeftSidePanel.Visibility = Visibility.Collapsed;
+            LeftSideSplitter.Visibility = Visibility.Collapsed;
+            LeftPanelColumn.MinWidth = 0;
+            LeftPanelColumn.Width = new GridLength(0);
+            LeftPanelToggleButton.Content = "▶";
+            LeftPanelToggleButton.ToolTip = "Expand left panel";
+        }
+        else
+        {
+            LeftPanelColumn.MinWidth = 200;
+            LeftPanelColumn.Width = _lastLeftPanelWidth.Value > 0 ? _lastLeftPanelWidth : new GridLength(280);
+            LeftSidePanel.Visibility = Visibility.Visible;
+            LeftSideSplitter.Visibility = Visibility.Visible;
+            LeftPanelToggleButton.Content = "◀";
+            LeftPanelToggleButton.ToolTip = "Collapse left panel";
+        }
+    }
+
+    private void ToggleRightPanel_Click(object sender, RoutedEventArgs e)
+    {
+        _isRightPanelCollapsed = !_isRightPanelCollapsed;
+
+        if (_isRightPanelCollapsed)
+        {
+            _lastRightPanelWidth = RightPanelColumn.Width.Value > 0 ? RightPanelColumn.Width : _lastRightPanelWidth;
+            RightSidePanel.Visibility = Visibility.Collapsed;
+            RightSideSplitter.Visibility = Visibility.Collapsed;
+            RightPanelColumn.MinWidth = 0;
+            RightPanelColumn.Width = new GridLength(0);
+            RightPanelToggleButton.Content = "◀";
+            RightPanelToggleButton.ToolTip = "Expand right panel";
+        }
+        else
+        {
+            RightPanelColumn.MinWidth = 340;
+            RightPanelColumn.Width = _lastRightPanelWidth.Value > 0 ? _lastRightPanelWidth : new GridLength(420);
+            RightSidePanel.Visibility = Visibility.Visible;
+            RightSideSplitter.Visibility = Visibility.Visible;
+            RightPanelToggleButton.Content = "▶";
+            RightPanelToggleButton.ToolTip = "Collapse right panel";
+        }
+    }
 
     private async Task Open3DViewportAsync()
     {
@@ -163,10 +312,7 @@ public partial class MainWindow : Window
         if (DataContext is not MainViewModel vm)
             return;
 
-        _eventPointOverlayVisual = new ModelVisual3D
-        {
-            Content = EventPoint3DOverlayBuilder.Build(vm.EventPoints)
-        };
+        _eventPointOverlayVisual = new ModelVisual3D();
         _lightOverlayVisual = new ModelVisual3D
         {
         };
@@ -178,10 +324,10 @@ public partial class MainWindow : Window
         _viewport3DWindow = new Viewport3DWindow(new[]
         {
             new Viewport3DOverlayLayer("Lights", _lightOverlayVisual, cull => MissionLight3DOverlayBuilder.Build(cull)),
-            new Viewport3DOverlayLayer("Event Points", _eventPointOverlayVisual)
+            new Viewport3DOverlayLayer("Event Points", _eventPointOverlayVisual, cull => EventPoint3DOverlayBuilder.Build(vm.EventPoints, cull))
         },
-        cullDistance: 1536.0,
-        cullMargin: 192.0)
+        cullDistance: 1024.0,
+        cullMargin: 128.0)
         { Owner = this };
         _viewport3DWindow.Closed += (_, __) =>
         {
@@ -204,8 +350,7 @@ public partial class MainWindow : Window
             e.PropertyName == nameof(MainViewModel.VisibleEventPoints) ||
             e.PropertyName == nameof(MainViewModel.SelectedEventPoint))
         {
-            Dispatcher.Invoke(() =>
-                _eventPointOverlayVisual.Content = EventPoint3DOverlayBuilder.Build(vm.EventPoints));
+            Dispatcher.Invoke(() => _viewport3DWindow?.RebuildCullAwareOverlayLayers());
         }
     }
 
@@ -286,15 +431,4 @@ public partial class MainWindow : Window
         return System.IO.Directory.GetFiles(customRoot, "*.tma").FirstOrDefault();
     }
 
-    private void EventPointsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (DataContext is MainViewModel vm && vm.SelectedEventPoint != null)
-        {
-            // Open editor dialog
-            if (vm.EditEventPointCommand.CanExecute(null))
-            {
-                vm.EditEventPointCommand.Execute(null);
-            }
-        }
-    }
 }

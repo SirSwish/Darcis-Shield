@@ -27,9 +27,10 @@
 
         <!-- Toggle button style for layer visibility (GREEN theme) -->
         <Style x:Key="LayerToggleStyle" TargetType="ToggleButton">
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="MinWidth" Value="70"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="MinWidth" Value="52"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="Background" Value="#3C3C3C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#555"/>
@@ -225,7 +226,6 @@
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Header="_Add EventPoint..." Command="{Binding AddEventPointCommand}" InputGestureText="Ctrl+M" ToolTip="Add a new EventPoint at current mouse position"/>
-                <MenuItem Header="_Edit EventPoint..." Command="{Binding EditEventPointCommand}" ToolTip="Edit the selected EventPoint"/>
                 <MenuItem Header="_Delete EventPoint" Command="{Binding DeleteEventPointCommand}" InputGestureText="Delete" ToolTip="Delete the selected EventPoint"/>
                 <MenuItem Header="_Copy EventPoint" Command="{Binding CopyEventPointCommand}" InputGestureText="Ctrl+C" ToolTip="Copy the selected EventPoint"/>
                 <MenuItem Header="_Paste EventPoint" Command="{Binding PasteEventPointCommand}" InputGestureText="Ctrl+V" ToolTip="Paste EventPoint at cursor position"/>
@@ -279,6 +279,8 @@
                     <MenuItem Header="Show _Textures" IsCheckable="True" IsChecked="{Binding ShowTextures}"/>
                     <MenuItem Header="Show _Buildings" IsCheckable="True" IsChecked="{Binding ShowBuildings}"/>
                     <MenuItem Header="Show _Objects" IsCheckable="True" IsChecked="{Binding ShowPrimGraphics}"/>
+                    <MenuItem Header="Show _Roof Tiles" IsCheckable="True" IsChecked="{Binding ShowRoofTiles}"/>
+                    <MenuItem Header="Show _Altitudes" IsCheckable="True" IsChecked="{Binding ShowRoofAltitudes}"/>
                 </MenuItem>
                 <MenuItem Header="Lights Layers">
                     <MenuItem Header="Show _Lights" IsCheckable="True" IsChecked="{Binding ShowLights}"/>
@@ -291,6 +293,11 @@
             <MenuItem Header="_Debug">
                 <MenuItem Header="_Find Event Point Usage..." Click="FindEventPointUsage_Click"
                           ToolTip="Scan a directory of UCM files to find missions using a specific event point type"/>
+                <MenuItem Header="Find _Trigger Usage..." Click="FindTriggerUsage_Click"
+                          ToolTip="Scan a directory of UCM files to find missions using a specific trigger type"/>
+                <Separator/>
+                <MenuItem Header="Export _All Event Points to JSON..." Click="ExportAllEventPoints_Click"
+                          ToolTip="Scan a workspace folder and export every UCM Event Point, including trigger and type-specific data, to one JSON file"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Mission Editor Help" Click="Help_Click"/>
@@ -344,6 +351,12 @@
                 <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Objects" 
                       IsChecked="{Binding ShowPrimGraphics}" IsEnabled="{Binding IsMapLoaded}"
                       ToolTip="Show/hide prim objects"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Roofs" 
+                      IsChecked="{Binding ShowRoofTiles}" IsEnabled="{Binding IsMapLoaded}"
+                      ToolTip="Show/hide RF4 roof tiles"/>
+                <ToggleButton Style="{StaticResource LayerToggleStyle}" Content="Alts" 
+                      IsChecked="{Binding ShowRoofAltitudes}" IsEnabled="{Binding IsMapLoaded}"
+                      ToolTip="Show/hide PAP altitude labels"/>
 
                 <Separator Margin="4,4" Background="#444" Width="1"/>
 
@@ -378,17 +391,17 @@
         </Border>
 
         <!-- Main Content -->
-        <Grid Grid.Row="2">
+        <Grid x:Name="MainContentGrid" Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280" MinWidth="200"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition x:Name="LeftPanelColumn" Width="280" MinWidth="200"/>
+                <ColumnDefinition x:Name="LeftSplitterColumn" Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="280" MinWidth="200"/>
+                <ColumnDefinition x:Name="RightSplitterColumn" Width="Auto"/>
+                <ColumnDefinition x:Name="RightPanelColumn" Width="420" MinWidth="340"/>
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel: Mission Info + EventPoint List -->
-            <Grid Grid.Column="0" Background="#252526">
+            <Grid x:Name="LeftSidePanel" Grid.Column="0" Background="#252526">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -581,6 +594,13 @@
           ToolTip="Filter by group letter"/>
                         </Grid>
 
+                        <!-- Map View Filter -->
+                        <CheckBox Content="Only show EventPoints in Map View"
+                                  IsChecked="{Binding FilterByMapView}"
+                                  Foreground="#CCC" FontSize="11"
+                                  Margin="0,0,0,8"
+                                  ToolTip="Only show EventPoints currently visible in the 2D map viewport. Updates as you scroll or zoom."/>
+
                         <!-- Category Filter (Compact Checkboxes) -->
                         <Expander Header="Categories" IsExpanded="False" 
                   Foreground="#AAA" FontSize="11">
@@ -640,18 +660,15 @@
                                     Background="#D41C1C" Foreground="White" BorderThickness="0"/>
                         </Grid>
 
-                        <ListView Grid.Row="1" 
+                        <ListView Grid.Row="1"
           x:Name="EventPointsListView"
-          ItemsSource="{Binding EventPoints}"
+          ItemsSource="{Binding EventPointsView}"
           SelectedItem="{Binding SelectedEventPoint}"
           SelectionMode="Single"
           VirtualizingPanel.IsVirtualizing="True"
-          VirtualizingPanel.VirtualizationMode="Recycling"
-          MouseDoubleClick="EventPointsListView_MouseDoubleClick">
+          VirtualizingPanel.VirtualizationMode="Recycling">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
-                                    <!-- THIS IS THE FIX: Visibility on the container, not the content -->
-                                    <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                     <Setter Property="Padding" Value="4"/>
                                     <Style.Triggers>
@@ -711,7 +728,7 @@
             </Grid>
 
             <!-- Left Splitter -->
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
+            <GridSplitter x:Name="LeftSideSplitter" Grid.Column="1" Width="4" HorizontalAlignment="Center"
                           Background="#3D3D3D"/>
 
             <!-- Center: Map View -->
@@ -729,77 +746,71 @@
                     </Border>
 
                     <local:MapViewControl x:Name="MapView" DataContext="{Binding}"/>
+
+                    <Button x:Name="LeftPanelToggleButton"
+                            Content="◀"
+                            Width="24" Height="72"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Margin="4,0,0,0"
+                            Padding="0"
+                            Background="#CC2D2D2D"
+                            Foreground="White"
+                            BorderBrush="#555"
+                            Panel.ZIndex="110"
+                            Click="ToggleLeftPanel_Click"
+                            ToolTip="Collapse left panel"/>
+
+                    <Button x:Name="RightPanelToggleButton"
+                            Content="▶"
+                            Width="24" Height="72"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0"
+                            Padding="0"
+                            Background="#CC2D2D2D"
+                            Foreground="White"
+                            BorderBrush="#555"
+                            Panel.ZIndex="110"
+                            Click="ToggleRightPanel_Click"
+                            ToolTip="Collapse right panel"/>
                 </Grid>
             </Border>
 
             <!-- Right Splitter -->
-            <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Center"
+            <GridSplitter x:Name="RightSideSplitter" Grid.Column="3" Width="4" HorizontalAlignment="Center"
                           Background="#3D3D3D"/>
 
-            <!-- Right Panel: Selected EventPoint Details -->
-            <Border Grid.Column="4" Background="#252526">
+            <!-- Right Panel: Quick-Edit for Selected EventPoint -->
+            <Border x:Name="RightSidePanel" Grid.Column="4" Background="#252526">
                 <Grid>
-                    <!-- Details when selected -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                  Visibility="{Binding SelectedEventPoint, Converter={StaticResource NullToVisibility}}">
-                        <StackPanel Margin="10">
-                            <TextBlock Text="SELECTED EVENT POINT" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,10"/>
+                    <!-- Quick-edit panel (live binds against MainViewModel.CurrentEditorVm) -->
+                    <DockPanel LastChildFill="True"
+                               Visibility="{Binding CurrentEditorVm, Converter={StaticResource NullToVisibility}}">
 
-                            <!-- Basic Info -->
-                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="80"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                        <!-- Bottom-docked Revert button -->
+                        <Border DockPanel.Dock="Bottom" Background="#1E1E1E" Padding="10,8">
+                            <Button Content="↺ Revert to selection-time state"
+                                    Command="{Binding RevertEventPointCommand}"
+                                    Background="#3C3C3C" Foreground="#DDD" BorderThickness="0"
+                                    Padding="10,6" HorizontalAlignment="Stretch"
+                                    ToolTip="Discard all edits made to this EventPoint since it was selected"/>
+                        </Border>
 
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Index:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedEventPoint.Index}" Style="{StaticResource ValueTextStyle}"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      DataContext="{Binding CurrentEditorVm}">
+                            <StackPanel Margin="10">
+                                <!-- Header -->
+                                <StackPanel Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding HeaderText}" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="{Binding SubHeaderText}" FontSize="11" Foreground="#888" Margin="0,3,0,0"/>
+                                </StackPanel>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Type:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedEventPoint.WaypointTypeName}" Style="{StaticResource ValueTextStyle}"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Group:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedEventPoint.GroupLetter}" Style="{StaticResource ValueTextStyle}"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Color:" Style="{StaticResource LabelTextStyle}"/>
-                                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                                        <Ellipse Width="12" Height="12" 
-                                                 Fill="{Binding SelectedEventPoint.ColorIndex, Converter={StaticResource ColorIndexToBrush}}"
-                                                 Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding SelectedEventPoint.ColorName}" Style="{StaticResource ValueTextStyle}"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Position:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedEventPoint.PositionString}" Style="{StaticResource ValueTextStyle}"/>
-
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="World:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedEventPoint.WorldPositionString}" Style="{StaticResource ValueTextStyle}" FontSize="10"/>
-
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Direction:" Style="{StaticResource LabelTextStyle}"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource ValueTextStyle}">
-                                        <Run Text="{Binding SelectedEventPoint.DirectionDegrees, StringFormat=F1, Mode=OneWay}"/>
-                                        <Run Text=" deg"/>
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
-
-                            <!-- Trigger Info -->
-                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10">
-                                <StackPanel>
-                                    <TextBlock Text="TRIGGER" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
-                                    <Grid>
+                                <!-- Common Properties -->
+                                <GroupBox Header="Common Properties" Foreground="#CCC" BorderBrush="#555" Margin="0,0,0,10">
+                                    <Grid Margin="4">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
@@ -807,82 +818,238 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Trigger:" Style="{StaticResource LabelTextStyle}"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedEventPoint.TriggerTypeName}" Style="{StaticResource ValueTextStyle}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Index:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Index, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="0,3"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="On Trigger:" Style="{StaticResource LabelTextStyle}"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedEventPoint.OnTriggerName}" Style="{StaticResource ValueTextStyle}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Type:" Style="{StaticResource LabelTextStyle}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WaypointTypeName, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="0,3"/>
 
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Radius:" Style="{StaticResource LabelTextStyle}"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedEventPoint.Radius}" Style="{StaticResource ValueTextStyle}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Group:" Style="{StaticResource LabelTextStyle}"/>
+                                        <ComboBox Grid.Row="2" Grid.Column="1"
+                                                  ItemsSource="{Binding GroupOptions}"
+                                                  SelectedItem="{Binding SelectedGroup}"
+                                                  Margin="0,2"/>
 
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="EP Ref:" Style="{StaticResource LabelTextStyle}"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedEventPoint.EPRef}" Style="{StaticResource ValueTextStyle}"/>
-
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Flags:" Style="{StaticResource LabelTextStyle}"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedEventPoint.Flags, Converter={StaticResource FlagsToString}}" 
-                                                   Style="{StaticResource ValueTextStyle}" TextWrapping="Wrap"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Color:" Style="{StaticResource LabelTextStyle}"/>
+                                        <ComboBox Grid.Row="3" Grid.Column="1"
+                                                  ItemsSource="{Binding ColorOptions}"
+                                                  SelectedIndex="{Binding ColorIndex}"
+                                                  Margin="0,2"/>
                                     </Grid>
-                                </StackPanel>
-                            </Border>
+                                </GroupBox>
 
-                            <!-- Extra Text (if any) -->
-                            <Border Background="#1E1E1E" Padding="10" Margin="0,0,0,10"
-                                    Visibility="{Binding SelectedEventPoint.ExtraText, Converter={StaticResource NullToVisibility}}">
-                                <StackPanel>
-                                    <TextBlock Text="TEXT CONTENT" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
-                                    <TextBox Text="{Binding SelectedEventPoint.ExtraText, Mode=OneWay}" 
-                                             IsReadOnly="True"
-                                             Background="#2D2D2D"
-                                             Foreground="#FFFFFF"
-                                             BorderBrush="#3D3D3D"
-                                             TextWrapping="Wrap"
-                                             MaxHeight="100"
-                                             VerticalScrollBarVisibility="Auto"/>
-                                </StackPanel>
-                            </Border>
+                                <!-- Position (read-only display; mutate via Select on Map) -->
+                                <GroupBox Header="Position" Foreground="#CCC" BorderBrush="#555" Margin="0,0,0,10">
+                                    <StackPanel Margin="4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                            <!-- Data Array -->
-                            <Border Background="#1E1E1E" Padding="10">
-                                <StackPanel>
-                                    <TextBlock Text="DATA ARRAY" Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,5"/>
-                                    <ItemsControl ItemsSource="{Binding SelectedEventPoint.Data}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,1">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="50"/>
-                                                        <ColumnDefinition Width="70"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Grid.Column="0" Style="{StaticResource LabelTextStyle}">
-                                                        <Run Text="["/>
-                                                        <Run Text="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=(ItemsControl.AlternationIndex), Mode=OneWay}"/>
-                                                        <Run Text="]"/>
-                                                    </TextBlock>
-                                                    <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource ValueTextStyle}"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding Converter={StaticResource IntToHex}}" 
-                                                               Style="{StaticResource LabelTextStyle}" FontFamily="Consolas"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                        <ItemsControl.AlternationCount>10</ItemsControl.AlternationCount>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="X:" Style="{StaticResource LabelTextStyle}"
+                                                       ToolTip="Map pixel X, matching the 8192 x 8192 viewport. One map tile = 64 pixels."/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PixelX, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="0,3"/>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Y (height):" Style="{StaticResource LabelTextStyle}"
+                                                       ToolTip="Vertical elevation in game units (256 = 1 storey). Type a value or use the ¼-storey nudge buttons."/>
+                                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,2">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Row="0" Grid.Column="0"
+                                                         Text="{Binding WorldY, UpdateSourceTrigger=PropertyChanged}"
+                                                         Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                         ToolTip="Height/elevation in game units. 256 game units = 1 storey. Cannot be set from a 2D map click — type a value here or nudge with the buttons."/>
+                                                <Button Grid.Row="0" Grid.Column="1"
+                                                        Content="+¼"
+                                                        Command="{Binding DataContext.BumpYUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        Background="#3C3C3C" Foreground="White" BorderThickness="0"
+                                                        Padding="6,2" Margin="4,0,0,0" MinWidth="32"
+                                                        ToolTip="Raise Y by a quarter storey (+64 game units)"/>
+                                                <Button Grid.Row="0" Grid.Column="2"
+                                                        Content="−¼"
+                                                        Command="{Binding DataContext.BumpYDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        Background="#3C3C3C" Foreground="White" BorderThickness="0"
+                                                        Padding="6,2" Margin="3,0,0,0" MinWidth="32"
+                                                        ToolTip="Lower Y by a quarter storey (−64 game units)"/>
+                                                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                                           Text="{Binding QuarterStoreyText, Mode=OneWay}"
+                                                           Foreground="#B7D7FF" FontSize="10" Margin="0,3,0,0"
+                                                           ToolTip="Current height expressed as quarter-storeys. One quarter-storey = 64 game units."/>
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Z:" Style="{StaticResource LabelTextStyle}"
+                                                       ToolTip="Map pixel Z, matching the 8192 x 8192 viewport. One map tile = 64 pixels."/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PixelZ, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="0,3"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Grid:" Style="{StaticResource LabelTextStyle}"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding GridPositionText, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="0,3"/>
+
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Direction:" Style="{StaticResource LabelTextStyle}"/>
+                                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,3">
+                                                <TextBlock Text="{Binding Direction, Mode=OneWay}" Style="{StaticResource ValueTextStyle}"/>
+                                                <TextBlock Text="{Binding DirectionDegreesText, Mode=OneWay}" Style="{StaticResource ValueTextStyle}" Margin="6,0,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Button Content="📍 Select X / Z on Map"
+                                                Command="{Binding DataContext.SelectPositionOnMapCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                Background="#3D5A80" Foreground="White" BorderThickness="0"
+                                                Padding="8,5" Margin="0,8,0,0" HorizontalAlignment="Stretch"
+                                                ToolTip="Click to set X/Z by clicking on the map. Y (height) must be entered above."/>
+
+                                        <TextBlock Text="Tip: Drag the EventPoint on the map to move; drag the arrow tip to rotate; use arrow keys for fine adjustments. Coordinates are shown in native game units."
+                                                   Foreground="#888" FontSize="10" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- Type-Specific Properties -->
+                                <GroupBox Header="Type-Specific Properties" Foreground="#CCC" BorderBrush="#555" Margin="0,0,0,10">
+                                    <ContentControl Content="{Binding TypeSpecificEditor}"/>
+                                </GroupBox>
+
+                                <!-- Trigger Settings -->
+                                <GroupBox Header="Trigger Settings" Foreground="#CCC" BorderBrush="#555" Margin="0,0,0,10">
+                                    <StackPanel Margin="4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="140"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Triggered By:" Style="{StaticResource LabelTextStyle}"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="1"
+                                                      ItemsSource="{Binding TriggerTypeOptions}"
+                                                      SelectedItem="{Binding SelectedTriggerType}"
+                                                      Margin="0,2"/>
+
+                                            <CheckBox Grid.Row="1" Grid.Column="1"
+                                                      Content="Negate / Invert condition"
+                                                      IsChecked="{Binding InvertCondition}"
+                                                      ToolTip="Inverts the trigger condition (WPT_FLAGS_INVERSE bit 0x02)"
+                                                      Margin="0,5,0,3"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Listening Mode:" Style="{StaticResource LabelTextStyle}"/>
+                                            <ComboBox Grid.Row="2" Grid.Column="1"
+                                                      ItemsSource="{Binding OnTriggerOptions}"
+                                                      SelectedItem="{Binding SelectedOnTrigger}"
+                                                      Margin="0,2"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="After Timer (ticks):" Style="{StaticResource LabelTextStyle}"
+                                                       Visibility="{Binding AfterTimerVisibility}"/>
+                                            <TextBox Grid.Row="3" Grid.Column="1"
+                                                     Text="{Binding AfterTimer, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding AfterTimerVisibility}"
+                                                     Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                     ToolTip="How long (in ticks) to stay active before resetting — used by 'Stay active for time then reset'"
+                                                     Margin="0,2"/>
+
+                                            <TextBlock Grid.Row="4" Grid.Column="0"
+                                                       Text="{Binding EPRefLabel}" Style="{StaticResource LabelTextStyle}"
+                                                       Visibility="{Binding EPRefVisibility}"/>
+                                            <TextBox Grid.Row="4" Grid.Column="1"
+                                                     Text="{Binding EPRef, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding EPRefVisibility}"
+                                                     Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                     Margin="0,2"/>
+
+                                            <TextBlock Grid.Row="5" Grid.Column="0"
+                                                       Text="{Binding EPRefBoolLabel}" Style="{StaticResource LabelTextStyle}"
+                                                       Visibility="{Binding EPRefBoolVisibility}"/>
+                                            <TextBox Grid.Row="5" Grid.Column="1"
+                                                     Text="{Binding EPRefBool, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding EPRefBoolVisibility}"
+                                                     Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                     Margin="0,2"/>
+
+                                            <TextBlock Grid.Row="6" Grid.Column="0"
+                                                       Text="{Binding RadiusLabel}" Style="{StaticResource LabelTextStyle}"
+                                                       Visibility="{Binding RadiusVisibility}"/>
+                                            <TextBox Grid.Row="6" Grid.Column="1"
+                                                     Text="{Binding Radius, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding RadiusVisibility}"
+                                                     Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                     Margin="0,2"/>
+
+                                            <TextBlock Grid.Row="7" Grid.Column="1"
+                                                       Text="{Binding RadiusInterpretedText}"
+                                                       Visibility="{Binding RadiusInterpretedVisibility}"
+                                                       Foreground="#888" FontSize="10"
+                                                       Margin="2,0,0,4"/>
+
+                                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Cuboid Half-Size Z:" Style="{StaticResource LabelTextStyle}"
+                                                       Visibility="{Binding CuboidZVisibility}"/>
+                                            <TextBox Grid.Row="8" Grid.Column="1"
+                                                     Text="{Binding CuboidHalfSizeZ, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding CuboidZVisibility}"
+                                                     Background="#3E3E42" Foreground="#EEE" BorderBrush="#555" Padding="4,2"
+                                                     ToolTip="High 16 bits of Radius — half-extent on the Z axis"
+                                                     Margin="0,2"/>
+
+                                            <CheckBox Grid.Row="9" Grid.Column="1"
+                                                      Content="Optional (PSX export only)"
+                                                      IsChecked="{Binding IsOptional}"
+                                                      ToolTip="EP may be omitted in PSX version (WPT_FLAGS_OPTIONAL bit 0x20)"
+                                                      Margin="0,5,0,3"/>
+
+                                            <TextBlock Grid.Row="10" Grid.Column="0" Text="Referenced:" Style="{StaticResource LabelTextStyle}"
+                                                       ToolTip="Set automatically on export — do not edit manually"/>
+                                            <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" Margin="0,3">
+                                                <CheckBox IsChecked="{Binding IsReferenced, Mode=OneWay}" IsEnabled="False"/>
+                                                <TextBlock Text="(computed on export)" Foreground="#666" FontSize="10" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Border Visibility="{Binding PersonUsedMessageWarningVisibility}"
+                                                Background="#3D2B00" BorderBrush="#AA7700" BorderThickness="1"
+                                                CornerRadius="2" Padding="8,6" Margin="0,8,0,0">
+                                            <TextBlock TextWrapping="Wrap" Foreground="#DDAA44" FontSize="10">
+                                                <Run FontWeight="SemiBold">Engine override:</Run>
+                                                Unreferenced 'Person Used → Message' EPs are forced to Stay While by the engine, regardless of the Listening Mode setting.
+                                            </TextBlock>
+                                        </Border>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
 
                     <!-- No selection state -->
-                    <TextBlock Text="Select an event point&#x0a;to view details"
+                    <TextBlock Text="Select an event point&#x0a;to edit"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Foreground="#666666"
                                TextAlignment="Center"
-                               Visibility="{Binding SelectedEventPoint, Converter={StaticResource NullToVisibility}, ConverterParameter=Inverse}"/>
+                               Visibility="{Binding CurrentEditorVm, Converter={StaticResource NullToVisibility}, ConverterParameter=Inverse}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -135,13 +135,15 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- World Coordinates -->
-                        <Label Grid.Row="0" Grid.Column="0" Content="World X:"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WorldX, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"/>
-                        <Label Grid.Row="0" Grid.Column="2" Content="Y:"/>
+                        <!-- Map pixel coordinates -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="X (px):"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PixelX, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"
+                                 ToolTip="Map pixel X, 0-8192. One map tile = 64 pixels."/>
+                        <Label Grid.Row="0" Grid.Column="2" Content="Y (game):"/>
                         <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding WorldY, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"/>
-                        <Label Grid.Row="0" Grid.Column="4" Content="Z:"/>
-                        <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding WorldZ, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"/>
+                        <Label Grid.Row="0" Grid.Column="4" Content="Z (px):"/>
+                        <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding PixelZ, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"
+                                 ToolTip="Map pixel Z, 0-8192. One map tile = 64 pixels."/>
 
                         <!-- Grid Coordinates (read-only) -->
                         <Label Grid.Row="1" Grid.Column="0" Content="Grid:"/>
@@ -164,7 +166,7 @@
 
                         <!-- Help text -->
                         <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6" 
-                                   Text="Tip: Drag EventPoints on map to move. Drag arrow tip to rotate. Arrow keys for fine adjustment." 
+                                   Text="Tip: Coordinates are native game units. One tile = 256 X/Z units; one storey = 256 Y units. Drag EventPoints on map to move. Drag arrow tip to rotate. Arrow keys for fine adjustment." 
                                    Foreground="#FF888888" FontSize="10" TextWrapping="Wrap" Margin="0,5,0,0"/>
                     </Grid>
                 </GroupBox>

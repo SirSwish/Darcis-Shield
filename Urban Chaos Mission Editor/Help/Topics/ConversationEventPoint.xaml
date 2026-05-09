@@ -1,0 +1,286 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Conversation Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Play a scripted exchange between two Event Point participants, usually the player and an NPC, then allow later mission logic to continue after the conversation is finished.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Conversation Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Conversation</Bold> Event Point plays a dialogue exchange between two participants.
+        It is different from a Message Event Point because it is usually a back-and-forth sequence
+        rather than a single radio line or prompt. Existing missions use conversations for story
+        scenes, objective handoffs, character introductions, warnings, interrogations, and short
+        exchanges that lead into the next mission step.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A conversation usually has three parts: the Event Point that starts it, the two participant
+        Event Point references stored by the Conversation itself, and any follow-up Event Points
+        that wait for the conversation using <Bold>Conversation Over</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Conversation when the player should hear an exchange between characters. Use Message when the player only needs one short line of instruction or feedback.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Conversation uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        keeping the conversation, the characters involved, and any follow-up Event Points together
+        in the editor and debug tools.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The position matters when the conversation uses a spatial trigger such as
+        <Bold>Radius</Bold>, <Bold>Cuboid</Bold>, or <Bold>Player Uses Radius</Bold>. Place the
+        Conversation Event Point where the player should enter, interact, or pass through to start
+        the exchange.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the conversation starts. Conversations commonly begin after
+        player interaction, a previous objective dependency, a person being seen, an area check, or
+        a previous conversation ending.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Conversation-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Conversation has type-specific settings that define who is speaking and how the conversation
+        is presented. These are separate from the common Event Point properties.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person 1 Event Point</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The first participant in the conversation. This is usually the player, a mission NPC, or the
+        character who starts the exchange. Existing summaries often appear as two references, such
+        as <Bold>EP 1 ↔ EP 96</Bold>, which means the conversation is between those two Event Points.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person 2 Event Point</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The second participant in the conversation. This should point at the other character or
+        speaker involved. If both participant references point at the same Event Point, the
+        conversation is usually functioning more like a self-report or radio-style monologue.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Text</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Conversation text is stored as a sequence of lines. In the exported data, each spoken line is
+        separated by a vertical bar character. When authoring, think of each segment as the next
+        line in the exchange rather than one continuous paragraph.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Grab Camera</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Some conversations set <Bold>Grab Camera</Bold>. Use this when the conversation should take
+        control of the camera or feel more like a directed scene. Leave it off for simpler exchanges
+        where the player can keep normal view control.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Set the two participant Event Points first. Most conversation mistakes come from the trigger being correct but the participant references pointing at the wrong people.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Conversations
+    </Paragraph>
+    <Paragraph>
+        Conversation Event Points are usually started by interaction, previous mission logic, line
+        of sight, or entering an area. The most useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Person Used</Bold> - starts a conversation when the player uses or talks to a person.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - starts a conversation after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Boolean AND</Bold> - starts a conversation after two previous conditions are true.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Person Seen</Bold> - starts a conversation when one person sees another.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius / Cuboid</Bold> - starts a conversation when the player enters a round or rectangular area.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Over</Bold> - starts a follow-up conversation after another conversation finishes.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Specific Item Held</Bold> - starts a conversation after the player obtains or carries the required item.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run> Trigger the Conversation Event Point itself. Follow-up Event Points should use Conversation Over and reference the Conversation Event Point that must finish.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Conversation Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Player Talks To A Person</Paragraph>
+    <Paragraph>
+        Use <Bold>Person Used</Bold> when the conversation should start because the player talks to
+        or uses a person. This is the normal pattern for optional dialogue, objective handoffs, and
+        character interaction.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Conversation <Bold>15</Bold> is between Event Point
+        <Bold>3</Bold> and Event Point <Bold>1</Bold>. It uses <Bold>Person Used</Bold> with
+        <Bold>Active While</Bold>, so the exchange starts from direct interaction with the person.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the person/NPC first, create the Conversation, set Person 1 and Person 2 to the
+        correct participants, then set the trigger to <Bold>Person Used</Bold>. Use
+        <Bold>Active While</Bold> only when the conversation should remain tied to the interaction
+        state.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conversation After An Objective</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when the conversation should begin after another Event Point has
+        completed. This is useful for story beats after a pickup, rescue, arrest, camera scene,
+        counter, or other objective stage.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Conversation <Bold>97</Bold> is between Event Point
+        <Bold>1</Bold> and Event Point <Bold>96</Bold>. It depends on Event Point <Bold>128</Bold>,
+        so the conversation waits for an earlier mission step before it plays.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the
+        Event Point that must happen first. Use <Bold>Conversation Over</Bold> on later Event Points
+        if the mission must wait until the dialogue has actually finished.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conversation When Someone Is Seen</Paragraph>
+    <Paragraph>
+        Use <Bold>Person Seen</Bold> when the conversation should start because one character sees
+        another. This pattern is useful for confrontations, warnings, enemy callouts, civilians
+        reacting to the player, or story characters noticing each other.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>bball2.ucm</Bold>, Conversation <Bold>337</Bold> is between Event Point
+        <Bold>325</Bold> and Event Point <Bold>1</Bold>. The trigger is <Bold>Person Seen</Bold>,
+        using Event Point <Bold>325</Bold> as the person being seen and Event Point <Bold>1</Bold>
+        as the observer.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Area-Based Conversations</Paragraph>
+    <Paragraph>
+        Use <Bold>Radius</Bold> or <Bold>Cuboid</Bold> when dialogue should begin because the player
+        enters a particular location. Cuboid is better for rectangular rooms, alleys, or large areas;
+        Radius is better for a local circular trigger point.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed Radius example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>e3.ucm</Bold>, Conversation <Bold>49</Bold> uses <Bold>Radius</Bold> with radius
+        <Bold>160</Bold>. The conversation is between Event Point <Bold>48</Bold> and Event Point
+        <Bold>2</Bold>, so it starts when the player reaches the local conversation area.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed Cuboid example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Conversation <Bold>330</Bold> uses <Bold>Cuboid</Bold> with
+        decoded half-sizes of <Bold>284</Bold> by <Bold>296</Bold>. This creates a rectangular
+        trigger area for the exchange between Event Point <Bold>328</Bold> and Event Point
+        <Bold>329</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conversation Chains</Paragraph>
+    <Paragraph>
+        Use <Bold>Conversation Over</Bold> when a second conversation or another Event Point should
+        wait until a previous conversation has ended. This is the right way to build multi-stage
+        dialogue scenes.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanicc.ucm</Bold>, Conversation <Bold>120</Bold> is triggered by
+        <Bold>Conversation Over</Bold> and references Event Point <Bold>118</Bold>. This creates a
+        follow-up exchange after the earlier conversation has completed.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Item-Gated Conversations</Paragraph>
+    <Paragraph>
+        Use <Bold>Specific Item Held</Bold> when the conversation should occur only after the player
+        has a particular item. This is useful for evidence, keys, tapes, notes, or other mission
+        objects that unlock new dialogue.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>MIB.ucm</Bold>, Conversation <Bold>291</Bold> is triggered by
+        <Bold>Specific Item Held</Bold> and references Event Point <Bold>289</Bold>. The conversation
+        functions as a report after the player obtains the relevant item.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Conversation Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide who the two conversation participants are.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the Event Points for those participants.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Conversation</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Person 1 Event Point</Bold> and <Bold>Person 2 Event Point</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enter the conversation text as separate lines in the intended speaking order.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enable <Bold>Grab Camera</Bold> only if the conversation should take over the view.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger that starts the conversation: Person Used, Dependency, Radius, Cuboid, Person Seen, Conversation Over, or Specific Item Held.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create follow-up Event Points with <Bold>Conversation Over</Bold> if later mission logic must wait for the dialogue to finish.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the full sequence in order, including repeated interaction attempts.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Person 1 and Person 2 are correct, the trigger starts the conversation at the right time, Grab Camera is intentional, and any follow-up logic uses Conversation Over rather than assuming the conversation has finished immediately.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

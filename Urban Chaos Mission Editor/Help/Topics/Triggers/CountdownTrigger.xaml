@@ -1,0 +1,303 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Countdown Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires after a hidden countdown timer expires. Used by 157 Event Points across retail missions for timed events and delayed triggers.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Countdown Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Countdown</Bold> creates a hidden timer that counts down from a specified duration. When the
+        timer reaches zero, the trigger fires. Unlike <Bold>Visible Countdown</Bold> which shows the timer
+        to the player, <Bold>Countdown</Bold> is invisible — the player doesn't see the timer ticking down.
+        This is used for delayed spawns, scripted sequences, time-based progression, and creating urgency
+        without explicit time pressure.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The countdown starts when the Event Point enters waiting state (based on its trigger and listening
+        mode). Once started, the timer counts down every game frame. When it reaches zero, the Event Point
+        fires. This enables time-based mission design: "enemies spawn 30 seconds after mission starts,"
+        "reinforcements arrive 60 seconds after alarm," or "escape vehicle leaves in 2 minutes."
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Countdown when this Event Point should fire after a hidden timer expires. Set Radius to the countdown duration in game ticks (typically 16 ticks per second). The timer is invisible to the player.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Countdown Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Countdown</Bold> trigger when the Event Point should fire after a time delay without showing
+        the timer to the player. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Delayed spawns</Bold> - Enemies appear 30 seconds after mission starts</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Scripted sequences</Bold> - Event happens X seconds after previous event</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Reinforcement timers</Bold> - Backup arrives 60 seconds after alarm triggers</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Progressive difficulty</Bold> - Difficulty increases over time without player awareness</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Ambient events</Bold> - Background events happen on a schedule</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gentle time pressure</Bold> - Create urgency without explicit countdown UI</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius (Countdown Duration)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The countdown duration in game ticks. The timer starts at this value and counts down to zero. When
+        the timer reaches zero, the trigger fires. The game typically runs at 16 ticks per second, so Radius
+        values should be calculated as: seconds * 16.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>160 ticks = 10 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>320 ticks = 20 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>480 ticks = 30 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>960 ticks = 60 seconds (1 minute)</Paragraph></ListItem>
+        <ListItem><Paragraph>1920 ticks = 120 seconds (2 minutes)</Paragraph></ListItem>
+    </List>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Note:</Bold> Despite the field name "Radius," this is actually the countdown duration for
+        Countdown triggers. The field is context-dependent — it means radius for Radius triggers but duration
+        for Countdown triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the Event Point enters waiting state, the countdown timer starts. Every game frame, the timer
+        decrements. When the timer reaches zero, the trigger condition is met. Whether the Event Point fires
+        immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when timer expires, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while timer is expired (rarely used with Countdown)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when timer expires, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when timer expires, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Group Life Event Point (enemy spawn) with <Bold>Countdown</Bold> trigger
+        (Radius = 480 [30 seconds]) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point enters waiting state</Paragraph></ListItem>
+        <ListItem><Paragraph>Countdown timer starts at 480 ticks (30 seconds)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player explores the area while timer counts down (invisible to player)</Paragraph></ListItem>
+        <ListItem><Paragraph>After 30 seconds, timer reaches zero</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Enemies spawn, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point stays active (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example with Dependency:</Bold> Event Point A has Dependency on objective completion (Active).
+        Event Point B (enemy reinforcements) has Countdown trigger (Radius = 960 [60 seconds]) with Dependency
+        on Event Point A (Active):
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point A waits for objective completion</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point B waits for Event Point A (countdown hasn't started yet)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player completes objective, Event Point A becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point B's Dependency is satisfied, countdown starts at 960 ticks</Paragraph></ListItem>
+        <ListItem><Paragraph>60 seconds pass (invisible to player)</Paragraph></ListItem>
+        <ListItem><Paragraph>Countdown reaches zero, Event Point B fires and spawns reinforcements</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Delayed Mission Start Spawn
+    </Paragraph>
+    <Paragraph>
+        A Group Life Event Point (enemy spawn) has Countdown trigger (Radius = 320 [20 seconds]) and Active
+        listening mode. The Event Point has no other trigger (or uses None trigger with Countdown). Enemies
+        spawn 20 seconds after mission starts, giving the player time to explore before combat begins. This
+        is a common retail pattern for gentler mission openings.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Reinforcement Delay
+    </Paragraph>
+    <Paragraph>
+        Event Point A detects alarm condition (Security Camera trigger, Active). Event Point B is a Group Life
+        (enemy reinforcements) with Countdown trigger (Radius = 480 [30 seconds]) and Dependency on A (Active).
+        When the alarm triggers, reinforcements spawn 30 seconds later. This creates realistic response time
+        rather than instant spawns.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Progressive Difficulty Increase
+    </Paragraph>
+    <Paragraph>
+        Multiple Event Points have Countdown triggers with increasing durations. First Event Point (Countdown =
+        480 [30 sec], Active) spawns easy enemies. Second Event Point (Countdown = 960 [60 sec], Active) spawns
+        harder enemies. Third Event Point (Countdown = 1440 [90 sec], Active) spawns elite enemies. Difficulty
+        ramps up over time without player awareness.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Scripted Sequence Timing
+    </Paragraph>
+    <Paragraph>
+        Event Point A starts a conversation (Active). Event Point B has Countdown trigger (Radius = 160 [10 sec])
+        with Dependency on A (Active Die). Event Point B spawns a vehicle 10 seconds after the conversation
+        starts. This creates timed scripted sequences: "talk to NPC, 10 seconds pass, vehicle arrives."
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Gentle Time Pressure
+    </Paragraph>
+    <Paragraph>
+        A Countdown trigger (Radius = 1920 [2 minutes], Active) with Dependency on objective start fires a
+        Lose Event Point. The player doesn't see a countdown timer but feels subtle pressure to move quickly.
+        This creates urgency without explicit UI stress.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Countdown</Bold> trigger appears in 157 Event Points across retail missions. It's commonly used
+        for delayed enemy spawns, reinforcement timers, and scripted sequence timing. Retail missions prefer
+        <Bold>Countdown</Bold> over <Bold>Visible Countdown</Bold> (25 instances) for most time-based events
+        because it doesn't add UI stress.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use Countdown with Dependency to create "event happens, then X seconds later, consequence happens" chains. The countdown starts when the dependency fires, not at mission start.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Invisible to player:</Run>
+                <Run> Countdown timers are completely hidden. If you want the player to know a timer is running, use Visible Countdown instead. Don't use hidden Countdown for mission-critical time limits — players will feel frustrated by invisible failure conditions.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Starts when waiting:</Run>
+                <Run> The countdown starts when the Event Point enters waiting state. For None trigger, this is at mission start. For Dependency trigger, this is when the dependency fires. Plan your countdown start time based on when the Event Point begins waiting.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Ticks not seconds:</Run>
+                <Run> The Radius field is in game ticks, not seconds. The game runs at approximately 16 ticks per second, so always multiply your desired seconds by 16. Setting Radius = 30 creates a 30-tick timer (about 2 seconds), not 30 seconds.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Countdown vs Visible Countdown</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Countdown</Bold> is hidden from the player. <Bold>Visible Countdown</Bold> shows the timer
+        on-screen. Use <Bold>Countdown</Bold> for background timing and delayed spawns. Use <Bold>Visible Countdown</Bold>
+        for mission-critical time limits and explicit time pressure.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Countdown vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Countdown</Bold> waits for a timer to expire. <Bold>Dependency</Bold> waits for an Event Point
+        to fire. Often combined: Event Point A has Dependency, then Event Point B has Countdown + Dependency
+        on A. This creates "event happens, then X seconds later, next event happens" chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Countdown vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Countdown</Bold> waits for a timer to expire. <Bold>None</Bold> fires at mission start. Use
+        <Bold>Countdown</Bold> for delayed events. Use <Bold>None</Bold> for immediate activation. Countdown
+        with no other trigger effectively means "wait X seconds from mission start."
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Countdown Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what should happen after the delay (spawn, message, objective, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Decide when the countdown should start (mission start, or after another event)</Paragraph></ListItem>
+        <ListItem><Paragraph>Calculate the delay in seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>Convert seconds to ticks (multiply seconds by 16)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire after the delay</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Countdown</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to the delay in ticks (seconds * 16)</Paragraph></ListItem>
+        <ListItem><Paragraph>If countdown should start at mission start, no additional trigger needed</Paragraph></ListItem>
+        <ListItem><Paragraph>If countdown should start after an event, add a Dependency trigger on that event</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent events)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game and measure the actual delay (use a stopwatch if needed)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point fires at the correct time after the countdown starts</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust Radius if the timing doesn't feel right</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use Countdown for atmospheric timing and background events. For critical time limits that affect mission success, use Visible Countdown instead so players know they're racing against time. Hidden timers should enhance pacing, not frustrate players.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

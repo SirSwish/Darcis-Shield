@@ -1,0 +1,12 @@
+Mission Editor Help Image Capture Guide - Increment
+==============================================
+
+IncrementEventPoint.xaml
+------------------------
+mission_increment_overview.png - Mission viewport or Event Points list showing Increment Event Points and a Counter-triggered logic Event Point.
+mission_increment_add_type.png - Add New EventPoint window with Increment selected.
+mission_increment_common_properties.png - Edit EventPoint window showing common properties for Increment.
+mission_increment_properties.png - Increment-specific fields showing Counter Index and Increment By.
+mission_increment_counter_trigger.png - Event Point trigger settings showing Counter trigger with Counter Index and Threshold fields.
+mission_increment_trigger_settings.png - Increment Event Point trigger settings, such as Killed or Arrested, Person Arrested, Player Enters Radius, or Dependency.
+mission_increment_two_enemy_example.png - Example setup showing two NPCs, two Increment Event Points targeting the same counter, and a Counter-triggered message/logic Event Point.

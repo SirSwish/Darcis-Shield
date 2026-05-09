@@ -1,0 +1,214 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Active Die Listening Mode
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires once when the trigger condition is met, then immediately becomes inactive and dead. It cannot fire again or be used as a dependency target.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Active Die Listening Mode Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Active Die</Bold> is for one-shot actions that should fire exactly once and then become
+        permanently inactive. When the trigger condition is met, the Event Point fires immediately, executes
+        its action, and then becomes dead. Unlike <Bold>Active</Bold> which stays active as a dependency
+        target, <Bold>Active Die</Bold> cannot be depended on by other Event Points because it becomes
+        inactive immediately after firing.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is primarily used for cleanup actions, one-time effects, or final mission events that should
+        never be dependency targets. Once an Event Point with <Bold>Active Die</Bold> fires, it's completely
+        out of the mission logic chain.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Active Die for one-shot actions that should never be used as dependency targets. The Event Point fires once and immediately dies, preventing any other Event Points from depending on it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Active Die
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active Die</Bold> when the Event Point should fire exactly once and should never be used
+        as a dependency target. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Final mission events</Bold> - Mission complete messages, victory cinematics</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>One-shot cleanup</Bold> - Delete a temporary object, remove a temporary NPC</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Instant effects</Bold> - Play a sound effect once, trigger a visual effect</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Terminal actions</Bold> - Events at the end of a chain that nothing should depend on</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Preventing dependencies</Bold> - When you explicitly want to prevent other Event Points from depending on this one</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires immediately and executes its action.
+        The moment the action completes, the Event Point becomes inactive and dead. It cannot fire again
+        even if the trigger condition becomes true multiple times. Other Event Points cannot use this Event
+        Point as a dependency target because it's inactive immediately after firing.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Dependency</Bold> trigger and <Bold>Active Die</Bold>
+        listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>The dependency Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point fires, message appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point immediately becomes inactive/dead (message disappears)</Paragraph></ListItem>
+        <ListItem><Paragraph>Other Event Points cannot depend on this Event Point because it's already dead</Paragraph></ListItem>
+        <ListItem><Paragraph>Even if the dependency becomes active again, this Event Point stays dead and does not fire</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Mission Complete Message
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Dependency</Bold> trigger (on final objective) and <Bold>Active Die</Bold>
+        listening mode shows "Mission Complete!" when the last objective is finished. It fires once, shows
+        the message, and becomes dead. Nothing should depend on this Event Point because it's the terminal
+        event in the mission.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        One-Shot Sound Effect
+    </Paragraph>
+    <Paragraph>
+        A Sound Event Point with <Bold>Radius</Bold> trigger and <Bold>Active Die</Bold> listening mode
+        plays an alarm sound once when the player enters a restricted area. The sound plays once and the
+        Event Point dies, preventing the sound from playing again if the player leaves and re-enters.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Cleanup Action
+    </Paragraph>
+    <Paragraph>
+        A Kill Waypoint Event Point with <Bold>Dependency</Bold> trigger and <Bold>Active Die</Bold> listening
+        mode removes a temporary NPC when an objective completes. The NPC is removed once and the Event Point
+        dies. This prevents the Event Point from being used as a dependency target for unintended logic chains.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Active Die</Bold> appears rarely in retail missions, typically for final mission messages,
+        one-shot sound effects, and cleanup actions at the end of mission chains where no further dependencies
+        are needed. It's intentionally used to prevent dependency chains from continuing past terminal events.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Dependency chain breaker:</Run>
+                <Run> Never use Active Die on Event Points that other Event Points need to depend on. The Event Point becomes inactive immediately after firing, so dependencies will fail. Use Active instead for dependency sources.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example of the problem:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Event Point A has None trigger with Active Die</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point B has Dependency on A with Active listening mode</Paragraph></ListItem>
+        <ListItem><Paragraph>Mission starts → A fires and immediately becomes dead</Paragraph></ListItem>
+        <ListItem><Paragraph>B never fires because A is already inactive when B checks the dependency</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Solution:</Bold> If other Event Points need to depend on Event Point A, use <Bold>Active</Bold>
+        listening mode instead of <Bold>Active Die</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Listening Modes
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Die vs Active</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Die</Bold> fires once and immediately becomes dead. <Bold>Active</Bold> fires once and
+        stays active as a dependency target. Use <Bold>Active Die</Bold> for terminal actions that should
+        never be dependency sources. Use <Bold>Active</Bold> for normal mission chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Die vs Active While</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Die</Bold> fires once and becomes permanently dead. <Bold>Active While</Bold> can toggle
+        between active and inactive repeatedly based on the trigger condition. Use <Bold>Active Die</Bold>
+        for truly one-shot actions. Use <Bold>Active While</Bold> for reversible states.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Die vs Active Time</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Die</Bold> becomes inactive immediately after firing. <Bold>Active Time</Bold> stays
+        active for a duration then becomes inactive. Use <Bold>Active Die</Bold> for instant, permanent death.
+        Use <Bold>Active Time</Bold> for temporary states with a fixed duration.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Active Die Listening Mode Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the Event Point that should fire exactly once and never be a dependency target</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify no other Event Points need to depend on this one</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the appropriate trigger type</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode to <Bold>Active Die</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Configure trigger-specific fields</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the Event Point fires when the trigger condition is met</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point becomes inactive immediately after firing</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Event Point does not fire again if the trigger condition becomes true again</Paragraph></ListItem>
+        <ListItem><Paragraph>Double-check that no Event Points are trying to depend on this one (they will fail)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The Event Point is truly a terminal action with no dependent Event Points. If anything needs to depend on this Event Point, use Active listening mode instead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

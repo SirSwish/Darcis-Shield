@@ -1,0 +1,11 @@
+Mission Editor Help Image Capture Guide - Create Barrel
+=================================================
+
+CreateBarrelEventPoint.xaml
+---------------------------
+mission_create_barrel_overview.png - Mission viewport showing one or more Create Barrel Event Points, preferably with barrels/cones visible or selected.
+mission_create_barrel_add_type.png - Add New EventPoint window with Create Barrel selected.
+mission_create_barrel_common_properties.png - Edit EventPoint window showing common properties such as index, type, letter group, colour, and position.
+mission_create_barrel_position.png - Select Position on Map workflow or map view showing a placed Create Barrel Event Point.
+mission_create_barrel_type_dropdown.png - Create Barrel-specific type dropdown showing options such as barrel/oil drum, cone, bin, burning barrel, and LOX/explosive drum.
+mission_create_barrel_trigger_settings.png - Trigger settings configured as None/Game Starts and Listening Mode Active.

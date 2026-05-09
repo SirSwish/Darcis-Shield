@@ -1,0 +1,14 @@
+Mission Editor Help Image Manifest - Create Treasure
+=================================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateTreasureEventPoint.xaml
+-----------------------------
+mission_create_treasure_overview.png
+mission_create_treasure_add_type.png
+mission_create_treasure_common_properties.png
+mission_create_treasure_position.png
+mission_create_treasure_properties.png
+mission_create_treasure_trigger_settings.png

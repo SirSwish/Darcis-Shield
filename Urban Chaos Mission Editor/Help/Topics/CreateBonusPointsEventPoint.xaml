@@ -1,0 +1,265 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Bonus Points Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Awards bonus points and displays a message when a special mission condition, sub-mission, or optional objective is completed.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Create Bonus Points Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Create Bonus Points</Bold> Event Point is used to award bonus points to the player
+        when they complete a sub-mission, side objective, special condition, or optional mission task.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        In practice, the point total does not appear to be meaningfully tallied throughout the game.
+        Even so, this Event Point is still useful because it acts as a clean marker that something
+        optional or noteworthy has been completed. It can also display confirmation text to the
+        player when the Event Point fires.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical use:</Run>
+                <Run>
+                    Treat Bonus Points as a visible success marker for optional mission actions.
+                    The on-screen display text is usually more important than the actual point value.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Bonus Points Event Point
+    </Paragraph>
+    <Paragraph>
+        To add this Event Point, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Bonus Points</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the normal common properties, trigger
+        settings, and the Bonus Points-specific fields.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Like other Event Points, Bonus Points has common properties such as index number, type,
+        letter group, colour, and position. The index and Event Point type are automatic.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Choose a letter group and colour that fits your mission organisation. For example, you might
+        keep optional rewards in their own colour or group so they are easy to identify later.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Bonus Points Properties
+    </Paragraph>
+    <Paragraph>
+        The Bonus Points-specific fields define what kind of bonus is being awarded, how many points
+        are awarded, which translation gender value is used, and what text is displayed to the
+        player.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Type
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Type</Bold> field appears to classify what kind of objective the bonus relates to.
+        The available values are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Primary</Bold> — likely intended for a main objective or core mission task.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Secondary</Bold> — likely intended for a secondary objective.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Bonus</Bold> — likely intended for side missions, optional tasks, or special rewards.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        The selected Type does not appear to have a strong gameplay effect. It is probably used more
+        for classification than mission logic. Choose the value that best describes the task being
+        rewarded.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Points
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Points</Bold> field is the number of bonus points awarded to the player. The usable
+        range is typically <Bold>0–1000</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Since the points do not appear to be meaningfully tallied through the game, the exact number
+        is mostly a design choice. Use whatever value makes sense for the importance of the optional
+        task.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Translation Gender
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Translation Gender</Bold> value appears to support translated versions of the game,
+        such as languages that use masculine and feminine forms for some words.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Setting this value likely tells the game which text variant to display in translated builds.
+        In English, this may not make any visible difference. In translated versions, the text system
+        may already handle much of this through translation data, so the exact practical effect is
+        uncertain.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Display Text
+    </Paragraph>
+    <Paragraph>
+        <Bold>Display Text</Bold> is the text shown when the Bonus Points Event Point fires. This is
+        often the most useful part of the Event Point, because it gives the player immediate feedback
+        that they completed an optional task.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example display text:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+You arrested them!
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Bonus Points does not normally fire by itself. It should be placed behind a trigger that
+        represents the bonus condition being completed.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For example, if the bonus should be awarded when a specific NPC is arrested, set:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> Person Arrested.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Target EP:</Bold> the Event Point number of the NPC that must be arrested.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical Target EP detail:</Run>
+                <Run>
+                    If the trigger checks a specific person, Target EP must point to that person’s Event Point number.
+                    For a Person Arrested trigger, Target EP should be the NPC Event Point that must be arrested.
+                    If Target EP is wrong, the bonus may not trigger when expected.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Example: Award Bonus Points When an NPC Is Arrested
+    </Paragraph>
+    <Paragraph>
+        This example awards a small bonus when the player arrests a specific NPC.
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or select the NPC that must be arrested.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note that NPC’s Event Point number from the Event Points list.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create a <Bold>Bonus Points</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Type</Bold> to <Bold>Primary</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Points</Bold> to <Bold>10</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Translation Gender</Bold> to <Bold>Male</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Display Text</Bold> to <Bold>You arrested them!</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>Person Arrested</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Listening Mode</Bold> to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Target EP</Bold> to the Event Point number of the NPC that must be arrested.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save the mission, and test it in game.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_bonus_points_example_arrest.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph>
+        When the target NPC is arrested, the Bonus Points Event Point should fire and display the
+        configured text.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Bonus Points Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what optional task or sub-mission should award the bonus.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point or NPC that represents the completion condition.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note any required target Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Bonus Points</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Type, Points, Translation Gender, and Display Text.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger that represents the condition being completed.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the trigger needs a target, set <Bold>Target EP</Bold> correctly.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

@@ -1,0 +1,270 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Dependency Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point waits for another Event Point to become active before firing. This is the second most common trigger type, used by 17% of all Event Points (2,787 instances across retail missions).
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Dependency Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Dependency</Bold> creates sequenced mission chains where Event Points fire in order based on
+        previous Event Points completing. When the referenced Event Point becomes active, this Event Point's
+        trigger condition is met and it can fire (subject to its listening mode). This is the fundamental
+        building block for creating objective chains, scripted sequences, and conditional mission logic.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Dependencies allow you to create complex mission flows: "After the player talks to the NPC, spawn
+        enemies. After the enemies are killed, show the next objective. After the player reaches the checkpoint,
+        unlock the next area." Nearly all mission progression beyond the initial setup uses <Bold>Dependency</Bold>
+        triggers.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Dependency when this Event Point should fire after another Event Point becomes active. Reference the dependency Event Point via the EP Ref field. This creates sequential mission logic.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Dependency Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> trigger when this Event Point should fire after another Event Point
+        becomes active. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Objective chains</Bold> - Next objective appears after current objective completes</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Scripted sequences</Bold> - Events happen in order (conversation → enemy spawn → chase begins)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conditional spawns</Bold> - NPCs or vehicles appear after a trigger Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Progressive unlocks</Bold> - New areas, messages, or features unlock after completing prerequisites</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission state machines</Bold> - Track mission progress through dependency chains</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Event Point Reference)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the Event Point this trigger depends on. When the referenced Event Point becomes active,
+        this trigger condition is met. The EP Ref field uses zero-based indexing (0 = first Event Point,
+        1 = second Event Point, etc.).
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The dependency source Event Point must use a listening mode that keeps it
+        active (<Bold>Active</Bold>, <Bold>Active While</Bold>, or <Bold>Active Time</Bold>). If the source
+        uses <Bold>Active Die</Bold>, the dependency will likely fail because the source becomes inactive
+        immediately after firing.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        The Event Point waits until the referenced Event Point becomes active. When the dependency is satisfied,
+        this Event Point's trigger condition is met. Whether it fires immediately or continues to check depends
+        on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when dependency becomes active, stays active</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while dependency is active</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when dependency becomes active, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when dependency becomes active, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Dependency</Bold> trigger (EP Ref = 5) and
+        <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, this Event Point waits for Event Point 5 to become active</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point 5 becomes active (e.g., player completes objective)</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point's trigger condition is met</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point fires, message appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active and stays active (using Active listening mode)</Paragraph></ListItem>
+        <ListItem><Paragraph>Other Event Points can now depend on this one</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Linear Objective Chain
+    </Paragraph>
+    <Paragraph>
+        Event Point A (None trigger, Active) → Event Point B (Dependency on A, Active) → Event Point C
+        (Dependency on B, Active). This creates a linear sequence: A fires at mission start, B fires when
+        A completes, C fires when B completes. This is the most common mission structure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Conversation Followed by Spawn
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Conversation with Person Used trigger and Active listening mode. Event Point B
+        is a Group Life (enemy spawn) with Dependency on A and Active listening mode. When the player talks
+        to the NPC (A fires), enemies spawn (B fires). This is a common retail pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Branching Dependencies
+    </Paragraph>
+    <Paragraph>
+        Event Point A (checkpoint marker) fires. Event Points B, C, and D all have Dependency on A. When A
+        fires, multiple things happen simultaneously: message appears (B), enemies spawn (C), nav beacon
+        activates (D). This creates branching logic from a single trigger point.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Kill Objective Chain
+    </Paragraph>
+    <Paragraph>
+        Event Point A spawns a target NPC (None trigger, Active). Event Point B is a Killed trigger on the
+        target (Active). Event Point C is a Message "Target eliminated" (Dependency on B, Active). When the
+        target is killed, B fires, then C shows the completion message. This is the standard kill objective
+        pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Continuous Effect While Dependency Active
+    </Paragraph>
+    <Paragraph>
+        Event Point A is an objective marker (Active). Event Point B is a Shake Camera with Dependency on A
+        and Active While listening mode. The camera shakes continuously while A is active. When A becomes
+        inactive, the shake stops. All retail Shake Camera Event Points use this pattern.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Dependency</Bold> trigger appears in 2,787 Event Points across retail missions — 17% of all
+        Event Points. It's the second most common trigger type after <Bold>None</Bold>. Nearly all mission
+        progression chains use <Bold>Dependency</Bold> to sequence objectives and scripted events.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions typically create long dependency chains: None → Dependency → Dependency → Dependency. The first Event Point has None trigger and each subsequent Event Point depends on the previous one. This creates clear, linear mission flow.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Circular dependency risk:</Run>
+                <Run> Never create circular dependencies where Event Point A depends on B and B depends on A. Both Event Points will wait forever and never fire. Plan your dependency chains to flow in one direction.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Active Die dependency risk:</Run>
+                <Run> If the dependency source uses Active Die listening mode, it becomes inactive immediately after firing. Dependencies on it may fail because the source is no longer active. Use Active listening mode for dependency sources.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">EP Ref indexing:</Run>
+                <Run> EP Ref uses zero-based indexing. The first Event Point is index 0, not 1. Double-check your Event Point indices when setting up dependencies.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dependency vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Dependency</Bold> waits for another Event Point to become active. <Bold>None</Bold> fires at
+        mission start with no condition. Use <Bold>Dependency</Bold> for sequenced mission logic. Use
+        <Bold>None</Bold> for immediate, unconditional activation.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dependency vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Dependency</Bold> waits for an Event Point to fire. <Bold>Radius</Bold> waits for the player
+        to enter a circular area. Use <Bold>Dependency</Bold> for logic-based triggers. Use <Bold>Radius</Bold>
+        for location-based triggers.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dependency vs Person Used</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Dependency</Bold> waits for an Event Point. <Bold>Person Used</Bold> waits for NPC interaction.
+        Often these are combined: Event Point A has Person Used trigger, Event Point B has Dependency on A.
+        This creates "talk to NPC then something happens" patterns.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Dependency Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the Event Point that should trigger first (the dependency source)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the source Event Point uses Active, Active While, or Active Time listening mode (not Active Die)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the dependent Event Point and configure its type and parameters</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Dependency</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the index of the source Event Point (zero-based indexing)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent chains or Active While for conditional)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the dependent Event Point does NOT fire until the source Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the dependent Event Point fires correctly when the source becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the dependency chain continues if other Event Points depend on this one</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Create dependency chains in order. Set up Event Point A first, test it, then create Event Point B that depends on A, test the chain, then create Event Point C that depends on B. This makes debugging much easier than creating all Event Points at once.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

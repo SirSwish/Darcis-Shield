@@ -1,0 +1,297 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Player Uses Radius Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when the player presses the action/use button within a circular area. Used by 124 Event Points across retail missions for interactive objects and environmental interactions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Player Uses Radius Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Player Uses Radius</Bold> detects when the player presses the action button (talk/use) while
+        inside a circular area. Unlike <Bold>Person Used</Bold> which requires a specific NPC, <Bold>Player
+        Uses Radius</Bold> creates an invisible interaction zone where the player can "use" the area itself.
+        This is used for environmental interactions, object triggers, anonymous switches, and any interaction
+        that doesn't involve a specific NPC.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger enables context-sensitive environmental interactions: "press action to open door,"
+        "activate computer terminal," "pick up item," "pull lever," or "interact with objective marker."
+        It's more flexible than Person Used because it doesn't require an NPC — just a location where the
+        player can interact. This is essential for missions with interactive environments.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Player Uses Radius when this Event Point should fire when the player presses the action button inside a circular area. Set the center position (X, Z) and Radius to define the interaction zone.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Player Uses Radius Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Player Uses Radius</Bold> trigger when the Event Point should fire based on player interaction
+        with an area (not an NPC). This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Environmental interactions</Bold> - Open doors, activate terminals, pull levers</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Item pickup</Bold> - "Press action to collect evidence/intel"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Objective markers</Bold> - "Interact with objective to complete"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Anonymous switches</Bold> - Activate something without visible switch object</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Context actions</Bold> - "Plant bomb here," "Sabotage equipment," "Hack terminal"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Interactive checkpoints</Bold> - Require player action to proceed (not just entering area)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">X (Center X Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The X coordinate of the circular interaction zone's center point in world units. Use the Map View
+        to visually place the Event Point and the X coordinate will be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Z (Center Z Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The Z coordinate of the circular interaction zone's center point in world units. Use the Map View
+        to visually place the Event Point and the Z coordinate will be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The radius of the circular interaction zone in world units. The player must be within this distance
+        from the center point (X, Z) when they press the action button for the trigger to fire. Larger values
+        create more forgiving interaction zones.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>256 - Very tight interaction (precise positioning required)</Paragraph></ListItem>
+        <ListItem><Paragraph>512 - Small interaction zone (typical for switches/terminals)</Paragraph></ListItem>
+        <ListItem><Paragraph>1024 - Medium interaction zone (forgiving objective markers)</Paragraph></ListItem>
+        <ListItem><Paragraph>2048 - Large interaction zone (broad area interactions)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if the player is within the circular area AND has pressed the
+        action button. Both conditions must be true simultaneously. When the player uses the action button
+        while inside the radius, the trigger condition is met. What happens next depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when player uses area, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while player is in area and holding action (rare)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when player uses area, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when player uses area, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Player Uses Radius</Bold> trigger (X=10000,
+        Z=15000, Radius=512) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, invisible interaction zone exists at position (10000, 15000)</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point waits for player to enter the zone and press action</Paragraph></ListItem>
+        <ListItem><Paragraph>Player approaches the location (terminal, objective marker, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player enters the radius (distance from center ≤ 512)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player presses the action button</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "Terminal accessed — downloading data" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active and stays active (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Interactive Objective Marker
+    </Paragraph>
+    <Paragraph>
+        A Nav Beacon Event Point marks an objective location (Active). A Player Uses Radius trigger at the
+        same location (Radius = 1024, Active) fires a Message "Objective complete" when the player reaches
+        the beacon and presses action. This creates "reach and interact with objective" gameplay, requiring
+        deliberate player action rather than just proximity.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Evidence Collection
+    </Paragraph>
+    <Paragraph>
+        Multiple Player Uses Radius triggers are placed at evidence locations (Radius = 512, Active Die).
+        Each fires an Increment Event Point that adds 1 to a collection counter. A Counter trigger watches
+        the counter and fires when all evidence is collected. This creates "collect X items" objectives.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Bomb Placement
+    </Paragraph>
+    <Paragraph>
+        A Player Uses Radius trigger marks a bomb placement location (Radius = 768, Active). When the player
+        reaches the location and presses action, a Message "Bomb planted — evacuate now!" appears and a
+        Visible Countdown starts. This creates "plant bomb and escape" mission structure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Door/Terminal Activation
+    </Paragraph>
+    <Paragraph>
+        A Player Uses Radius trigger is placed at a door or terminal location (Radius = 512, Active Die).
+        When the player interacts, the trigger fires an Animation Event Point (door opens) or spawns enemies
+        (terminal activates security). This creates interactive environment elements.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Sabotage Objective
+    </Paragraph>
+    <Paragraph>
+        A Player Uses Radius trigger marks equipment to sabotage (Radius = 512, Active). When the player
+        interacts, a Message "Equipment sabotaged" appears, a sound effect plays, and the next objective
+        unlocks. This creates "interact with X locations" objectives.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Player Uses Radius</Bold> trigger appears in 124 Event Points across retail missions. It's
+        commonly used for interactive objectives, item collection, and environmental interactions. Retail
+        missions prefer Player Uses Radius over automatic Radius triggers when the objective requires deliberate
+        player action rather than just proximity.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly combine Nav Beacon (showing location) with Player Uses Radius trigger (requiring interaction). This gives players clear guidance ("go here") plus intentional action ("press button to complete").</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Requires player action:</Run>
+                <Run> Player Uses Radius requires the player to press the action button. If the player just walks through the area without pressing action, the trigger never fires. Use Radius trigger if you want automatic proximity activation. Use Player Uses Radius for deliberate interactions.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Invisible interaction zone:</Run>
+                <Run> The interaction zone is invisible. Players won't know they can interact unless you guide them with nav beacons, messages, or visible objects (prims, NPCs, etc.). Always provide visual or contextual cues for Player Uses Radius triggers.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Radius size matters:</Run>
+                <Run> If the Radius is too small (e.g., 128), players will struggle to find the exact interaction spot. If too large (e.g., 4096), the interaction feels imprecise. Use 512-1024 for most interactions — tight enough to be specific, large enough to be forgiving.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Radius vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Player Uses Radius</Bold> requires the player to press action inside an area. <Bold>Radius</Bold>
+        fires automatically when the player enters an area. Use <Bold>Player Uses Radius</Bold> for deliberate
+        interactions ("plant bomb," "collect item"). Use <Bold>Radius</Bold> for automatic proximity triggers
+        ("reached checkpoint").
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Radius vs Person Used</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Player Uses Radius</Bold> detects action button press in an area. <Bold>Person Used</Bold>
+        detects action button press on a specific NPC. Use <Bold>Player Uses Radius</Bold> for environmental
+        interactions (no NPC required). Use <Bold>Person Used</Bold> for NPC conversations and interactions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Radius vs Cuboid</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Player Uses Radius</Bold> requires action button in a circular area. <Bold>Cuboid</Bold> fires
+        automatically when player enters a rectangular box. Use <Bold>Player Uses Radius</Bold> for interactive
+        objectives. Use <Bold>Cuboid</Bold> for automatic location triggers with altitude checking.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Player Uses Radius Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the location where the player should interact (terminal, objective, item, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Decide what should happen when the player interacts</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire on player interaction</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Player Uses Radius</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Use the Map View to visually place the Event Point at the interaction location (X, Z auto-set)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to define the interaction zone size (512-1024 for most cases)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for objective completion, Active Die for collection items)</Paragraph></ListItem>
+        <ListItem><Paragraph>Add visual cues so players know where to interact (nav beacon, message, visible prim)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by approaching the location</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger does NOT fire when just entering the area</Paragraph></ListItem>
+        <ListItem><Paragraph>Press the action button while inside the radius</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger fires when action button is pressed</Paragraph></ListItem>
+        <ListItem><Paragraph>Move outside the radius and press action</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger does NOT fire (must be inside radius)</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust Radius if the interaction zone feels too small or too large</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Always pair Player Uses Radius triggers with visual guidance. Use Nav Beacon Event Points to show where to go, and consider placing visible prims (terminals, computers, switches) at the interaction location. Without visual cues, players won't know where they can interact.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

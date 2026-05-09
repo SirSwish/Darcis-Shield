@@ -1,0 +1,10 @@
+Mission Editor Help Image Capture Guide - Create Mist
+================================================
+
+CreateMistEventPoint.xaml
+-------------------------
+mission_create_mist_overview.png - Mission viewport or Event Points list showing a Create Mist Event Point, ideally in an atmospheric scene.
+mission_create_mist_add_type.png - Add New EventPoint window with Create Mist selected.
+mission_create_mist_common_properties.png - Edit EventPoint window showing common properties and no type-specific fields.
+mission_create_mist_position.png - Map view showing the Create Mist Event Point placed where the fog/mist should appear.
+mission_create_mist_trigger_settings.png - Trigger settings configured as None/Game Starts and Listening Mode Active.

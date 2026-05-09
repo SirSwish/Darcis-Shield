@@ -1,0 +1,543 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Win and Lose Event Points
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Ends the mission successfully or unsuccessfully when the configured trigger logic fires.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Win and Lose Event Points Do
+    </Paragraph>
+    <Paragraph>
+        <Bold>Win</Bold> and <Bold>Lose</Bold> Event Points are used to end the mission. A Win Event
+        Point completes the mission successfully. A Lose Event Point fails the mission.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        These Event Points are simple in terms of their own fields. Like other Event Points, they
+        have common properties such as index number, type, letter group, colour, position, trigger
+        settings, and listening mode. However, for Win and Lose Event Points, the position normally
+        does not matter in gameplay.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The important part is the <Bold>trigger logic</Bold>. A Win or Lose Event Point matters when
+        it becomes active. The mission result is controlled by whatever trigger causes it to fire.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical concept:</Run>
+                <Run>
+                    Win and Lose Event Points are trigger-driven. Their map position is mostly for editor organisation.
+                    What matters is the condition that activates them.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADDING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding Win or Lose Event Points
+    </Paragraph>
+    <Paragraph>
+        To add a mission ending Event Point, click <Bold>Add</Bold> in the Event Points panel, select
+        the appropriate Win or Lose Event Point type, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The editor opens the normal <Bold>Edit EventPoint</Bold> window. There are no meaningful
+        type-specific properties to configure for these endpoints. Configure the common properties
+        and, most importantly, the trigger settings.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COMMON PROPERTIES -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Win and Lose Event Points use the standard Event Point common properties:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Index number</Bold> — automatic Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Type</Bold> — automatic Event Point type.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Letter Group</Bold> — useful for organisation.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Colour</Bold> — useful for visually separating mission-ending logic.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Position</Bold> — normally not important for gameplay, but useful for editor readability.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Trigger settings</Bold> — the condition that makes the mission win or lose.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening mode</Bold> — controls how the Event Point listens for or reacts to its trigger.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Because position is usually irrelevant, you can place Win and Lose Event Points somewhere
+        convenient in the editor. Many mission authors place ending logic near the area it relates to,
+        or group all ending logic in a clear corner of the map for easy inspection.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Organisation tip:</Run>
+                <Run>
+                    Use a consistent colour or letter group for mission-ending logic. For example, put all Win/Lose Event Points in one group so they are easy to find later.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TYPE-SPECIFIC PROPERTIES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Type-Specific Properties
+    </Paragraph>
+    <Paragraph>
+        Win and Lose Event Points have no meaningful type-specific configuration. Their purpose is
+        simply to end the mission when activated.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This means that the help, design, and testing focus should be on the Event Point’s trigger
+        condition. If the trigger never fires, the mission will never win or lose through that Event
+        Point.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Simple rule:</Run>
+                <Run>
+                    Win means mission success. Lose means mission failure. The trigger decides when either result happens.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TRIGGER LOGIC -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Logic
+    </Paragraph>
+    <Paragraph>
+        Trigger logic is the entire purpose of Win and Lose Event Points. They can be triggered by
+        simple conditions, or by complex chains of Event Points.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Simple Trigger Examples
+    </Paragraph>
+    <Paragraph>
+        A simple mission can end directly from one condition. For example:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Person Arrested → Win</Bold> — the mission is completed when a specific NPC is arrested.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Person Dead → Lose</Bold> — the mission fails if a protected person dies.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Player Enters Radius → Win</Bold> — the mission completes when the player reaches an extraction point.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Timer / Countdown Expires → Lose</Bold> — the mission fails when time runs out.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Item Held / Specific Item Held → Win</Bold> — the mission completes when the player has recovered a required item.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        For simple conditions involving a specific NPC or object, make sure the relevant
+        <Bold>Target EP</Bold>, <Bold>Dependency EP</Bold>, or reference field points to the correct
+        Event Point number.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Reference warning:</Run>
+                <Run>
+                    If the Win or Lose trigger depends on a specific person, item, object, timer, or previous Event Point,
+                    the reference must point to the correct Event Point number. A wrong reference can make the mission impossible to finish or impossible to fail.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COMPLEX LOGIC -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Complex Win and Lose Logic
+    </Paragraph>
+    <Paragraph>
+        Win and Lose Event Points can also be triggered by chains of other Event Points. This is how
+        more advanced missions create multi-part objectives, optional routes, conditional outcomes,
+        and fail states.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A common pattern is to use <Bold>Simple Waypoints</Bold> or other intermediate Event Points
+        as logic nodes. These can be connected with <Bold>Dependency</Bold>,
+        <Bold>Boolean AND</Bold>, and <Bold>Boolean OR</Bold> triggers.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_boolean_logic.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Boolean AND
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean AND</Bold> when multiple conditions must all be true before the mission
+        should win or lose.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Suspect arrested AND evidence collected -> Win
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Boolean OR
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean OR</Bold> when any one of several conditions should be enough to cause the
+        mission to win or lose.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Hostage killed OR player leaves area OR timer expires -> Lose
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Dependency Chains
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when a Win or Lose Event Point should activate after another
+        Event Point has fired. This lets you build readable chains where intermediate Event Points
+        represent mission progress.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Example:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Player reaches extraction -> Simple Waypoint activates -> Win Event Point fires
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- MULTIPLE WIN/LOSE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Multiple Win and Lose Event Points
+    </Paragraph>
+    <Paragraph>
+        A mission can have <Bold>multiple Win Event Points</Bold> and <Bold>multiple Lose Event Points</Bold>.
+        This is normal and often useful.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Each Win or Lose Event Point can represent a different ending condition. For example, one
+        Win Event Point might complete the mission when the target is arrested, while another might
+        complete the mission when the player escapes with an item. Similarly, one Lose Event Point
+        might fail the mission if a protected NPC dies, while another fails the mission if time runs
+        out.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_win_lose_multiple_endings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Design tip:</Run>
+                <Run>
+                    Multiple Win and Lose Event Points are useful when a mission has several valid success paths or several independent fail states.
+                    Keep them clearly labelled by group, colour, or placement so they remain readable.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Example Multiple Win Conditions
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Arrest the target → Win.</Paragraph></ListItem>
+        <ListItem><Paragraph>Recover the evidence and reach the extraction point → Win.</Paragraph></ListItem>
+        <ListItem><Paragraph>Disable the bomb before the timer expires → Win.</Paragraph></ListItem>
+        <ListItem><Paragraph>Complete all required objectives using Boolean AND → Win.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Example Multiple Lose Conditions
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Protected NPC dies → Lose.</Paragraph></ListItem>
+        <ListItem><Paragraph>Player kills the wrong person → Lose.</Paragraph></ListItem>
+        <ListItem><Paragraph>Timer expires → Lose.</Paragraph></ListItem>
+        <ListItem><Paragraph>Player enters a forbidden zone → Lose.</Paragraph></ListItem>
+        <ListItem><Paragraph>Mission-critical object is destroyed → Lose.</Paragraph></ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- PRACTICAL EXAMPLES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Practical Examples
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Simple Arrest Mission</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a Win Event Point. Set its trigger to <Bold>Person Arrested</Bold> and reference the
+        target NPC. When that NPC is arrested, the mission ends successfully.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Protect the Witness</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a Lose Event Point. Set its trigger to <Bold>Person Dead</Bold>,
+        <Bold>Killed or Arrested</Bold>, or another appropriate person-state trigger and reference
+        the witness NPC. If the witness dies, the mission fails.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Collect Evidence and Escape</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use one Event Point to detect evidence collection and another to detect reaching the escape
+        point. Connect them with <Bold>Boolean AND</Bold>, then trigger a Win Event Point from the
+        result.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timed Failure</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use a timer or countdown Event Point. If the timer completes before the objective is
+        satisfied, trigger a Lose Event Point.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Multiple Failure States</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add separate Lose Event Points for different fail states, such as the target escaping, a
+        civilian dying, time running out, or the player entering a restricted area.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Win Event Point Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what condition should complete the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create any required supporting Event Points first, such as target NPCs, items, timers, counters, or waypoints.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Add</Bold> and select the Win Event Point type.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a clear group and colour for mission-ending logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place it somewhere readable in the editor. Exact position is normally not gameplay-critical.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger condition that should cause mission success.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the trigger references another Event Point, set the reference to the correct Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save, and test the mission.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Lose Event Point Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what condition should fail the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create any required supporting Event Points first, such as protected NPCs, timers, zones, objects, or counters.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Add</Bold> and select the Lose Event Point type.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a clear group and colour for mission-ending logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place it somewhere readable in the editor. Exact position is normally not gameplay-critical.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger condition that should cause mission failure.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the trigger references another Event Point, set the reference to the correct Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save, and test the failure condition.</Paragraph></ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- TESTING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Testing Win and Lose Logic
+    </Paragraph>
+    <Paragraph>
+        Always test both success and failure paths. It is easy to create a mission that can be won
+        but not failed, or failed but not won, because one trigger reference is wrong or one
+        dependency chain never becomes true.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>Test every Win condition individually.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test every Lose condition individually.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test what happens if multiple ending conditions become true close together.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test Boolean AND chains by satisfying only one side, then both sides.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test Boolean OR chains by satisfying each possible branch separately.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test failure paths before and after mission objectives are completed.</Paragraph></ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- TROUBLESHOOTING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mission never wins</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Win Event Point exists.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the trigger condition is firing.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm any Target EP, Dependency EP, or Boolean reference points to the correct Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Boolean AND, confirm all required conditions are becoming true.</Paragraph></ListItem>
+        <ListItem><Paragraph>Temporarily test with a simpler trigger to confirm the Win Event Point itself works.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mission never loses</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Lose Event Point exists.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the fail condition actually occurs in game.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm any referenced NPC, timer, object, zone, or dependency is the correct Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the Lose condition directly before combining it into complex logic.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mission ends too early</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check whether the Win or Lose Event Point uses <Bold>None / Game Starts</Bold> by mistake.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether a dependency is already active from mission start.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check Boolean OR logic, because any true branch can trigger the ending.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether multiple Win or Lose Event Points exist and another one is firing first.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The wrong ending happens</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Search the mission for all Win and Lose Event Points.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check each ending trigger separately.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm no old test Win/Lose Event Point is still active.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm Boolean references and dependencies point to the intended Event Points.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Win and Lose Event Points are simple, but mission endings can become complex.
+                    Keep the trigger chains readable, test every ending path, and remember that multiple Win and Lose Event Points can exist in one mission.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

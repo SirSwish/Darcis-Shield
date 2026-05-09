@@ -1,0 +1,319 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Treasure Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Spawns a random bonus item pickup such as Speed, Strength, Constitution, or Reflexes.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Create Treasure Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Create Treasure</Bold> Event Point spawns one of the game’s bonus item pickups.
+        These are the special stat-style items associated with <Bold>Speed</Bold>,
+        <Bold>Strength</Bold>, <Bold>Constitution</Bold>, and <Bold>Reflexes</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This Event Point is simple compared with many mission logic Event Points. It does not create
+        an NPC, does not require complex linking, and does not contain many type-specific fields.
+        Its purpose is to place a bonus pickup into the mission.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple summary:</Run>
+                <Run>
+                    Create Treasure places a bonus pickup at the Event Point location. The creator chooses where it appears,
+                    when it appears, and the points value. The exact bonus item type is chosen randomly by the game.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADDING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Create Treasure Event Point
+    </Paragraph>
+    <Paragraph>
+        To add a treasure pickup, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Create Treasure</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the normal common properties, trigger
+        settings, and the Create Treasure-specific points field.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COMMON PROPERTIES -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Create Treasure uses the standard Event Point common properties. These include the automatic
+        index number, automatic Event Point type, letter group, colour, position, trigger settings,
+        and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The most important common property for this Event Point is the <Bold>position</Bold>, because
+        that controls where the bonus item appears in the mission.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Select Position on Map</Bold> to place the treasure pickup visually in the
+        viewport. The pickup spawns at the Event Point location when the Event Point triggers.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Place treasure in a location that makes sense for the mission. For example, it might be used
+        as a reward at the end of a difficult route, behind a search objective, inside a dangerous
+        area, or near the completion point of an optional challenge.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_position.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- RANDOM TYPE -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Bonus Item Type Is Random
+    </Paragraph>
+    <Paragraph>
+        There is no field for choosing exactly which bonus item will appear. The Event Point can
+        spawn one of the bonus item types, but the exact type is decided by the game at random.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Speed</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Strength</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Constitution</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Reflexes</Bold>.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        The mission creator cannot force this Event Point to specifically spawn Speed, Strength,
+        Constitution, or Reflexes. The creator controls the Event Point position, trigger behaviour,
+        and points value, but not the exact bonus category.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical limitation:</Run>
+                <Run>
+                    You cannot select the exact bonus item type. Create Treasure chooses randomly between the bonus item types.
+                    Do not build mission logic that depends on this Event Point spawning one specific bonus category.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- SPECIFIC PROPERTY -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Create Treasure Properties
+    </Paragraph>
+    <Paragraph>
+        Create Treasure has only one type-specific property: <Bold>Points</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Points
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Points</Bold> value is associated with the spawned treasure item. Typical values
+        are in the range of <Bold>5–50 points</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The editor may provide quick value buttons or quick values for common point amounts. Use
+        these as convenience shortcuts when you want to assign a standard reward value quickly.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Because the exact bonus item type is random, the Points value is the main type-specific
+        control available to the mission creator.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- TRIGGER SETTINGS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Like most Event Points, Create Treasure can be active from the start of the mission or placed
+        behind another trigger.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Spawn Immediately
+    </Paragraph>
+    <Paragraph>
+        If the treasure should appear as soon as the mission starts, use:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Spawn After a Condition
+    </Paragraph>
+    <Paragraph>
+        If the treasure should act as a reward, place it behind a trigger. For example, it could
+        appear after:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph>An NPC is arrested or killed.</Paragraph></ListItem>
+        <ListItem><Paragraph>A counter reaches a required value.</Paragraph></ListItem>
+        <ListItem><Paragraph>A conversation finishes.</Paragraph></ListItem>
+        <ListItem><Paragraph>The player enters a specific area.</Paragraph></ListItem>
+        <ListItem><Paragraph>A sub-objective or optional task is completed.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Use whichever trigger best matches the mission condition that should make the bonus item
+        appear.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_treasure_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- EXAMPLES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Examples
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Reward for Exploring</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place a treasure pickup at the end of an alley, rooftop route, hidden area, or optional
+        exploration path. Use None / Game Starts if it should always be available.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Reward for a Sub-Mission</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place Create Treasure behind a dependency or counter trigger so it appears only after a
+        side task is completed.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Reward After Arresting a Target</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use a trigger such as Person Arrested if the treasure should spawn after the player arrests a
+        specific NPC. In that case, make sure the trigger’s target/reference points to the correct
+        NPC Event Point.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Small Bonus Pickup</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use a low value such as 5 or 10 points for minor rewards.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Major Optional Reward</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use a higher value such as 25 or 50 points for a more significant optional challenge.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Create Treasure Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Create Treasure</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a letter group and colour that fits your mission organisation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Select Position on Map</Bold> to place the treasure pickup location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the <Bold>Points</Bold> value, usually somewhere around <Bold>5–50</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the trigger that controls when the treasure appears.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>None / Game Starts</Bold> and <Bold>Active</Bold> if it should appear immediately.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use a dependency, counter, radius, person, or other trigger if it should appear as a reward.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save the mission, and test it in game.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Create Treasure is simple, but do not over-specify it in mission logic.
+                    You can control where and when it appears, and how many points it is worth.
+                    You cannot control whether it becomes Speed, Strength, Constitution, or Reflexes.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

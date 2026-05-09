@@ -1,0 +1,14 @@
+Mission Editor Help Image Manifest - Win and Lose Event Points
+===========================================================
+
+Place these screenshots under:
+Help/Images/
+
+WinLoseEventPoints.xaml
+-----------------------
+mission_win_lose_overview.png
+mission_win_lose_add_type.png
+mission_win_lose_common_properties.png
+mission_win_lose_trigger_settings.png
+mission_win_lose_boolean_logic.png
+mission_win_lose_multiple_endings.png

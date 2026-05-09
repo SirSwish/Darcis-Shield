@@ -1,0 +1,284 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Killed Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when a specific NPC or person has been killed. Used by 430 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Killed Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Killed</Bold> (also known as <Bold>Person Killed</Bold>) detects when a specific NPC dies.
+        This is the standard trigger for elimination objectives, assassination targets, boss fights, and any
+        event that should fire when an NPC is defeated. The trigger references an NPC Event Point (usually
+        a Create NPC) and fires when that NPC's health reaches zero and they die.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger is fundamental to combat-focused missions — kill objectives, bounty targets, enemy boss
+        fights, and protection failures all use <Bold>Killed</Bold>. It's the third most common trigger type
+        in retail missions (after None and Dependency), reflecting how central combat is to Urban Chaos gameplay.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Killed when the Event Point should fire when a specific NPC dies. Reference the NPC's Event Point via the EP Ref field. This creates kill objectives and combat progression.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Killed Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Killed</Bold> trigger when the Event Point should fire based on an NPC's death. This is
+        appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Elimination objectives</Bold> - "Kill the gang leader" style missions</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Assassination targets</Bold> - Specific named NPCs that must be eliminated</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Boss fight completion</Bold> - Next objective appears after defeating a boss</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Protection failure</Bold> - Mission fails if a friendly NPC dies</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Combat progression</Bold> - "Clear the area of enemies" objectives</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Trigger-based spawns</Bold> - Killing one enemy spawns reinforcements</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Event Point Reference)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the Event Point that creates or controls the target NPC. This is typically a Create NPC
+        Event Point. When the NPC spawned by that Event Point dies, this trigger fires. The EP Ref field uses
+        zero-based indexing (0 = first Event Point, 1 = second Event Point, etc.).
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The referenced Event Point must actually create or reference an NPC that can
+        die. If the EP Ref points to a Message Event Point or other non-NPC type, the trigger will never fire.
+        Also, the NPC must be alive first — if the NPC never spawns, it can't be killed.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        The Event Point waits until the referenced NPC's health reaches zero and they die. When the death
+        occurs, the trigger condition is met. Whether the Event Point fires immediately or continues to check
+        depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when NPC dies, stays active (most common for kill objectives)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while NPC is dead (unusual, rarely used)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when NPC dies, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when NPC dies, immediately becomes dead (rare)</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Killed</Bold> trigger (EP Ref = 5, referencing
+        a Create NPC Event Point) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point 5 spawns a boss NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>This Message Event Point waits for the boss to die</Paragraph></ListItem>
+        <ListItem><Paragraph>Player fights and kills the boss</Paragraph></ListItem>
+        <ListItem><Paragraph>Boss health reaches zero, NPC dies</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Message Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "Boss defeated!" appears, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Other Event Points can depend on this to unlock the next mission phase</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Standard Kill Objective
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Create NPC (None trigger, Active) spawning an enemy target. Event Point B is a
+        Message "Eliminate the target" (Dependency on A or None trigger, Active). Event Point C is a Message
+        "Target eliminated" (Killed trigger on A, Active). When the player kills the target, the completion
+        message appears. This is the most common kill objective pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Boss Fight Progression
+    </Paragraph>
+    <Paragraph>
+        A boss NPC is spawned (Create NPC). Multiple Event Points have Killed triggers on the boss: one shows
+        victory message, another spawns an exit nav beacon, another unlocks the next mission area. When the
+        boss dies, all dependent events fire simultaneously, creating a satisfying victory moment.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Protection Mission Failure
+    </Paragraph>
+    <Paragraph>
+        A friendly NPC is created (Create NPC). A Mission Fail Event Point has Killed trigger on the friendly
+        NPC with Active listening mode. If the friendly NPC dies, the mission immediately fails. This creates
+        "protect the VIP" style objectives.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Kill Triggers Reinforcements
+    </Paragraph>
+    <Paragraph>
+        An enemy leader is spawned. A Group Life Event Point (enemy reinforcements) has Killed trigger on
+        the leader with Active listening mode. When the player kills the leader, reinforcements spawn —
+        "you killed the boss but now the gang wants revenge" scenario. This creates escalating combat encounters.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Assassination Chain
+    </Paragraph>
+    <Paragraph>
+        Target 1 is spawned. Killed trigger on Target 1 shows "1 of 3 eliminated" message and spawns Target 2.
+        Killed trigger on Target 2 shows "2 of 3 eliminated" and spawns Target 3. Killed trigger on Target 3
+        completes the mission. This creates sequential assassination objectives.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Killed</Bold> trigger appears in 430 Event Points across retail missions. It's the third most
+        common trigger type (after None and Dependency). Nearly every combat-focused mission includes kill
+        objectives using <Bold>Killed</Bold> triggers. It's essential for action-oriented gameplay and combat
+        progression.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly create kill objective chains: Create NPC → Nav Beacon or Message pointing to target → Killed trigger shows completion message → Dependency triggers next objective. This creates clear, understandable kill objectives with proper feedback.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">NPC must spawn first:</Run>
+                <Run> The EP Ref must point to an Event Point that creates an NPC, and that NPC must actually spawn before it can be killed. If the NPC never spawns due to trigger conditions, the Killed trigger will never fire.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Invulnerable NPCs never trigger:</Run>
+                <Run> If the NPC is set to invulnerable or has infinite health, the Killed trigger will never fire. Ensure kill-objective NPCs can actually die.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Death by any means:</Run>
+                <Run> Killed triggers fire regardless of how the NPC dies — player kill, friendly fire, fall damage, scripted death, etc. If you need to ensure the player specifically kills the target, additional logic may be required.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">One-time event:</Run>
+                <Run> Once an NPC dies, they're dead permanently (unless respawned by other Event Points). Killed triggers fire once per NPC lifetime. If you need repeatable death detection, you'll need to respawn the NPC.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed vs Person Used</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Killed</Bold> fires when an NPC dies (combat). <Bold>Person Used</Bold> fires when the player
+        interacts with an NPC (peaceful). Use <Bold>Killed</Bold> for combat objectives and elimination
+        missions. Use <Bold>Person Used</Bold> for conversations and friendly interactions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Killed</Bold> waits for an NPC to die. <Bold>Dependency</Bold> waits for another Event Point
+        to fire. Often combined: Event Point A has Killed trigger, Event Point B has Dependency on A. This
+        creates "kill target then next objective" chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed vs All Killed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Killed</Bold> fires when a specific NPC dies. <Bold>All Killed</Bold> fires when all NPCs in
+        a group or area are dead. Use <Bold>Killed</Bold> for single-target elimination. Use <Bold>All Killed</Bold>
+        for "clear the area" objectives.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Killed Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Create NPC Event Point that spawns the target NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the NPC Event Point uses a listening mode that keeps it active (usually Active)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the NPC can actually die (not invulnerable, has normal health)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the NPC Event Point (zero-based indexing)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when the NPC dies (Message, Nav Beacon, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Killed</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the index of the NPC Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for kill objectives)</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure Event Point-specific fields (message text, next objective, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Consider adding a nav beacon or objective message to guide the player to the target</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by killing the target NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point fires when the NPC dies</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the Event Point does NOT fire while the NPC is still alive</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> For clear kill objectives, create a three-part chain: 1) Create NPC spawns target, 2) Message or Nav Beacon points player to target, 3) Killed trigger shows completion message. This gives the player clear objectives and satisfying feedback when they succeed.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

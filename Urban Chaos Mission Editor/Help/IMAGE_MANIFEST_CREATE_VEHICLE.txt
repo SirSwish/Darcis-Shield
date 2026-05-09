@@ -1,0 +1,17 @@
+Mission Editor Help Image Manifest - Create Vehicle
+==================================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateVehicleEventPoint.xaml
+----------------------------
+mission_create_vehicle_overview.png
+mission_create_vehicle_add_type.png
+mission_create_vehicle_common_properties.png
+mission_create_vehicle_position_facing.png
+mission_create_vehicle_type_dropdown.png
+mission_create_vehicle_behaviour_dropdown.png
+mission_create_vehicle_target_ep.png
+mission_create_vehicle_key_required.png
+mission_create_vehicle_trigger_settings.png

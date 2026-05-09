@@ -1,0 +1,13 @@
+Mission Editor Help Image Capture Guide - Extend Timer
+==================================================
+
+ExtendTimerEventPoint.xaml
+--------------------------
+mission_extend_timer_overview.png - Mission viewport or Event Points list showing an Extend Timer Event Point near a checkpoint or timed challenge.
+mission_extend_timer_add_type.png - Add New EventPoint window with Extend Timer selected.
+mission_extend_timer_common_properties.png - Edit EventPoint window showing common properties for Extend Timer.
+mission_extend_timer_properties.png - Extend Timer-specific fields showing Target EP Index and Extension Amount.
+mission_extend_timer_target_ep_index.png - Close-up of Target EP Index pointing to the Visible Countdown Event Point number.
+mission_extend_timer_visible_countdown_host.png - Example Simple Waypoint configured as the Visible Countdown host.
+mission_extend_timer_trigger_settings.png - Extend Timer trigger settings, such as Player Enters Radius for a checkpoint.
+mission_extend_timer_maze_example.png - Example map setup showing start trigger, Visible Countdown host, and one or more Extend Timer checkpoint Event Points.

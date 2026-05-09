@@ -38,6 +38,13 @@ public interface IBuildingDataProvider : IMapDataProvider
 }
 
 /// <summary>
+/// Provides read-only building/roof data for overlays.
+/// </summary>
+public interface IRoofDataProvider : IBuildingDataProvider
+{
+}
+
+/// <summary>
 /// Interface for texture data access.
 /// </summary>
 public interface ITextureDataProvider : IMapDataProvider

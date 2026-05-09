@@ -1,0 +1,14 @@
+Mission Editor Help Image Capture Guide - Create Vehicle
+====================================================
+
+CreateVehicleEventPoint.xaml
+----------------------------
+mission_create_vehicle_overview.png - Mission viewport or Event Points list showing a Create Vehicle Event Point and spawned/selected vehicle position.
+mission_create_vehicle_add_type.png - Add New EventPoint window with Create Vehicle selected.
+mission_create_vehicle_common_properties.png - Edit EventPoint window showing common properties such as index, type, group, colour, position, facing, trigger, and listening mode.
+mission_create_vehicle_position_facing.png - Map view showing a placed Create Vehicle Event Point with the orange facing-direction handle aligned to a road or parking position.
+mission_create_vehicle_type_dropdown.png - Vehicle Type dropdown showing Car, Van, Taxi, Helicopter, Motorbike, Police Sedan, Ambulance, Police SUV, Civilian SUV, Soft-Top Sedan, and Wildcat Van.
+mission_create_vehicle_behaviour_dropdown.png - Behaviour dropdown showing Player Drives, Patrol, Guard, and Track.
+mission_create_vehicle_target_ep.png - Target EP field visible, ideally with a helicopter Track example.
+mission_create_vehicle_key_required.png - Key Required dropdown showing Unlocked, Red Key, Blue Key, Green Key, Black Key, White Key, and Locked.
+mission_create_vehicle_trigger_settings.png - Trigger settings showing None/Game Starts + Active for immediate spawn or a mission trigger such as Dependency.

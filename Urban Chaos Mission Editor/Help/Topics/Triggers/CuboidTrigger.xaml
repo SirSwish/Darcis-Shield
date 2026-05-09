@@ -1,0 +1,293 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Cuboid Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point checks if the player is within a rectangular box area defined by minimum and maximum X, Y, Z coordinates. Used by 330 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Cuboid Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Cuboid</Bold> creates a rectangular box trigger zone in the world using minimum and maximum
+        bounds for X, Y, and Z coordinates. When the player's position is inside this box, the trigger condition
+        is met. This is more precise than <Bold>Radius</Bold> because it checks all three axes and can match
+        architectural boundaries like rooms, hallways, or specific building floors.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The cuboid trigger is ideal for indoor spaces, multi-story buildings, and any area where altitude
+        (Y coordinate) matters. It's also better for rectangular areas that align with building geometry.
+        The tradeoff is more complex configuration — you must set six values (min/max for each axis) instead
+        of just a center point and radius.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Cuboid when the Event Point should fire when the player enters a rectangular box area. Set min/max X, Y, Z coordinates to define the trigger zone.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Cuboid Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Cuboid</Bold> trigger when the Event Point should fire based on the player entering a
+        rectangular area with altitude checking. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Room-specific triggers</Bold> - Fire when player enters a specific room or hallway</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Floor-specific events</Bold> - Trigger only on a particular building floor, not above or below</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Architectural boundaries</Bold> - Match rectangular building geometry precisely</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Altitude-sensitive triggers</Bold> - Fire only when player is at a specific height range</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Multi-story objectives</Bold> - "Reach the third floor" needs Y-axis checking</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Precise area control</Bold> - When circular Radius triggers are too imprecise</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Min X</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The minimum X coordinate of the bounding box. Defines the left/western edge of the trigger zone.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Max X</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The maximum X coordinate of the bounding box. Defines the right/eastern edge of the trigger zone.
+        Must be greater than Min X.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Min Y</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The minimum Y coordinate (altitude) of the bounding box. Defines the bottom edge of the trigger zone.
+        This is critical for multi-story buildings — set it to the floor altitude you want.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Max Y</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The maximum Y coordinate (altitude) of the bounding box. Defines the top edge of the trigger zone.
+        Must be greater than Min Y. Set this to the ceiling altitude or height limit.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Min Z</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The minimum Z coordinate of the bounding box. Defines the front/northern edge of the trigger zone.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Max Z</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The maximum Z coordinate of the bounding box. Defines the back/southern edge of the trigger zone.
+        Must be greater than Min Z.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Configuration tip:</Run>
+                <Run> The easiest way to set cuboid bounds is to place the Event Point in the Map View and note the X, Z coordinates at opposite corners of the room or area. For Y coordinates, use the building's floor and ceiling altitudes from the map data.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if the player's position is within the bounding box. All three
+        axes are checked: player X must be between Min X and Max X, player Y must be between Min Y and Max Y,
+        and player Z must be between Min Z and Max Z. If all three conditions are true, the trigger fires.
+        What happens next depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when player enters, stays active even after player leaves</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while player is inside, inactive when player leaves</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when player enters, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when player enters, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Cuboid</Bold> trigger (Min X=10000, Max X=12000,
+        Min Y=2000, Max Y=4000, Min Z=15000, Max Z=17000) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point waits</Paragraph></ListItem>
+        <ListItem><Paragraph>Player moves toward the target building</Paragraph></ListItem>
+        <ListItem><Paragraph>Player enters the second floor room (all coordinates within min/max bounds)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition becomes true, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "You've reached the office" appears, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Player leaves the room</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point stays active (Active listening mode), message stays visible</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Specific Room Objective
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Cuboid</Bold> trigger and <Bold>Active</Bold> listening mode marks
+        reaching a specific room in a building. The cuboid bounds are set to match the room's walls and floor/ceiling,
+        ensuring the trigger only fires when the player is actually in that room, not on the floor above or
+        below. This is the most common use of <Bold>Cuboid</Bold> in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Floor-Specific Spawn
+    </Paragraph>
+    <Paragraph>
+        A Group Life Event Point with <Bold>Cuboid</Bold> trigger and <Bold>Active</Bold> listening mode
+        spawns enemies only when the player reaches a specific floor of a building. The Y-axis bounds ensure
+        the spawn doesn't trigger when the player is on the wrong floor.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Hallway Area Message
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Cuboid</Bold> trigger and <Bold>Active While</Bold> listening mode
+        shows a warning "Restricted area" while the player is in a specific hallway. The rectangular cuboid
+        matches the hallway geometry precisely. When the player leaves, the message disappears.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Rooftop Checkpoint
+    </Paragraph>
+    <Paragraph>
+        A checkpoint Event Point with <Bold>Cuboid</Bold> trigger and <Bold>Active</Bold> listening mode
+        fires only when the player reaches the rooftop of a building. The Y-axis bounds (Min Y = rooftop altitude,
+        Max Y = sky limit) ensure the trigger only fires at the correct altitude, not when the player is at
+        ground level or on lower floors.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Cuboid</Bold> trigger appears in 330 Event Points across retail missions — more than twice as
+        common as <Bold>Radius</Bold> (146 instances). Retail missions prefer <Bold>Cuboid</Bold> for indoor
+        objectives, multi-story buildings, and precise area control. It's the go-to trigger for architectural
+        boundaries.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Min/Max ordering:</Run>
+                <Run> Max values must be greater than Min values for all three axes. If Max X &lt; Min X (or Y or Z), the trigger will never fire because the bounding box is invalid.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Y-axis is altitude:</Run>
+                <Run> In Urban Chaos, Y is the vertical axis (up/down). Min Y is the floor, Max Y is the ceiling. Set these carefully for multi-story buildings — getting them wrong means the trigger fires on the wrong floor.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Testing is critical:</Run>
+                <Run> Cuboid bounds are easy to get wrong because you're setting six coordinates manually. Always test in-game by approaching the area from different angles and altitudes to verify the trigger zone is exactly where you want it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cuboid vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Cuboid</Bold> creates a rectangular box with X, Y, Z bounds. <Bold>Radius</Bold> creates a
+        circular area with X, Z only (no Y checking). Use <Bold>Cuboid</Bold> for precise architectural
+        boundaries and altitude-specific triggers. Use <Bold>Radius</Bold> for simple proximity checks where
+        altitude doesn't matter.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cuboid vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Cuboid</Bold> fires based on player position. <Bold>Dependency</Bold> fires when another Event
+        Point becomes active. Use <Bold>Cuboid</Bold> for location-based triggers. Use <Bold>Dependency</Bold>
+        for logic-based sequencing. Often combined: Event Point A has Cuboid trigger, Event Point B has
+        Dependency on A.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cuboid vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Cuboid</Bold> fires when player enters a rectangular area. <Bold>None</Bold> fires at mission
+        start. Use <Bold>Cuboid</Bold> for events that should happen in a specific location. Use <Bold>None</Bold>
+        for immediate, unconditional activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Cuboid Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the rectangular area where the Event Point should trigger (room, hallway, floor, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point and configure its type</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Cuboid</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Use the Map View to find X, Z coordinates at opposite corners of the area</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Min X and Max X to span the area horizontally</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Min Z and Max Z to span the area vertically (in map view)</Paragraph></ListItem>
+        <ListItem><Paragraph>Use map data or in-game testing to find the floor and ceiling altitudes</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Min Y (floor altitude) and Max Y (ceiling altitude)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify Max X &gt; Min X, Max Y &gt; Min Y, Max Z &gt; Min Z</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for checkpoints, Active While for area messages)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by approaching from different directions and altitudes</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger only fires when inside the intended area</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust bounds if the trigger zone is too large or too small</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use the Map View to find X, Z coordinates by clicking opposite corners of the room or area. For Y coordinates, check the map's floor prims to find altitude values. Write these down before setting the cuboid bounds.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

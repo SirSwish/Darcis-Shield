@@ -1,0 +1,48 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Adjust NPC Event Point</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Changes NPC behaviour, state, or mission role after another condition is met.</Paragraph>
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">What It Does</Paragraph>
+    <Paragraph Margin="0,0,0,6">Adjust NPC Event Points alter an existing character rather than creating a new one. They are useful for changing behaviour after dialogue, objectives, alarms, counters, or player actions.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">When To Use It</Paragraph>
+    <List MarkerStyle="Disc" Margin="18,2,0,8">
+        <ListItem><Paragraph>Use when the mission needs this specific behaviour as part of a scripted chain.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use with Dependency, Radius, Counter, Conversation Over, or other state triggers depending on the gameplay moment.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use after confirming that any referenced person, vehicle, thing, counter, or group exists before the Event Point fires.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Important Properties</Paragraph>
+    <List MarkerStyle="Disc" Margin="18,2,0,8">
+        <ListItem><Paragraph>The main reference identifies the target NPC.</Paragraph></ListItem>
+        <ListItem><Paragraph>Position and Y altitude matter whenever the trigger or effect is spatial.</Paragraph></ListItem>
+        <ListItem><Paragraph>Colour and letter group should match the related objective chain for debugging.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Trigger Usage</Paragraph>
+    <Paragraph Margin="0,0,0,6">This Event Point should usually be driven by the mission condition that makes the the behaviour or state change valid. Active Die is safest for one-time actions; Active While is useful only when the behaviour should track a live condition.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Practical Workflow</Paragraph>
+    <List MarkerStyle="Disc" Margin="18,2,0,8">
+        <ListItem><Paragraph>Create or identify the Event Point that supplies the target NPC.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create this Event Point and set its references, position, and type-specific values.</Paragraph></ListItem>
+        <ListItem><Paragraph>Connect it to the trigger that represents the intended mission moment.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the before, during, and after states so the effect does not fire too early or repeat unexpectedly.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Notes And Checks</Paragraph>
+    <List MarkerStyle="Disc" Margin="18,2,0,8">
+        <ListItem><Paragraph>If it appears to do nothing, verify the referenced Event Point exists at trigger time.</Paragraph></ListItem>
+        <ListItem><Paragraph>Unexpected repetition usually means the trigger remains true or the listening mode is too persistent.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep related Event Points close in colour/letter grouping so debug search remains useful.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

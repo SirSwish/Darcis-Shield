@@ -1,0 +1,283 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Shake Camera Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Shakes the player's camera view to emphasize explosions, impacts, environmental events, or dramatic mission moments.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Shake Camera Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Shake Camera</Bold> Event Point applies a camera shake effect to the player's view.
+        This creates visual feedback for explosions, heavy impacts, collapsing structures, machine
+        operations, or dramatic scripted moments. The shake effect makes events feel more impactful
+        and helps draw the player's attention to important mission beats.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Shake Camera is very rare in retail missions — only <Bold>3</Bold> instances exist across all
+        76 retail missions. All three use <Bold>Dependency</Bold> triggers with <Bold>Active While</Bold>
+        listening mode, meaning the camera shakes continuously as long as the triggering Event Point
+        remains active. This pattern is typically used for ongoing events like machine operations or
+        boss battle attacks.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Place a Shake Camera Event Point where the shake effect should be centered. Connect it to the Event Point that represents the explosion, impact, or event that should cause the shake. When that Event Point fires, the camera shakes.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Shake Camera uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. <Bold>Position</Bold> defines where the
+        shake effect is centered or applied. <Bold>Trigger settings</Bold> control when the shake
+        happens and which Event Point causes it. Colour and letter group can be used to visually
+        associate the Shake Camera with related explosion or event Event Points.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position places the Shake Camera Event Point at the location where the shake effect should
+        occur. This is typically near the explosion, impact zone, or event that causes the shake. The
+        position may affect the shake's intensity or spatial feel, depending on how the game engine
+        implements the effect.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Y Altitude
+    </Paragraph>
+    <Paragraph>
+        Y altitude should match the vertical position of the event causing the shake. For explosions
+        or impacts on the ground, use ground-level Y values. For events on rooftops or elevated
+        platforms, use the appropriate height.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        All retail Shake Camera Event Points use <Bold>Dependency</Bold>, which causes the shake when
+        another Event Point fires. The dependency target is typically an explosion, boss attack,
+        machine activation, or other dramatic event.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        All retail Shake Camera examples use <Bold>Active While</Bold>, which keeps shaking the camera
+        as long as the dependency Event Point remains active. This is appropriate for ongoing events
+        like continuous explosions or machine operations. <Bold>Active</Bold> would be appropriate for
+        a one-time shake from a single explosion or impact.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Shake Camera-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Shake Camera has <Bold>no type-specific Data settings</Bold>. The Event Point's behaviour is
+        entirely determined by its presence and the common properties (position, trigger, listening
+        mode). The shake intensity, duration, and pattern are controlled by the game engine based on
+        when and how the Event Point fires.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Shake Camera is a presence-based Event Point with no configuration. Add it near the explosion or event, connect it via Dependency to the triggering Event Point, and use Active While for continuous shake or Active for a one-time shake.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Shake Camera
+    </Paragraph>
+    <Paragraph>
+        All retail Shake Camera Event Points use <Bold>Dependency</Bold> with <Bold>Active While</Bold>,
+        meaning the shake happens continuously as long as the dependency Event Point is active. Other
+        plausible trigger patterns include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active While</Bold> - the observed retail pattern. The camera shakes continuously as long as the dependency Event Point remains active. Used for ongoing events like machine operations or continuous explosions.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - would shake the camera once when the dependency Event Point fires, appropriate for a single explosion or impact.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius</Bold> with <Bold>Active</Bold> - would shake the camera when the player enters the area, useful for proximity-triggered explosions or environmental hazards.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - would shake the camera at mission start, though this is uncommon and not observed in retail.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Camera shake should be used sparingly for dramatic moments. Overusing it or shaking too frequently can be disorienting or annoying to players. Reserve it for significant impacts, explosions, or boss attacks.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Shake Camera Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Continuous Shake During Event</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active While</Bold> when the camera should shake
+        continuously while an event is ongoing. This is the only observed retail pattern and is
+        appropriate for machine operations, continuous explosions, or boss battle attacks.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>factory1.ucm</Bold>, Shake Camera <Bold>479</Bold> uses <Bold>Dependency</Bold> on
+        Event Point <Bold>478</Bold> with listening mode <Bold>Active While</Bold>. It is placed at
+        position X: 20817, Y: 5760, Z: 18809. As long as Event Point 478 remains active, the camera
+        shakes continuously. This is likely tied to a machine or environmental event in the factory
+        mission.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Shake Camera</Bold> Event Point near the event that should cause the shake. Set
+        <Bold>Triggered By</Bold> to <Bold>Dependency</Bold>, <Bold>EP Ref</Bold> to the Event Point
+        that represents the ongoing event, and listening mode to <Bold>Active While</Bold>. The camera
+        will shake continuously while the dependency Event Point is active.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Boss Battle Shake</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active While</Bold> when a boss attack or special move
+        should shake the camera. The dependency target is the boss attack Event Point.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Finale1.ucm</Bold>, Shake Camera <Bold>108</Bold> uses <Bold>Dependency</Bold> on
+        Event Point <Bold>187</Bold> with listening mode <Bold>Active While</Bold>. It is placed at
+        position X: 12617, Y: 1792, Z: 9380. In <Bold>Finale1b.ucm</Bold>, Shake Camera <Bold>108</Bold>
+        is at the same position but depends on Event Point <Bold>130</Bold>. Both are finale missions
+        where the player battles the final boss, suggesting the camera shake is tied to boss attacks
+        or environmental effects during the boss battle.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Shake Camera</Bold> Event Point near the boss battle area. Set <Bold>Triggered
+        By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that
+        represents the boss attack or special move. Use listening mode <Bold>Active While</Bold> if the
+        attack causes continuous shaking, or <Bold>Active</Bold> if it should shake once per attack.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">One-Time Explosion Shake</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active</Bold> when a single explosion or impact should
+        shake the camera once. This is not observed in retail but is a plausible pattern for scripted
+        explosions.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission has a scripted explosion when the player destroys a target or completes an objective.
+        The Shake Camera Event Point uses <Bold>Dependency</Bold> on the explosion Event Point with
+        listening mode <Bold>Active</Bold>. When the explosion fires, the camera shakes once to
+        emphasize the impact.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the
+        explosion or impact Event Point. Use listening mode <Bold>Active</Bold> for a one-time shake.
+        This creates a brief shake effect when the explosion fires without continuous shaking.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Proximity-Triggered Shake</Paragraph>
+    <Paragraph>
+        Use <Bold>Radius</Bold> with <Bold>Active</Bold> if the camera should shake when the player
+        approaches a hazard, unstable structure, or environmental danger. This is not observed in
+        retail but would be plausible for environmental storytelling.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission has a collapsing bridge or unstable platform. The Shake Camera Event Point uses
+        <Bold>Radius</Bold> trigger with an appropriate radius value and listening mode <Bold>Active</Bold>.
+        When the player gets close, the camera shakes once to indicate danger or instability.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Shake Camera Event Point at the hazard location. Set <Bold>Triggered By</Bold> to
+        <Bold>Radius</Bold>, set an appropriate radius value, and use listening mode <Bold>Active</Bold>
+        so the shake triggers once when the player approaches.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Very Rare Usage In Retail</Paragraph>
+    <Paragraph>
+        Shake Camera appears in only 3 of 16,259 Event Points across 76 retail missions. This suggests
+        camera shake is reserved for very specific dramatic moments and is not a general-purpose feature.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed pattern</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        All three retail Shake Camera instances use <Bold>Dependency</Bold> with <Bold>Active While</Bold>.
+        Two are in finale missions (<Bold>Finale1.ucm</Bold> and <Bold>Finale1b.ucm</Bold>) during the
+        final boss battle, and one is in <Bold>factory1.ucm</Bold>, likely tied to a machine or
+        environmental event. No retail missions use Shake Camera for general explosions, gunfire, or
+        minor impacts.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to apply</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Only use Shake Camera for significant dramatic moments like boss attacks, major explosions, or
+        environmental catastrophes. Overusing camera shake can be disorienting and reduce its impact.
+        If every explosion shakes the camera, none of them feel special.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Shake Camera Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the explosion, impact, boss attack, or event that should cause the camera shake.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm this event is dramatic or significant enough to warrant camera shake. Reserve shake for major moments, not minor impacts.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Shake Camera</Bold> Event Point near the event location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust the Event Point's <Bold>position</Bold> and <Bold>Y altitude</Bold> to match the event's location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that represents the triggering event.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use listening mode <Bold>Active While</Bold> for continuous shaking (ongoing events) or <Bold>Active</Bold> for a one-time shake (single explosion).</Paragraph></ListItem>
+        <ListItem><Paragraph>For proximity-triggered shake, use <Bold>Radius</Bold> instead of <Bold>Dependency</Bold> and configure the radius value.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the shake in-game and confirm it fires at the correct moment, feels impactful without being excessive, and does not repeat unexpectedly.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Active While, ensure the dependency Event Point eventually becomes inactive so the shake stops. Endless shaking is disorienting.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The event is significant enough to warrant camera shake, the Shake Camera is positioned at the event location, the dependency or trigger fires only at the intended moment, and the shake does not last indefinitely or repeat excessively.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,14 @@
+Mission Editor Help Image Capture Guide - Activate Prim
+==================================================
+
+ActivatePrimEventPoint.xaml
+---------------------------
+mission_activate_prim_overview.png - Mission viewport showing an Activate Prim Event Point near a blue gate.
+mission_activate_prim_add_type.png - Add New EventPoint window with Activate Prim selected.
+mission_activate_prim_common_properties.png - Edit EventPoint window showing common properties such as index, type, group, colour, position, trigger, and listening mode.
+mission_activate_prim_position_near_gate.png - Map view showing Activate Prim placed directly on or near a blue gate.
+mission_activate_prim_type_dropdown.png - Prim Type dropdown showing Door, Electric Fence, Security Cam, and Anim Prim.
+mission_activate_prim_gate_switch_setup.png - Map view showing the switch prim, Simple Waypoint, Activate Prim Event Point, and gate together.
+mission_activate_prim_simple_waypoint_switch.png - Simple Waypoint settings showing Player Uses in Radius, Listening Mode None, and radius around 128.
+mission_activate_prim_dependency_settings.png - Activate Prim settings showing Triggered By Dependency, Listening Mode Active, Prim Type Door, and Dependency EP pointing to the Simple Waypoint.
+mission_activate_prim_electric_fence.png - Activate Prim configured for Electric Fence, preferably placed near a fence section.

@@ -2,12 +2,71 @@
               Foreground="#E0E0E0" Background="#1E1F22"
               FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
     <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Map &amp; Lights Overlays</Paragraph>
-    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Display the IAM map, object graphics, and light data underneath mission markers.</Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Display the loaded map, roof data, altitude cells, objects, lighting, and mission markers while placing Event Points and zones.</Paragraph>
     <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
+
     <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Reference Layers</Paragraph>
-    <Paragraph>Grid, textures, buildings, objects, lights, light ranges, event points, and event point radii can be toggled independently. Use map layers for spatial editing and light layers when checking visibility or ambience around mission events.</Paragraph>
-    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">3D View</Paragraph>
-    <Paragraph>The 3D view plots event points with their EP number and radius while retaining their colour order. Light overlays can be shown or hidden separately when the mission has companion lighting data.</Paragraph>
+    <Paragraph>The Mission Editor can show map and light data underneath mission data so you can place Event Points and zones in context. Grid, textures, buildings, objects, roof tiles, altitude cells, lights, light ranges, Event Points, and Event Point labels can be toggled independently.</Paragraph>
+    <Paragraph Margin="0,6,0,0">Use map layers for spatial placement. Textures and buildings help identify streets, rooms, roofs, doors, fences, and walls. Roof tiles and altitude cells help confirm height-sensitive placement, especially when placing Event Points above ground level or near walkable roof areas.</Paragraph>
+    <Paragraph Margin="0,6,0,0">Use light overlays when checking visibility, mood, and placement around mission events. Lights and light ranges can be switched on or off separately, which is useful when you want to see whether an Event Point sits in a lit area without hiding the rest of the mission.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Switching Layers On and Off</Paragraph>
+    <Paragraph>Layer buttons let you reduce the view to only the information you need. If the viewport is visually busy, switch off buildings, objects, lights, zones, or Event Points temporarily, then re-enable them when you need to verify relationships between systems.</Paragraph>
+    <Paragraph Margin="0,6,0,0">This is especially useful when placing a mission marker near dense geometry. For example, you can enable textures and buildings to place the marker, enable roof tiles and altitudes to confirm its height, then enable lights to confirm how the area reads in the mission.</Paragraph>
+    <Paragraph Margin="0,6,0,0">Event Points can be switched on and off independently from the map and light overlays. In the 3D view, Event Points and lights also have their own visibility controls so you can inspect mission logic without losing the environmental reference.</Paragraph>
+
     <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Companion Editors</Paragraph>
-    <Paragraph><Bold>Edit Map</Bold> and <Bold>Edit Lights</Bold> launch the loaded files in the dedicated editors, keeping the mission workflow connected when a placement issue belongs to map geometry or lighting.</Paragraph>
+    <Paragraph><Bold>Edit Map</Bold> opens the loaded IAM map in the dedicated Map Editor. Use this when a placement issue is really caused by map geometry, roof tiles, altitude values, walkables, buildings, textures, or objects.</Paragraph>
+    <Paragraph Margin="0,6,0,0"><Bold>Edit Light</Bold> opens the loaded light data in the dedicated Light Editor. Use this when a mission event needs lighting changes, light range adjustments, ambient preview checks, or object placement relative to lights.</Paragraph>
+    <Paragraph Margin="0,6,0,0">These buttons keep the mission workflow connected. You can inspect and edit the source map or light file directly, then return to the Mission Editor with clearer context for Event Point and zone placement.</Paragraph>
+
+    <BlockUIContainer Margin="0,12,0,12">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Tip:</Run>
+                <Run>Use the Mission Editor for mission logic placement, the Map Editor for geometry and cell data, and the Light Editor for lighting. The overlay buttons are there to help you decide which editor owns the thing you are looking at.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">3D View</Paragraph>
+    <Paragraph>The <Bold>3D View</Bold> gives you a live three-dimensional visualisation of the current mission area. It uses the loaded map as the world reference and plots mission data on top of it, so you can inspect placement from an in-world perspective rather than only from the 2D grid.</Paragraph>
+    <Paragraph Margin="0,6,0,0">Use the 3D view to check whether Event Points are at the correct height, whether mission markers are hidden behind buildings, whether roof or altitude placement makes sense, and whether lights line up with the intended gameplay area.</Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">3D Layer Visibility</Paragraph>
+    <Paragraph>The 3D view supports layer visibility for the rendered map, lights, and Event Points. You can switch <Bold>Lights</Bold> on or off when checking lighting context, and switch <Bold>Event Points</Bold> on or off when you want to inspect the map without mission markers in the way.</Paragraph>
+    <Paragraph Margin="0,6,0,0">Event Points are drawn with their EP number and colour order so they remain identifiable in 3D. Light overlays can be shown separately to help judge whether events occur in dark, bright, or specially lit spaces.</Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">Camera Controls</Paragraph>
+    <Paragraph>The 3D view uses keyboard controls for movement and looking around the mission area.</Paragraph>
+    <List MarkerStyle="Disc" Margin="16,4,0,0" Foreground="#E0E0E0">
+        <ListItem><Paragraph><Bold>W</Bold> = move forward</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>S</Bold> = move backward</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>A</Bold> = move left</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>D</Bold> = move right</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>E</Bold> = move upward / elevate the camera</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Q</Bold> = move downward / lower the camera</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Arrow keys</Bold> = look around</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Navigation advice:</Run>
+                <Run>Use WASD and Q/E to position the camera, then use the arrow keys to line up the angle you want. This is useful when checking Event Points on rooftops, around stairs, beside building entrances, or inside light ranges.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9ECBFF" Margin="0,12,0,4">Live Updates and Performance</Paragraph>
+    <Paragraph>The 3D view updates as the mission and map display state changes. Larger maps and dense building layers can be more expensive to render, so use the layer buttons and draw-distance controls to simplify the scene while you work.</Paragraph>
+    <Paragraph Margin="0,6,0,0">For best results, do detailed placement in the 2D view first, then use the 3D view to review the result. If the 3D view feels busy or slow, hide buildings, lights, or Event Points until you are looking at only the layer you need.</Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Worked Example</Paragraph>
+    <Paragraph>A common workflow is to place an Event Point in 2D, then confirm the result using map and light overlays.</Paragraph>
+    <Paragraph Margin="0,8,0,2"><Bold>Step 1:</Bold> Enable textures and buildings to identify the correct street, room, roof, or object.</Paragraph>
+    <Paragraph Margin="0,4,0,2"><Bold>Step 2:</Bold> Enable roof tiles and altitudes if the placement depends on height.</Paragraph>
+    <Paragraph Margin="0,4,0,2"><Bold>Step 3:</Bold> Enable lights or light ranges if the event should be visible, hidden, or affected by a specific lighting area.</Paragraph>
+    <Paragraph Margin="0,4,0,2"><Bold>Step 4:</Bold> Place or adjust the Event Point, then open the 3D view to check the placement from an in-world angle.</Paragraph>
+    <Paragraph Margin="0,4,0,2"><Bold>Step 5:</Bold> If the map or lighting itself needs changing, use <Bold>Edit Map</Bold> or <Bold>Edit Light</Bold> to open the companion editor directly.</Paragraph>
 </FlowDocument>

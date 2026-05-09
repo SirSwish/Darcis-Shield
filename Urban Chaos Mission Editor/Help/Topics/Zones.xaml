@@ -1,11 +1,182 @@
 <FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-              Foreground="#E0E0E0" Background="#1E1F22"
-              FontFamily="Segoe UI" FontSize="14" PagePadding="32,24,32,24" ColumnWidth="100000">
-    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">Zones</Paragraph>
-    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">Paint gameplay regions such as inside, reverb, no-wander, no-go, and custom zones.</Paragraph>
-    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,0,0,12"/></BlockUIContainer>
-    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">Painting Zones</Paragraph>
-    <Paragraph>Enable <Bold>Paint Zone Mode</Bold>, choose a Zone Type, then click and drag over cells on the map. Enable <Bold>Erase Zone Mode</Bold> to remove zone data. <Bold>Clear All Zones</Bold> removes every painted mission zone.</Paragraph>
-    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,14,0,4">Layer Visibility</Paragraph>
-    <Paragraph><Bold>Show Zones</Bold> controls whether painted zones are drawn. This is separate from event point and map layers, so you can inspect zone coverage without hiding mission markers.</Paragraph>
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Zones
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Paint per-cell mission overlays used for indoor markers, audio ambience,
+        pedestrian avoidance, AI restriction areas, and hard navigation blockers.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Zones Do
+    </Paragraph>
+    <Paragraph>
+        Zones are mission-specific flags painted onto individual map cells. They do not replace the
+        base map, buildings, roofs, lights, or Event Points. Instead, they sit on top of the loaded
+        map and provide extra information that the mission can use for AI movement, ambience, and
+        blocked areas.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Multiple zone flags can be combined on the same cell. For example, a cell can be both
+        <Bold>No Wander</Bold> and <Bold>Reverb</Bold> if civilians should avoid the area and the
+        space should behave like an echo-heavy interior.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use zones to describe how cells should behave for mission logic. Use map geometry for visible structure, Event Points for scripted behaviour, and zones for cell-level movement or environment rules.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Painting Zones
+    </Paragraph>
+    <Paragraph>
+        Enable <Bold>Paint Zone Mode</Bold>, choose a <Bold>Zone Type</Bold>, then click and drag
+        over cells on the map. Enable <Bold>Erase Zone Mode</Bold> to remove zone data.
+        <Bold>Clear All Zones</Bold> removes every painted mission zone from the current mission.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Use map and light overlays while painting zones. Textures, buildings, objects, lights,
+        light ranges, roof tiles, altitude cells, and Event Points can all help you place zones in
+        the correct part of the world instead of working from the grid alone.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Zone Types
+    </Paragraph>
+    <Paragraph>
+        The original editor exposes the following zone flags. They are best understood as separate
+        behaviours that can be painted onto cells as needed.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Indoors</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Marks this cell as an indoor zone. This is mostly legacy or rarely used, but may be used by
+        some indoor, warehouse, or special-case mission logic to identify internal areas.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Use it when an area is clearly inside a building-like space and you want the mission data
+        to preserve that intent. Do not use it as a hard movement blocker; use <Bold>No Go</Bold>
+        for blocked navigation.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Reverb</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Marks this cell as a reverb or echo area for sound ambience. It is intended for enclosed or
+        echo-heavy spaces such as warehouses, tunnels, large rooms, and underground-style areas.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Treat this as an audio environment flag. It should not be used to control pedestrian
+        movement, enemy restrictions, or player blocking unless runtime code for a specific mission
+        proves otherwise.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">No Wander</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Prevents normal wandering pedestrians and ambient NPCs from choosing or drifting into this
+        cell. This is not the same as blocking the player, and it is not the same as disabling all
+        navigation.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Use <Bold>No Wander</Bold> for roads, mission-only spaces, private areas, rooftops,
+        dangerous areas, or anywhere ambient civilians should not casually walk into.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">
+        Blue Zone, Cyan Zone, Yellow Zone, and Magenta Zone
+    </Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Colour zones are AI movement restriction regions. NPCs with matching zone restriction flags
+        can use the matching painted cells to decide where they are allowed to move, remain, or
+        patrol.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        For example, if an enemy has the <Bold>Blue Zone</Bold> restriction flag and the map
+        contains cells painted as <Bold>Blue Zone</Bold>, that enemy is intended to stay within or
+        use the blue-zoned area. This is useful for keeping groups of NPCs in separate regions
+        without needing visible physical blockers.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Use one colour consistently for one logical area or group. Avoid mixing colour zones unless
+        you are deliberately building overlapping AI control regions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">No Go</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>No Go</Bold> is the strongest movement-blocking zone. It marks the cell as not
+        navigable and is intended to prevent people, AI, and vehicles from pathing through the
+        square.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        Use <Bold>No Go</Bold> for hard boundaries, blocked roads, map edges, invisible blockers,
+        impassable hazards, and areas that should not be entered through normal movement.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2A3A" BorderBrush="#4A4A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#B0B0E0">
+                <Run FontWeight="Bold">Important distinction:</Run>
+                <Run> No Wander means ambient characters should not randomly choose the area. No Go means the cell should not be navigated or entered normally. Colour zones restrict or guide matching NPC groups. Reverb is sound and environment data. Indoors is an indoor or legacy marker.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Quick Reference
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Indoors</Bold> - marks a cell as indoor or internal; probably legacy or special-case.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Reverb</Bold> - marks an audio echo or reverb area.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>No Wander</Bold> - tells ambient pedestrians not to wander into this cell.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Blue Zone</Bold> - AI restriction zone colour 1.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cyan Zone</Bold> - AI restriction zone colour 2.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Yellow Zone</Bold> - AI restriction zone colour 3.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Magenta Zone</Bold> - AI restriction zone colour 4.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>No Go</Bold> - hard navigation blocker for people, AI, and vehicles.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Layer Visibility
+    </Paragraph>
+    <Paragraph>
+        <Bold>Show Zones</Bold> controls whether painted zones are drawn. This is separate from
+        Event Point, map, roof, altitude, and light layers, so you can inspect zone coverage without
+        hiding the rest of the mission data.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        When zone placement is hard to read, switch off unrelated layers temporarily, then bring
+        textures, buildings, lights, or Event Points back one at a time to confirm the zone is in
+        the right place.
+    </Paragraph>
 </FlowDocument>

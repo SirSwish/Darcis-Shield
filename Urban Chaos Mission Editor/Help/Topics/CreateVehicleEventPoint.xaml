@@ -1,0 +1,613 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Vehicle Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Spawns a vehicle at the Event Point position, including civilian cars, taxis, police vehicles, vans, ambulances, SUVs, and helicopter-related mission vehicles.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Create Vehicle Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Create Vehicle</Bold> Event Point creates a vehicle at the selected Event Point
+        position. This can be used to place a player-drivable car, a locked mission vehicle, a patrol
+        vehicle, a police vehicle, an ambulance, a van, an SUV, or a helicopter-style mission object.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The main things you control are the vehicle type, where it spawns, whether it is usable by
+        the player, whether it requires a key, and whether it should perform special behaviour such
+        as patrol or helicopter tracking.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple summary:</Run>
+                <Run>
+                    Create Vehicle places one vehicle at the Event Point position. Vehicle behaviour depends on the selected vehicle type,
+                    behaviour mode, key requirement, and any linked driver or Target EP setup.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Create Vehicle Event Point
+    </Paragraph>
+    <Paragraph>
+        To add a vehicle, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Create Vehicle</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the normal common properties and the
+        Create Vehicle-specific settings.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Create Vehicle uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>position</Bold> controls where the vehicle spawns. The <Bold>facing direction</Bold>
+        controls the direction the vehicle faces when it appears.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Select Position on Map</Bold> to place the vehicle in the viewport. Vehicles should
+        normally be placed on a road, driveway, parking area, open yard, or other flat place where
+        the game can spawn them cleanly.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Avoid placing vehicles inside buildings, inside other objects, too close to walls, or in
+        places where the player or driver AI cannot reasonably reach them.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Facing Direction
+    </Paragraph>
+    <Paragraph>
+        Select the Event Point and rotate the orange facing handle if the vehicle should face a
+        specific direction. This is especially important for player vehicles, patrol vehicles, and
+        parked cars that should line up with roads or parking spaces.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_position_facing.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Vehicle Type
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Type</Bold> field controls which vehicle is spawned at the Event Point position.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_type_dropdown.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Car / Civilian Sedan</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A standard civilian car. Useful for general player vehicles, parked cars, traffic scenes, or
+        mission escape vehicles.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Van / Civilian Van</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A civilian van. Useful for service vehicles, industrial areas, delivery scenes, or mission
+        transport setups.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Taxi</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A taxi vehicle. Useful for city scenes, roads, transport areas, or urban traffic dressing.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Helicopter</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A helicopter-style mission vehicle. The player cannot use this like a normal drivable car.
+        Helicopter-specific behaviours include <Bold>Guard</Bold> and <Bold>Track</Bold>.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Motorbike</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Listed as a vehicle type, but does not appear to spawn in the retail version of the game.
+        Treat it as unavailable unless specifically testing engine behaviour.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Police Sedan</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A police car. Useful for police scenes, chases, patrols, and mission setups involving law
+        enforcement.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Ambulance</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        An ambulance vehicle. Useful for emergency scenes, hospitals, accidents, or scripted city
+        incidents.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Police SUV</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A police SUV. Useful for heavier police presence, roadblocks, chase scenes, or tactical
+        police staging.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Civilian SUV</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A civilian SUV. Useful for residential, road, parking, or mission transport scenes.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Soft-Top Sedan</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A soft-top civilian-style sedan. Useful for variety in parked or usable vehicle placement.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Wildcat Van</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A Wildcat van. Useful where a more specific gang, team, or mission vehicle is required.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Retail-version note:</Run>
+                <Run>
+                    Motorbike appears in the vehicle list but does not appear to spawn in the retail version.
+                    Helicopter exists, but the player cannot use it like a normal vehicle.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Vehicle Behaviour
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Behaviour</Bold> field controls what the vehicle is intended to do after it spawns.
+        Some behaviours only make sense for certain vehicle types or require additional Event Points.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_behaviour_dropdown.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Drives</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The vehicle is stationary and is intended for the player to drive. This is the typical option
+        for a mission car, escape vehicle, parked vehicle, or player-usable transport.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Patrol</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        If the vehicle is occupied by a driver, it will travel to waypoints. This requires a correctly
+        configured driver NPC and suitable waypoints.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical Patrol requirement:</Run>
+                <Run>
+                    Patrol does not work by vehicle behaviour alone. The vehicle needs an occupied driver,
+                    and that driver should be configured with AI Type = Driver and Movement = Patrol Waypoints in order.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph Margin="24,6,0,0">
+        For a patrol vehicle, the driver NPC should be set up with:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>AI Type:</Bold> Driver.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Movement:</Bold> Patrol Waypoints (in order).</Paragraph></ListItem>
+        <ListItem><Paragraph>Appropriate waypoint Event Points for the route.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,10,0,1">Guard</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Used only for <Bold>Helicopter</Bold> vehicles. This keeps the helicopter grounded or landed
+        and prevents it from moving away.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Track</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Used only for <Bold>Helicopter</Bold> vehicles. The helicopter tracks a specific Event Point
+        specified in the <Bold>Target EP</Bold> field.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Target EP
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Target EP</Bold> field is used for vehicle behaviours that need a target reference.
+        In this setup, it is mainly relevant to the <Bold>Track</Bold> behaviour used by helicopters.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If a helicopter is set to <Bold>Track</Bold>, Target EP should be the Event Point number that
+        the helicopter should track.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical Target EP detail:</Run>
+                <Run>
+                    Target EP must point to the Event Point that should be tracked.
+                    Do not put the Create Vehicle Event Point's own number here unless that is deliberately the target.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_target_ep.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Key Required
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Key Required</Bold> field controls whether the player can enter the vehicle
+        immediately, needs a key, or cannot enter the vehicle at all.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_key_required.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Unlocked</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        No key is required. The vehicle is available to the player if the vehicle type and behaviour
+        allow player use. This is the most common setup for player vehicles.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Red Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The vehicle is locked unless the player has collected a <Bold>Key</Bold> item. This can be
+        created with the <Bold>Create Item</Bold> Event Point and used to build more complex mission
+        logic.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Blue Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">Listed as an option but appears unused.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Green Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">Listed as an option but appears unused.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Black Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">Listed as an option but appears unused.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">White Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">Listed as an option but appears unused.</Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Locked</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The car is locked and cannot be entered by the player.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Typical setup:</Run>
+                <Run>
+                    Player vehicles are usually Unlocked. Use Red Key or Locked only when you want mission logic to control access.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Key-Based Vehicle Logic
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Red Key</Bold> option can be used to build mission logic where the player must
+        collect a key before entering a vehicle.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A common setup is:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Player searches body/object -> finds Key -> collects Key -> Red Key vehicle can be driven
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        This usually involves combining Create Vehicle with other Event Points:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Create Vehicle</Bold> — creates the vehicle and sets Key Required to Red Key.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Create Item</Bold> — creates the Key item.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Item Hidden in Prim</Bold> or <Bold>Make Searchable</Bold> — can be used if the key is found by searching an object/body.</Paragraph></ListItem>
+        <ListItem><Paragraph>Optional mission triggers or messages to guide the player to the key.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        This allows more complex mission sequences such as finding a key on a dead body, searching a
+        vehicle, unlocking an escape car, or requiring the player to complete an objective before
+        they can drive away.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Key logic warning:</Run>
+                <Run>
+                    Red Key vehicle access depends on the player actually collecting the Key item.
+                    Make sure the Key item is created, reachable, and collectible before the player is expected to use the vehicle.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Locking Vehicles with Mission Logic
+    </Paragraph>
+    <Paragraph>
+        Vehicles are commonly created as <Bold>Unlocked</Bold> when they are intended for the player.
+        There is also a separate Event Point available to lock vehicles, which can be scripted behind
+        mission logic.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This means you can create a vehicle normally, then use another Event Point later to lock or
+        control access to it based on mission state.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Like other Event Points, Create Vehicle can spawn immediately or be placed behind mission
+        logic.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Spawn Immediately
+    </Paragraph>
+    <Paragraph>
+        If the vehicle should exist as soon as the mission begins, use:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Spawn Later
+    </Paragraph>
+    <Paragraph>
+        If the vehicle should appear only after some mission condition, use a trigger such as:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> — after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Enters Radius</Bold> — when the player enters a location.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Finished</Bold> — after dialogue completes.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Counter Reaches Value</Bold> — after a mission counter reaches a required value.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Timer</Bold> — after a timed delay.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_vehicle_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Practical Examples
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Simple Player Car</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a civilian car, set Behaviour to <Bold>Player Drives</Bold>, set Key Required to
+        <Bold>Unlocked</Bold>, and trigger it from the start of the mission.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Escape Car Requiring a Key</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a vehicle with Key Required set to <Bold>Red Key</Bold>. Create a Key item elsewhere
+        using Create Item. The player must find and collect the key before they can drive the vehicle.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Search Body, Find Key, Drive Car</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use Create Item with <Bold>Item Hidden in Prim</Bold> to hide a Key in a searchable object or
+        body. Set the vehicle to require Red Key. Once the player searches and collects the key, they
+        can enter the vehicle.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Patrol Vehicle</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a vehicle with Behaviour set to <Bold>Patrol</Bold>. Add or configure a driver NPC
+        with <Bold>AI Type = Driver</Bold> and <Bold>Movement = Patrol Waypoints in order</Bold>.
+        Add the appropriate waypoints for the route.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Grounded Helicopter</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a helicopter and set Behaviour to <Bold>Guard</Bold> if it should remain grounded or
+        landed.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Tracking Helicopter</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create a helicopter and set Behaviour to <Bold>Track</Bold>. Set <Bold>Target EP</Bold> to
+        the Event Point the helicopter should track.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Create Vehicle Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Create Vehicle</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a letter group and colour that fits your mission organisation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Select Position on Map</Bold> to place the vehicle.</Paragraph></ListItem>
+        <ListItem><Paragraph>Rotate the facing direction so the vehicle points the correct way.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the <Bold>Vehicle Type</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the <Bold>Behaviour</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the <Bold>Key Required</Bold> setting.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using helicopter Track behaviour, set <Bold>Target EP</Bold> correctly.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Patrol behaviour, create/configure the driver NPC and waypoints.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger that spawns the vehicle.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save, and test the mission.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Red Key Vehicle Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create a vehicle and set <Bold>Key Required</Bold> to <Bold>Red Key</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create a <Bold>Key</Bold> item using Create Item.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Key visibly, or hide it using <Bold>Item Hidden in Prim</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>If hidden, make sure the correct nearby object becomes searchable.</Paragraph></ListItem>
+        <ListItem><Paragraph>Guide the player to the key using mission messages, objectives, or search clues.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the vehicle cannot be entered before the key is collected.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the vehicle can be entered after the key is collected.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The vehicle does not spawn</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Create Vehicle Event Point exists.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the trigger condition is firing.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test with <Bold>Triggered By: None / Game Starts</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the selected vehicle type works in the retail version.</Paragraph></ListItem>
+        <ListItem><Paragraph>Avoid relying on Motorbike unless specifically testing, as it does not appear to spawn in retail.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The player cannot enter the vehicle</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the <Bold>Key Required</Bold> setting.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Unlocked</Bold> if no key should be required.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using <Bold>Red Key</Bold>, confirm the player can collect the Key item.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the vehicle type is player-usable. Helicopter is not player-usable.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the vehicle is not spawned inside geometry or blocked by objects.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Patrol vehicle does not move</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm Behaviour is set to <Bold>Patrol</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the vehicle has an occupied driver.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the driver NPC uses <Bold>AI Type = Driver</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the driver movement is <Bold>Patrol Waypoints in order</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm waypoint Event Points exist and are reachable.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Helicopter does not track correctly</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the vehicle type is <Bold>Helicopter</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm Behaviour is set to <Bold>Track</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm <Bold>Target EP</Bold> points to the Event Point that should be tracked.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    For most player vehicles, use Player Drives and Unlocked.
+                    Use Red Key, Patrol, Guard, Track, and Target EP only when the mission specifically needs that extra logic.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

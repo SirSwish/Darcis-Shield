@@ -1,0 +1,19 @@
+Mission Editor Help Image Manifest - Camera Event Points
+=====================================================
+
+Place these screenshots under:
+Help/Images/
+
+CameraEventPoints.xaml
+----------------------
+mission_camera_eventpoints_overview.png
+mission_camera_sequence_diagram.png
+mission_camera_create_camera_overview.png
+mission_camera_add_create_camera.png
+mission_camera_type_dropdown.png
+mission_camera_speed_delay.png
+mission_camera_flags.png
+mission_camera_waypoints_overview.png
+mission_camera_waypoint_position.png
+mission_camera_create_target_overview.png
+mission_camera_target_type.png

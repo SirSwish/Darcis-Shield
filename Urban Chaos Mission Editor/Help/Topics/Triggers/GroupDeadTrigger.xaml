@@ -1,0 +1,307 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Group Dead Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when all NPCs of a specific Colour and Group combination are dead. Used by 44 Event Points across retail missions for elimination objectives and group wipe detection.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Group Dead Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Group Dead</Bold> tracks all NPCs that share a specific Colour+Group identifier and fires when
+        every single one is dead. NPCs in Urban Chaos are tagged with a Colour (0-14) and Group letter (A-Z).
+        This trigger monitors all NPCs with the matching Colour+Group combination and fires when none are
+        alive. This is the standard way to create "eliminate all enemies" objectives.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Unlike <Bold>Killed</Bold> which tracks one specific NPC death, or <Bold>Counter</Bold> which tracks
+        a partial quota, <Bold>Group Dead</Bold> requires complete elimination of an entire group. This is
+        essential for "clear the area," "eliminate all hostiles," or "wipe out the gang" style objectives.
+        It automatically tracks group membership — no manual counting required.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Group Dead when this Event Point should fire after all NPCs of a specific Colour+Group are eliminated. Set EP Ref to the Colour (0-14) and EP Ref Bool to the Group (0=A, 1=B, etc.).</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Group Dead Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Group Dead</Bold> trigger when the Event Point should fire after all members of a Colour+Group
+        are eliminated. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Total elimination objectives</Bold> - "Eliminate all enemies in the area"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Wave completion</Bold> - Detect when an enemy wave is completely wiped out</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Area clearance</Bold> - "Clear the building of all hostiles"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gang wipe objectives</Bold> - "Eliminate all gang members"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Progressive spawns</Bold> - Next wave spawns when previous wave is dead</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Clean sweep win conditions</Bold> - Mission succeeds when all enemies are dead</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Colour)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The Colour index (0-14) of the NPCs to track. All NPCs in the mission are tagged with a Colour for
+        identification. This field specifies which Colour to monitor. When combined with EP Ref Bool (Group),
+        this defines the exact Colour+Group to watch.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common Colour values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>0 = Red (typically enemies)</Paragraph></ListItem>
+        <ListItem><Paragraph>1 = Blue (typically allies)</Paragraph></ListItem>
+        <ListItem><Paragraph>2 = Green</Paragraph></ListItem>
+        <ListItem><Paragraph>3 = Yellow</Paragraph></ListItem>
+        <ListItem><Paragraph>...and so on up to 14</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref Bool (Group)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The Group letter (0=A, 1=B, 2=C, etc.) of the NPCs to track. All NPCs are also tagged with a Group
+        letter (A-Z) for sub-categorization. This field specifies which Group to monitor. When combined with
+        EP Ref (Colour), this defines the exact Colour+Group to watch.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Group values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>0 = Group A</Paragraph></ListItem>
+        <ListItem><Paragraph>1 = Group B</Paragraph></ListItem>
+        <ListItem><Paragraph>2 = Group C</Paragraph></ListItem>
+        <ListItem><Paragraph>...and so on (A-Z)</Paragraph></ListItem>
+    </List>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The Colour+Group combination must match NPCs that actually exist in the
+        mission. If you set EP Ref = 0 (Red) and EP Ref Bool = 0 (Group A), but no Red/Group A NPCs are
+        spawned, the trigger fires immediately because zero NPCs are alive (technically all are dead).
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks how many NPCs with the matching Colour+Group are alive. When
+        the count reaches zero (all are dead), the trigger condition is met. Whether the Event Point fires
+        immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when all group members are dead, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while all group members are dead (deactivates if more spawn)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when all are dead, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when all are dead, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Group Dead</Bold> trigger (EP Ref = 0 [Red],
+        EP Ref Bool = 0 [Group A]) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, multiple Group Life Event Points spawn Red/Group A enemies</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point waits for all Red/Group A NPCs to die</Paragraph></ListItem>
+        <ListItem><Paragraph>Player engages enemies, killing them one by one</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger continues waiting while at least one Red/Group A enemy is alive</Paragraph></ListItem>
+        <ListItem><Paragraph>Player kills the last Red/Group A enemy</Paragraph></ListItem>
+        <ListItem><Paragraph>All Red/Group A NPCs are now dead (count = 0)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "All hostiles eliminated" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active and stays active (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Total Elimination Win Condition
+    </Paragraph>
+    <Paragraph>
+        Multiple Group Life Event Points spawn Red/Group A enemies throughout the mission. A Group Dead
+        trigger (EP Ref = 0 [Red], EP Ref Bool = 0 [Group A], Active) fires a Win Event Point when all
+        enemies are dead. This is the most common use of Group Dead in retail missions — "kill all enemies
+        to win."
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Wave Completion Detection
+    </Paragraph>
+    <Paragraph>
+        Event Point A spawns wave 1 enemies as Red/Group A (Active). Event Point B is a Group Dead trigger
+        (EP Ref = 0 [Red], EP Ref Bool = 0 [Group A], Active). Event Point C spawns wave 2 enemies as
+        Red/Group B with Dependency on B (Active). When wave 1 is eliminated, wave 2 spawns. This creates
+        progressive wave combat.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Area Clearance Objective
+    </Paragraph>
+    <Paragraph>
+        Different buildings have enemies with different Colour+Group tags: Building 1 has Red/Group A,
+        Building 2 has Red/Group B. Separate Group Dead triggers track each building. A Boolean And combines
+        both Group Dead triggers to create "clear all buildings" objective requiring total elimination.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Gang Elimination Mission
+    </Paragraph>
+    <Paragraph>
+        A specific gang is tagged as Yellow/Group C. A Group Dead trigger (EP Ref = 3 [Yellow], EP Ref Bool = 2
+        [Group C], Active) fires a Message "Gang eliminated" and unlocks the next objective. This creates
+        "eliminate specific gang" missions distinct from general enemy elimination.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Progressive Difficulty
+    </Paragraph>
+    <Paragraph>
+        Event Point A spawns easy enemies as Red/Group A (Active). Event Point B is a Group Dead trigger
+        (EP Ref = 0 [Red], EP Ref Bool = 0 [Group A], Active). Event Point C spawns harder enemies as
+        Red/Group B with Dependency on B (Active). Difficulty increases as each group is eliminated.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Group Dead</Bold> trigger appears in 44 Event Points across retail missions. It's commonly used
+        for total elimination win conditions and wave progression. Retail missions prefer Group Dead over
+        Counter triggers for "kill all enemies" objectives because it automatically tracks group membership
+        without manual counting.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use Red/Group A for primary enemies and Group Dead → Win condition. Different Groups (B, C, D) are used for separate waves or gangs. Colours beyond Red (Blue, Green, Yellow) are used for faction-specific elimination objectives.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Colour+Group must match spawns:</Run>
+                <Run> The Colour+Group values (EP Ref and EP Ref Bool) must match NPCs that actually spawn in the mission. If you set the trigger to watch Red/Group A but all enemies are Red/Group B, the trigger fires immediately because zero Red/Group A NPCs exist.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">All must die:</Run>
+                <Run> Group Dead requires 100% elimination. If even one NPC of the Colour+Group is alive, the trigger won't fire. For partial quotas ("kill 10 of 15 enemies"), use Counter triggers instead. Group Dead is all-or-nothing.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Spawning more resets condition:</Run>
+                <Run> If all Group members die and then more are spawned (same Colour+Group), the Group Dead condition becomes false again. The trigger will fire again when the new spawns are all dead (if using Active While), or won't fire again (if using Active).</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead vs Killed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Group Dead</Bold> fires when all members of a Colour+Group are dead. <Bold>Killed</Bold> fires
+        when one specific NPC dies. Use <Bold>Group Dead</Bold> for "eliminate all enemies" objectives. Use
+        <Bold>Killed</Bold> for "eliminate specific target" objectives.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead vs Counter</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Group Dead</Bold> requires 100% elimination of a group. <Bold>Counter</Bold> fires at a specific
+        numeric threshold (can be partial). Use <Bold>Group Dead</Bold> for total wipe objectives. Use
+        <Bold>Counter</Bold> for partial quotas ("kill 10 of 15 enemies").
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Group Dead</Bold> tracks NPC deaths. <Bold>Dependency</Bold> waits for Event Points to fire.
+        Use <Bold>Group Dead</Bold> for elimination tracking. Use <Bold>Dependency</Bold> for event sequencing.
+        Often combined: Group Dead fires, next Event Point has Dependency on it.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Group Dead Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify which enemies should be eliminated (one wave, one gang, all enemies, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a unique Colour+Group combination for those enemies (e.g., Red/Group A)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or configure Group Life Event Points that spawn those enemies</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Group Life's Colour to the chosen Colour (e.g., 0 for Red)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Group Life's Group to the chosen Group (e.g., 0 for Group A)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when all enemies are dead</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Group Dead</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the Colour value (0-14, matching the enemy Colour)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref Bool to the Group value (0=A, 1=B, etc., matching the enemy Group)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for elimination objectives)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by killing all but one enemy</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger does NOT fire (one enemy still alive)</Paragraph></ListItem>
+        <ListItem><Paragraph>Kill the last enemy</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger fires immediately when the last enemy dies</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Colour+Group combination matches the spawned enemies</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use consistent Colour+Group conventions across your missions: Red/Group A for primary enemies, Red/Group B for wave 2, Blue/Group A for allies, etc. Document your Colour+Group assignments in comments. This makes Group Dead triggers much easier to configure and debug.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

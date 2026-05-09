@@ -1,0 +1,14 @@
+Mission Editor Help Image Capture Guide - Create Item / Make Searchable
+==================================================================
+
+CreateItemMakeSearchableEventPoints.xaml
+----------------------------------------
+mission_create_item_make_searchable_overview.png - Mission viewport or Event Points list showing item/searchable Event Points.
+mission_create_item_overview.png - Visible Create Item Event Point or item pickup in the viewport.
+mission_create_item_add_type.png - Add New EventPoint window with Create Item selected.
+mission_create_item_position.png - Position selection on the map, ideally near a prim/object if using Item Hidden in Prim.
+mission_create_item_properties.png - Create Item-specific properties showing Item Type, Count, Item Follows Person, and Item Hidden in Prim.
+mission_create_item_type_dropdown.png - Item Type dropdown showing weapons, ammo, keys, health, mission items, Inferno, etc.
+mission_create_item_hidden_in_prim.png - Example configuration with Item Hidden in Prim enabled near a searchable object.
+mission_make_searchable_overview.png - Add/Edit EventPoint view showing Make Searchable selected or placed near a prim.
+mission_create_item_trigger_settings.png - Trigger settings configured as None/Game Starts and Listening Mode Active.

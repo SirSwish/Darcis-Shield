@@ -21,7 +21,7 @@ namespace UrbanChaosMissionEditor.Views.MapOverlays
     /// <summary>
     /// Adapter to connect ReadOnlyMapDataService to IBuildingDataProvider.
     /// </summary>
-    internal class MissionEditorBuildingProvider : IBuildingDataProvider
+    internal class MissionEditorBuildingProvider : IRoofDataProvider
     {
         public bool IsLoaded => ReadOnlyMapDataService.Instance.IsLoaded;
         public byte[]? GetBytesCopy() => ReadOnlyMapDataService.Instance.GetBytesCopy();

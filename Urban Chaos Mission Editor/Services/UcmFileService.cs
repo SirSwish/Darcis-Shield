@@ -11,6 +11,44 @@ namespace UrbanChaosMissionEditor.Services;
 public class UcmFileService
 {
     /// <summary>
+    /// Fast scan reader: reads only the header + 512 EventPoints, skipping skill levels,
+    /// per-EP extras, and the 128x128 zone grid. Used by debug bulk-search tools that only
+    /// need EventPoint structural data (waypoint type, trigger type, Data array, etc).
+    /// </summary>
+    public (string MissionName, EventPoint[] EventPoints) ReadEventPointsForScan(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException($"UCM file not found: {filePath}");
+
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read,
+            FileShare.Read, bufferSize: 65536, FileOptions.SequentialScan);
+        using var reader = new BinaryReader(fs, Encoding.ASCII);
+
+        uint version = reader.ReadUInt32();
+        if (version > Mission.CurrentVersion)
+            throw new InvalidDataException($"Unsupported UCM version: {version}");
+
+        // Skip Flags (4) + 5 path strings (260 each) up to MissionName, then read it.
+        reader.ReadUInt32();                       // Flags
+        reader.ReadBytes(260);                     // BriefName
+        reader.ReadBytes(260);                     // LightMapName
+        reader.ReadBytes(260);                     // MapName
+        string missionName = ReadFixedString(reader, 260);
+        reader.ReadBytes(260);                     // CitSezMapName
+
+        // Skip metadata (MapIndex u16 + FreeEPoints u16 + UsedEPoints u16 + CrimeRate u8 + CivsRate u8 = 8 bytes)
+        reader.ReadBytes(8);
+
+        var eps = new EventPoint[Mission.MaxEventPoints];
+        for (int i = 0; i < Mission.MaxEventPoints; i++)
+        {
+            eps[i] = ReadEventPoint(reader, i);
+        }
+
+        return (missionName, eps);
+    }
+
+    /// <summary>
     /// Read a UCM file and return a Mission object
     /// </summary>
     public Mission ReadMission(string filePath)

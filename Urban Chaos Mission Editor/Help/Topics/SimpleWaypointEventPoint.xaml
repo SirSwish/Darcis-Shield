@@ -1,0 +1,159 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Simple Waypoint Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        A generic marker, patrol node, path point, or trigger helper used by other Event Points.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Simple Waypoints Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Simple Waypoint</Bold> is a general-purpose Event Point. It does not spawn a person,
+        vehicle, item, or visual effect by itself. Instead, it marks a position that other mission
+        systems can use.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Simple Waypoints are commonly used as patrol route nodes, path positions, intermediate
+        trigger points, switch/use detection points, and destinations or references for other Event
+        Points.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Simple Waypoints do have one type-specific property: Delay. This is stored in
+                    tenths of a second and controls how long an entity pauses at the waypoint before
+                    continuing.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Uses
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>NPC patrol routes</Bold> - enemies or civilians can move through Simple Waypoints in group/order logic.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Vehicle patrol routes</Bold> - driver or vehicle logic can use waypoints as route positions.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Switch triggers</Bold> - a Simple Waypoint near a switch can detect player use, then activate another Event Point by dependency.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Path nodes</Bold> - movement or camera-style chains can use waypoint positions as intermediate locations.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Logic markers</Bold> - mission logic can reference a Simple Waypoint as a readable point in a dependency chain.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Delay
+    </Paragraph>
+    <Paragraph>
+        <Bold>Delay</Bold> is the Simple Waypoint's type-specific property. It is stored as a number
+        of tenths of a second. The editor also shows the equivalent value in seconds.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>0</Bold> means no pause.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>10</Bold> means 1.0 second.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>25</Bold> means 2.5 seconds.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>100</Bold> means 10.0 seconds.</Paragraph></ListItem>
+    </List>
+    <Paragraph Margin="0,6,0,0">
+        Use Delay when an entity should wait briefly before moving to its next waypoint. For patrols,
+        this can make guards pause at corners, doorways, observation posts, or points of interest
+        instead of moving continuously.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Practical use:</Run>
+                <Run>
+                    Keep most patrol waypoints at Delay 0, then add short delays only at places where
+                    the character should visibly pause. This keeps routes responsive while still
+                    making patrols feel intentional.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Creating a Simple Waypoint
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Simple</Bold> as the Event Point type.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the appropriate letter group and colour for the chain or logic it belongs to.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Select Position on Map</Bold>, then click the intended map position.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Delay</Bold> if an entity should pause at this waypoint.</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure the trigger settings if the waypoint is being used as a trigger helper rather than only a movement node.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Group and Colour
+    </Paragraph>
+    <Paragraph>
+        Simple Waypoints often work best when their letter group and colour match the entity or
+        mission logic that will use them. For example, a patroling NPC and its route waypoints should
+        be easy to identify as part of the same chain.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If several systems use Simple Waypoints in the same mission, use different colours or letter
+        groups to keep patrol paths, trigger helper points, objective markers, and camera/path logic
+        visually separate.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Trigger Helper Pattern
+    </Paragraph>
+    <Paragraph>
+        A Simple Waypoint can act as an invisible trigger helper. A common pattern is to place a
+        Simple Waypoint near a switch, set it to detect the player using that switch area, then make
+        another Event Point depend on the Simple Waypoint.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Player uses switch -&gt; Simple Waypoint activates -&gt; Dependent Event Point fires
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Troubleshooting
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">An entity does not pause at the waypoint</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm Delay is greater than 0.</Paragraph></ListItem>
+        <ListItem><Paragraph>Remember Delay is in tenths of a second, so 1 is only 0.1 seconds.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the entity is actually using this waypoint as part of its movement route.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">A dependency does not fire</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the dependent Event Point references the Simple Waypoint's Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Simple Waypoint trigger condition can actually be satisfied.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check the Simple Waypoint radius or trigger-specific values if it relies on player proximity or use.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">A patrol follows the wrong route</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check that the waypoint group and colour match the intended route logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep unrelated Simple Waypoints in different groups or colours to avoid accidental route overlap.</Paragraph></ListItem>
+        <ListItem><Paragraph>Inspect Event Point numbers if the movement mode follows waypoints in numeric order.</Paragraph></ListItem>
+    </List>
+</FlowDocument>

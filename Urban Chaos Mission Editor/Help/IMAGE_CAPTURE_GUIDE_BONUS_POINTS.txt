@@ -1,0 +1,11 @@
+Mission Editor Help Image Capture Guide - Bonus Points
+==================================================
+
+CreateBonusPointsEventPoint.xaml
+--------------------------------
+mission_bonus_points_overview.png - Mission viewport or Event Points list showing a Bonus Points Event Point.
+mission_bonus_points_add_type.png - Add New EventPoint window with Bonus Points selected.
+mission_bonus_points_common_properties.png - Edit EventPoint window showing common properties such as index, type, letter group, colour, and position.
+mission_bonus_points_properties.png - Bonus Points-specific fields showing Type, Points, Translation Gender, and Display Text.
+mission_bonus_points_trigger_settings.png - Trigger settings configured for Person Arrested, Listening Mode Active, and Target EP set to the target NPC.
+mission_bonus_points_example_arrest.png - Example Bonus Points Event Point configured with Primary, 10 points, Male translation gender, and display text "You arrested them!".

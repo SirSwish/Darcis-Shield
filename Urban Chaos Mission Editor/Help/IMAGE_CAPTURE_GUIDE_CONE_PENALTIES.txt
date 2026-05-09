@@ -1,0 +1,13 @@
+Mission Editor Help Image Capture Guide - Cone Penalties
+=====================================================
+
+ConePenaltiesEventPoint.xaml
+----------------------------
+mission_cone_penalties_overview.png - Mission viewport or Event Points list showing a Cone Penalties Event Point.
+mission_cone_penalties_required_setup.png - Example setup showing Count Up timer, Cone Penalties, and Create Barrel / Traffic Cone Event Points together.
+mission_cone_penalties_edit_window.png - Edit EventPoint window for Cone Penalties showing that there are no type-specific properties.
+mission_cone_penalties_common_properties.png - Common properties section for Cone Penalties.
+mission_cone_penalties_traffic_cones.png - Create Barrel Event Point configured as Traffic Cone, preferably with cones placed in the viewport.
+mission_cone_penalties_count_up_timer.png - Count Up timer Event Point settings or Event Points list showing the timer exists.
+mission_cone_penalties_trigger_settings.png - Cone Penalties trigger settings, either None/Game Starts + Active or a challenge-start dependency.
+mission_cone_penalties_example_route.png - Example route or challenge area with multiple traffic cones placed.

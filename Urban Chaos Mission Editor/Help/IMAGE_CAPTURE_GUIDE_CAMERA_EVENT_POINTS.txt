@@ -1,0 +1,16 @@
+Mission Editor Help Image Capture Guide - Camera Event Points
+=======================================================
+
+CameraEventPoints.xaml
+----------------------
+mission_camera_eventpoints_overview.png - Mission viewport or Event Points list showing Create Camera, Camera Waypoint, and Create Target Event Points together.
+mission_camera_sequence_diagram.png - Simple map setup showing Create Camera -> Camera Waypoint(s) -> Create Target positions.
+mission_camera_create_camera_overview.png - Edit EventPoint window for Create Camera.
+mission_camera_add_create_camera.png - Add New EventPoint window with Create Camera selected.
+mission_camera_type_dropdown.png - Camera Type dropdown showing Normal, Security Cam, Camcorder, News, and Targeting.
+mission_camera_speed_delay.png - Create Camera Speed and Delay fields.
+mission_camera_flags.png - Create Camera flags showing Pause Player, Direction Lock, and Cannot Be Skipped.
+mission_camera_waypoints_overview.png - Viewport or Event Points list showing one or more Camera Waypoints.
+mission_camera_waypoint_position.png - Camera Waypoint edit window showing X/Z and Y position values.
+mission_camera_create_target_overview.png - Edit EventPoint window for Create Target.
+mission_camera_target_type.png - Create Target Target Type field showing Normal, Attached, and Nearest Living Thing.

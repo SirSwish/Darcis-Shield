@@ -1,0 +1,420 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Traps Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Creates Steam Jet traps that can damage the player or NPCs, animate in timed on/off patterns, and be controlled through mission logic.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What the Traps Event Point Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Traps</Bold> Event Point is used to create trap-style hazards in a mission.
+        Currently, the available trap type is <Bold>Steam Jet</Bold>. This creates a jet of steam
+        that comes out of pipes or vents and can harm the player or NPCs on the map.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Steam traps are often used cosmetically to make industrial areas, sewers, warehouses,
+        factories, or machinery rooms feel more alive. They can also be used as real hazards,
+        obstacles, timing challenges, or item blockers.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical requirement:</Run>
+                <Run>
+                    Steam Jet traps only work correctly when Listening Mode is set to Active While.
+                    If the trap does not appear or does not animate correctly, check this setting first.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Traps Event Point
+    </Paragraph>
+    <Paragraph>
+        To add a trap, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Traps</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the normal common properties, trigger
+        settings, listening mode, and Traps-specific settings.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Traps uses the standard Event Point common properties: index number, Event Point type, letter
+        group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>position</Bold> controls where the trap appears. The <Bold>facing direction</Bold>
+        is also important because the steam direction can be relative to the Event Point’s facing arrow.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Select Position on Map</Bold> to place the steam trap near the pipe, vent, wall,
+        floor, or object where the steam should originate. For damaging traps, place it where the
+        player or NPCs can actually pass through the steam’s range.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Facing Direction
+    </Paragraph>
+    <Paragraph>
+        The steam’s direction can depend on the Event Point’s facing arrow. Select the Event Point
+        in the viewport and rotate the orange facing handle if the steam needs to spray toward a
+        specific direction.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_position_facing.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Required Listening Mode: Active While
+    </Paragraph>
+    <Paragraph>
+        Steam traps are not a normal “fire once and remain true” event. They need to remain active
+        while their trigger condition is active. For that reason, Steam Jet traps should use:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active While.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        This is the most important setup detail for Steam Jet traps. If the listening mode is set to
+        <Bold>Active</Bold> instead, the trap may not behave correctly.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Do not skip this:</Run>
+                <Run>
+                    For Steam Jet traps, set Listening Mode to Active While. This is required for the trap to operate correctly.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_active_while.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trap Type
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Trap Type</Bold> field determines which trap is created. Currently, the available
+        option is <Bold>Steam Jet</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Steam Jet</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Creates a jet of steam that sprays from the Event Point. The steam can be harmful to the
+        player and enemies. It is most useful around pipes, vents, machinery, industrial walls, or
+        environmental hazards.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Steam Direction
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Direction</Bold> property controls the direction the steam sprays relative to the
+        Event Point’s facing direction arrow.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_direction.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Up</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The steam shoots straight upward into the air. Use this for floor vents, broken pipes, or
+        rising steam effects.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Forward</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The steam shoots forward in the direction of the Event Point’s facing arrow. Use this for
+        wall pipes, horizontal vents, or directional hazards.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Down</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The steam shoots downward toward the ground. Use this for overhead pipes, ceiling vents, or
+        downward pressure jets.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Facing tip:</Run>
+                <Run>
+                    For Forward steam, rotate the Event Point’s orange facing handle so the arrow points in the direction the steam should spray.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Animation Parameters
+    </Paragraph>
+    <Paragraph>
+        Steam Jet traps can be animated with a repeating on/off pattern. The animation parameters
+        control how quickly steam escapes, how far it reaches, and which steps in the animation
+        sequence are active.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_animation_parameters.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Speed
+    </Paragraph>
+    <Paragraph>
+        <Bold>Speed</Bold> controls how quickly the steam escapes or animates. Typical values are
+        <Bold>1–10</Bold>. Lower values are slower or gentler. Higher values make the steam effect
+        faster or more aggressive.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Steps
+    </Paragraph>
+    <Paragraph>
+        Every frame of gameplay can be thought of as a <Bold>step</Bold>. The <Bold>Steps</Bold>
+        value controls how many animation states exist in the trap’s repeating sequence.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For example, if Steps is set to <Bold>5</Bold>, the editor gives you five step states that
+        can each be switched on or off. This lets you create a repeating steam pattern rather than a
+        constant jet.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Range
+    </Paragraph>
+    <Paragraph>
+        <Bold>Range</Bold> controls how far the steam reaches in its relative direction. Typical
+        values are <Bold>1–10</Bold>. A higher range means the steam reaches further.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Step Activation Pattern
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Step Activation Pattern</Bold> controls which steps in the sequence are active.
+        Each step has an on/off checkbox. This is how you create rhythmic steam bursts.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_traps_step_pattern.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Example: Five-Step Pattern
+    </Paragraph>
+    <Paragraph>
+        If you set <Bold>Steps</Bold> to <Bold>5</Bold>, five checkboxes appear. To create this
+        pattern:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+on, off, off, on, off
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Step 1:</Bold> checked / on.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Step 2:</Bold> unchecked / off.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Step 3:</Bold> unchecked / off.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Step 4:</Bold> checked / on.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Step 5:</Bold> unchecked / off.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        The trap repeats that on/off sequence during gameplay.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Uses
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cosmetic Steam</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use Steam Jet traps to add life to industrial maps, factories, basements, pipes, sewers,
+        or machinery areas. A low range and slow pattern can make the environment feel active
+        without being too dangerous.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Environmental Hazard</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use stronger range and faster or more frequent activation to create a real hazard the player
+        must avoid. Because steam can harm the player or enemies, test the placement carefully.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timing Challenge</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use a step pattern that alternates on and off so the player must time movement through the trap.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hiding or Protecting Items</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Steam traps can hide items from the player or make an item harder to reach. For example,
+        a pickup may be visible behind a steam burst, requiring the player to wait for the safe
+        moment or disable the trap first.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Switch-Controlled Trap</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A steam trap can be dynamically turned off through mission logic. For example, the player
+        presses a switch, and that trigger kills or disables the trap.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Turning Steam Traps Off with Mission Logic
+    </Paragraph>
+    <Paragraph>
+        Steam traps can be used as part of mission logic rather than only as static hazards. For
+        example, a switch, dependency, or other trigger can turn the trap off.
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create a Steam Jet trap blocking or protecting an area.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trap to use <Bold>Listening Mode: Active While</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create a switch or other trigger Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use mission logic to kill, deactivate, or stop the trap when the switch is used.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the trap stops and the player can safely pass or reach the item.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Design tip:</Run>
+                <Run>
+                    Steam traps are especially useful when the mission gives the player a problem first,
+                    then provides a switch, dependency, or objective that disables the trap.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Steam Trap Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Traps</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Event Point where the steam should originate.</Paragraph></ListItem>
+        <ListItem><Paragraph>Rotate the Event Point facing arrow if using <Bold>Forward</Bold> direction.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Trap Type</Bold> to <Bold>Steam Jet</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the steam direction: <Bold>Up</Bold>, <Bold>Forward</Bold>, or <Bold>Down</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Speed</Bold>, usually between <Bold>1–10</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Range</Bold>, usually between <Bold>1–10</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Steps</Bold> to define the length of the repeating activation sequence.</Paragraph></ListItem>
+        <ListItem><Paragraph>Tick or untick the step activation checkboxes to define the on/off pattern.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Listening Mode</Bold> to <Bold>Active While</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger condition that should make the trap active.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>, save, and test the trap in game.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run>
+                    Steam Jet selected, direction set, range set, steps configured, step pattern checked, and Listening Mode set to Active While.
+                    If the trap does not work, check Active While first.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

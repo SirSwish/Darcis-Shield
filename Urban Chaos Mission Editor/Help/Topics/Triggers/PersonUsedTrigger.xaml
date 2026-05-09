@@ -1,0 +1,274 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Person Used Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when the player interacts with a specific NPC using the action/talk button. Used by 640 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Person Used Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Person Used</Bold> detects when the player presses the action button (talk/use) while near
+        a specific NPC. This is the standard trigger for conversations, NPC interactions, and any event that
+        should fire when the player actively chooses to interact with someone. The trigger references an NPC
+        Event Point (usually a Create NPC) and fires when the player uses that NPC.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger is fundamental to mission design — conversations, briefings, quest handoffs, and story
+        progression all use <Bold>Person Used</Bold>. Nearly all retail missions include multiple conversation
+        or interaction chains using this trigger. It's the primary way players communicate with NPCs and
+        advance the story.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Person Used when the Event Point should fire when the player talks to or interacts with a specific NPC. Reference the NPC's Event Point via the EP Ref field.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Person Used Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Person Used</Bold> trigger when the Event Point should fire based on player interaction
+        with an NPC. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Conversations</Bold> - Start a Conversation Event Point when player talks to an NPC</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Mission briefings</Bold> - NPC gives instructions or objectives when talked to</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Quest handoffs</Bold> - "Talk to the informant to get the next lead"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Story progression</Bold> - Key story moments triggered by NPC interaction</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conditional spawns</Bold> - Talking to an NPC triggers enemy spawns or other events</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Tutorial interactions</Bold> - Training missions where NPCs guide the player</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Event Point Reference)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the Event Point that creates or controls the target NPC. This is typically a Create NPC
+        Event Point. When the player interacts with the NPC spawned by that Event Point, this trigger fires.
+        The EP Ref field uses zero-based indexing (0 = first Event Point, 1 = second Event Point, etc.).
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The referenced Event Point must actually create or reference an NPC that the
+        player can interact with. If the EP Ref points to a Message Event Point or other non-NPC type, the
+        trigger will never fire.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        The Event Point waits until the player presses the action button while near the referenced NPC. When
+        the interaction happens, the trigger condition is met. Whether the Event Point fires immediately or
+        continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when player uses the NPC, stays active (most common for conversations)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while the conversation or interaction is ongoing</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when player uses the NPC, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when player uses the NPC, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Conversation Event Point with <Bold>Person Used</Bold> trigger (EP Ref = 5,
+        referencing a Create NPC Event Point) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point 5 spawns an NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>This Conversation Event Point waits for player interaction</Paragraph></ListItem>
+        <ListItem><Paragraph>Player approaches the NPC and presses the action button</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Conversation Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Conversation dialog appears, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Other Event Points can depend on this Conversation finishing (using Conversation Over or Dependency)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Standard Conversation Chain
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Create NPC (None trigger, Active). Event Point B is a Conversation (Person Used
+        trigger on A, Active). Event Point C has Dependency on B (or uses Conversation Over trigger). When
+        the player talks to the NPC (A), the conversation starts (B), and when it finishes, the next event
+        fires (C). This is the most common conversation pattern in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Quest Handoff
+    </Paragraph>
+    <Paragraph>
+        An NPC is placed in the world (Create NPC with None trigger). A Message Event Point with Person Used
+        trigger on the NPC and Active listening mode shows "New Objective: Investigate the warehouse" when
+        the player talks to the NPC. This creates a "talk to NPC to get next mission" pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Interaction Triggers Spawn
+    </Paragraph>
+    <Paragraph>
+        A Create NPC Event Point creates an informant. A Group Life Event Point (enemy spawn) has Person Used
+        trigger on the informant with Active listening mode. When the player talks to the informant, enemies
+        spawn — "the informant was a trap" scenario. This is a common retail ambush pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Guided Navigation
+    </Paragraph>
+    <Paragraph>
+        An NPC guide is placed in the world. A Nav Beacon Event Point has Person Used trigger on the guide
+        with Active listening mode. When the player talks to the guide, the nav beacon appears showing the
+        next destination. This creates "talk to NPC for directions" patterns.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Tutorial Instruction
+    </Paragraph>
+    <Paragraph>
+        A trainer NPC is created at mission start. A Message Event Point has Person Used trigger on the trainer
+        with Active listening mode. When the player talks to the trainer, tutorial instructions appear. This
+        is the standard tutorial interaction pattern.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Person Used</Bold> trigger appears in 640 Event Points across retail missions. It's the fourth
+        most common trigger type (after None, Dependency, and Person Killed). Nearly every mission includes
+        NPC conversations or interactions using <Bold>Person Used</Bold>. It's the foundation of narrative
+        and story progression in Urban Chaos missions.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly create conversation chains: Create NPC → Person Used trigger starts Conversation → Conversation Over or Dependency triggers next event. This creates natural story flow through player-initiated interactions.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">NPC must exist:</Run>
+                <Run> The EP Ref must point to an Event Point that creates an NPC. If the referenced Event Point hasn't fired yet or doesn't create an NPC, the trigger cannot fire. Ensure the NPC is spawned before the player needs to interact with it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">NPC death breaks trigger:</Run>
+                <Run> If the NPC dies before the player interacts with them, the trigger cannot fire (dead NPCs can't be talked to). For critical mission NPCs, consider making them invulnerable or placing them in protected areas.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Player must initiate:</Run>
+                <Run> Person Used requires player action. If the player doesn't approach and use the NPC, the trigger never fires. Consider using nav beacons or objective messages to guide players to important NPCs.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Used vs Killed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Used</Bold> fires when the player interacts with an NPC (peaceful). <Bold>Killed</Bold>
+        fires when an NPC dies (combat). Use <Bold>Person Used</Bold> for conversations and friendly interactions.
+        Use <Bold>Killed</Bold> for kill objectives and elimination missions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Used vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Used</Bold> waits for player-NPC interaction. <Bold>Dependency</Bold> waits for another
+        Event Point to fire. Often combined: Event Point A has Person Used trigger, Event Point B has Dependency
+        on A. This creates "talk to NPC then something happens" chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Used vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Used</Bold> requires player action (pressing use button). <Bold>Radius</Bold> fires
+        automatically when player enters an area. Use <Bold>Person Used</Bold> for player-initiated interactions.
+        Use <Bold>Radius</Bold> for automatic location-based triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Person Used Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Create NPC Event Point that spawns the target NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the NPC Event Point uses a listening mode that keeps it active (usually Active)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the NPC Event Point (zero-based indexing)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when the player uses the NPC (Conversation, Message, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Person Used</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the index of the NPC Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for conversations)</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure Event Point-specific fields (conversation text, messages, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by approaching the NPC and pressing the action button</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point fires when the NPC is used</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the Event Point does NOT fire if the player doesn't use the NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>If the NPC is mission-critical, consider adding a nav beacon or objective message to guide the player</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> For important story conversations, create the Create NPC Event Point first, then immediately create the Person Used conversation Event Point. Keep them adjacent in the event list and document which NPC they reference. This makes conversation chains much easier to understand and debug.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,14 @@
+Mission Editor Help Image Manifest - Bonus Points
+================================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateBonusPointsEventPoint.xaml
+--------------------------------
+mission_bonus_points_overview.png
+mission_bonus_points_add_type.png
+mission_bonus_points_common_properties.png
+mission_bonus_points_properties.png
+mission_bonus_points_trigger_settings.png
+mission_bonus_points_example_arrest.png

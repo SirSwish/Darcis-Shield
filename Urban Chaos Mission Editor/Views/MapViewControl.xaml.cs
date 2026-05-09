@@ -71,18 +71,20 @@ public partial class MapViewControl : UserControl
 
             System.Diagnostics.Debug.WriteLine($"[MapViewControl] Preview click at Surface position: ({position.X}, {position.Y})");
 
-            // Convert pixel to world coordinates (inverted)
-            int worldX = (int)((8192.0 - position.X) * 4);
-            int worldZ = (int)((8192.0 - position.Y) * 4);
+            // Convert pixel to pixel-space coordinates (0..8192, inverted to match engine origin).
+            // The callback expects pixel-space values; the editor VM scales them to
+            // native game units (×4) when writing to the underlying EventPoint model.
+            int pixelX = (int)(8192.0 - position.X);
+            int pixelZ = (int)(8192.0 - position.Y);
 
-            System.Diagnostics.Debug.WriteLine($"[MapViewControl] Calculated world coords: ({worldX}, {worldZ})");
+            System.Diagnostics.Debug.WriteLine($"[MapViewControl] Calculated pixel coords: ({pixelX}, {pixelZ})");
 
             if (_positionSelectedCallback != null)
             {
                 System.Diagnostics.Debug.WriteLine("[MapViewControl] Invoking callback from Preview handler");
                 var callback = _positionSelectedCallback;
                 ExitPositionSelectionMode();
-                callback.Invoke(worldX, worldZ);
+                callback.Invoke(pixelX, pixelZ);
             }
             else
             {
@@ -146,20 +148,26 @@ public partial class MapViewControl : UserControl
         var selected = ViewModel?.SelectedEventPoint;
         if (selected == null) return;
 
-        // Calculate the position in scrollviewer coordinates
         double zoom = ViewModel?.MapZoom ?? 1.0;
         double targetX = selected.PixelX * zoom;
         double targetY = selected.PixelZ * zoom;
 
-        // Get the viewport size
         double viewportWidth = ScrollContainer.ViewportWidth;
         double viewportHeight = ScrollContainer.ViewportHeight;
+        double viewLeft = ScrollContainer.HorizontalOffset;
+        double viewTop = ScrollContainer.VerticalOffset;
+        double viewRight = viewLeft + viewportWidth;
+        double viewBottom = viewTop + viewportHeight;
 
-        // Calculate scroll offsets to center the point
+        if (targetX >= viewLeft && targetX <= viewRight &&
+            targetY >= viewTop && targetY <= viewBottom)
+        {
+            return;
+        }
+
         double scrollX = targetX - (viewportWidth / 2);
         double scrollY = targetY - (viewportHeight / 2);
 
-        // Clamp to valid scroll range
         scrollX = Math.Max(0, Math.Min(scrollX, ScrollContainer.ScrollableWidth));
         scrollY = Math.Max(0, Math.Min(scrollY, ScrollContainer.ScrollableHeight));
 
@@ -492,21 +500,11 @@ public partial class MapViewControl : UserControl
             _suppressCenterOnSelection = true;
             ViewModel.SelectedEventPoint = eventPoint;
 
-            if (e.ClickCount == 2)
-            {
-                if (ViewModel.EditEventPointCommand.CanExecute(null))
-                    ViewModel.EditEventPointCommand.Execute(null);
-
-                e.Handled = true;
-            }
-            else
-            {
-                _currentDragMode = DragMode.MovePoint;
-                _dragStartPosition = position;
-                _originalX = eventPoint.Model.X;
-                _originalZ = eventPoint.Model.Z;
-                Surface.CaptureMouse();
-            }
+            _currentDragMode = DragMode.MovePoint;
+            _dragStartPosition = position;
+            _originalX = eventPoint.Model.X;
+            _originalZ = eventPoint.Model.Z;
+            Surface.CaptureMouse();
         }
 
         Surface.Focus();
@@ -683,7 +681,7 @@ public partial class MapViewControl : UserControl
             _ => ""
         };
 
-        CoordinateText.Text = $"Grid: ({gameGridX}, {gameGridZ})  World: ({worldX}, {worldZ})  Pixel: ({(int)position.X}, {(int)position.Y}){modeText}{dragText}";
+        CoordinateText.Text = $"Grid: ({gameGridX}, {gameGridZ})  Pixel: ({(int)position.X}, {(int)position.Y}){modeText}{dragText}";
     }
 
     private void UpdateCursor(Point position)
@@ -768,6 +766,26 @@ public partial class MapViewControl : UserControl
             EventPointsLayer?.Refresh();
             e.Handled = true;
         }
+    }
+
+    #endregion
+
+    #region Viewport Tracking
+
+    private void ScrollContainer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        var vm = ViewModel;
+        if (vm == null) return;
+
+        double zoom = vm.MapZoom;
+        if (zoom <= 0) zoom = 1.0;
+
+        double pixelLeft = ScrollContainer.HorizontalOffset / zoom;
+        double pixelTop = ScrollContainer.VerticalOffset / zoom;
+        double pixelRight = pixelLeft + ScrollContainer.ViewportWidth / zoom;
+        double pixelBottom = pixelTop + ScrollContainer.ViewportHeight / zoom;
+
+        vm.UpdateMapViewport(pixelLeft, pixelTop, pixelRight, pixelBottom);
     }
 
     #endregion

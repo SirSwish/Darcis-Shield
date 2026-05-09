@@ -1,0 +1,229 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Transfer Player Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Transfers player control to another person/NPC Event Point when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Transfer Player Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Transfer Player</Bold> Event Point changes which person the player controls. The
+        controllable target is stored as an Event Point index in <Bold>Transfer To</Bold>. Despite
+        the name, this target does <Bold>not</Bold> have to be a Create Player endpoint.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Transfer Player can link to any suitable person/NPC Event Point. Retail missions transfer
+        player control to both <Bold>Create Player</Bold> and <Bold>Create NPC</Bold> entries. This
+        lets a mission hand control to an NPC character for a scripted character swap, cutscene
+        recovery, special sequence, or mission-state transition.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Transfer To is the Event Point that will become player-controlled. It can point to an NPC/person Event Point, not only the original player start point.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Transfer Player uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group should usually
+        match the scripted chain that causes the transfer, such as a conversation, objective step,
+        cutscene event, or fail-safe correction.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The Transfer Player Event Point's own position is usually not what matters. The controlled
+        character comes from the Event Point referenced by <Bold>Transfer To</Bold>. Use this point's
+        position only for organising or visualising the trigger chain unless the trigger itself is
+        spatial.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the transfer happens. Existing missions commonly use
+        <Bold>Dependency</Bold> so another Event Point explicitly causes the transfer. A transfer can
+        also be triggered after a conversation ends.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Existing Transfer Player examples use <Bold>Active</Bold>. This is appropriate for a direct
+        transfer when the trigger fires. Avoid persistent listening modes unless repeated transfers
+        are intentional and tested carefully.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Transfer Player-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Transfer Player has one type-specific setting. <Bold>Data[0]</Bold> stores the Event Point
+        index that player control should transfer to.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Transfer To</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Transfer To is the Event Point index that will become player-controlled. The editor stores it
+        in the range <Bold>1-2048</Bold>. It can point to a <Bold>Create Player</Bold> Event Point,
+        but it can also point to a <Bold>Create NPC</Bold> or other suitable person/NPC character.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Do not restrict Transfer To to player start Event Points. Retail missions use NPC Event Points as control-transfer targets, including Roper and Darci NPC placements.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Transfer Player
+    </Paragraph>
+    <Paragraph>
+        Existing Transfer Player usage is focused and deliberate. Useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> - transfers after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Over</Bold> - transfers after a specific conversation has completed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the observed listening mode for Transfer Player entries.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Think of Transfer To as the character that will receive player control. Pick a suitable person/NPC Event Point, then trigger the transfer from the mission event that makes the handoff valid.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Transfer Player Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Transfer Control To An NPC</Paragraph>
+    <Paragraph>
+        Use an NPC Event Point when the mission wants the player to take control of that NPC
+        character. This is different from moving the player near the NPC; the NPC becomes the
+        player-controlled character.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Transfer Player <Bold>22</Bold> transfers control to Event Point
+        <Bold>96</Bold>, which is a <Bold>Create NPC</Bold> entry for <Bold>Roper</Bold>. The
+        transfer is triggered by <Bold>Dependency</Bold> on Event Point <Bold>19</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create or identify the NPC/person Event Point that should become player-controlled. Set
+        <Bold>Transfer To</Bold> to that Event Point index, then use a dependency trigger from the
+        Event Point that should cause the transfer.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Transfer Control Back To The Player</Paragraph>
+    <Paragraph>
+        Use a Create Player Event Point when the mission needs to return control to the original
+        player character.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Transfer Player <Bold>94</Bold> transfers control to Event Point
+        <Bold>1</Bold>, the <Bold>Create Player</Bold> entry for <Bold>Darci</Bold>. It is triggered
+        by <Bold>Dependency</Bold> on Event Point <Bold>40</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use the player start as Transfer To only when returning control to that player character is
+        intended. If the player should control another character, point Transfer To at that
+        NPC/person Event Point instead.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Post-Conversation Transfer</Paragraph>
+    <Paragraph>
+        Use <Bold>Conversation Over</Bold> when a conversation should end by transferring control to
+        another character or returning control to the original player character.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>estate2.ucm</Bold>, Transfer Player <Bold>291</Bold> transfers control to Event Point
+        <Bold>1</Bold>, the <Bold>Create Player</Bold> entry for <Bold>Darci</Bold>. It triggers
+        from <Bold>Conversation Over</Bold> on Event Point <Bold>122</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Staged Character Transfer</Paragraph>
+    <Paragraph>
+        Use a character NPC placement when the transfer is part of a finale, cutscene, or scripted
+        character handoff.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Finale1.ucm</Bold>, Transfer Player <Bold>26</Bold> transfers control to Event
+        Point <Bold>70</Bold>, a <Bold>Create NPC</Bold> entry for <Bold>Darci</Bold>. The control
+        target is therefore an NPC Event Point rather than the player start.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Transfer Player Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Choose the Event Point that should become player-controlled. This can be Create Player or any suitable NPC/person Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check that character's position, Y altitude, setup, and mission role are valid for player control.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Transfer Player</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Transfer To</Bold> to the Event Point index that should receive player control.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger, usually <Bold>Dependency</Bold> or <Bold>Conversation Over</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Active</Bold> for the listening mode unless repeated transfers are specifically intended.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the transfer from the gameplay state that triggers it, not only from a fresh mission start.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm control changes to the intended character and that the resulting position, facing, and mission state are valid.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Transfer To points at the intended character Event Point, NPC control targets are allowed, the trigger fires only at the correct mission moment, and the resulting controlled character is valid for gameplay.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

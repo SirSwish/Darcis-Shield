@@ -1,0 +1,280 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Conversation Over Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point waits for a Conversation Event Point to finish all its dialog lines. Used by 361 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Conversation Over Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Conversation Over</Bold> detects when a Conversation Event Point has finished displaying all
+        its dialog lines. This is the standard way to chain events after conversations complete. Unlike
+        <Bold>Dependency</Bold> which fires when a Conversation starts, <Bold>Conversation Over</Bold> waits
+        for the conversation to actually finish. This ensures dialog is fully read before the next event triggers.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger is fundamental to narrative mission design. It allows you to create "talk to NPC, then
+        something happens" patterns where the follow-up event waits for the conversation to conclude. Nearly
+        all retail conversation chains use <Bold>Conversation Over</Bold> rather than <Bold>Dependency</Bold>
+        to ensure proper dialog timing.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Conversation Over when this Event Point should fire after a Conversation Event Point finishes all its dialog. Reference the Conversation Event Point via the EP Ref field.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Conversation Over Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Conversation Over</Bold> trigger when this Event Point should fire after a conversation
+        finishes. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Post-conversation objectives</Bold> - Next mission step appears after dialog finishes</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Story progression</Bold> - Events happen after the player receives information</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Delayed spawns</Bold> - Enemies or NPCs appear after conversation completes</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Briefing sequences</Bold> - Action starts after mission briefing is delivered</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Tutorial progression</Bold> - Next instruction appears after current dialog finishes</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Nav beacon activation</Bold> - Direction marker appears after NPC gives instructions</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Event Point Reference)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the Conversation Event Point to watch. When that conversation finishes all its dialog
+        lines, this trigger condition is met. The EP Ref field uses zero-based indexing (0 = first Event Point,
+        1 = second Event Point, etc.).
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The referenced Event Point must be a Conversation type. If the EP Ref points
+        to a non-Conversation Event Point (Message, Group Life, etc.), the trigger will never fire. Always
+        verify the EP Ref points to a Conversation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        The Event Point waits until the referenced Conversation Event Point finishes displaying all its dialog
+        lines. When the last dialog line completes, this Event Point's trigger condition is met. Whether it
+        fires immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when conversation finishes, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while conversation is finished (rare, usually not needed)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when conversation finishes, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when conversation finishes, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Conversation Over</Bold> trigger (EP Ref = 8,
+        referencing a Conversation Event Point) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point 8 is a Conversation waiting for player to talk to an NPC</Paragraph></ListItem>
+        <ListItem><Paragraph>This Message Event Point waits for Event Point 8 to finish</Paragraph></ListItem>
+        <ListItem><Paragraph>Player talks to the NPC, Conversation Event Point 8 fires and shows dialog</Paragraph></ListItem>
+        <ListItem><Paragraph>Player reads through all dialog lines in the conversation</Paragraph></ListItem>
+        <ListItem><Paragraph>Conversation finishes displaying all lines</Paragraph></ListItem>
+        <ListItem><Paragraph>This Message Event Point's trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "Objective Updated: Investigate the warehouse" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes active and stays active (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Standard Conversation Chain
+    </Paragraph>
+    <Paragraph>
+        Event Point A creates an NPC (None trigger, Active). Event Point B is a Conversation (Person Used
+        trigger on A, Active). Event Point C is a Message showing next objective (Conversation Over trigger
+        on B, Active). When the conversation finishes, the objective updates. This is the most common
+        conversation pattern in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Briefing Then Action
+    </Paragraph>
+    <Paragraph>
+        A Conversation Event Point delivers mission briefing. A Group Life Event Point (enemy spawn) has
+        Conversation Over trigger on the briefing with Active listening mode. When the briefing finishes,
+        enemies spawn and combat begins. This creates "briefing then action" mission structure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Nav Beacon After Instructions
+    </Paragraph>
+    <Paragraph>
+        An NPC gives directions via a Conversation Event Point. A Nav Beacon Event Point has Conversation Over
+        trigger on the conversation with Active listening mode. When the NPC finishes explaining where to go,
+        the nav beacon appears showing the destination. This is a common retail guidance pattern.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Tutorial Step Progression
+    </Paragraph>
+    <Paragraph>
+        A Conversation Event Point explains a game mechanic. The next tutorial Conversation Event Point has
+        Conversation Over trigger on the previous one with Active listening mode. This creates sequential
+        tutorial dialog where each step waits for the previous explanation to finish.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Post-Dialog Ambush
+    </Paragraph>
+    <Paragraph>
+        An NPC talks to the player via a Conversation Event Point. Multiple Group Life Event Points (enemy
+        spawns) have Conversation Over trigger on the conversation with Active listening mode. When the
+        conversation finishes, enemies spawn from multiple locations creating an ambush. The player can't
+        skip the dialog, ensuring the trap is properly set up.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Conversation Over</Bold> trigger appears in 361 Event Points across retail missions. It's nearly
+        as common as <Bold>Person Used</Bold> (640 instances) and is the standard way to sequence events after
+        conversations. Retail missions heavily prefer <Bold>Conversation Over</Bold> over <Bold>Dependency</Bold>
+        for post-conversation events because it ensures dialog timing is correct.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly create conversation chains: Create NPC → Person Used starts Conversation → Conversation Over triggers next event. This pattern appears in nearly every story-driven retail mission.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Conversation must finish:</Run>
+                <Run> The trigger only fires when all dialog lines complete. If the Conversation Event Point has multiple lines, the player must read through all of them. Don't use Conversation Over if you want events to fire when the conversation starts — use Dependency instead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Must reference Conversation:</Run>
+                <Run> The EP Ref must point to a Conversation Event Point. If it points to any other Event Point type (Message, Group Life, etc.), the trigger will never fire. Always verify the Event Point type before setting the EP Ref.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Conversation must start:</Run>
+                <Run> The referenced Conversation Event Point must actually fire and start. If the conversation never triggers (e.g., player never talks to the NPC), the Conversation Over trigger will never fire either. Ensure the conversation's trigger conditions can be met.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Over vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Conversation Over</Bold> waits for a Conversation to finish all dialog. <Bold>Dependency</Bold>
+        fires when any Event Point becomes active. Use <Bold>Conversation Over</Bold> for events that should
+        happen after dialog completes. Use <Bold>Dependency</Bold> for events that should happen when the
+        conversation starts (or for non-conversation Event Points).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Over vs Person Used</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Conversation Over</Bold> waits for conversation completion. <Bold>Person Used</Bold> waits for
+        NPC interaction. These are commonly chained: Conversation uses Person Used trigger to start, then
+        other Event Points use Conversation Over to fire after dialog finishes. This creates complete
+        conversation chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Over vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Conversation Over</Bold> waits for conversation completion. <Bold>None</Bold> fires at mission
+        start. Use <Bold>Conversation Over</Bold> for events that depend on dialog finishing. Use <Bold>None</Bold>
+        for immediate, unconditional activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Conversation Over Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Conversation Event Point that the player will interact with</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Conversation Event Point has dialog configured and can fire</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the Conversation Event Point (zero-based indexing)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire after the conversation finishes (Message, spawn, nav beacon, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Conversation Over</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the index of the Conversation Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent progression)</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure Event Point-specific fields (message text, spawn parameters, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by triggering the conversation</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point does NOT fire when the conversation starts</Paragraph></ListItem>
+        <ListItem><Paragraph>Read through all dialog lines in the conversation</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point fires immediately after the last dialog line</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the Event Point does NOT fire if the conversation never triggers</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> When creating conversation chains, keep the Conversation Event Point and its Conversation Over dependent Event Points adjacent in the event list. Document which Event Points depend on which conversations. This makes conversation flow much easier to understand and debug.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

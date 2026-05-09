@@ -1,0 +1,17 @@
+Mission Editor Help Image Manifest - Traps
+=========================================
+
+Place these screenshots under:
+Help/Images/
+
+TrapsEventPoint.xaml
+--------------------
+mission_traps_overview.png
+mission_traps_add_type.png
+mission_traps_common_properties.png
+mission_traps_position_facing.png
+mission_traps_active_while.png
+mission_traps_type.png
+mission_traps_direction.png
+mission_traps_animation_parameters.png
+mission_traps_step_pattern.png

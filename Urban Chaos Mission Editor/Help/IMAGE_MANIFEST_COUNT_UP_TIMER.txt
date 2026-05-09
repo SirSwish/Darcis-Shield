@@ -1,0 +1,13 @@
+Mission Editor Help Image Manifest - Count Up Timer
+=================================================
+
+Place these screenshots under:
+Help/Images/
+
+CountUpTimerEventPoint.xaml
+---------------------------
+mission_count_up_timer_overview.png
+mission_count_up_timer_add_type.png
+mission_count_up_timer_common_properties.png
+mission_count_up_timer_trigger_settings.png
+mission_count_up_timer_cone_penalties_setup.png

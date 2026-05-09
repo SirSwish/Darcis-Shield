@@ -1,0 +1,309 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Message Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Display mission dialogue, radio instructions, warnings, objective updates, tutorial prompts, and feedback messages when mission logic reaches the right condition.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Message Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Message</Bold> Event Point is the mission system's way of showing text to the player.
+        Existing missions use Message Event Points for radio chatter, mission objectives,
+        tutorial instructions, character speech, success/failure feedback, area prompts, and small
+        status updates such as gates opening, people being safe, or objectives being failed.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        They are not just decorative text. They are usually part of mission logic: a trigger becomes
+        true, the message appears for a configured duration, and other Event Points may then depend
+        on that message having fired.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> If the player needs to know something, use a Message. If the mission needs to wait for an objective, person, item, area, or counter, put the correct trigger on the Message.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Message uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        organising the message alongside the objective, person, item, counter, or area that causes
+        it to appear.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        A Message can look like screen text, but its position still matters when the trigger is
+        spatial. Radius, Cuboid, Tripwire, Player Uses Radius, and similar triggers use the Event
+        Point's location to decide when the message should appear.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the message is displayed. A Message with <Bold>Dependency</Bold>
+        waits for another Event Point. A Message with <Bold>Radius</Bold> or <Bold>Cuboid</Bold>
+        waits for the player to enter an area. A Message with <Bold>Person Used</Bold> waits for
+        the player to interact with a person.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Message-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Message has a small set of type-specific settings. These control what the player sees, who
+        appears to be speaking, and how long the line remains on screen.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Message Text</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The text is the line shown to the player. It appears as the Message Event Point summary and
+        text payload. Typical lines include objective instructions such as
+        <Italic>HIT THE SWITCH!</Italic>, success feedback such as <Italic>Gunman arrested.</Italic>,
+        and failure feedback such as <Italic>Too many deaths!</Italic>.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Duration</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Duration controls how long the message remains visible. Use short durations for short status
+        messages and longer durations for full radio lines or multi-clause instructions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Speaker</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The speaker controls how the line is presented. Many messages use <Bold>Radio</Bold>. Some
+        messages are attributed to a specific Event Point, such as <Bold>Event Point 1</Bold> or
+        <Bold>Event Point 96</Bold>, which usually means the line is being spoken by a mission
+        character rather than generic radio text. Tutorial and place/street-name style messages can
+        also be used when the line is instructional or location-based rather than character speech.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Choose the duration based on how much text the player must read. Short prompts can be brief, but long radio instructions need enough time for the player to read them without stopping play.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Messages
+    </Paragraph>
+    <Paragraph>
+        Message Event Points are usually triggered by player interaction, dependency chains, area
+        checks, and mission state changes. The most useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Person Used</Bold> - used when the player talks to or uses a person.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - used when the message should appear after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cuboid</Bold> - used for rectangular area prompts such as rooms, alleys, and tutorial spaces.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Boolean AND</Bold> - used when two previous conditions must both be true.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Uses Radius</Bold> - used when the player must interact while close to a point.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius</Bold> - used when entering a circular area should show the message.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Killed / Killed Not Arrested / Person Arrested</Bold> - used for success, failure, and target-state feedback.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Most Message Event Points use <Bold>Active</Bold> listening mode. A large minority use
+        <Bold>Active While</Bold>, especially when the message is tied to a live interaction state
+        such as Person Used or Person Seen.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run> Do not leave a Message on None unless it should be available immediately. Most messages should wait for a specific mission condition so they appear at the moment the player needs them.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Message Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Person Used Messages</Paragraph>
+    <Paragraph>
+        <Bold>Person Used</Bold> messages are usually conversation-style or interaction-style lines.
+        The player uses or talks to a person, and the Message displays a line from that person or
+        from the radio.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Message <Bold>133</Bold> displays
+        <Italic>What you waitin' for? Get in there!</Italic>. It uses <Bold>Person Used</Bold>,
+        <Bold>Active While</Bold>, and its speaker is <Bold>Event Point 96</Bold>. This is a typical
+        pattern for a character telling the player what to do when interacted with.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the person/NPC first, then create the Message. Set the Message trigger to
+        <Bold>Person Used</Bold>, point the reference at the person where the format supports it,
+        and choose a speaker that matches the character or radio source.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dependency Messages</Paragraph>
+    <Paragraph>
+        <Bold>Dependency</Bold> messages appear after another Event Point has completed or become
+        active. This is the main pattern for objective chains: complete a step, then tell the player
+        what has changed or what to do next.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Message <Bold>21</Bold> is triggered by dependency on Event Point
+        <Bold>16</Bold>. The message tells Roper that people are secured and to head after Beck. It
+        lasts <Bold>7 seconds</Bold> and is spoken by <Bold>Event Point 1</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Put the Message after the objective Event Point it describes. Set <Bold>Triggered By</Bold>
+        to <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the previous Event Point. Use
+        <Bold>Active</Bold> unless the message should only exist while the dependency remains true.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Area Prompt Messages</Paragraph>
+    <Paragraph>
+        Area prompts use <Bold>Radius</Bold>, <Bold>Cuboid</Bold>, <Bold>Tripwire</Bold>, or
+        <Bold>Player Uses Radius</Bold>. These are used for tutorial prompts, switch prompts, gates,
+        hazards, or instructions that make sense only in a particular place.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed Cuboid example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Assault1.ucm</Bold>, Message <Bold>30</Bold> says
+        <Italic>Jump up to grab that cable!</Italic>. It uses <Bold>Cuboid</Bold>, with decoded
+        half-sizes of <Bold>232</Bold> by <Bold>148</Bold>, so the tutorial appears inside a
+        rectangular space rather than a circular radius.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed Player Uses Radius example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Message <Bold>43</Bold> says <Italic>Gate Open</Italic>. It uses
+        <Bold>Player Uses Radius</Bold> with radius <Bold>128</Bold>. This means the player must use
+        the interaction point while close enough, rather than merely walking past it.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Message Event Point at the exact trigger location. Use <Bold>Radius</Bold> for
+        round local prompts, <Bold>Cuboid</Bold> for rectangular spaces, and <Bold>Player Uses
+        Radius</Bold> when the player must press/use/interact in the area.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Target State Messages</Paragraph>
+    <Paragraph>
+        Messages are frequently used to report what happened to a person or objective target. These
+        use triggers such as <Bold>Killed</Bold>, <Bold>Killed Not Arrested</Bold>,
+        <Bold>Person Arrested</Bold>, <Bold>Person Seen</Bold>, and <Bold>Enemy Radius</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed Not Arrested failure example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Message <Bold>13</Bold> says
+        <Italic>Johnson's dead! You blew it BIG TIME, D'arci!!</Italic>. It uses
+        <Bold>Killed Not Arrested</Bold> and references Event Point <Bold>5</Bold>. This is a
+        failure-style message where killing the target is specifically different from arresting them.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Arrested success/failure example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanicc.ucm</Bold>, Message <Bold>312</Bold> says <Italic>Gunman arrested.</Italic>
+        and is triggered by <Bold>Person Arrested</Bold> referencing Event Point <Bold>305</Bold>.
+        The same mission also uses Person Arrested to warn the player when the wrong person, such as
+        a reporter, has been arrested.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Radius success example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Message <Bold>40</Bold> says
+        <Italic>You got Beck through Stern - well done!</Italic>. It uses <Bold>Enemy Radius</Bold>,
+        references Event Point <Bold>3</Bold>, and has a decoded distance of <Bold>10 tiles</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Counter Messages</Paragraph>
+    <Paragraph>
+        Counter-triggered messages are used when a numeric mission value reaches a threshold. They
+        usually pair with <Bold>Increment</Bold> Event Points and sometimes <Bold>Reset Counter</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed examples</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>BAALROG1.ucm</Bold>, Message <Bold>57</Bold> says <Italic>Too many deaths!</Italic>
+        when counter <Bold>8</Bold> reaches threshold <Bold>8</Bold>. In
+        <Bold>Gangorder2.ucm</Bold>, Message <Bold>28</Bold> congratulates the player when counter
+        <Bold>7</Bold> reaches threshold <Bold>5</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use <Bold>Counter</Bold> as the trigger. Set <Bold>EP Ref</Bold> to the counter number and
+        <Bold>Radius</Bold> to the required threshold. Keep the related Increment Event Points easy
+        to find, because they are what actually change the counter.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conversation Follow-up Messages</Paragraph>
+    <Paragraph>
+        Messages also fire after conversations finish. This is useful when dialogue should lead into
+        an instruction, a warning, or a mission state change.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>MIB.ucm</Bold>, Message <Bold>22</Bold> is triggered by
+        <Bold>Conversation Over</Bold> and references Event Point <Bold>21</Bold>. The message
+        follows dialogue with additional information about the scene.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Message Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what the player needs to be told.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Message</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Enter the message text and choose a duration. Use 4 seconds for short lines and 5 to 7 seconds for longer instructions.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the speaker. Use <Bold>Radio</Bold> for mission-control text or a specific Event Point speaker for character speech.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger based on why the message should appear: Person Used, Dependency, Radius, Cuboid, Counter, Killed, Arrested, or Conversation Over.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the trigger uses EP Ref, point it at the person, objective, conversation, counter, or previous Event Point that controls the message.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the trigger is spatial, place the Message point and set the radius/cuboid size in the correct map location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission path in order, because many messages only make sense after earlier Event Points have fired.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Message text is correct, duration is long enough, speaker is correct, trigger type matches the mission condition, EP Ref points at the correct Event Point or counter, and spatial triggers are placed at the right map position.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

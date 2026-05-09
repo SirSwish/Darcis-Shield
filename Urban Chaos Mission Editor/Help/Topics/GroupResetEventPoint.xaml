@@ -1,0 +1,267 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Group Reset Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Resets all Event Points in the same colour and letter group to their alive and unactivated state.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Group Reset Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Group Reset</Bold> Event Point resets every Event Point that shares its
+        <Bold>colour</Bold> and <Bold>letter group</Bold> to an <Bold>alive and unactivated</Bold>
+        state. This means the target Event Points become alive (able to process) but also
+        unactivated (as if they had not yet fired).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Group Reset is rare in retail missions - only 4 instances exist, all in driving/testdrive
+        missions. It is used when a mission needs to reuse a set of Event Points multiple times, such
+        as resetting checkpoints in a driving course or clearing a failed objective so it can be
+        retried. Like Group Life and Group Death, it has no type-specific Data settings - the colour
+        and group it targets come from the Event Point's standard common properties.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Set this Event Point's Colour and Group to match the set of Event Points you want to reset. When the Group Reset fires, every waypoint with that exact colour+group returns to alive and unactivated.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Group Reset uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. <Bold>Colour</Bold> and
+        <Bold>letter group</Bold> are the critical fields - they determine which Event Points this
+        Group Reset will affect. Position is usually not what matters for the reset itself, but can
+        be used to keep the Group Reset near its target set for organisation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Colour
+    </Paragraph>
+    <Paragraph>
+        Colour is one half of the targeting selector. A Group Reset with <Bold>White</Bold> affects
+        only Event Points that also use <Bold>White</Bold>. All other colours are ignored. The
+        colour field is in the common Event Point properties section.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Group (Letter)
+    </Paragraph>
+    <Paragraph>
+        Group letter is the other half of the selector. A Group Reset with letter <Bold>A</Bold>
+        affects only Event Points that also use letter <Bold>A</Bold>. The combination of
+        <Bold>Colour + Group</Bold> is what defines the target set. White/A is different from
+        White/B or Green/A.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position does not affect which Event Points are reset. Group Reset targets by colour+group,
+        not by spatial radius. Use position only for placing the Event Point somewhere logical for
+        mission authoring, such as near the checkpoint or objective that should be reset.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        All retail Group Reset Event Points use <Bold>Dependency</Bold>. The reset happens when
+        another Event Point fires, such as a fail condition, checkpoint restart, or objective retry
+        trigger.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Most retail Group Reset examples use <Bold>Active</Bold>. One uses <Bold>Active While</Bold>,
+        which keeps resetting the group as long as the dependency condition remains true. Use
+        <Bold>Active</Bold> for a one-time reset and <Bold>Active While</Bold> only when the group
+        should be continuously reset while a condition is active.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Group Reset-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Group Reset has <Bold>no type-specific Data settings</Bold>. The Event Point's behaviour is
+        entirely determined by the Colour and Group fields in the common properties section, plus
+        the trigger that causes it to fire.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Group Reset is useful for missions with retry mechanics, checkpoints, or repeatable objectives. Set the retry/fail Event Point as the Dependency trigger so the group resets when the player needs to try again.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Group Reset
+    </Paragraph>
+    <Paragraph>
+        Existing Group Reset usage is focused entirely on driving missions with checkpoint or retry
+        mechanics. The only observed trigger pattern is:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - the standard pattern. The group is reset when another Event Point fires, such as a checkpoint trigger, fail condition, or retry action.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active While</Bold> - used when the group should be continuously reset as long as the dependency condition remains true. This is less common but observed in one retail mission.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Group Reset affects every Event Point with the matching Colour+Group. Make sure the Colour+Group combination is used only by the Event Points you intend to reset, not by unrelated mission logic.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Group Reset Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Checkpoint Or Retry Reset</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active</Bold> when a set of Event Points should be
+        reset after a checkpoint trigger, fail condition, or retry action. This is the standard
+        Group Reset pattern.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive1a.ucm</Bold>, Group Reset <Bold>292</Bold> targets <Bold>White/A</Bold>
+        and uses <Bold>Dependency</Bold> on Event Point <Bold>234</Bold> with listening mode
+        <Bold>Active</Bold>. When Event Point <Bold>234</Bold> fires, all White/A Event Points are
+        reset to alive and unactivated.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set the Event Points that should be reset to a specific Colour+Group, for example
+        <Bold>White/A</Bold>. Add a <Bold>Group Reset</Bold> Event Point with the same
+        <Bold>White/A</Bold> combination, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold>,
+        and set <Bold>EP Ref</Bold> to the Event Point that represents the checkpoint or retry
+        trigger. Use listening mode <Bold>Active</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Continuous Reset With Active While</Paragraph>
+    <Paragraph>
+        Use <Bold>Active While</Bold> instead of <Bold>Active</Bold> when the group should be
+        continuously reset as long as the dependency condition remains true. This is uncommon but
+        useful for specific driving or checkpoint scenarios.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive2.ucm</Bold>, Group Reset <Bold>140</Bold> targets <Bold>Green/A</Bold>
+        and uses <Bold>Dependency</Bold> on Event Point <Bold>139</Bold> with listening mode
+        <Bold>Active While</Bold>. As long as Event Point <Bold>139</Bold> remains active, the
+        Green/A group is continuously reset.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use <Bold>Active While</Bold> instead of <Bold>Active</Bold> when the dependency Event Point
+        represents a persistent condition rather than a one-time trigger. Test carefully, because
+        continuous resetting can cause unintended loops if the group's own behaviour re-triggers the
+        dependency.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Driving Mission Checkpoint System</Paragraph>
+    <Paragraph>
+        Group Reset is most commonly found in driving missions where checkpoints or stages need to
+        be reset if the player fails or retries.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Three of the four retail Group Reset instances are in <Bold>testdrive</Bold> missions
+        (<Bold>testdrive1a.ucm</Bold>, <Bold>testdrive2.ucm</Bold>, and <Bold>testdrive3.ucm</Bold>).
+        Each uses <Bold>White/A</Bold> or <Bold>Green/A</Bold> as the target Colour+Group and resets
+        the group when a checkpoint or retry Event Point fires.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        For a driving or checkpoint mission, assign all checkpoint-related Event Points to a common
+        Colour+Group. Add a Group Reset that triggers on the fail condition or retry action. This
+        lets the player restart the checkpoint sequence without leaving the mission.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Rare Usage Outside Driving Missions</Paragraph>
+    <Paragraph>
+        Group Reset is almost never used outside of driving/checkpoint missions. If a mission does
+        not have retry or repeatable objective mechanics, Group Life and Group Death are usually
+        sufficient for controlling group activation.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed pattern</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Of 16,259 Event Points across 76 retail missions, only <Bold>4</Bold> are Group Reset. All
+        4 are in driving/testdrive missions. No combat, objective, or exploration missions use Group
+        Reset in retail data.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to apply</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Only use Group Reset when a mission genuinely needs to reset a group of Event Points to
+        their unactivated state. For most missions, Group Life (activate) and Group Death
+        (deactivate) are sufficient. Group Reset is specifically for retry and checkpoint mechanics.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Group Reset Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Confirm the mission needs reset mechanics. If it does not have checkpoints, retries, or repeatable objectives, Group Reset is probably not needed.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the Event Points that should be reset together as a group.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set all of those Event Points to the same <Bold>Colour</Bold> and <Bold>Group</Bold> letter combination.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Group Reset</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Group Reset's <Bold>Colour</Bold> and <Bold>Group</Bold> to match the target set.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that should trigger the reset, such as a checkpoint trigger or fail condition.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use listening mode <Bold>Active</Bold> for a one-time reset or <Bold>Active While</Bold> for continuous reset.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the reset carefully and confirm the group returns to alive and unactivated as expected.</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify that no unintended Event Points share the same Colour+Group, which would cause them to reset along with the intended group.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the reset does not create an unintended loop where the group's behaviour re-triggers the reset dependency.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The mission genuinely needs reset mechanics, the Group Reset's Colour+Group matches the target Event Points exactly, the dependency fires only when the reset should happen, and no reset loops are created.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

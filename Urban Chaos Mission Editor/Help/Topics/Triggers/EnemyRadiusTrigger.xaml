@@ -1,0 +1,299 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Enemy Radius Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when an enemy NPC enters a circular area. Used by 169 Event Points across retail missions for enemy detection and proximity-based events.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Enemy Radius Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Enemy Radius</Bold> detects when an enemy NPC enters a circular area defined by a center point
+        and radius. Unlike <Bold>Radius</Bold> which detects the player, <Bold>Enemy Radius</Bold> detects
+        NPCs. This is used for enemy patrol detection, ambush triggers based on enemy position, tracking
+        enemy movement, and creating reactive mission events based on where enemies go.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger enables dynamic mission design that reacts to enemy behavior rather than just player
+        actions. You can create "when enemies reach this location, trigger reinforcements," "if enemies enter
+        restricted area, sound alarm," or "detect when enemies are close to an objective." This makes missions
+        feel more responsive to NPC AI behavior.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Enemy Radius when this Event Point should fire when an enemy NPC enters a circular area. Set the center position (X, Z) and Radius to define the detection zone. Optionally filter by specific NPC using EP Ref.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Enemy Radius Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Enemy Radius</Bold> trigger when the Event Point should fire based on enemy NPC position
+        entering a circular area. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Patrol route tracking</Bold> - Detect when enemies reach specific patrol points</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Ambush preparation</Bold> - Trigger events when enemies approach an ambush location</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Area intrusion detection</Bold> - Alert when enemies enter restricted zones</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Objective protection</Bold> - Detect when enemies get close to protected objectives</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dynamic spawns</Bold> - Spawn reinforcements based on enemy movement</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>AI behavior triggers</Bold> - React to where enemies go during combat</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">X (Center X Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The X coordinate of the circle's center point in world units. This defines the horizontal position
+        of the detection zone. Use the Map View to visually place the Event Point and the X coordinate will
+        be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Z (Center Z Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The Z coordinate of the circle's center point in world units. This defines the vertical position
+        (depth) of the detection zone. Use the Map View to visually place the Event Point and the Z coordinate
+        will be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The radius of the circular detection zone in world units. Larger values create bigger detection areas.
+        Any enemy NPC within this distance from the center point (X, Z) will trigger the condition.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>512 - Small detection zone (tight checkpoint)</Paragraph></ListItem>
+        <ListItem><Paragraph>1024 - Medium detection zone (typical patrol point)</Paragraph></ListItem>
+        <ListItem><Paragraph>2048 - Large detection zone (broad area coverage)</Paragraph></ListItem>
+        <ListItem><Paragraph>4096 - Very large detection zone (entire building or district)</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (Optional NPC Filter)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Optional. If set, only the specific NPC created by the referenced Event Point will trigger the
+        detection. If left at 0 or unset, any enemy NPC entering the radius will trigger. Use this to track
+        specific enemies (e.g., "detect when the boss reaches this location") rather than any enemy.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if any enemy NPC (or the specific NPC if EP Ref is set) is within
+        the circular area. The distance from each enemy to the center point (X, Z) is calculated. If any
+        qualifying enemy is within the Radius, the trigger condition is true. What happens next depends on
+        the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when enemy enters, stays active even after enemy leaves</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while enemy is inside, inactive when enemy leaves (most common)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when enemy enters, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when enemy enters, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Enemy Radius</Bold> trigger (X=10000, Z=15000,
+        Radius=1024) and <Bold>Active While</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, enemies spawn and patrol the area</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point waits for any enemy to enter the detection zone</Paragraph></ListItem>
+        <ListItem><Paragraph>An enemy NPC patrols toward position (10000, 15000)</Paragraph></ListItem>
+        <ListItem><Paragraph>Enemy enters the radius (distance from center ≤ 1024)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition becomes true, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message "Enemy approaching objective" appears</Paragraph></ListItem>
+        <ListItem><Paragraph>Enemy continues moving and leaves the radius</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes inactive (Active While mode), message disappears</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Patrol Point Detection
+    </Paragraph>
+    <Paragraph>
+        Multiple Enemy Radius triggers mark patrol waypoints (Active Die listening mode). Each fires a Message
+        Event Point or Increment counter when an enemy reaches that patrol point. This creates patrol route
+        tracking and can trigger events when enemies reach specific locations. Common in stealth missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Objective Protection Warning
+    </Paragraph>
+    <Paragraph>
+        An Enemy Radius trigger is placed around a protected objective (Active While listening mode). When
+        enemies enter the radius, a Message "Enemies approaching the objective!" appears. When enemies leave,
+        the message disappears. This provides dynamic situational awareness.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Ambush Readiness
+    </Paragraph>
+    <Paragraph>
+        An Enemy Radius trigger detects when enemies approach an ambush location (Active listening mode).
+        When the trigger fires, ally NPCs are alerted or positioned for the ambush. This creates reactive
+        tactical behavior based on enemy movement.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Boss Movement Tracking
+    </Paragraph>
+    <Paragraph>
+        Event Point A spawns a boss NPC (Active). Event Point B is an Enemy Radius trigger (EP Ref = A [boss],
+        Active) at a specific location. When the boss reaches that location, Event Point B fires, triggering
+        the next mission phase. This creates boss encounter progression based on boss position.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Enemy Intrusion Alert
+    </Paragraph>
+    <Paragraph>
+        An Enemy Radius trigger marks a restricted area (Active Die listening mode). When any enemy enters,
+        an alarm Event Point fires and reinforcements spawn. This creates "enemies have breached the perimeter"
+        style mission events.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Enemy Radius</Bold> trigger appears in 169 Event Points across retail missions. It's commonly
+        used for patrol detection, objective protection warnings, and enemy movement tracking. Retail missions
+        use Enemy Radius to make missions reactive to NPC AI behavior rather than just player actions.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use Enemy Radius with Active While listening mode for dynamic warnings: "Enemies near objective" appears when enemies enter the radius and disappears when they leave. This creates responsive mission feedback.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Detects enemies, not player:</Run>
+                <Run> Enemy Radius triggers when NPCs enter the area, not the player. If you want to detect the player, use Radius trigger instead. Enemy Radius is specifically for tracking enemy NPC positions.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Y coordinate ignored:</Run>
+                <Run> Enemy Radius triggers only check X and Z position, not Y (altitude). The trigger fires at any height as long as the enemy is within the X/Z circle. If you need altitude checking, use Cuboid-based logic instead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">AI pathing may vary:</Run>
+                <Run> Enemy Radius depends on NPC AI pathfinding and behavior. Enemies may take unpredictable routes or change direction based on combat. Test thoroughly to ensure enemies actually reach the detection zone during normal gameplay.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Radius vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Enemy Radius</Bold> detects enemy NPCs in a circular area. <Bold>Radius</Bold> detects the
+        player in a circular area. Use <Bold>Enemy Radius</Bold> for tracking enemy movement. Use <Bold>Radius</Bold>
+        for tracking player movement.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Radius vs Person Seen</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Enemy Radius</Bold> fires when an enemy enters an area. <Bold>Person Seen</Bold> fires when
+        an NPC is seen by an observer. Use <Bold>Enemy Radius</Bold> for location-based enemy detection. Use
+        <Bold>Person Seen</Bold> for visibility-based detection (line of sight).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Radius vs Killed</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Enemy Radius</Bold> detects enemy position. <Bold>Killed</Bold> detects enemy death. Use
+        <Bold>Enemy Radius</Bold> to track where enemies go. Use <Bold>Killed</Bold> to track when enemies die.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Enemy Radius Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the location where you want to detect enemy presence</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when an enemy reaches that location</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Enemy Radius</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Use the Map View to visually place the Event Point at the detection location (X, Z auto-set)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to define the detection zone size</Paragraph></ListItem>
+        <ListItem><Paragraph>If you want to detect any enemy, leave EP Ref at 0</Paragraph></ListItem>
+        <ListItem><Paragraph>If you want to detect a specific NPC, set EP Ref to that NPC's Event Point index</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active While for dynamic warnings, Active for one-time events)</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure Event Point-specific fields (message text, spawns, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by observing enemy patrol paths and movement</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger fires when an enemy enters the detection zone</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Active While, verify the trigger deactivates when the enemy leaves</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust Radius if the detection zone is too small or too large</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use Enemy Radius with Active While listening mode to create dynamic situational awareness. Messages like "Enemies approaching" or "Patrol nearby" that appear and disappear based on enemy position make missions feel more reactive and alive.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

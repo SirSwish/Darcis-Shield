@@ -44,6 +44,9 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         private readonly BuildingsAccessor _buildings;
         private readonly PrimsAccessor _prims;
         private readonly AltitudeAccessor _altitudes;
+        private readonly Dictionary<string, Material> _textureMaterialCache = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, BitmapSource> _transparentBitmapCache = new(StringComparer.Ordinal);
+        private readonly Dictionary<int, Material> _solidMaterialCache = new();
 
         // Cached procedural ladder tile (generated once, shared across all ladder facets).
         private static BitmapSource? _ladderTile;
@@ -56,6 +59,56 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             _buildings = new BuildingsAccessor(data);
             _prims = new PrimsAccessor(data);
             _altitudes = new AltitudeAccessor(data);
+        }
+
+        private Material GetTextureMaterial(
+            string cacheKey,
+            BitmapSource source,
+            bool makeTransparent = false,
+            bool useAbsoluteViewport = false)
+        {
+            string materialKey = $"{cacheKey}|alpha={(makeTransparent ? 1 : 0)}|abs={(useAbsoluteViewport ? 1 : 0)}";
+            if (_textureMaterialCache.TryGetValue(materialKey, out var cached))
+                return cached;
+
+            BitmapSource materialSource = source;
+            if (makeTransparent)
+            {
+                string bitmapKey = $"{cacheKey}|alpha";
+                if (!_transparentBitmapCache.TryGetValue(bitmapKey, out materialSource!))
+                {
+                    materialSource = MakeDarkPixelsTransparent(source, 32);
+                    _transparentBitmapCache[bitmapKey] = materialSource;
+                }
+            }
+
+            var brush = new ImageBrush(materialSource)
+            {
+                TileMode = TileMode.None,
+                Stretch = Stretch.Fill
+            };
+            if (useAbsoluteViewport)
+                brush.ViewportUnits = BrushMappingMode.Absolute;
+
+            brush.Freeze();
+            var material = new DiffuseMaterial(brush);
+            material.Freeze();
+            _textureMaterialCache[materialKey] = material;
+            return material;
+        }
+
+        private Material GetSolidMaterial(Color color)
+        {
+            int key = color.A << 24 | color.R << 16 | color.G << 8 | color.B;
+            if (_solidMaterialCache.TryGetValue(key, out var cached))
+                return cached;
+
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            var material = new DiffuseMaterial(brush);
+            material.Freeze();
+            _solidMaterialCache[key] = material;
+            return material;
         }
 
         // =====================================================================
@@ -156,14 +209,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         {
                             mesh = new MeshGeometry3D();
                             buckets[key] = mesh;
-                            var brush = new ImageBrush(bmp)
-                            {
-                                TileMode = TileMode.None,
-                                Stretch = Stretch.Fill,
-                                ViewportUnits = BrushMappingMode.Absolute
-                            };
-                            brush.Freeze();
-                            materials[key] = new DiffuseMaterial(brush);
+                            materials[key] = GetTextureMaterial($"terrain|{key}", bmp, useAbsoluteViewport: true);
                         }
                     }
                     else
@@ -188,7 +234,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             if (fallbackMesh != null)
             {
                 fallbackMesh.Freeze();
-                var gray = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(120, 120, 110)));
+                var gray = GetSolidMaterial(Color.FromRgb(120, 120, 110));
                 group.Children.Add(new GeometryModel3D(fallbackMesh, gray) { BackMaterial = gray });
             }
             group.Freeze();
@@ -365,13 +411,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                                 ladderMesh = new MeshGeometry3D();
                                 texBuckets[ladderKey] = ladderMesh;
                                 var bmp = GetOrBuildLadderTile();
-                                var brush = new ImageBrush(bmp)
-                                {
-                                    TileMode = TileMode.None,
-                                    Stretch = Stretch.Fill
-                                };
-                                brush.Freeze();
-                                texMaterials[ladderKey] = new DiffuseMaterial(brush);
+                                texMaterials[ladderKey] = GetTextureMaterial(ladderKey, bmp);
                             }
 
                             // Offset the ladder geometry slightly along the wall's outward normal
@@ -452,14 +492,13 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             {
                 kv.Value.Freeze();
                 Color c = colors.TryGetValue(kv.Key, out var cc) ? cc : defaultColor;
-                var mat = new DiffuseMaterial(new SolidColorBrush(c));
+                var mat = GetSolidMaterial(c);
 
                 var model = new GeometryModel3D(kv.Value, mat);
                 if (ShouldRenderBackface(kv.Key))
                 {
-                    var backMat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(
-                        (byte)(c.R * 0.7), (byte)(c.G * 0.7), (byte)(c.B * 0.7))));
-                    model.BackMaterial = backMat;
+                    model.BackMaterial = GetSolidMaterial(Color.FromRgb(
+                        (byte)(c.R * 0.7), (byte)(c.G * 0.7), (byte)(c.B * 0.7)));
                 }
 
                 group.Children.Add(model);
@@ -667,20 +706,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                         }
                         bucketMesh = new MeshGeometry3D();
                         texBuckets[key] = bucketMesh;
-                        BitmapSource materialBmp = bmp;
-
-                        if (NeedsTransparency(f.Type))
-                        {
-                            materialBmp = MakeDarkPixelsTransparent(bmp, 32);
-                        }
-
-                        var brush = new ImageBrush(materialBmp)
-                        {
-                            TileMode = TileMode.None,
-                            Stretch = Stretch.Fill
-                        };
-                        brush.Freeze();
-                        texMaterials[key] = new DiffuseMaterial(brush);
+                        texMaterials[key] = GetTextureMaterial(key, bmp, NeedsTransparency(f.Type));
                     }
 
                     double tA = (double)col / panelsAcross;
@@ -983,7 +1009,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             if (mesh.Positions.Count == 0) return null;
             mesh.Freeze();
 
-            var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(230, 40, 40)));
+            var mat = GetSolidMaterial(Color.FromRgb(230, 40, 40));
             var group = new Model3DGroup();
             group.Children.Add(new GeometryModel3D(mesh, mat) { BackMaterial = mat });
             group.Freeze();
@@ -1070,7 +1096,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             if (mesh.Positions.Count == 0) return null;
             mesh.Freeze();
 
-            var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(30, 30, 30)));
+            var mat = GetSolidMaterial(Color.FromRgb(30, 30, 30));
             var group = new Model3DGroup();
             group.Children.Add(new GeometryModel3D(mesh, mat) { BackMaterial = mat });
             group.Freeze();
@@ -1319,9 +1345,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
                                 mesh = new MeshGeometry3D();
                                 texMeshes[meshKey] = mesh;
-                                var brush = new ImageBrush(bmp) { TileMode = TileMode.None, Stretch = Stretch.Fill };
-                                brush.Freeze();
-                                texMaterials[meshKey] = new DiffuseMaterial(brush);
+                                texMaterials[meshKey] = GetTextureMaterial(meshKey, bmp);
                             }
 
                             AddRf4Quad(texMeshes[meshKey], x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
@@ -1347,9 +1371,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                                 {
                                     mesh = new MeshGeometry3D();
                                     texMeshes[meshKey] = mesh;
-                                    var brush = new ImageBrush(bmp) { TileMode = TileMode.None, Stretch = Stretch.Fill };
-                                    brush.Freeze();
-                                    texMaterials[meshKey] = new DiffuseMaterial(brush);
+                                    texMaterials[meshKey] = GetTextureMaterial(meshKey, bmp);
                                 }
 
                                 AddRf4Quad(mesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, rf4Rot, diagNWSE);
@@ -1380,7 +1402,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             if (fallbackMesh != null)
             {
                 fallbackMesh.Freeze();
-                var mat = new DiffuseMaterial(new SolidColorBrush(Color.FromRgb(140, 140, 140)));
+                var mat = GetSolidMaterial(Color.FromRgb(140, 140, 140));
                 group.Children.Add(new GeometryModel3D(fallbackMesh, mat) { BackMaterial = mat });
             }
         }

@@ -1,0 +1,305 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Visible Countdown Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires after a visible on-screen countdown timer expires. Used by 25 Event Points across retail missions for explicit time limits and mission-critical timers.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Visible Countdown Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Visible Countdown</Bold> creates an on-screen countdown timer that the player can see. The timer
+        displays in the HUD and counts down to zero. When the timer expires, the trigger fires. Unlike
+        <Bold>Countdown</Bold> which is hidden, <Bold>Visible Countdown</Bold> shows the player exactly how
+        much time remains. This is used for mission-critical time limits, escape sequences, timed objectives,
+        and creating explicit time pressure.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The visible timer adds dramatic tension — the player watches the seconds tick away and knows exactly
+        when they'll run out of time. This is essential for "escape before the bomb explodes," "rescue the
+        hostage before the deadline," or "reach the extraction point in 5 minutes" style missions. The on-screen
+        timer creates urgency and gives players clear feedback about their remaining time.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Visible Countdown when this Event Point should fire after an on-screen timer expires. Set Radius to the countdown duration in game ticks (typically 16 ticks per second). The timer is visible to the player in the HUD.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Visible Countdown Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Visible Countdown</Bold> trigger when the Event Point should fire after a time limit AND
+        the player needs to see the timer. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Mission time limits</Bold> - "Complete the objective within 5 minutes or fail"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Escape sequences</Bold> - "Reach the extraction point before the timer runs out"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Bomb defusal</Bold> - "Disarm the bomb before it explodes in 3 minutes"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Rescue missions</Bold> - "Save the hostage before the execution in 2 minutes"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Speed run objectives</Bold> - "Complete the challenge within the time limit for bonus"</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Timed challenges</Bold> - "Eliminate all enemies within 90 seconds"</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius (Countdown Duration)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The countdown duration in game ticks. The timer starts at this value and counts down to zero on-screen.
+        When the timer reaches zero, the trigger fires. The game typically runs at 16 ticks per second, so
+        Radius values should be calculated as: seconds * 16.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>960 ticks = 60 seconds (1 minute)</Paragraph></ListItem>
+        <ListItem><Paragraph>1920 ticks = 120 seconds (2 minutes)</Paragraph></ListItem>
+        <ListItem><Paragraph>2880 ticks = 180 seconds (3 minutes)</Paragraph></ListItem>
+        <ListItem><Paragraph>4800 ticks = 300 seconds (5 minutes)</Paragraph></ListItem>
+    </List>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Note:</Bold> Despite the field name "Radius," this is actually the countdown duration for
+        Visible Countdown triggers. The field is context-dependent — it means radius for Radius triggers but
+        visible timer duration for Visible Countdown triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the Event Point enters waiting state, the visible countdown timer appears on-screen and starts
+        counting down. Every game frame, the timer decrements and the on-screen display updates. When the
+        timer reaches zero, the trigger condition is met. Whether the Event Point fires immediately or continues
+        to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when timer expires, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while timer is expired (rarely used)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when timer expires, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when timer expires, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Lose Event Point with <Bold>Visible Countdown</Bold> trigger (Radius = 1920
+        [2 minutes]) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point enters waiting state</Paragraph></ListItem>
+        <ListItem><Paragraph>Visible countdown timer appears on-screen showing "2:00"</Paragraph></ListItem>
+        <ListItem><Paragraph>Player races to complete the objective while watching the timer tick down</Paragraph></ListItem>
+        <ListItem><Paragraph>Timer displays "1:30... 1:00... 0:30... 0:10... 0:05..."</Paragraph></ListItem>
+        <ListItem><Paragraph>Timer reaches "0:00"</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition is met, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Mission fails, player sees "Time Limit Exceeded" message</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example with Success Condition:</Bold> Event Point A is a Visible Countdown (Radius = 2880
+        [3 minutes], Active) firing a Lose Event Point. Event Point B is an objective completion marker
+        (Active). Event Point C is a Win Event Point with Dependency on B (Active):
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, 3-minute countdown appears on-screen</Paragraph></ListItem>
+        <ListItem><Paragraph>Player works to complete objective while watching timer</Paragraph></ListItem>
+        <ListItem><Paragraph>If player completes objective before timer expires, Event Point B fires, then Event Point C fires (win)</Paragraph></ListItem>
+        <ListItem><Paragraph>If timer expires before objective completion, Event Point A fires (lose)</Paragraph></ListItem>
+        <ListItem><Paragraph>This creates "beat the clock" mission structure</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Mission Time Limit
+    </Paragraph>
+    <Paragraph>
+        A Lose Event Point has Visible Countdown trigger (Radius = 4800 [5 minutes]) and Active listening mode.
+        The objective completion has a Win Event Point with Active listening mode. If the timer expires before
+        the objective is complete, the player fails. This is the most common use of Visible Countdown in retail
+        missions — explicit time limits for mission success.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Escape Sequence
+    </Paragraph>
+    <Paragraph>
+        Event Point A is an alarm or event that triggers an escape (Active). Event Point B is a Visible
+        Countdown (Radius = 1920 [2 minutes]) with Dependency on A (Active), firing a Lose Event Point.
+        Event Point C is a Radius trigger at the extraction point (Active), firing a Win Event Point. When
+        the alarm triggers, the player has 2 minutes visible on-screen to reach the extraction point.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Bomb Defusal
+    </Paragraph>
+    <Paragraph>
+        A Visible Countdown (Radius = 2880 [3 minutes], Active) fires a Lose Event Point. A Player Uses Radius
+        trigger at the bomb location (Active) fires a Win Event Point. The player sees the countdown and must
+        reach the bomb and interact with it before time runs out. Classic bomb defusal mission structure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Rescue Deadline
+    </Paragraph>
+    <Paragraph>
+        A Visible Countdown (Radius = 1920 [2 minutes], Active) with Dependency on "hostage captured" event
+        fires a Killed Event Point on the hostage. If the player doesn't rescue the hostage before the visible
+        timer expires, the hostage is executed (killed). This creates dramatic rescue tension.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Timed Challenge Bonus
+    </Paragraph>
+    <Paragraph>
+        Event Point A is the primary objective Win Event Point (Active). Event Point B is a Visible Countdown
+        (Radius = 1440 [90 seconds], Active Die). Event Point C is a bonus objective with Boolean And trigger
+        (EP Ref = A [win], EP Ref Bool = NOT B [timer not expired]). If the player wins before the timer
+        expires, they get a bonus. This creates speed run incentives.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Visible Countdown</Bold> trigger appears in only 25 Event Points across retail missions — much
+        less common than hidden <Bold>Countdown</Bold> (157 instances). Retail missions use Visible Countdown
+        sparingly for high-stakes, mission-critical time limits. The visible timer creates significant player
+        stress, so it's reserved for dramatic moments and explicit time-based objectives.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions rarely use Visible Countdown for entire mission time limits. More commonly, it's used for specific escape sequences or challenge segments within missions. The visible timer creates tension, so use it intentionally for dramatic effect.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Creates player stress:</Run>
+                <Run> Visible countdown timers create significant stress and urgency. Use them intentionally for dramatic moments. Don't use visible timers for casual pacing — use hidden Countdown instead. Players find constant on-screen timers exhausting.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Timer must be fair:</Run>
+                <Run> When using Visible Countdown, ensure the time limit is achievable. Playtest thoroughly to verify players can complete the objective within the time limit. Unfair visible timers frustrate players more than hidden timers because they see themselves failing.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Ticks not seconds:</Run>
+                <Run> The Radius field is in game ticks, not seconds. The game runs at approximately 16 ticks per second, so always multiply your desired seconds by 16. Setting Radius = 60 creates a 60-tick timer (about 4 seconds), not 60 seconds.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Visible Countdown vs Countdown</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Visible Countdown</Bold> shows the timer on-screen. <Bold>Countdown</Bold> is hidden. Use
+        <Bold>Visible Countdown</Bold> for mission-critical time limits where the player needs to know exactly
+        how much time remains. Use <Bold>Countdown</Bold> for background timing and delayed spawns where the
+        timer should be invisible.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Visible Countdown vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Visible Countdown</Bold> waits for a visible timer to expire. <Bold>Dependency</Bold> waits
+        for an Event Point to fire. Often combined: Event Point A has Dependency on an event, then Event Point
+        B has Visible Countdown + Dependency on A. This starts the visible timer when a specific event happens.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Visible Countdown vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Visible Countdown</Bold> waits for a visible timer to expire. <Bold>None</Bold> fires at mission
+        start. Use <Bold>Visible Countdown</Bold> for time-limited missions. Use <Bold>None</Bold> for immediate
+        activation. Visible Countdown with no other trigger starts the on-screen timer at mission start.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Visible Countdown Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what should happen when the visible timer expires (usually mission failure)</Paragraph></ListItem>
+        <ListItem><Paragraph>Decide when the visible countdown should start (mission start, or after another event)</Paragraph></ListItem>
+        <ListItem><Paragraph>Determine the time limit in seconds (be generous — visible timers create stress)</Paragraph></ListItem>
+        <ListItem><Paragraph>Convert seconds to ticks (multiply seconds by 16)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when time expires (usually Lose Event Point)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Visible Countdown</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to the time limit in ticks (seconds * 16)</Paragraph></ListItem>
+        <ListItem><Paragraph>If countdown should start at mission start, no additional trigger needed</Paragraph></ListItem>
+        <ListItem><Paragraph>If countdown should start after an event, add a Dependency trigger on that event</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for time limit failures)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the success condition Event Point(s) that should fire before time expires</Paragraph></ListItem>
+        <ListItem><Paragraph>Playtest thoroughly with a stopwatch to verify the time limit is fair</Paragraph></ListItem>
+        <ListItem><Paragraph>Watch the on-screen timer count down during testing</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify players can complete the objective within the time limit</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust Radius if the time limit is too tight or too generous</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> When using Visible Countdown, always provide clear objectives and guidance so players know exactly what they need to do within the time limit. Visible timers without clear goals create frustration. Consider adding a message like "Reach the extraction point" when the visible timer starts.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

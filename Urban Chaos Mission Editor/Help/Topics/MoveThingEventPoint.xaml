@@ -1,0 +1,235 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Move Thing Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Relocates another Event Point to this Event Point's position, commonly to randomise spawn points, patrol destinations, or objective locations.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Move Thing Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Move Thing</Bold> Event Point moves a target Event Point to the Move Thing Event
+        Point's own world position. The target is chosen by Event Point index. When the Move Thing
+        fires, the referenced Event Point is relocated to this point's X, Y, and Z coordinates.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Existing missions mostly use Move Thing as a random destination system. Several Move Thing
+        Event Points can all target the same Event Point, with each Move Thing placed at a different
+        possible location. The mission can then randomly choose one of those locations and move the
+        target there.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Move Thing does not move itself. It moves the target Event Point named in Target Waypoint to the Move Thing point's position.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Move Thing uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are especially
+        useful for Move Thing groups, because several Move Thing points often belong to one
+        randomisation set.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position is the destination. When the Event Point fires, the target Event Point is moved to
+        this Move Thing point's X, Y, and Z coordinates. This means the Move Thing point should be
+        placed exactly where the target should end up.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Y Altitude
+    </Paragraph>
+    <Paragraph>
+        Y altitude is part of the destination. Retail examples move targets to different heights,
+        including ground level and elevated positions. If the moved target appears underground,
+        floating, or unreachable, check the Move Thing point's Y value first.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the relocation happens. <Bold>Random</Bold> is the common
+        pattern for selecting from multiple possible destinations. <Bold>Dependency</Bold> is useful
+        when another mission event should explicitly move the target to this destination.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Move Thing-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Move Thing has one type-specific setting. <Bold>Data[0]</Bold> stores the target Event Point
+        index to move.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Target Waypoint</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Target Waypoint is the Event Point index that will be moved to this Move Thing point's
+        position. The editor clamps this value to the valid Event Point range.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Create or identify the target Event Point first, then create each Move Thing destination and set Target Waypoint to that target's index.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Move Thing
+    </Paragraph>
+    <Paragraph>
+        Existing Move Thing usage is heavily focused on random placement. Useful trigger patterns
+        are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Random</Bold> - use when one of several Move Thing destinations should be selected.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - use when another Event Point should move the target to this specific location.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the observed listening mode for Move Thing entries; use it for normal relocation when the trigger fires.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical setup detail:</Run>
+                <Run> Target Waypoint and trigger EP Ref are not always the same thing. Target Waypoint is the Event Point being moved. Trigger EP Ref belongs to the trigger condition.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Move Thing Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Random Spawn Or Objective Location</Paragraph>
+    <Paragraph>
+        Use multiple Move Thing Event Points with the same <Bold>Target Waypoint</Bold> when the
+        mission needs to move one target to one of several possible locations.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Move Thing <Bold>121</Bold> and Move Thing
+        <Bold>122</Bold> both move Event Point <Bold>117</Bold>. Each Move Thing point has a
+        different position and uses the <Bold>Random</Bold> trigger with <Bold>Active</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the Event Point that should be relocated. Add several Move Thing Event Points at the
+        possible destinations, set each one's <Bold>Target Waypoint</Bold> to the same target, and
+        use the <Bold>Random</Bold> trigger so the mission can choose a destination.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Random Combat Placement</Paragraph>
+    <Paragraph>
+        Move Thing is useful for varying combat setups. It can move patrol points, enemy-related
+        positions, or objective markers so repeated plays do not use the exact same location.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>fight1.ucm</Bold>, Move Thing <Bold>6</Bold> and Move Thing <Bold>13</Bold> both
+        move Event Point <Bold>4</Bold> to different positions. One destination is at ground level
+        and another uses Y altitude <Bold>64</Bold>, showing that height is part of the selected
+        destination.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place each Move Thing destination where the target is safe and reachable. Check surrounding
+        geometry, roofs, walkables, and altitude before relying on the random setup in a mission.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Random High/Low Destination</Paragraph>
+    <Paragraph>
+        Use Y altitude deliberately when random destinations can be on different floors or height
+        levels. This is useful for vertical mission layouts, but it also makes mistakes easier to
+        miss.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>FreeCD1.ucm</Bold>, Move Thing <Bold>36</Bold> moves Event Point <Bold>6</Bold>
+        to a destination at Y <Bold>1024</Bold>, while Move Thing <Bold>128</Bold> moves the same
+        Event Point to a destination at Y <Bold>1408</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dependency-Controlled Relocation</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when a specific mission event should move the target to a
+        specific destination rather than choosing randomly.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>police2.ucm</Bold>, Move Thing <Bold>68</Bold> moves Event Point
+        <Bold>13</Bold> and uses <Bold>Dependency</Bold> on Event Point <Bold>24</Bold>. In this
+        setup, Event Point <Bold>13</Bold> is the target being moved, while Event Point
+        <Bold>24</Bold> is the trigger dependency.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Target Waypoint</Bold> to the Event Point you want to relocate. Then set the
+        trigger to <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the Event Point that
+        should cause the relocation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Move Thing Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Event Point that needs to be moved.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Move Thing</Bold> Event Point at the destination location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Target Waypoint</Bold> to the Event Point index that should move.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set this Move Thing point's X, Y, and Z to the exact destination.</Paragraph></ListItem>
+        <ListItem><Paragraph>For random placement, create several Move Thing points with the same Target Waypoint and use <Bold>Random</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted relocation, use <Bold>Dependency</Bold> and set EP Ref to the Event Point that should cause the move.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep related Move Thing points in the same colour and letter group.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test every possible destination to make sure the moved target is valid, reachable, and not inside geometry.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Target Waypoint is the Event Point to move, this point's coordinates are the intended destination, the trigger is either Random or a deliberate dependency, and every possible destination has been tested in-game.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,217 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Sound Effect Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Play a selected Sound FX or Music entry when mission logic reaches the right trigger, such as an objective dependency or a nearby player interaction.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Sound Effect Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Sound Effect</Bold> Event Point plays an audio entry from the game's sound list.
+        It can be used for mission feedback, interaction sounds, alarms, stingers, music cues, or
+        short audio moments that need to be tied to mission scripting.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Sound Effect Event Points do not describe the objective by themselves. They are usually
+        supporting feedback: another Event Point becomes active, the player uses something nearby,
+        or the mission reaches a scripted moment, and the sound plays to reinforce that event.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Sound Effect for audible feedback. Pair it with Message, Conversation, Visual Effect, Activate Prim, or objective logic when the player also needs context.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Sound Effect uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        keeping the sound cue grouped with the objective, prop, conversation, or area that causes it.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position matters when the trigger is spatial, such as <Bold>Player Uses Radius</Bold>. It
+        can also matter if the engine treats the selected audio as positional. Place the Event Point
+        at the source of the sound or at the interaction point that should cause the sound to play.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the sound plays. A dependency-triggered sound waits for another
+        Event Point. A player-use radius sound plays when the player uses/interacts within the
+        configured radius.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Sound Effect-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Sound Effect has two type-specific settings. These map directly to the original sound setup:
+        <Bold>Data[0]</Bold> stores the sound category, and <Bold>Data[1]</Bold> stores the absolute
+        index into <Bold>sound_list[]</Bold>.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Category</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Category chooses whether the entry is treated as <Bold>Sound FX</Bold> or <Bold>Music</Bold>.
+        The editor filters the sound list to match this category. Use <Bold>Sound FX</Bold> for most
+        short mission cues, interaction sounds, alarms, and feedback. Use <Bold>Music</Bold> only
+        when intentionally selecting a music entry.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Sound / Sound ID</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The sound list selection writes the absolute <Bold>Sound ID</Bold> into the Event Point.
+        You can choose the sound from the list or type the Sound ID directly. The ID is not a local
+        filtered-list index; it is the original index into the game's full <Bold>sound_list[]</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Pick the Category first, then choose the Sound. Changing the category changes the filtered list, but the stored Sound ID remains the absolute sound_list index.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Sound Effects
+    </Paragraph>
+    <Paragraph>
+        Existing Sound Effect usage is mostly tied to another Event Point becoming active or to the
+        player using something in a small radius. Useful trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> - plays the sound after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Uses Radius</Bold> - plays the sound when the player uses/interacts within range.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - useful for one-shot sounds that should fire when the trigger becomes true.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - useful when the sound should be tied to a condition that remains true, but this can repeat if the trigger is not controlled carefully.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run> Be careful with Active While. If the condition stays true, the sound may behave like a repeated or sustained cue depending on engine handling and the selected sound.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Sound Effect Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Sound After Mission Progress</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when the sound should play after another Event Point completes.
+        This is useful for feedback after an objective, scripted state change, camera moment, or
+        interaction chain.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>MIB.ucm</Bold>, Sound Effect <Bold>20</Bold> uses <Bold>Sound FX</Bold> with Sound
+        ID <Bold>17</Bold>. It is triggered by <Bold>Dependency</Bold> on Event Point
+        <Bold>17</Bold> and uses <Bold>Active While</Bold>, tying the sound cue to that earlier
+        mission condition.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the Event Point that represents the mission event first. Then create the Sound Effect,
+        choose the Category and Sound ID, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold>,
+        and set <Bold>EP Ref</Bold> to the Event Point that should cause the sound.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Interaction Sound</Paragraph>
+    <Paragraph>
+        Use <Bold>Player Uses Radius</Bold> when the player should hear a sound after using an
+        object, console, switch, door, or other nearby interaction point.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>skymiss2.ucm</Bold>, Sound Effect <Bold>72</Bold> uses <Bold>Sound FX</Bold> with
+        Sound ID <Bold>174</Bold>. It is triggered by <Bold>Player Uses Radius</Bold> with radius
+        <Bold>128</Bold>, so the player must interact near the Event Point for the sound to play.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Sound Effect Event Point at the interaction location. Set the trigger to
+        <Bold>Player Uses Radius</Bold>, choose a radius that matches the object or area, then select
+        the Sound FX or Music entry that should play.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Objective Feedback Sound</Paragraph>
+    <Paragraph>
+        Use a dependency-triggered sound alongside a Message, Visual Effect, Activate Prim, or
+        Counter chain when the player needs immediate audio confirmation that something happened.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Decide which Event Point represents the completed action. Trigger the Sound Effect from that
+        Event Point, then add any supporting Message or Visual Effect separately. Keep all related
+        Event Points in the same colour and letter group for easier debugging.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Sound Effect Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what mission action should cause the sound.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Sound Effect</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose <Bold>Sound FX</Bold> or <Bold>Music</Bold> in Category.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the sound from the list or enter the absolute <Bold>Sound ID</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Event Point at the sound source or interaction location if the trigger is spatial.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger, usually <Bold>Dependency</Bold> or <Bold>Player Uses Radius</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Active</Bold> for a normal one-shot cue unless you specifically need Active While behaviour.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the sound in game to confirm timing, repetition, and volume feel correct.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Category is correct, Sound ID points at the intended sound_list entry, the trigger fires at the right mission moment, and Active While is only used when repeated or condition-linked audio is intentional.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

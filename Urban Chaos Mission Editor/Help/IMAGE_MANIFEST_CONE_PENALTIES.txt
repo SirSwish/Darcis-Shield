@@ -1,0 +1,16 @@
+Mission Editor Help Image Manifest - Cone Penalties
+===================================================
+
+Place these screenshots under:
+Help/Images/
+
+ConePenaltiesEventPoint.xaml
+----------------------------
+mission_cone_penalties_overview.png
+mission_cone_penalties_required_setup.png
+mission_cone_penalties_edit_window.png
+mission_cone_penalties_common_properties.png
+mission_cone_penalties_traffic_cones.png
+mission_cone_penalties_count_up_timer.png
+mission_cone_penalties_trigger_settings.png
+mission_cone_penalties_example_route.png

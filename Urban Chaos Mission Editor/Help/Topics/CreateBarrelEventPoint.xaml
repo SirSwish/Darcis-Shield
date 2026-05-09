@@ -1,0 +1,244 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Barrel Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Spawns simple knockable world items such as barrels, cones, bins, burning barrels, and explosive drums.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Create Barrel Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Create Barrel</Bold> Event Point is used to spawn simple knockable mission props.
+        These are physical objects that can be placed around the map for decoration, hazards,
+        clutter, mission staging, or environmental detail.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Despite the name, this Event Point is not limited to ordinary barrels. It can create several
+        related object types, including traffic cones, bins, burning barrels, and explosive LOX-style
+        drums like those seen in the Semtex mission.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple rule:</Run>
+                <Run>
+                    One Create Barrel Event Point spawns one object. If you want several barrels, cones, bins, or drums,
+                    place several Create Barrel Event Points.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Create Barrel Event Point
+    </Paragraph>
+    <Paragraph>
+        To add one, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Create Barrel</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the normal common properties and a small
+        Create Barrel-specific section.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Create Barrel uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. The letter group and colour can be set
+        however you prefer. For simple scenery placement, you may want to group similar props
+        together so they are easy to hide, filter, or inspect later.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The object spawns at the Event Point position. Use <Bold>Select Position on Map</Bold> to
+        place it visually in the viewport. This is usually easier than typing world coordinates by
+        hand.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Because these are physical props, place them somewhere sensible: on roads, pavements,
+        warehouse areas, alleyways, construction zones, industrial lots, or wherever the scenario
+        requires them.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_position.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Barrel Type
+    </Paragraph>
+    <Paragraph>
+        Create Barrel has only one important type-specific setting: the object type to spawn.
+        Choose the type that matches the scene or mission situation you are building.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_type_dropdown.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Barrel / Oil Drum</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Useful for industrial areas, alleys, factories, loading zones, storage yards, and general
+        urban clutter. For example, if you are making an old factory with oil drums behind it, use
+        this type.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Traffic Cone</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Useful for crime scenes, construction work, road blocks, traffic incidents, police activity,
+        or areas where you want the player to read the scene as temporarily blocked or controlled.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Bin</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Useful for streets, alleys, shopfronts, housing areas, back lanes, and general city dressing.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Burning Barrel</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Useful for dark alleys, rough areas, homeless encampment-style scenes, industrial yards, or
+        places where you want fire/light ambience.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">LOX / Explosive Drum</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Useful for explosive set pieces or mission hazards, such as the LOX-style drums seen in the
+        Semtex mission. Use these carefully if the object is expected to behave as an explosive
+        hazard.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#3A2A2A" BorderBrush="#7A4A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0A0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    One object spawns per Event Point. The Count-style behaviour used by some other Event Points does not apply here.
+                    To create a cluster of objects, copy and paste the Event Point or create several manually.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        For normal prop placement, the object should exist when the mission starts. Use the standard
+        immediate trigger setup:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        This causes the barrel, cone, bin, burning barrel, or explosive drum to appear as soon as the
+        mission begins.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_barrel_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Examples
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Old Factory or Industrial Yard</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place several oil drums or barrels around loading areas, storage corners, and behind
+        buildings.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Crime Scene or Traffic Incident</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place traffic cones around a blocked road, crash scene, police area, or temporary hazard.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Back Alley or Street Dressing</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place bins, barrels, and other knockable objects to make the city feel more lived-in.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hazard or Explosive Encounter</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use LOX/explosive drums when you want a dangerous object or mission hazard. Test these
+        carefully to confirm the gameplay effect matches what you expect.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Create Barrel Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Create Barrel</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a letter group and colour that fits your organisation scheme.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Select Position on Map</Bold> and place the object in the viewport.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select the object type, such as barrel, cone, bin, burning barrel, or LOX/explosive drum.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>None / Game Starts</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Listening Mode</Bold> to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Copy and paste the Event Point if you need multiple similar objects.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission.</Paragraph></ListItem>
+    </List>
+
+</FlowDocument>

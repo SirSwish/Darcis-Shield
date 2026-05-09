@@ -133,7 +133,7 @@
     <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Create Target / Target Waypoint</Paragraph>
     <Paragraph Margin="24,0,0,0">Creates a camera target or target path node for scripted camera aiming.</Paragraph>
     <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Simple</Paragraph>
-    <Paragraph Margin="24,0,0,0">A basic marker or trigger event point with no special type-specific data.</Paragraph>
+    <Paragraph Margin="24,0,0,0">A marker, patrol node, path point, or trigger helper. See <Bold>Simple Waypoint Event Point</Bold> for its type-specific <Bold>Delay</Bold> property and common usage patterns.</Paragraph>
     <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Move Thing</Paragraph>
     <Paragraph Margin="24,0,0,0">Moves a referenced event point or object to this event point’s position.</Paragraph>
     <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Adjust Enemy / Enemy Flags</Paragraph>

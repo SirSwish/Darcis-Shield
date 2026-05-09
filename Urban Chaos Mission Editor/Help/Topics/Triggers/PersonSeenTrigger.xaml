@@ -1,0 +1,279 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Person Seen Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point fires when a specific NPC has been seen by an observer (typically an enemy or security camera). Used by 125 Event Points across retail missions for stealth detection and alarm systems.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Person Seen Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Person Seen</Bold> detects when a specific NPC has been seen by an observer. The observer is
+        typically an enemy NPC or security camera. This is the foundation of stealth mission design — when
+        the player (or ally NPC) is spotted, the trigger fires and consequences happen (alarm, reinforcements,
+        mission failure). It checks line-of-sight visibility and detection range.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger enables classic stealth gameplay: "infiltrate the facility without being seen," "if
+        detected, reinforcements spawn," or "cameras trigger alarms when they spot you." Person Seen is
+        essential for any mission where detection matters. It responds to NPC AI vision and security camera
+        detection, creating dynamic stealth challenges.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Person Seen when this Event Point should fire when a specific NPC is spotted by an observer (enemy or camera). Set EP Ref to the NPC to watch. The trigger fires when that NPC is seen.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Person Seen Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Person Seen</Bold> trigger when the Event Point should fire based on an NPC being spotted.
+        This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Stealth detection</Bold> - Trigger alarm or reinforcements when player is spotted</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Security camera systems</Bold> - Cameras detect player and trigger consequences</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Infiltration fail conditions</Bold> - Mission fails if player is seen</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Guard awareness</Bold> - Track when specific NPCs have been detected</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Detection counters</Bold> - Count how many times player was spotted</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Visibility-based progression</Bold> - Events trigger when NPC is visible to observers</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (NPC To Watch)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the Event Point that creates or controls the NPC to watch for detection. This is typically
+        the player character's NPC Event Point (often index 0), but can be any NPC you want to track. When
+        the referenced NPC is seen by an observer (enemy or camera), this trigger fires.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> The referenced Event Point must create an NPC that can be detected. If the
+        EP Ref points to a non-NPC Event Point (Message, Group Life, etc.), the trigger will never fire.
+        For player detection, EP Ref typically points to the player's NPC Event Point.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if the referenced NPC is visible to any observer. Observers
+        include enemy NPCs (with line-of-sight vision) and security cameras. When the NPC is spotted (visible
+        and within detection range), the trigger condition is met. Whether the Event Point fires immediately
+        or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when NPC is first seen, stays active (most common for alarms)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while NPC is visible, inactive when out of sight</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when NPC is seen, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when NPC is seen, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Group Life Event Point (enemy reinforcements) with <Bold>Person Seen</Bold>
+        trigger (EP Ref = 0 [player]) and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, player attempts stealth infiltration</Paragraph></ListItem>
+        <ListItem><Paragraph>This Event Point waits for the player to be spotted</Paragraph></ListItem>
+        <ListItem><Paragraph>Player moves through the area, avoiding enemy vision</Paragraph></ListItem>
+        <ListItem><Paragraph>Player makes a mistake and enters an enemy's line of sight</Paragraph></ListItem>
+        <ListItem><Paragraph>Enemy detects the player (Person Seen condition becomes true)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger fires, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Reinforcements spawn, alarm sounds</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point stays active even if player hides again (using Active listening mode)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Stealth Alarm System
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Person Seen trigger (EP Ref = 0 [player], Active Die) that increments a detection
+        counter. Event Point B is a Counter trigger watching that counter with threshold 1 (Active). Event
+        Point C is a Group Life (reinforcements) with Dependency on B (Active). First detection triggers
+        alarm and spawns reinforcements. This is the most common stealth detection pattern in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Infiltration Fail Condition
+    </Paragraph>
+    <Paragraph>
+        A Person Seen trigger (EP Ref = 0 [player], Active) directly fires a Lose Event Point. If the player
+        is detected at any point during the mission, the mission fails. This creates strict "no detection"
+        stealth challenges.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Detection Warning
+    </Paragraph>
+    <Paragraph>
+        A Person Seen trigger (EP Ref = 0 [player], Active While) shows a Message "You've been spotted!"
+        while the player is visible to enemies. When the player breaks line of sight, the message disappears.
+        This provides real-time stealth feedback.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Security Camera Detection
+    </Paragraph>
+    <Paragraph>
+        Multiple Security Camera Event Points are placed in the world. A Person Seen trigger (EP Ref = 0
+        [player], Active) detects when cameras spot the player. This fires an alarm Event Point and spawns
+        reinforcements. Classic security system stealth gameplay.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Detection Count Tracking
+    </Paragraph>
+    <Paragraph>
+        Multiple Person Seen triggers (EP Ref = 0 [player], Active Die) each increment a detection counter.
+        Different Counter triggers watch the counter with different thresholds: 1 detection = warning, 3
+        detections = reinforcements, 5 detections = mission failure. This creates progressive stealth
+        penalties.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Person Seen</Bold> trigger appears in 125 Event Points across retail missions. It's the
+        foundation of stealth mission design. Retail stealth missions commonly use Person Seen with Active Die
+        to increment detection counters, then use Counter triggers to react when the counter reaches thresholds.
+        This creates flexible "X detections allowed before consequences" systems.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail stealth missions commonly use Person Seen → Increment counter (Active Die) → Counter trigger → consequences. This allows multiple detections before failure and makes stealth more forgiving than instant-fail on first detection.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Requires observers:</Run>
+                <Run> Person Seen only fires if there are active observers (enemies or cameras) in the mission. If all enemies are dead and there are no cameras, the trigger will never fire. Ensure your mission has appropriate observers for stealth gameplay.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Line of sight required:</Run>
+                <Run> Person Seen requires line-of-sight visibility. If the NPC is behind a wall or obstacle, they won't be detected even if close to an enemy. This is realistic for stealth but can be confusing if observers can't actually see the NPC.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Active Die for counting:</Run>
+                <Run> When using Person Seen to increment detection counters, always use Active Die listening mode. If you use Active, the trigger fires continuously every frame while visible, incrementing the counter thousands of times per second.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Seen vs Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Seen</Bold> requires line-of-sight visibility to an observer. <Bold>Radius</Bold> fires
+        when the player enters an area regardless of visibility. Use <Bold>Person Seen</Bold> for stealth
+        detection. Use <Bold>Radius</Bold> for location-based triggers that don't care about visibility.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Seen vs Security Camera</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Seen</Bold> detects when an NPC is spotted by any observer. <Bold>Security Camera</Bold>
+        is a trigger type for camera objects themselves. Often combined: Security Camera Event Points exist
+        in the world, and Person Seen triggers detect when cameras spot the player.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Seen vs Enemy Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Person Seen</Bold> requires line-of-sight detection by observers. <Bold>Enemy Radius</Bold>
+        detects enemy position in an area. Use <Bold>Person Seen</Bold> for stealth visibility. Use <Bold>Enemy
+        Radius</Bold> for enemy location tracking.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Person Seen Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what should happen when the NPC is spotted (alarm, reinforcements, failure, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Identify which NPC to watch (usually the player, EP Ref = 0)</Paragraph></ListItem>
+        <ListItem><Paragraph>Ensure the mission has active observers (enemies or cameras)</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when the NPC is spotted</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Person Seen</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the NPC Event Point index (typically 0 for player)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (Active for permanent alarms, Active Die for detection counting)</Paragraph></ListItem>
+        <ListItem><Paragraph>If counting detections, create an Increment Event Point and Counter trigger chain</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by deliberately getting spotted by an enemy</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger fires when line-of-sight detection occurs</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the trigger does NOT fire when behind obstacles</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Active Die for counting, verify it only increments once per detection</Paragraph></ListItem>
+        <ListItem><Paragraph>Playtest stealth routes to ensure detection feels fair and consistent</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> For forgiving stealth gameplay, use Person Seen → Increment counter → Counter triggers with thresholds (e.g., 3 detections allowed). For strict stealth, use Person Seen → immediate Lose Event Point. Always playtest to ensure detection feels fair and enemies have realistic vision ranges.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

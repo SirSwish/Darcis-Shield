@@ -1300,11 +1300,11 @@ namespace UrbanChaosMapEditor.Views.Core
                             }
                             else
                             {
-                                // WriteWorldAltitude double-shifts (>> 6 total). Pre-shift by 6 in QS mode
-                                // so the stored byte equals what the user typed.
+                                // In QS mode, the typed value is the effective PAP altitude byte.
+                                // WriteWorldAltitude shifts down by PAP_ALT_SHIFT, so pre-shift once.
                                 int altToWrite = HeightSettings.ShowRawHeights
                                     ? vm.TargetAltitude
-                                    : vm.TargetAltitude << 6;
+                                    : vm.TargetAltitude << AltitudeAccessor.PAP_ALT_SHIFT;
                                 _altitude.SetRoofTile(tx, ty, altToWrite);
 
                                 if (vm.TargetAltitude == 0)

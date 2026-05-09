@@ -1,0 +1,17 @@
+Mission Editor Help Image Manifest - Create Item / Make Searchable
+================================================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateItemMakeSearchableEventPoints.xaml
+----------------------------------------
+mission_create_item_make_searchable_overview.png
+mission_create_item_overview.png
+mission_create_item_add_type.png
+mission_create_item_position.png
+mission_create_item_properties.png
+mission_create_item_type_dropdown.png
+mission_create_item_hidden_in_prim.png
+mission_make_searchable_overview.png
+mission_create_item_trigger_settings.png

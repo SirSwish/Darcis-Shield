@@ -1,0 +1,10 @@
+Mission Editor Help Image Capture Guide - Count Up Timer
+===================================================
+
+CountUpTimerEventPoint.xaml
+---------------------------
+mission_count_up_timer_overview.png - Mission viewport or Event Points list showing a Count Up Timer Event Point.
+mission_count_up_timer_add_type.png - Add New EventPoint window with Count Up Timer selected.
+mission_count_up_timer_common_properties.png - Edit EventPoint window showing common properties and no type-specific fields.
+mission_count_up_timer_trigger_settings.png - Trigger settings showing a useful start trigger, such as Player Enters Radius, Dependency, or None/Game Starts.
+mission_count_up_timer_cone_penalties_setup.png - Example setup showing Count Up Timer, Cone Penalties, and Create Barrel traffic cone Event Points together.

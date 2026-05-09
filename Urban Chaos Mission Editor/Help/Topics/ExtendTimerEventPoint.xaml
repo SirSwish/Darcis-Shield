@@ -1,0 +1,400 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Extend Timer Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Adds extra time to an existing Event Point that is running a Visible Countdown trigger.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Extend Timer Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Extend Timer</Bold> Event Point is used to increase the amount of available time
+        on an existing <Bold>Visible Countdown</Bold> trigger.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        It does <Bold>not</Bold> create its own countdown timer. It does <Bold>not</Bold> start a new
+        visible countdown by itself. Its purpose is to find an existing Event Point that is already
+        using a Visible Countdown trigger and add extra seconds to that countdown.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is useful for missions where the player is racing against time but can earn more time by
+        reaching checkpoints, pressing switches, completing sub-objectives, collecting items, or
+        triggering other mission logic.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical setup:</Run>
+                <Run>
+                    Extend Timer only works against an existing Event Point that has a Visible Countdown trigger.
+                    The Target EP Index must point to that Visible Countdown Event Point.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding an Extend Timer Event Point
+    </Paragraph>
+    <Paragraph>
+        Click <Bold>Add</Bold> in the Event Points panel, select <Bold>Extend Timer</Bold>, and click
+        <Bold>OK</Bold>. The editor opens the standard Event Point editor with common properties,
+        trigger settings, and the Extend Timer-specific fields.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Extend Timer uses the normal common properties: index number, Event Point type, letter group,
+        colour, position, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The map position is usually not gameplay-critical. The important parts are the trigger logic,
+        the <Bold>Target EP Index</Bold>, and the <Bold>Extension Amount</Bold>. Still, place the
+        Event Point near the checkpoint, switch, item, or area that grants the extra time so the
+        mission remains readable in the editor.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Extend Timer Properties
+    </Paragraph>
+    <Paragraph>
+        Extend Timer has two type-specific properties.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Target EP Index</Bold> — the Event Point number of the Event Point that owns
+                the <Bold>Visible Countdown</Bold> trigger.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Extension Amount</Bold> — the number of seconds added to that visible countdown
+                when Extend Timer fires.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Target EP Index
+    </Paragraph>
+    <Paragraph>
+        <Bold>Target EP Index</Bold> must be set to the Event Point number of the Event Point that is
+        running the <Bold>Visible Countdown</Bold>. In many missions, this host Event Point is a
+        <Bold>Simple Waypoint</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Do not set Target EP Index to the Extend Timer Event Point itself. Do not set it to the
+        checkpoint Event Point unless that checkpoint is also the Visible Countdown host. Do not set
+        it to the start trigger unless that start trigger is the actual Visible Countdown Event Point.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical Target EP Index detail:</Run>
+                <Run>
+                    Target EP Index must point to the Event Point that owns the Visible Countdown.
+                    This is the most common place to make a mistake.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_target_ep_index.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Extension Amount
+    </Paragraph>
+    <Paragraph>
+        <Bold>Extension Amount</Bold> is the number of seconds added to the visible countdown.
+        For example, if the countdown has 20 seconds remaining and the Extension Amount is 10, the
+        timer should increase to approximately 30 seconds when the Extend Timer fires.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Visible Countdown Host
+    </Paragraph>
+    <Paragraph>
+        Extend Timer needs an existing visible countdown to extend. The visible countdown is commonly
+        hosted by a <Bold>Simple Waypoint</Bold>. That Simple Waypoint is configured with a
+        <Bold>Visible Countdown</Bold> trigger, often with zero delay or a mission-specific countdown
+        value.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_visible_countdown_host.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Typical Host Chain
+    </Paragraph>
+    <Paragraph>
+        A common timed challenge is wired like this:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Player enters start area
+    -> Start Simple Waypoint triggers
+        -> Visible Countdown Simple Waypoint begins counting down
+            -> Extend Timer checkpoint adds extra seconds to that Visible Countdown
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        In this example, the Extend Timer should target the <Bold>Visible Countdown Simple Waypoint</Bold>,
+        not the start-area Simple Waypoint.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        The Extend Timer Event Point should be triggered by whatever condition grants the player
+        extra time.
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Player Enters Radius</Bold> — add time when the player reaches a checkpoint.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Enters Cuboid</Bold> — add time when the player enters a larger checkpoint area.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Uses in Radius</Bold> — add time when the player presses a switch or uses an object.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> — add time after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Item Held / Specific Item Held</Bold> — add time after the player obtains or has a required item.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Finished</Bold> — add time after a scripted dialogue or instruction completes.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Checkpoint tip:</Run>
+                <Run>
+                    For checkpoint-style timer extensions, Player Enters Radius is usually the simplest trigger.
+                    Place the Extend Timer Event Point at the checkpoint and give it a suitable radius.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Example: Maze Checkpoint Adds Time
+    </Paragraph>
+    <Paragraph>
+        This example creates a timed maze where the player receives extra time for reaching a
+        checkpoint.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_extend_timer_maze_example.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create a <Bold>Simple Waypoint</Bold> at the maze entrance.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the entrance Simple Waypoint to trigger when the player enters the start area.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create another <Bold>Simple Waypoint</Bold> to host the <Bold>Visible Countdown</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure the Visible Countdown Simple Waypoint so it starts from the entrance Simple Waypoint, usually through <Bold>Dependency</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the Event Point number of the Visible Countdown Simple Waypoint.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create an <Bold>Extend Timer</Bold> Event Point at the checkpoint.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Target EP Index</Bold> to the Event Point number of the Visible Countdown Simple Waypoint.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Extension Amount</Bold> to the number of seconds to add, such as <Bold>10</Bold>, <Bold>15</Bold>, or <Bold>30</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Extend Timer trigger to activate when the player reaches the checkpoint, such as <Bold>Player Enters Radius</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Uses
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Maze or Route Checkpoints</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add extra seconds when the player reaches each checkpoint. This rewards progress and keeps a
+        timed maze from being too punishing.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timed Rescue Mission</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add time when the player rescues a person, reaches a safe zone, or activates a switch that
+        delays the failure condition.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Vehicle or Cone Challenge</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use Extend Timer as a positive reward for checkpoints, while other Event Points such as Cone
+        Penalties can add negative time penalties.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Objective Chain Reward</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add time after the player completes a sub-objective, finds an item, arrests a target, or
+        finishes a required step.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Extend Timer Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the Event Point that uses the <Bold>Visible Countdown</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note that Event Point’s index number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create an <Bold>Extend Timer</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Target EP Index</Bold> to the visible countdown Event Point number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Extension Amount</Bold> to the number of seconds to add.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Extend Timer trigger to the condition that grants extra time.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Event Point near the checkpoint or logic area for readability.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Multiple Extend Timer Event Points
+    </Paragraph>
+    <Paragraph>
+        You can use multiple Extend Timer Event Points to add time at several checkpoints. Each one
+        should target the same Visible Countdown Event Point if they are all extending the same timer.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Visible Countdown EP #12
+    &lt;- Extend Timer checkpoint A: Target EP Index = 12, +10 seconds
+    &lt;- Extend Timer checkpoint B: Target EP Index = 12, +15 seconds
+    &lt;- Extend Timer checkpoint C: Target EP Index = 12, +30 seconds
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The timer does not gain time</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Extend Timer Event Point is actually triggering.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm <Bold>Target EP Index</Bold> points to the Event Point with the <Bold>Visible Countdown</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the target Event Point is the visible countdown host, not the start trigger or checkpoint trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm <Bold>Extension Amount</Bold> is greater than zero.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the visible countdown is currently running when the extension occurs.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The wrong timer is extended</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the Event Point number entered in <Bold>Target EP Index</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>If there are multiple visible countdown Event Points, make sure Extend Timer targets the correct one.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use consistent groups, colours, or placement to keep timer logic readable.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The countdown never starts</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the host Event Point that has the <Bold>Visible Countdown</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm that host Event Point’s trigger is firing.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the host depends on another Event Point, confirm that dependency is correct.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the visible countdown host separately before testing Extend Timer.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The player can repeatedly farm time</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the Extend Timer trigger and listening mode.</Paragraph></ListItem>
+        <ListItem><Paragraph>If it should only trigger once, use a one-shot setup rather than an always-repeatable radius.</Paragraph></ListItem>
+        <ListItem><Paragraph>Consider using dependency logic so the checkpoint can only award time once.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Extend Timer is simple, but easy to miswire. The most important rule is:
+                    Target EP Index must point to the Event Point that owns the Visible Countdown.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

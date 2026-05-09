@@ -1,0 +1,264 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Radius Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point checks if the player is within a circular area defined by a center point and radius. Used by 146 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Radius Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> creates a circular trigger zone in the world. When the player character's position
+        enters this circle, the trigger condition is met. This is used for location-based objectives, area
+        messages, checkpoints, and any event that should fire when the player reaches a specific spot. The
+        circle is defined by an X/Z center position and a radius in world units.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Unlike <Bold>Cuboid</Bold> which defines a rectangular box, <Bold>Radius</Bold> creates a circular
+        area. Radius triggers are simpler to configure (only need center point and radius) but less precise
+        for architectural boundaries. They work well for "reach this location" objectives and proximity-based
+        events.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Radius when the Event Point should fire when the player enters a circular area. Set the center position (X, Z) and radius to define the trigger zone.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Radius Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Radius</Bold> trigger when the Event Point should fire based on the player's proximity
+        to a specific location. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Checkpoint markers</Bold> - "Reach the extraction point" style objectives</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Area messages</Bold> - Show a message when the player enters a zone</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Proximity spawns</Bold> - Spawn enemies or NPCs when the player gets close</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Location-based progression</Bold> - Next objective unlocks when player reaches a spot</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Tutorial zones</Bold> - Show hints or instructions in specific areas</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Ambush triggers</Bold> - Start combat when player enters an area</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">X (Center X Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The X coordinate of the circle's center point in world units. This defines the horizontal position
+        of the trigger zone. Use the Map View to visually place the Event Point and the X coordinate will
+        be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Z (Center Z Position)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The Z coordinate of the circle's center point in world units. This defines the vertical position
+        (depth) of the trigger zone. Use the Map View to visually place the Event Point and the Z coordinate
+        will be set automatically.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The radius of the circular trigger zone in world units. Larger values create bigger trigger areas.
+        The player must be within this distance from the center point (X, Z) for the trigger to fire.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Common values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>512 - Small trigger zone (tight checkpoint)</Paragraph></ListItem>
+        <ListItem><Paragraph>1024 - Medium trigger zone (typical checkpoint or area)</Paragraph></ListItem>
+        <ListItem><Paragraph>2048 - Large trigger zone (broad area coverage)</Paragraph></ListItem>
+        <ListItem><Paragraph>4096 - Very large trigger zone (entire building or district)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if the player's position is within the circular area. The distance
+        from the player to the center point (X, Z) is calculated. If this distance is less than or equal to
+        the Radius, the trigger condition is true. What happens next depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when player enters, stays active even after player leaves</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active while player is inside, inactive when player leaves</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when player enters, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when player enters, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Radius</Bold> trigger (X=10000, Z=15000, Radius=1024)
+        and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point waits</Paragraph></ListItem>
+        <ListItem><Paragraph>Player moves toward position (10000, 15000)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player enters the radius (distance from center ≤ 1024)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger condition becomes true, Event Point fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Message appears, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Player leaves the radius</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point stays active (Active listening mode), message stays visible</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Checkpoint Objective
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Radius</Bold> trigger and <Bold>Active</Bold> listening mode marks
+        a checkpoint. When the player reaches the area, the message "Checkpoint reached" appears and stays
+        visible. Later Event Points depend on this checkpoint to unlock the next objective. This is the most
+        common use of <Bold>Radius</Bold> in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Area Warning Message
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Radius</Bold> trigger and <Bold>Active While</Bold> listening mode
+        shows a warning "Enemy territory ahead" while the player is inside a dangerous zone. When the player
+        leaves, the message disappears. This uses <Bold>Active While</Bold> to create a temporary area message.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Proximity Enemy Spawn
+    </Paragraph>
+    <Paragraph>
+        A Group Life Event Point with <Bold>Radius</Bold> trigger and <Bold>Active</Bold> listening mode
+        spawns enemies when the player enters an area. The enemies spawn once when the player gets close,
+        creating an ambush encounter. The Event Point stays active after spawning.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Nav Beacon to Location
+    </Paragraph>
+    <Paragraph>
+        A Nav Beacon Event Point with <Bold>Dependency</Bold> trigger and <Bold>Active</Bold> listening mode
+        appears after the previous objective. A second Event Point with <Bold>Radius</Bold> trigger (at the
+        nav beacon location) and <Bold>Active</Bold> listening mode fires when the player reaches the beacon.
+        This creates "follow beacon to checkpoint" patterns.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> trigger appears in 146 Event Points across retail missions. It's commonly used
+        for checkpoint objectives, area triggers, and proximity-based spawns. Retail missions prefer <Bold>Radius</Bold>
+        for simple circular zones and <Bold>Cuboid</Bold> for precise architectural boundaries.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Y coordinate ignored:</Run>
+                <Run> Radius triggers only check X and Z position, not Y (altitude). The trigger fires at any height as long as the player is within the X/Z circle. If you need altitude checking, use Cuboid instead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Radius units:</Run>
+                <Run> The Radius field is in world units, not meters or pixels. Test your radius values in the Map View to ensure the trigger zone is the right size. Common values range from 512 (small) to 4096 (very large).</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius vs Cuboid</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Radius</Bold> creates a circular area (X, Z only). <Bold>Cuboid</Bold> creates a rectangular
+        box (X, Y, Z with min/max bounds). Use <Bold>Radius</Bold> for simple proximity checks. Use <Bold>Cuboid</Bold>
+        for precise architectural boundaries or altitude-specific triggers.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Radius</Bold> fires based on player position. <Bold>Dependency</Bold> fires when another Event
+        Point becomes active. Use <Bold>Radius</Bold> for location-based triggers. Use <Bold>Dependency</Bold>
+        for logic-based sequencing. Often combined: Event Point A has Radius trigger, Event Point B has
+        Dependency on A.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Radius</Bold> fires when player enters an area. <Bold>None</Bold> fires at mission start. Use
+        <Bold>Radius</Bold> for events that should happen at a specific location. Use <Bold>None</Bold> for
+        immediate, unconditional activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Radius Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the location where the Event Point should trigger</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point and configure its type</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Radius</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Use the Map View to visually place the Event Point at the target location (X, Z auto-set)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Radius to define the trigger zone size (test different values to get the right feel)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for checkpoints, Active While for area messages)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by approaching the location from different directions</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the trigger fires when entering the circle</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the listening mode behavior (Active stays active, Active While deactivates when leaving)</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust Radius if the trigger zone feels too small or too large</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use the Map View to visually place Radius trigger Event Points. Click the location on the map and the X, Z coordinates will be set automatically. This is much easier than manually entering coordinates.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

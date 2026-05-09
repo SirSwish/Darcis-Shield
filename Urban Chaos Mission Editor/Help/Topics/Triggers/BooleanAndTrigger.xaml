@@ -1,0 +1,296 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Boolean And Trigger
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point combines two conditions and fires only when both are true simultaneously. Used by 359 Event Points across retail missions.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Boolean And Trigger Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Boolean And</Bold> creates logical AND combinations of two Event Points. This trigger fires
+        when both referenced Event Points are active at the same time. It's the fundamental building block
+        for complex mission logic requiring multiple conditions. For example: "spawn enemies only when the
+        player reaches the room AND the alarm is triggered" or "win the mission when all enemies are dead
+        AND the hostage is rescued."
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This trigger enables sophisticated mission design beyond simple linear chains. Instead of Event A
+        followed by Event B, you can create Event C that requires both Event A AND Event B to be active.
+        This allows for branching mission paths, multiple objectives that converge, and conditional logic
+        based on game state.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Boolean And when this Event Point should fire only when two other Event Points are both active. Set EP Ref to the first condition and EP Ref Bool to the second condition.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Boolean And Trigger
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean And</Bold> trigger when the Event Point should fire only when two conditions are
+        both true. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Multiple objective completion</Bold> - Win condition requires completing two separate objectives</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Converging mission paths</Bold> - Two parallel objectives must both complete before progressing</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conditional spawns</Bold> - Enemies appear only when player reaches location AND another event occurs</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Complex win conditions</Bold> - Mission success requires multiple simultaneous states</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Gated progression</Bold> - Area unlocks only when two prerequisites are met</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Compound triggers</Bold> - Combine location-based and event-based triggers</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref (First Condition)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the first Event Point to check. This is one of the two conditions that must be active
+        for the Boolean And to fire. The EP Ref field uses zero-based indexing (0 = first Event Point,
+        1 = second Event Point, etc.).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref Bool (Second Condition)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The index of the second Event Point to check. This is the other condition that must be active for
+        the Boolean And to fire. When both EP Ref and EP Ref Bool Event Points are active, the trigger
+        condition is met. The EP Ref Bool field also uses zero-based indexing.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Important:</Bold> Both referenced Event Points must use listening modes that keep them active
+        (<Bold>Active</Bold>, <Bold>Active While</Bold>, or <Bold>Active Time</Bold>). If either uses
+        <Bold>Active Die</Bold>, the Boolean And may fail because the source becomes inactive immediately
+        after firing.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        Every game frame, the trigger checks if both referenced Event Points are active. When both EP Ref
+        and EP Ref Bool Event Points are active simultaneously, the trigger condition is met. Whether this
+        Event Point fires immediately or continues to check depends on the listening mode:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="24,2,0,8">
+        <ListItem><Paragraph><Bold>Active</Bold> - Fires once when both conditions are true, stays active (most common pattern)</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - Active only while both conditions remain true</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Time</Bold> - Fires when both conditions become true, stays active for After Timer duration</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active Die</Bold> - Fires once when both conditions are true, immediately becomes dead</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Win Event Point with <Bold>Boolean And</Bold> trigger (EP Ref = 5, EP Ref Bool = 12)
+        and <Bold>Active</Bold> listening mode:
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Mission starts, Event Point 5 tracks "rescue hostage" objective</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point 12 tracks "eliminate all enemies" objective</Paragraph></ListItem>
+        <ListItem><Paragraph>This Win Event Point waits for both conditions to be true</Paragraph></ListItem>
+        <ListItem><Paragraph>Player rescues the hostage, Event Point 5 becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Win Event Point still waits (only one condition is true)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player eliminates all enemies, Event Point 12 becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>Both conditions are now true, Boolean And trigger fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Win Event Point fires, mission success</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Dual Objective Win Condition
+    </Paragraph>
+    <Paragraph>
+        Event Point A tracks objective 1 completion (Killed trigger on target, Active). Event Point B tracks
+        objective 2 completion (Radius trigger at extraction point, Active). A Win Event Point has Boolean And
+        trigger (EP Ref = A, EP Ref Bool = B) with Active listening mode. The mission succeeds only when both
+        objectives are complete. This is the most common use of Boolean And in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Conditional Area Spawn
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Radius trigger marking a room entry (Active While). Event Point B is an alarm
+        state marker (Active). Event Point C is a Group Life (enemy spawn) with Boolean And trigger (EP Ref = A,
+        EP Ref Bool = B) and Active listening mode. Enemies spawn only when the player enters the room AND
+        the alarm is active. This creates conditional encounter design.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Converging Mission Branches
+    </Paragraph>
+    <Paragraph>
+        Event Point A tracks completion of mission branch 1 (Active). Event Point B tracks completion of
+        mission branch 2 (Active). Event Point C is a Message "All objectives complete" with Boolean And
+        trigger (EP Ref = A, EP Ref Bool = B) and Active listening mode. The player can complete the branches
+        in any order, but the next mission phase only unlocks when both are done.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Location Plus Event Trigger
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Cuboid trigger marking a specific room (Active While). Event Point B is a
+        Conversation Over trigger waiting for briefing to finish (Active). Event Point C is a Group Life
+        (ally spawn) with Boolean And trigger (EP Ref = A, EP Ref Bool = B) and Active listening mode.
+        Allies only spawn when the player reaches the room AND the briefing is complete. This prevents
+        premature spawns.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Compound Boolean Logic
+    </Paragraph>
+    <Paragraph>
+        Event Point A is a Boolean And combining two conditions (Active). Event Point B is another condition
+        (Active). Event Point C is a Boolean And (EP Ref = A, EP Ref Bool = B) with Active listening mode.
+        This creates three-condition AND logic: (Condition1 AND Condition2) AND Condition3. Retail missions
+        use this to build complex logic trees.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Boolean And</Bold> trigger appears in 359 Event Points across retail missions. It's commonly
+        used for win conditions requiring multiple objectives, gated progression, and conditional spawns.
+        Retail missions favor Boolean And over complex Dependency chains when multiple simultaneous conditions
+        are required.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Retail pattern:</Run>
+                <Run> Retail missions commonly use Boolean And for dual-objective win conditions: objective1 → Active, objective2 → Active, win condition → Boolean And(objective1, objective2). This creates "complete both objectives to win" mission structure.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Important Warnings
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Both conditions must be simultaneous:</Run>
+                <Run> Boolean And requires both Event Points to be active at the same time. If EP Ref fires and becomes inactive before EP Ref Bool fires, the Boolean And will never trigger. Use Active listening mode on dependencies to keep them active.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Active Die breaks Boolean And:</Run>
+                <Run> If either EP Ref or EP Ref Bool uses Active Die listening mode, it becomes inactive immediately after firing. This usually prevents the Boolean And from ever firing because both conditions are never active simultaneously. Always use Active for dependencies.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Order doesn't matter:</Run>
+                <Run> Boolean And fires when both conditions are true, regardless of which fires first. Event Point A then Event Point B produces the same result as Event Point B then Event Point A. The trigger checks both every frame.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Trigger Types
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean And vs Boolean Or</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean And</Bold> requires both conditions to be true. <Bold>Boolean Or</Bold> fires when
+        either condition is true. Use <Bold>Boolean And</Bold> for "complete both objectives" logic. Use
+        <Bold>Boolean Or</Bold> for "complete either objective" logic.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean And vs Dependency</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean And</Bold> requires two Event Points to be active. <Bold>Dependency</Bold> requires
+        one Event Point to be active. Use <Bold>Boolean And</Bold> for multiple simultaneous conditions. Use
+        <Bold>Dependency</Bold> for simple linear chains.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean And vs None</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Boolean And</Bold> waits for two conditions. <Bold>None</Bold> fires at mission start. Use
+        <Bold>Boolean And</Bold> for complex conditional logic. Use <Bold>None</Bold> for immediate,
+        unconditional activation.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Boolean And Trigger Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the two conditions that must both be true</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the first condition Event Point (or create a dependency marker Event Point)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the first condition Event Point uses Active listening mode (not Active Die)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the first condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Create or identify the second condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the second condition Event Point uses Active listening mode (not Active Die)</Paragraph></ListItem>
+        <ListItem><Paragraph>Note the index of the second condition Event Point</Paragraph></ListItem>
+        <ListItem><Paragraph>Create the Event Point that should fire when both conditions are true</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Trigger to <Bold>Boolean And</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref to the first condition Event Point index</Paragraph></ListItem>
+        <ListItem><Paragraph>Set EP Ref Bool to the second condition Event Point index</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode (usually Active for permanent state changes)</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in-game by triggering only the first condition</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Boolean And Event Point does NOT fire (only one condition true)</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger the second condition</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Boolean And Event Point fires immediately when both conditions become true</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the opposite order (second condition first, then first condition)</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Boolean And still fires correctly regardless of order</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> When using Boolean And, create marker Event Points for complex conditions. For example, instead of pointing directly to a Kill trigger, create an "Enemies Dead" marker Event Point with Dependency on the Kill. This makes Boolean And logic more readable and easier to debug.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

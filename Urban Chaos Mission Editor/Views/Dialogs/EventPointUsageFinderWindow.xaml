@@ -50,6 +50,10 @@
 
         <!-- Filter mode -->
         <Grid Grid.Row="2" Margin="0,0,0,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*"/>
@@ -57,9 +61,9 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="Search by:" Foreground="{StaticResource TextSecondary}"
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Search by:" Foreground="{StaticResource TextSecondary}"
                        VerticalAlignment="Center"/>
-            <ComboBox Grid.Column="1"
+            <ComboBox Grid.Row="0" Grid.Column="1"
                       x:Name="FilterModeCombo"
                       Background="{StaticResource Accent}"
                       Foreground="Black"
@@ -68,14 +72,185 @@
                 <ComboBoxItem Content="Category"/>
             </ComboBox>
 
-            <TextBlock Grid.Column="2" Text="Value:" Foreground="{StaticResource TextSecondary}"
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Value:" Foreground="{StaticResource TextSecondary}"
                        VerticalAlignment="Center" Margin="10,0,0,0"/>
-            <ComboBox Grid.Column="3"
+            <ComboBox Grid.Row="0" Grid.Column="3"
                       x:Name="FilterValueCombo"
                       Background="{StaticResource Accent}"
                       Foreground="Black"
                       DisplayMemberPath="DisplayName"
-                      SelectedValuePath="Value"/>
+                      SelectedValuePath="Value"
+                      SelectionChanged="FilterValueCombo_SelectionChanged"/>
+
+            <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
+                        Orientation="Vertical"
+                        Margin="10,6,0,0">
+                <!-- Optional sub-filter (shown when 'Create Item' is the selected Waypoint Type) -->
+                <StackPanel x:Name="ItemFilterPanel"
+                            Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Item Type:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="ItemTypeFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Item event points with this item type"/>
+                    </Grid>
+
+                    <CheckBox x:Name="HiddenInPrimOnlyCheckBox"
+                              Content="Only items with 'Hidden in prim' flag set"
+                              Foreground="{StaticResource TextSecondary}"
+                              Margin="0,4,0,0"
+                              ToolTip="Restrict matches to Create Item event points where the Hidden In Prim flag (Data[2] bit 1) is set"/>
+                </StackPanel>
+
+                <!-- Optional sub-filter (shown when 'Create Vehicle' is the selected Waypoint Type) -->
+                <StackPanel x:Name="VehicleFilterPanel"
+                            Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Type:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="VehicleTypeFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Vehicle event points with this vehicle type"/>
+                    </Grid>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Behaviour:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="VehicleBehaviorFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Vehicle event points with this behaviour"/>
+                    </Grid>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Key Required:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="VehicleKeyFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Vehicle event points with this key requirement"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Optional sub-filter (shown when 'Create Camera' is the selected Waypoint Type) -->
+                <StackPanel x:Name="CameraFilterPanel"
+                            Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Camera Type:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="CameraTypeFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Camera event points with this camera type"/>
+                    </Grid>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Movement:"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1"
+                                  x:Name="CameraMovementFilterCombo"
+                                  Background="{StaticResource Accent}"
+                                  Foreground="Black"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValuePath="Value"
+                                  ToolTip="Restrict matches to Create Camera event points with this movement type"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Optional sub-filter (shown when 'Create Target' is the selected Waypoint Type) -->
+                <Grid x:Name="TargetFilterPanel"
+                      Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="92"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="Target Type:"
+                               Foreground="{StaticResource TextSecondary}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              x:Name="TargetTypeFilterCombo"
+                              Background="{StaticResource Accent}"
+                              Foreground="Black"
+                              DisplayMemberPath="DisplayName"
+                              SelectedValuePath="Value"
+                              ToolTip="Restrict matches to Create Target event points with this target type"/>
+                </Grid>
+
+                <!-- Optional sub-filter (shown when 'Activate Prim' is the selected Waypoint Type) -->
+                <Grid x:Name="ActivatePrimFilterPanel"
+                      Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="92"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="Prim Type:"
+                               Foreground="{StaticResource TextSecondary}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              x:Name="ActivatePrimTypeFilterCombo"
+                              Background="{StaticResource Accent}"
+                              Foreground="Black"
+                              DisplayMemberPath="DisplayName"
+                              SelectedValuePath="Value"
+                              ToolTip="Restrict matches to Activate Prim event points with this prim type"/>
+                </Grid>
+            </StackPanel>
         </Grid>
 
         <!-- Action buttons -->
@@ -137,6 +312,8 @@
                     <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="220"/>
                     <DataGridTextColumn Header="Matches" Binding="{Binding MatchCount}" Width="80"/>
                     <DataGridTextColumn Header="EP #s" Binding="{Binding EpIndices}" Width="180"/>
+                    <DataGridTextColumn Header="Counter #" Binding="{Binding CounterIndex}" Width="90"/>
+                    <DataGridTextColumn Header="Increment Number" Binding="{Binding IncrementNumber}" Width="130"/>
                     <DataGridTextColumn Header="Mission" Binding="{Binding MissionName}" Width="160"/>
                     <DataGridTextColumn Header="Path" Binding="{Binding FullPath}" Width="*"/>
                 </DataGrid.Columns>

@@ -1,0 +1,215 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Active Time Listening Mode
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        The Event Point becomes active when the trigger condition is met and remains active for a limited duration controlled by the After Timer field.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Active Time Listening Mode Does
+    </Paragraph>
+    <Paragraph>
+        <Bold>Active Time</Bold> creates timed, temporary states that automatically expire after a specific
+        duration. When the trigger condition is met, the Event Point becomes active and starts a countdown
+        timer. When the After Timer duration expires, the Event Point becomes inactive. This is ideal for
+        temporary effects, timed buffs, or objectives with time limits.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Unlike <Bold>Active While</Bold> which depends on a continuous condition, <Bold>Active Time</Bold>
+        uses a fixed duration timer. The Event Point stays active for exactly the specified time regardless
+        of whether the trigger condition changes.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Active Time when the Event Point should be active for a specific duration and then automatically expire. The After Timer field controls how long the Event Point stays active.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        When To Use Active Time
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active Time</Bold> when the Event Point should be active for a specific duration and then
+        automatically expire. This is appropriate for:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,8">
+        <ListItem><Paragraph><Bold>Timed objectives</Bold> - Defend a location for 60 seconds, survive for 2 minutes</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Temporary power-ups</Bold> - Speed boost lasts 10 seconds, invulnerability for 5 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Time-limited spawns</Bold> - Enemy wave active for 30 seconds then despawns</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Temporary messages</Bold> - Show a hint or warning for 5 seconds then hide it</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Timed dependency windows</Bold> - Other Event Points can depend on this one only during the timer duration</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Fields
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">After Timer</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The duration in game time units that the Event Point remains active after the trigger fires. When
+        this timer expires, the Event Point becomes inactive. This field is required when using <Bold>Active Time</Bold>
+        listening mode.
+    </Paragraph>
+    <Paragraph Margin="24,4,0,0">
+        <Bold>Example values:</Bold>
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,8">
+        <ListItem><Paragraph>100 = approximately 5 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>200 = approximately 10 seconds</Paragraph></ListItem>
+        <ListItem><Paragraph>1200 = approximately 60 seconds (1 minute)</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires and becomes active. The After Timer
+        countdown begins immediately. When the timer expires, the Event Point becomes inactive. If the Event
+        Point is triggered again (the trigger condition becomes true again after expiration), the timer
+        restarts.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Example:</Bold> A Message Event Point with <Bold>Radius</Bold> trigger, <Bold>Active Time</Bold>
+        listening mode, and After Timer = 200 (10 seconds):
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="40,2,0,0">
+        <ListItem><Paragraph>Player enters the radius</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point fires, message appears, Event Point becomes active</Paragraph></ListItem>
+        <ListItem><Paragraph>After Timer countdown begins (200 game time units = ~10 seconds)</Paragraph></ListItem>
+        <ListItem><Paragraph>Player can leave or stay in the radius — it doesn't matter</Paragraph></ListItem>
+        <ListItem><Paragraph>After 10 seconds, the timer expires</Paragraph></ListItem>
+        <ListItem><Paragraph>Event Point becomes inactive, message disappears</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Timed Defense Objective
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>Dependency</Bold> trigger and <Bold>Active Time</Bold> listening
+        mode with After Timer = 1200 (60 seconds). When a previous objective completes, this message appears
+        showing "Defend the area for 60 seconds!" and stays visible for exactly 60 seconds. Other Event Points
+        can depend on this to track the defense timer.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Temporary Hint Message
+    </Paragraph>
+    <Paragraph>
+        A Message Event Point with <Bold>None</Bold> trigger and <Bold>Active Time</Bold> listening mode
+        with After Timer = 100 (5 seconds). At mission start, a tutorial hint appears for 5 seconds then
+        automatically disappears.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Limited Spawn Window
+    </Paragraph>
+    <Paragraph>
+        A Group Life Event Point with <Bold>Radius</Bold> trigger and <Bold>Active Time</Bold> listening mode
+        with After Timer = 600 (30 seconds). When the player enters an area, enemy reinforcements spawn and
+        stay active for 30 seconds. After the timer expires, the Event Point becomes inactive (and the enemies
+        may despawn depending on the Event Point configuration).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Timed Dependency Chain
+    </Paragraph>
+    <Paragraph>
+        Event Point A uses <Bold>Active Time</Bold> with After Timer = 400 (20 seconds). Event Point B has
+        a <Bold>Dependency</Bold> trigger on Event Point A. B will only be active during the 20-second window
+        when A is active. After A's timer expires, B becomes inactive.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        <Bold>Active Time</Bold> is relatively rare in retail missions but appears in timed objectives and
+        temporary tutorial messages. It's commonly used for "hold this position for X seconds" objectives
+        where the timer needs to be tracked by the mission system.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Comparison With Other Listening Modes
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Time vs Active</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Time</Bold> stays active for a limited duration controlled by After Timer. <Bold>Active</Bold>
+        stays active permanently once triggered. Use <Bold>Active Time</Bold> for temporary effects that should
+        automatically expire. Use <Bold>Active</Bold> for permanent progress markers.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Time vs Active While</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Time</Bold> uses a fixed duration timer. <Bold>Active While</Bold> is active only while
+        the trigger condition remains true. Use <Bold>Active Time</Bold> when you need a specific duration
+        regardless of conditions. Use <Bold>Active While</Bold> when the duration depends on a continuous state.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Time vs Active Die</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Active Time</Bold> is active for a duration then becomes inactive (but can fire again). <Bold>Active Die</Bold>
+        fires once and becomes permanently dead. Use <Bold>Active Time</Bold> for repeatable timed effects.
+        Use <Bold>Active Die</Bold> for one-shot cleanup actions.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Active Time Listening Mode Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the Event Point that should be active for a specific duration</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the appropriate trigger type (None, Dependency, Radius, etc.)</Paragraph></ListItem>
+        <ListItem><Paragraph>Set Listening Mode to <Bold>Active Time</Bold></Paragraph></ListItem>
+        <ListItem><Paragraph>Set After Timer to the desired duration in game time units (e.g., 200 for ~10 seconds)</Paragraph></ListItem>
+        <ListItem><Paragraph>Configure trigger-specific fields</Paragraph></ListItem>
+        <ListItem><Paragraph>Test that the Event Point becomes active when the trigger fires</Paragraph></ListItem>
+        <ListItem><Paragraph>Verify the Event Point stays active for the correct duration</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Event Point becomes inactive when the timer expires</Paragraph></ListItem>
+        <ListItem><Paragraph>If using as a dependency source, test that dependent Event Points also deactivate when the timer expires</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> After Timer is required for Active Time listening mode. Test your timer values in-game to ensure the duration feels correct. Game time units are approximately 20 units per second.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

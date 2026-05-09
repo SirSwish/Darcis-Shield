@@ -1,0 +1,235 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Lock Vehicle Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Locks or unlocks a referenced Create Vehicle Event Point when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Lock Vehicle Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Lock Vehicle</Bold> Event Point changes the access state of a vehicle that already
+        exists as a <Bold>Create Vehicle</Bold> Event Point. It can lock a vehicle so the player
+        cannot enter it, or unlock it so it becomes available after the correct mission condition.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is different from the initial lock setting on Create Vehicle. Create Vehicle defines
+        the vehicle and its starting access state. Lock Vehicle is the scripted mission action that
+        changes that access state later.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Lock Vehicle when mission progress should change whether a specific vehicle can be entered.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Lock Vehicle uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group should usually
+        match the vehicle objective, escape sequence, bomb setup, or encounter logic that controls
+        the vehicle.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The Lock Vehicle Event Point's own position is usually not the vehicle position. The target
+        vehicle is selected by the <Bold>Vehicle</Bold> field. Use this point's position for
+        organisation unless the trigger itself is spatial.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the lock or unlock action happens. Existing missions mostly use
+        <Bold>Dependency</Bold>, where another Event Point such as a Message, Simple Waypoint, or
+        Kill Waypoint causes the vehicle state change. A vehicle can also be unlocked after a
+        specific NPC is killed.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Existing Lock Vehicle examples use <Bold>Active</Bold>. This is appropriate for a direct
+        state change when the trigger fires.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Lock Vehicle-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Lock Vehicle has two type-specific settings. <Bold>Data[0]</Bold> stores the vehicle Event
+        Point index. <Bold>Data[1]</Bold> stores the desired lock state.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Vehicle</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Vehicle is the Event Point index of the <Bold>Create Vehicle</Bold> entry to lock or unlock.
+        The editor stores this value in the range <Bold>1-2048</Bold>. It should point at the
+        vehicle itself, not the trigger Event Point that causes the lock action.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">State</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        State chooses the action to apply to the vehicle:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>Unlocked</Bold> - makes the vehicle available to enter.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Locked</Bold> - prevents the player from entering the vehicle.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Vehicle is the Create Vehicle Event Point being changed. EP Ref belongs to the trigger and is usually a different Event Point.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Lock Vehicle
+    </Paragraph>
+    <Paragraph>
+        Existing Lock Vehicle usage is deliberate and usually tied to mission progress. Useful
+        trigger patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> - locks or unlocks after another Event Point fires.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Killed</Bold> - unlocks after a referenced NPC has been killed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the observed listening mode for Lock Vehicle entries.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Create the vehicle first, note its Event Point index, then create Lock Vehicle actions that change that same vehicle at the correct mission moments.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Lock Vehicle Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Lock A Vehicle After Setup</Paragraph>
+    <Paragraph>
+        Use <Bold>Locked</Bold> when the vehicle should become unavailable after a mission step,
+        such as priming explosives or moving the player into a different phase of the objective.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Lock Vehicle <Bold>14</Bold> locks Vehicle Event Point
+        <Bold>2</Bold>. It uses <Bold>Dependency</Bold> on Event Point <Bold>12</Bold>, a Message
+        telling the player that explosives are primed and they should leave.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Vehicle</Bold> to the Create Vehicle Event Point that should be locked. Set
+        <Bold>State</Bold> to <Bold>Locked</Bold>, then trigger it from the mission step that should
+        remove vehicle access.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Unlock A Reward Or Escape Vehicle</Paragraph>
+    <Paragraph>
+        Use <Bold>Unlocked</Bold> when the vehicle should become available after the player completes
+        an objective, reaches a waypoint, or clears a condition.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Lock Vehicle <Bold>55</Bold> unlocks Vehicle Event Point
+        <Bold>37</Bold>. It is triggered by <Bold>Dependency</Bold> on Event Point <Bold>54</Bold>,
+        a Message reacting to mission progress.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Start the vehicle locked or unavailable, then create a Lock Vehicle Event Point with
+        <Bold>State</Bold> set to <Bold>Unlocked</Bold>. Trigger it from the objective completion,
+        message, waypoint, or other Event Point that should grant access.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Re-Lock A Vehicle Later</Paragraph>
+    <Paragraph>
+        A mission can unlock a vehicle and later lock it again. This is useful when a vehicle should
+        only be available during a specific mission window.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Vehicle Event Point <Bold>37</Bold> is unlocked by Lock
+        Vehicle <Bold>55</Bold> and later locked by Lock Vehicle <Bold>61</Bold>. The later lock is
+        triggered by <Bold>Dependency</Bold> on Event Point <Bold>59</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Unlock After An NPC Is Killed</Paragraph>
+    <Paragraph>
+        Use <Bold>Killed</Bold> when defeating a specific NPC should make a vehicle available.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>MIB.ucm</Bold>, Lock Vehicle <Bold>283</Bold> unlocks Vehicle Event Point
+        <Bold>85</Bold> after Event Point <Bold>68</Bold>, a <Bold>Create NPC</Bold> for
+        <Bold>Bish</Bold>, is killed.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Lock Vehicle Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the <Bold>Create Vehicle</Bold> Event Point to control.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Lock Vehicle</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Vehicle</Bold> to the Create Vehicle Event Point index.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>State</Bold> to <Bold>Locked</Bold> or <Bold>Unlocked</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger, usually <Bold>Dependency</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Active</Bold> for the listening mode.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the vehicle before and after the trigger to confirm access changes at the intended time.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep related vehicle logic grouped by colour and letter for easier debugging.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Vehicle points at the Create Vehicle Event Point, State is the intended lock action, EP Ref points at the trigger condition, and the vehicle access changes only at the correct mission moment.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

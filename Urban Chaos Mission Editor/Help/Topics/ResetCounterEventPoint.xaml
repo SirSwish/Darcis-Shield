@@ -1,0 +1,259 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Reset Counter Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Resets one of the ten mission counters back to zero when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Reset Counter Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Reset Counter</Bold> Event Point sets one of the mission's ten counters back to zero.
+        The counter to reset is chosen by the <Bold>Counter Index</Bold> field, which selects from
+        counters <Bold>1</Bold> through <Bold>10</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Mission counters are part of a three-component system: <Bold>Increment</Bold> Event Points
+        add to a counter, <Bold>Counter</Bold> triggers watch a counter and fire when it reaches a
+        threshold, and <Bold>Reset Counter</Bold> Event Points clear a counter back to zero. This
+        system is used for kill counts, collection objectives, multi-step goals, and conditional
+        mission flow.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Reset Counter is extremely rare in retail missions - only 1 instance exists out of 16,259
+        total Event Points. Most missions that use counters do not need to reset them, because the
+        mission ends or transitions before a counter needs to be reused.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Choose which counter to reset (1-10), then trigger the Reset Counter Event Point when that counter should return to zero. The reset happens instantly when the Event Point fires.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Reset Counter uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group can be used to
+        visually associate the Reset Counter with the Increment and Counter-trigger Event Points that
+        use the same counter. Position is usually not what matters for the reset itself.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position does not affect which counter is reset. The counter selection comes from the
+        <Bold>Counter Index</Bold> field in the type-specific settings. Use position to keep the
+        Reset Counter near the other Event Points that use the same counter, for organisation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings control when the counter is reset. The single retail Reset Counter uses a
+        <Bold>Counter</Bold> trigger with <Bold>Active While</Bold>, which continuously resets one
+        counter as long as another counter is above a threshold. Other trigger types like
+        <Bold>Dependency</Bold> or <Bold>None</Bold> could be used when the reset should happen at a
+        specific scripted moment or mission-start.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        The retail Reset Counter uses <Bold>Active While</Bold>, which keeps resetting the counter
+        as long as the trigger condition remains true. <Bold>Active</Bold> would be appropriate for a
+        one-time reset when the trigger fires once. <Bold>Active Die</Bold> could be used if the
+        Event Point should reset the counter once and then become inactive.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Reset Counter-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Reset Counter has one type-specific setting. <Bold>Data[0]</Bold> stores the counter index
+        as a zero-based value (0-9), but the editor displays it as <Bold>1-10</Bold>.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter Index</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Counter Index selects which of the ten mission counters should be reset. The editor displays
+        counters as <Bold>1</Bold> through <Bold>10</Bold>. Internally, the value is stored in
+        <Bold>Data[0]</Bold> as <Bold>0-9</Bold>, so counter 1 is stored as 0, counter 2 is stored
+        as 1, and so on. The editor handles this conversion automatically.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use the same counter number across related Increment, Counter-trigger, and Reset Counter Event Points. For example, if Increment Event Points are adding to counter 3, the Reset Counter should also target counter 3.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Reset Counter
+    </Paragraph>
+    <Paragraph>
+        The single retail Reset Counter uses a Counter trigger with Active While. Other plausible
+        trigger patterns include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Counter</Bold> with <Bold>Active While</Bold> - the observed retail pattern. The counter is continuously reset as long as another counter meets a threshold condition. Useful for keeping a counter at zero while a gate condition is active.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - would reset the counter once when another Event Point fires, such as after completing an objective phase or entering a new mission area.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - would reset the counter at mission start, ensuring it begins at zero.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Reset Counter is very rare because most counter-based objectives do not need to be reset. Only use it when a mission genuinely needs to reuse a counter or continuously suppress a counter's value.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Reset Counter Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Continuous Reset While Gate Is Active</Paragraph>
+    <Paragraph>
+        Use <Bold>Counter</Bold> trigger with <Bold>Active While</Bold> when one counter should be
+        continuously reset to zero as long as another counter is above (or below) a threshold. This
+        is the pattern observed in retail data.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Gangorder2.ucm</Bold>, Reset Counter <Bold>204</Bold> targets counter <Bold>8</Bold>.
+        It uses a <Bold>Counter</Bold> trigger on counter <Bold>7</Bold> with threshold
+        <Bold>1</Bold> and listening mode <Bold>Active While</Bold>. As long as counter 7 is
+        greater than or equal to 1, counter 8 is continuously reset to zero.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Counter Index</Bold> to the counter that should be reset. Set
+        <Bold>Triggered By</Bold> to <Bold>Counter</Bold>, choose the gate counter and threshold,
+        and use listening mode <Bold>Active While</Bold>. This keeps the target counter at zero as
+        long as the gate condition is true.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Reset After Objective Phase</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active</Bold> when a counter should be reset once
+        after completing an objective phase, entering a new area, or transitioning between mission
+        states. This would allow the counter to be reused for a new objective.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission uses counter 2 to track enemy kills in phase one. After phase one completes, a
+        Reset Counter targeting counter 2 fires via <Bold>Dependency</Bold> on the phase-complete
+        Event Point. Counter 2 returns to zero and can then be used to track kills in phase two.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Counter Index</Bold> to the counter being reused. Set <Bold>Triggered By</Bold> to
+        <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event Point that marks the transition
+        moment. Use listening mode <Bold>Active</Bold> for a one-time reset.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Mission-Start Counter Initialization</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> with <Bold>Active</Bold> if a counter should explicitly start at zero
+        rather than relying on the engine's default initialization.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission author wants to ensure counter 5 is zero at mission start, regardless of any
+        potential engine state. A Reset Counter targeting counter 5 with trigger <Bold>None</Bold>
+        and listening mode <Bold>Active</Bold> fires immediately when the mission loads, guaranteeing
+        the counter starts at zero.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Counter Index</Bold> to the counter that should be initialized. Set
+        <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to <Bold>Active</Bold>.
+        This is likely unnecessary in most cases, because counters should default to zero, but it
+        could be used for explicit clarity or as a safeguard.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Rare Usage In Retail</Paragraph>
+    <Paragraph>
+        Reset Counter appears in only 1 of 16,259 Event Points across 76 retail missions. In
+        contrast, <Bold>Increment</Bold> appears 46 times, and Counter triggers are used in many
+        missions. This suggests that most counter-based logic does not need reset functionality.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed pattern</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The overwhelming majority of missions that use counters either complete before the counter
+        needs to be reused, or use separate counters for each phase. Resetting a counter is only
+        needed in specific scenarios like continuous gating (the retail example) or explicit counter
+        reuse across mission phases.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to apply</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Only add a Reset Counter if the mission has a specific, tested reason to reset a counter. If
+        a mission has multiple phases that each need a kill count or collection count, consider using
+        separate counters (counter 1 for phase one, counter 2 for phase two) instead of resetting and
+        reusing a single counter.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Reset Counter Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Confirm the mission needs to reset a counter. If separate counters can be used for each phase, that is usually simpler than resetting and reusing a counter.</Paragraph></ListItem>
+        <ListItem><Paragraph>Identify which counter is being reset (1-10). This should match the counter used by related Increment and Counter-trigger Event Points.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Reset Counter</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Counter Index</Bold> to the counter that should be reset.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger based on when the reset should happen: <Bold>Counter</Bold> with <Bold>Active While</Bold> for continuous reset, <Bold>Dependency</Bold> with <Bold>Active</Bold> for one-time reset, or <Bold>None</Bold> with <Bold>Active</Bold> for mission-start initialization.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the counter behaviour before and after the reset and confirm it resets at the intended moment.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Active While with a Counter trigger, test carefully to ensure the continuous reset does not interfere with other mission logic or create unintended loops.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep related counter logic (Increment, Counter-trigger, Reset Counter) grouped by colour and letter for easier debugging.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The mission genuinely needs to reset a counter, the Counter Index matches the counter being used by related Increment and Counter-trigger logic, the trigger fires only when the reset should happen, and the reset does not create unintended loops or conflicts.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

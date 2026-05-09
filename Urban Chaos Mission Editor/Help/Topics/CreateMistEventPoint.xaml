@@ -1,0 +1,300 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Create Mist Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Creates a decorative fog or mist effect at the Event Point location.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- OVERVIEW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Create Mist Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Create Mist</Bold> Event Point creates a decorative layer of fog or mist at the
+        Event Point location. It is used to add atmosphere to a scene rather than to create an NPC,
+        item, trap, objective, or mission rule.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This Event Point is very simple. It has no type-specific properties. The main things you
+        control are where the mist appears, when it is created, and how it fits into the scene.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_mist_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple summary:</Run>
+                <Run>
+                    Create Mist places a fog/mist effect at the Event Point position.
+                    It has no type-specific fields; placement and trigger setup are the important parts.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- ADDING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Create Mist Event Point
+    </Paragraph>
+    <Paragraph>
+        To add a mist effect, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Create Mist</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the standard common properties and trigger
+        settings. There are no extra Create Mist-specific fields to configure.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_mist_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- COMMON PROPERTIES -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Create Mist uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour can be set
+        however you prefer. For scene effects, it can be useful to keep decorative Event Points in a
+        consistent group or colour so they are easy to filter and identify later.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_mist_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The <Bold>position</Bold> controls where the mist appears. Use
+        <Bold>Select Position on Map</Bold> to place the Event Point visually in the viewport.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Place the mist where it supports the atmosphere of the map. For example, you might place it
+        around drains, alleys, water, dark industrial areas, vents, sewer entrances, night scenes, or
+        any location where low fog makes the scene feel more dramatic.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_mist_position.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- NO TYPE-SPECIFIC PROPERTIES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Type-Specific Properties
+    </Paragraph>
+    <Paragraph>
+        Create Mist has <Bold>no type-specific properties</Bold>. There is no mist type, colour,
+        density, radius, speed, height, count, or item/object selection to configure in this Event
+        Point.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        If the mist does not appear as expected, check the common properties first: position, trigger,
+        and listening mode.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    Create Mist is controlled through common Event Point setup only.
+                    The visual result depends on where it is placed and when it is triggered.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ============================================================ -->
+    <!-- TRIGGER SETTINGS -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        For normal decorative use, mist is usually created when the mission starts. The typical setup
+        is:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Triggered By:</Bold> None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Listening Mode:</Bold> Active.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        This makes the mist appear immediately and remain available as part of the scene.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_create_mist_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Triggered Mist
+    </Paragraph>
+    <Paragraph>
+        Although None / Active is the typical setup, Create Mist can also be placed behind mission
+        logic if you want the mist to appear later. For example, mist could appear after the player
+        enters an area, after a switch is used, after a trap activates, or after a scripted sequence
+        changes the atmosphere of the scene.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        In that case, use the trigger that matches the desired mission event, such as
+        <Bold>Dependency</Bold>, <Bold>Player Enters Radius</Bold>, <Bold>Switch</Bold>, or another
+        appropriate trigger.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- PRACTICAL USES -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Uses
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Atmospheric Night Scene</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place mist in alleys, streets, or open areas to make a night mission feel colder, darker, or
+        more cinematic.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Industrial Area</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use mist around factories, vents, pipes, drains, or machinery areas to suggest steam, heat,
+        pollution, or poor visibility.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Sewer or Water Area</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place mist near water, sewer entrances, tunnels, drains, or underground areas to make the
+        environment feel damp and heavy.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cinematic Scene Dressing</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use mist as background dressing for cutscenes, camera sequences, important NPC encounters, or
+        dramatic mission moments.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Area Reveal</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Trigger mist later through dependency logic if you want the atmosphere to change after an
+        event, such as opening a gate, activating machinery, or entering a restricted area.
+    </Paragraph>
+
+    <!-- ============================================================ -->
+    <!-- WORKFLOW -->
+    <!-- ============================================================ -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Create Mist Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Create Mist</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a letter group and colour that fits your mission organisation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Select Position on Map</Bold> to place the mist where it should appear.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Triggered By</Bold> to <Bold>None / Game Starts</Bold> for normal decorative mist.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Listening Mode</Bold> to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission to confirm the mist appears in the correct place.</Paragraph></ListItem>
+    </List>
+
+    <!-- ============================================================ -->
+    <!-- TROUBLESHOOTING -->
+    <!-- ============================================================ -->
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mist does not appear</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Create Mist Event Point exists in the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Event Point trigger is firing.</Paragraph></ListItem>
+        <ListItem><Paragraph>For simple decorative use, test with <Bold>Triggered By: None / Game Starts</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm <Bold>Listening Mode</Bold> is set to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Event Point is placed somewhere visible in the map area.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mist appears in the wrong place</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Move the Event Point using <Bold>Select Position on Map</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check the X/Z coordinate values if the marker was placed manually.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test again in game after moving it.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The mist appears too early or too late</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the trigger used by the Create Mist Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>None / Game Starts</Bold> if it should exist from the beginning.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Dependency</Bold> or another trigger if it should appear later in the mission.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Create Mist is mostly decorative. Use it to improve atmosphere, guide mood, or dress a scene.
+                    It does not replace objective, trap, item, or camera Event Points.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

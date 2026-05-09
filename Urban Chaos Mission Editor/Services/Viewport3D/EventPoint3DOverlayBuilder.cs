@@ -3,16 +3,30 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using UrbanChaosMissionEditor.ViewModels;
+using UrbanChaosMapEditor.Services.Viewport3D;
 
 namespace UrbanChaosMissionEditor.Services.Viewport3D;
 
 public static class EventPoint3DOverlayBuilder
 {
     private const double EngineToViewY = 0.25;
+    private const int MaxLabels = 80;
+    private const int RingSegments = 32;
+    private const double MarkerRadius = 10.0;
 
-    public static Model3DGroup Build(IEnumerable<EventPointViewModel> eventPoints)
+    private readonly record struct EventPointCandidate(
+        int Index,
+        double X,
+        double Y,
+        double Z,
+        double RingRadius,
+        Color Color,
+        double DistanceSq);
+
+    public static Model3DGroup Build(IEnumerable<EventPointViewModel> eventPoints, ViewportCullRegion? cull = null)
     {
         var group = new Model3DGroup();
+        var candidates = new List<EventPointCandidate>();
 
         foreach (var ep in eventPoints)
         {
@@ -23,46 +37,90 @@ public static class EventPoint3DOverlayBuilder
             double z = ep.PixelZ;
             double y = Math.Max(8.0, ep.WorldY * EngineToViewY);
             var color = ep.PointColor;
+            double ringRadius = ep.Radius > 0 ? Math.Max(8.0, ep.Radius / 4.0) : 0.0;
+            double boundsRadius = Math.Max(MarkerRadius, ringRadius);
 
-            AddSphere(group, x, y + 10.0, z, 10.0, color);
+            if (cull.HasValue && !cull.Value.IntersectsBounds(
+                x - boundsRadius,
+                z - boundsRadius,
+                x + boundsRadius,
+                z + boundsRadius))
+            {
+                continue;
+            }
 
-            if (ep.Radius > 0)
-                AddGroundRing(group, x, z, Math.Max(8.0, ep.Radius / 4.0), Color.FromArgb(185, color.R, color.G, color.B));
-
-            AddLabel(group, $"EP {ep.Index}", x, y + 34.0, z);
+            candidates.Add(new EventPointCandidate(
+                ep.Index,
+                x,
+                y,
+                z,
+                ringRadius,
+                color,
+                cull?.DistanceSquaredToPoint(x, z) ?? 0.0));
         }
+
+        AddMergedSpheres(group, candidates);
+        AddMergedRings(group, candidates);
+
+        foreach (var ep in candidates.OrderBy(ep => ep.DistanceSq).Take(MaxLabels))
+            AddLabel(group, $"EP {ep.Index}", ep.X, ep.Y + 34.0, ep.Z);
 
         return group;
     }
 
-    private static void AddSphere(Model3DGroup group, double x, double y, double z, double radius, Color color)
+    private static void AddMergedSpheres(Model3DGroup group, IReadOnlyList<EventPointCandidate> candidates)
     {
-        var mesh = new MeshGeometry3D();
-        AppendSphere(mesh, x, y, z, radius, 8, 14);
+        if (candidates.Count == 0)
+            return;
 
-        var material = new MaterialGroup();
-        material.Children.Add(new DiffuseMaterial(new SolidColorBrush(color)));
-        material.Children.Add(new EmissiveMaterial(new SolidColorBrush(Color.FromArgb(140, color.R, color.G, color.B))));
+        foreach (var bucket in candidates.GroupBy(ep => ep.Color))
+        {
+            var mesh = new MeshGeometry3D();
+            foreach (var ep in bucket)
+                AppendSphere(mesh, ep.X, ep.Y + 10.0, ep.Z, MarkerRadius, 6, 10);
 
-        group.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
+            mesh.Freeze();
+
+            var color = bucket.Key;
+            var material = new MaterialGroup();
+            material.Children.Add(new DiffuseMaterial(new SolidColorBrush(color)));
+            material.Children.Add(new EmissiveMaterial(new SolidColorBrush(Color.FromArgb(140, color.R, color.G, color.B))));
+            material.Freeze();
+
+            group.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
+        }
     }
 
-    private static void AddGroundRing(Model3DGroup group, double cx, double cz, double radius, Color color)
+    private static void AddMergedRings(Model3DGroup group, IReadOnlyList<EventPointCandidate> candidates)
     {
-        const int segments = 64;
+        foreach (var bucket in candidates.Where(ep => ep.RingRadius > 0.0).GroupBy(ep => ep.Color))
+        {
+            var mesh = new MeshGeometry3D();
+            foreach (var ep in bucket)
+                AppendGroundRing(mesh, ep.X, ep.Z, ep.RingRadius);
+
+            if (mesh.Positions.Count == 0)
+                continue;
+
+            mesh.Freeze();
+            var color = bucket.Key;
+            var material = new DiffuseMaterial(new SolidColorBrush(Color.FromArgb(185, color.R, color.G, color.B)));
+            material.Freeze();
+            group.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
+        }
+    }
+
+    private static void AppendGroundRing(MeshGeometry3D mesh, double cx, double cz, double radius)
+    {
         const double y = 2.0;
         double halfWidth = Math.Max(1.5, Math.Min(5.0, radius / 40.0));
-        var mesh = new MeshGeometry3D();
 
-        for (int i = 0; i < segments; i++)
+        for (int i = 0; i < RingSegments; i++)
         {
-            double a0 = i * Math.PI * 2.0 / segments;
-            double a1 = (i + 1) * Math.PI * 2.0 / segments;
+            double a0 = i * Math.PI * 2.0 / RingSegments;
+            double a1 = (i + 1) * Math.PI * 2.0 / RingSegments;
             AddRingSegment(mesh, cx, cz, y, radius, halfWidth, a0, a1);
         }
-
-        var material = new DiffuseMaterial(new SolidColorBrush(color));
-        group.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
     }
 
     private static void AddRingSegment(MeshGeometry3D mesh, double cx, double cz, double y, double radius, double halfWidth, double a0, double a1)

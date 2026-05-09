@@ -1,0 +1,235 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        No Floor Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Disables the ground floor and makes only building rooftops walkable, creating a rooftop-only environment.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What No Floor Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>No Floor</Bold> Event Point removes the walkable ground floor from the mission area,
+        making only the top surfaces of buildings (rooftops) walkable. When active, the player and NPCs
+        cannot walk on the normal street-level ground — they must stay on rooftops or fall through the
+        missing floor.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This creates a rooftop-only environment, typically used in special mission scenarios where the
+        ground is meant to be a hazard or void. No Floor is extremely rare — only <Bold>2</Bold>
+        instances exist across all 76 retail missions, both in finale missions where the final boss
+        battle takes place on rooftops.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Place a No Floor Event Point in the mission to disable the ground floor. The floor disappears, and only building rooftops remain walkable. This is typically used at mission start with a None trigger.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        No Floor uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. <Bold>Position</Bold> defines where the
+        no-floor effect is centered or applied, though the exact spatial radius or scope is determined
+        by the game engine. Colour and letter group are usually not critical for No Floor.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position places the No Floor Event Point in the mission area. In retail missions, the Event
+        Point is placed centrally in the rooftop battle area. The position may define the center of
+        the no-floor effect or simply mark where the feature is active.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Y Altitude
+    </Paragraph>
+    <Paragraph>
+        Y altitude should be set to a level that makes sense for the rooftop environment. In retail
+        examples, it is set to rooftop height (Y: 1792), indicating the floor below that level is
+        removed or non-walkable.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Both retail No Floor Event Points use <Bold>None</Bold>, which applies the no-floor effect as
+        soon as the mission loads. Other trigger types like <Bold>Dependency</Bold> could be used if
+        the floor should disappear at a scripted moment, but this is not observed in retail data.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Both retail No Floor examples use <Bold>Active</Bold>. This is appropriate for a permanent
+        environmental change that should remain in effect once applied. Other listening modes are not
+        needed unless the floor should dynamically toggle or disappear temporarily.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        No Floor-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        No Floor has <Bold>no type-specific Data settings</Bold>. The Event Point's behaviour is
+        entirely determined by its presence and the common properties (position, trigger, listening
+        mode). The mere existence of a No Floor Event Point in the mission is what activates the
+        no-floor effect.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> No Floor is a presence-based Event Point with no configuration. Add it to the mission, place it centrally in the rooftop area, and use None/Active to activate it at mission start.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger No Floor
+    </Paragraph>
+    <Paragraph>
+        Both retail No Floor Event Points use <Bold>None</Bold> with <Bold>Active</Bold>, meaning the
+        no-floor effect is applied at mission start. Other plausible trigger patterns include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - the observed retail pattern. The floor is removed as soon as the mission loads and remains absent for the entire mission.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - would remove the floor when another Event Point fires, useful if the floor should disappear at a scripted moment (for example, after an explosion or environmental event).</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius</Bold> with <Bold>Active</Bold> - would remove the floor when the player enters a specific area, though this is speculative and not observed in retail.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> No Floor is an extreme environmental change. Only use it when the mission is specifically designed for rooftop-only gameplay. Missions with No Floor must ensure players spawn on rooftops and that all objectives are reachable on rooftops.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common No Floor Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Rooftop Battle Environment At Mission Start</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> with <Bold>Active</Bold> when the entire mission should take place on
+        rooftops with no walkable ground floor. This is the only observed retail pattern.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Finale1.ucm</Bold> and <Bold>Finale1b.ucm</Bold>, No Floor Event Points <Bold>92</Bold>
+        and <Bold>92</Bold> (respectively) are placed at position X: 12791, Y: 1792, Z: 9363. Both use
+        trigger <Bold>None</Bold> with listening mode <Bold>Active</Bold>. When the mission loads, the
+        ground floor is immediately removed, forcing all gameplay to take place on rooftops. These are
+        finale missions where the player battles the final boss on rooftops above a missing floor.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>No Floor</Bold> Event Point to the mission. Place it centrally in the rooftop
+        battle area. Set <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to
+        <Bold>Active</Bold>. Ensure the mission is designed so the player spawns on a rooftop and all
+        mission objectives are accessible on rooftops without needing the ground floor.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Scripted Floor Removal</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active</Bold> if the floor should disappear at a
+        specific scripted moment rather than at mission start. This is not observed in retail but would
+        be a plausible pattern for dramatic environmental changes.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission has an explosion or environmental event that destroys the ground floor mid-mission.
+        The No Floor Event Point uses <Bold>Dependency</Bold> on the explosion Event Point, with
+        listening mode <Bold>Active</Bold>. When the explosion fires, the ground floor disappears and
+        players must stay on rooftops for the remainder of the mission.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event
+        Point that should cause the floor to disappear. Use listening mode <Bold>Active</Bold> so the
+        floor remains absent after the trigger fires.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Extremely Rare Usage</Paragraph>
+    <Paragraph>
+        No Floor is one of the rarest Event Point types in retail data. Only <Bold>2</Bold> instances
+        exist across 76 retail missions, both in finale missions. This suggests No Floor is a
+        special-purpose feature for very specific mission scenarios.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed pattern</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Of 16,259 Event Points across all retail missions, only <Bold>2</Bold> are No Floor. Both are
+        in finale missions (<Bold>Finale1.ucm</Bold> and <Bold>Finale1b.ucm</Bold>), which are the
+        final boss battles of the game. Both are placed at the exact same position and use the exact
+        same trigger settings (None/Active).
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to apply</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Only use No Floor when the mission is specifically designed for rooftop-only gameplay. This is
+        not a general-purpose feature — it is a dramatic environmental change that requires the entire
+        mission to be built around the absence of the ground floor. Most missions do not need No Floor.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic No Floor Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Confirm the mission is designed for rooftop-only gameplay. No Floor is an extreme environmental change and should only be used in missions specifically built for it.</Paragraph></ListItem>
+        <ListItem><Paragraph>Ensure the mission has rooftop spawn points, rooftop objectives, and rooftop enemy placements. Players should never need the ground floor.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>No Floor</Bold> Event Point to the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Event Point centrally in the rooftop battle area or at a position that makes sense for the no-floor effect.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Y altitude</Bold> to rooftop height or the level below which the floor should be removed.</Paragraph></ListItem>
+        <ListItem><Paragraph>For mission-start no-floor (the standard pattern), set <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted floor removal, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> or another trigger type and configure the appropriate trigger parameters.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the mission in-game and confirm the floor is removed as expected, that players spawn on rooftops, and that all objectives are reachable without the ground floor.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test falling behaviour to ensure NPCs and players who fall off rooftops behave as intended (death, respawn, etc.).</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The mission is designed for rooftop-only gameplay, players spawn on rooftops, all objectives are accessible on rooftops, the No Floor Event Point is placed and triggered correctly, and falling behaviour is tested.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

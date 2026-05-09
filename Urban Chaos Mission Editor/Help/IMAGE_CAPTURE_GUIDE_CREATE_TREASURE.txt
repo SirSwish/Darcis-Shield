@@ -1,0 +1,11 @@
+Mission Editor Help Image Capture Guide - Create Treasure
+===================================================
+
+CreateTreasureEventPoint.xaml
+-----------------------------
+mission_create_treasure_overview.png - Mission viewport or Event Points list showing a Create Treasure Event Point.
+mission_create_treasure_add_type.png - Add New EventPoint window with Create Treasure selected.
+mission_create_treasure_common_properties.png - Edit EventPoint window showing common properties such as index, type, letter group, colour, and position.
+mission_create_treasure_position.png - Select Position on Map workflow or map view showing a placed Create Treasure Event Point.
+mission_create_treasure_properties.png - Create Treasure-specific Points field and any quick point value controls.
+mission_create_treasure_trigger_settings.png - Trigger settings showing either None/Game Starts + Active or a reward-style trigger condition.

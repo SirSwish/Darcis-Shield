@@ -1,0 +1,262 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Visual Effect Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Spawns one or more visual effects at a mission location, either as always-on scenery or as scripted feedback when another Event Point fires.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Visual Effect Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Visual Effect</Bold> Event Point creates visible feedback such as fire, flares,
+        shockwaves, smoke trails, or a combined explosion-style effect. It is used when the mission
+        needs something visible in the world rather than only a sound, message, or state change.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Visual Effect Event Points are often placed directly on the thing they represent: a fire,
+        an explosion point, a damaged object, or a location that should visually respond to mission
+        progress. They can be permanent, or they can wait for another Event Point to activate them.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Visual Effect for world feedback the player can see. Pair it with Sound Effect, Message, Activate Prim, Create Bomb, or objective logic when the visual needs context.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Visual Effect uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        keeping a visual effect grouped with the objective, prop, enemy, bomb, or trigger chain that
+        causes it.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position controls where the effect appears in the world. Place the Event Point at the exact
+        source of the visual: the fire location, explosion point, impact point, or damaged object.
+        Altitude matters, so check the Y value if an effect appears buried, floating, or clipped by
+        nearby geometry.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the visual appears. A trigger of <Bold>None</Bold> with
+        <Bold>Active</Bold> is useful for ambient effects that should exist from mission start.
+        <Bold>Dependency</Bold> is useful for scripted reveals, explosions, fires, and objective
+        feedback after another Event Point has fired.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Visual Effect-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Visual Effect has two type-specific settings. <Bold>Data[0]</Bold> stores a bitmask of the
+        selected effect types, so multiple effects can be enabled at once. <Bold>Data[1]</Bold>
+        stores the effect scale.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Effect Types</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Effect Types is a multi-select bitmask. You can choose one effect, such as
+        <Bold>Bonfire</Bold>, or combine several effects for a larger explosion-like result.
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>Flare</Bold> - a bright light burst.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Fire Dome</Bold> - a dome-shaped fire expansion.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Shockwave</Bold> - an expanding shockwave ring.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Smoke Trails</Bold> - rising smoke particles.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Bonfire</Bold> - a persistent burning fire effect.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Scale</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Scale controls the size or intensity of the effect and is clamped by the editor to
+        <Bold>0-1024</Bold>. Existing missions commonly use <Bold>0</Bold> for default scale and
+        <Bold>256</Bold> for deliberately larger or stronger effects.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> For a simple standing fire, choose only Bonfire. For an explosion or impact moment, combine Flare, Fire Dome, Shockwave, Smoke Trails, and optionally Bonfire.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Visual Effects
+    </Paragraph>
+    <Paragraph>
+        Existing Visual Effect usage is mostly split between ambient fires that are active from the
+        start and scripted effects that are activated by another Event Point. Useful trigger patterns
+        are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> - use for always-on ambience, especially Bonfire effects.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - use when another Event Point should cause the visual to appear.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Boolean OR</Bold> - use when any one of several related conditions can reveal the same visual result.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Enemy Radius</Bold> - use when an enemy entering or reaching an area should cause the effect.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the observed listening mode for Visual Effect entries; use it for normal one-shot or always-on activation.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical setup detail:</Run>
+                <Run> If no Effect Types are selected, the Event Point has no visible effect. Choose at least one effect type before testing the trigger chain.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Visual Effect Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Ambient Fire</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> and <Bold>Active</Bold> when the effect should exist as soon as the
+        mission starts. This is the most common pattern for Bonfire effects used as scenery,
+        hazards, or atmospheric fires.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Acarry.ucm</Bold>, Visual Effect <Bold>102</Bold> is a <Bold>Bonfire</Bold> with
+        trigger <Bold>None</Bold> and listening mode <Bold>Active</Bold>. It has no dependency and
+        appears as part of the mission setup.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a Visual Effect at the fire location, select <Bold>Bonfire</Bold>, leave the trigger as
+        <Bold>None</Bold>, and use <Bold>Active</Bold>. Use Scale only if the default-sized fire is
+        too small for the scene.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Scripted Explosion Or Impact</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when the effect should appear after a bomb, objective, prim,
+        camera moment, or other scripted Event Point. Combining several effect types gives a fuller
+        explosion-style result.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>Bankbomb1.ucm</Bold>, Visual Effects <Bold>16-20</Bold> combine
+        <Bold>Flare</Bold>, <Bold>Fire Dome</Bold>, <Bold>Shockwave</Bold>,
+        <Bold>Smoke Trails</Bold>, and <Bold>Bonfire</Bold>. They all use
+        <Bold>Dependency</Bold> on Event Point <Bold>9</Bold>, creating multiple visual points from
+        the same mission trigger.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create the Event Point that represents the cause first, such as a bomb or objective trigger.
+        Place one or more Visual Effect Event Points around the affected area, select the combined
+        effect types, then set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and point
+        <Bold>EP Ref</Bold> at the causing Event Point.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Scaled Effect Cluster</Paragraph>
+    <Paragraph>
+        Use Scale when the default effect is not large or strong enough. Scale is especially useful
+        when several effects are distributed across an area and need to read clearly during gameplay.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>e3.ucm</Bold>, Visual Effects <Bold>77</Bold> and <Bold>78</Bold> combine all five
+        effect types at <Bold>Scale 256</Bold>. They are triggered by <Bold>Dependency</Bold> on
+        Event Point <Bold>76</Bold>, so the larger effects appear only after that mission condition.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Start with the desired effect types at default scale, test the placement, then increase Scale
+        gradually. Keep related Visual Effect points grouped by colour and letter so the cluster is
+        easy to inspect later.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conditional Fire Reveal</Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean OR</Bold> when several mission branches can lead to the same fire or visual
+        state. This lets the effect appear if any linked condition becomes true.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanicc.ucm</Bold>, Visual Effects <Bold>139-141</Bold> are
+        <Bold>Bonfire</Bold> effects triggered by <Bold>Boolean OR</Bold> referencing Event Point
+        <Bold>138</Bold>. This pattern is useful when a visual state can be caused by more than one
+        route through the mission logic.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Enemy-Triggered Effect</Paragraph>
+    <Paragraph>
+        Use <Bold>Enemy Radius</Bold> when the visual should appear because an enemy reaches or
+        enters an area. This is less common, but useful for encounter scripting and area-based
+        mission events.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>skymiss2.ucm</Bold>, Visual Effect <Bold>349</Bold> combines all five effect types
+        and uses <Bold>Enemy Radius</Bold> with radius <Bold>352</Bold>, referencing Event Point
+        <Bold>313</Bold>. The effect is therefore tied to an enemy-related spatial condition.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Visual Effect Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide whether the effect is ambient or triggered by mission logic.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Visual Effect</Bold> Event Point at the exact world location.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select one or more <Bold>Effect Types</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Scale</Bold>, leaving it at 0 for default size unless a larger effect is needed.</Paragraph></ListItem>
+        <ListItem><Paragraph>For ambient effects, use <Bold>None</Bold> and <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted effects, use <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the Event Point that causes it.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test in 2D and 3D views to confirm the position, altitude, and trigger timing.</Paragraph></ListItem>
+        <ListItem><Paragraph>Pair with Sound Effect or Message if the player needs stronger feedback.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> At least one effect type is selected, Scale is intentional, the Event Point is placed at the correct altitude, and the trigger matches whether the effect should be ambient or scripted.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

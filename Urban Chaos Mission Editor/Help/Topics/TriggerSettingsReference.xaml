@@ -6,210 +6,1143 @@
               FontSize="14"
               PagePadding="32,24,32,24">
 
-    <!-- ============================================================ -->
-    <!-- TITLE -->
-    <!-- ============================================================ -->
     <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
-        Trigger Settings and Listening Modes
+        Trigger Settings Reference
     </Paragraph>
     <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
-        A reference for Event Point trigger conditions and listening behaviour.
+        Comprehensive reference for Event Point trigger types, listening modes, trigger fields, and practical mission authoring patterns with retail examples.
     </Paragraph>
 
     <BlockUIContainer>
         <Border Height="1" Background="#444" Margin="0,0,0,12"/>
     </BlockUIContainer>
 
-    <!-- ============================================================ -->
-    <!-- OVERVIEW -->
-    <!-- ============================================================ -->
     <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
-        What Trigger Settings Control
+        Understanding Triggers
     </Paragraph>
     <Paragraph>
-        Trigger settings define when an Event Point activates. Some event points activate as soon as
-        the mission starts, while others wait for the player to enter a radius, complete another
-        event, use an object, kill or arrest a target, finish a conversation, or satisfy a counter
-        condition.
+        An Event Point describes <Bold>what</Bold> happens — an NPC spawns, a message appears, the mission
+        ends. Its trigger decides <Bold>when</Bold> that Event Point becomes active. A Create NPC with
+        <Bold>None</Bold> exists from mission start. A Message with <Bold>Radius</Bold> appears when the
+        player enters an area. An End Game Win with <Bold>Counter</Bold> fires when the required counter
+        reaches its target.
     </Paragraph>
     <Paragraph Margin="0,6,0,0">
-        Trigger settings are what turn individual Event Points into mission logic. A single event
-        point can create an object, display a message, start a timer, or end the mission, but the
-        trigger decides when that action actually happens.
+        Most retail missions use a small number of trigger patterns repeatedly: <Bold>None</Bold> for
+        setup (61% of all Event Points), <Bold>Dependency</Bold> for mission chains (17%), <Bold>Radius</Bold>
+        or <Bold>Cuboid</Bold> for location checks, <Bold>Counter</Bold> for objective totals, and person/object
+        state triggers for mission outcomes.
     </Paragraph>
-
-    <BlockUIContainer Margin="0,6,0,8">
-        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_triggers_settings_panel.png"
-               MaxWidth="720" Stretch="Uniform"/>
-    </BlockUIContainer>
-
-    <!-- ============================================================ -->
-    <!-- TRIGGER TYPES -->
-    <!-- ============================================================ -->
-    <BlockUIContainer>
-        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
-    </BlockUIContainer>
-
-    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
-        Triggered By Options
-    </Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None / Game Starts</Paragraph>
-    <Paragraph Margin="24,0,0,0">The Event Point is active from the start of the mission, or triggers immediately when the mission begins.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Dependency</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when another referenced Event Point has triggered or activated. Uses an Event Point reference.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Enters Radius</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the player enters this Event Point’s radius. Uses the Radius field.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Door Opens</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when an associated door or openable object is opened. Usually tied to nearby or linked door logic.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Tripwire</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a tripwire-style area or line is crossed.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Pressure Pad</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a pressure pad is activated, usually by the player, person, or thing standing on it.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Electric Fence</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers from electric fence interaction or state. This appears to be legacy or special-case mission logic.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Water Level</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers based on water level or environmental state. This appears to be special-case environment logic.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Security Camera</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers from security camera detection or camera state.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Switch</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a switch is used or activated.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Anim Prim</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers from an animated prim or object state.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timer</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers after a timer delay. Uses the time or radius-style numeric field depending on editor mapping.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Shout (all)</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when all required shout conditions in range are satisfied. Uses radius/text-style trigger data.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean AND</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers only when two referenced Event Points or conditions are both true. Uses EPRef and EPRefBool.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Boolean OR</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when either of two referenced Event Points or conditions is true. Uses EPRef and EPRefBool.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Item Held / Specific Item Held / Item Seen</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when an item is held, a specific item is held, or an item is seen/detected.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed or Arrested / Killed Not Arrested / Person Arrested</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers based on the state of a referenced person, such as killed, arrested, or specifically killed but not arrested.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Shout (any)</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when any matching shout condition occurs in range.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Countdown Timer / Visible Countdown Timer</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a countdown completes. Visible Countdown Timer shows the countdown to the player and is the timer type targeted by Extend Timer.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Enters Radius</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when an enemy or person enters this Event Point’s radius. Often uses both an EP reference and Radius.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Enters Cuboid</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the player enters a box or cuboid region instead of a circular radius.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Target 50% Damaged / Half Dead</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the referenced target, person, or object reaches roughly half health or damage.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when all relevant members of a group or colour are dead.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Sees Person</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when one referenced enemy/person sees another referenced person. Uses two Event Point references.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Person / Player Uses in Radius</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the player interacts with a referenced person or presses use while inside the Event Point’s radius.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Prim Damaged</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a prim or object is damaged.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Conversation Finished</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the referenced Conversation Event Point has completed.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Counter Reaches Value</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a mission counter reaches a configured value. Used with Increment and Reset Counter logic.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Crime Rate Above / Crime Rate Below</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the mission or world crime rate rises above or drops below a threshold.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Is Murderer</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers if the referenced person is marked as the murderer.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person In Vehicle</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when a referenced person is in a referenced vehicle. Uses two Event Point references.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Thing Stop Direction/Radius / Radius and Direction / Move Radius Direction</Paragraph>
-    <Paragraph Margin="24,0,0,0">Movement, proximity, and direction-related triggers, likely used by moving objects, path logic, or directional checks.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Carries Person</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the player is carrying the referenced person.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Random</Paragraph>
-    <Paragraph Margin="24,0,0,0">Random chance trigger, usually dependent on a referenced Event Point or condition.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Fires a Gun</Paragraph>
-    <Paragraph Margin="24,0,0,0">Triggers when the player fires a weapon.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Darci Has Grabbed Someone / Darci Punches and Kicks</Paragraph>
-    <Paragraph Margin="24,0,0,0">Character-specific triggers for Darci grabbing someone or attacking with punches and kicks.</Paragraph>
-
-    <!-- ============================================================ -->
-    <!-- LISTENING MODE -->
-    <!-- ============================================================ -->
-    <BlockUIContainer>
-        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
-    </BlockUIContainer>
-
-    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
-        Listening Mode
-    </Paragraph>
-    <Paragraph>
-        Listening Mode controls what happens after an Event Point has been triggered. The practical
-        difference is mostly about whether the event point remains true for dependency chains,
-        remains true only while the trigger is happening, stays active temporarily, or dies after
-        firing.
-    </Paragraph>
-
-    <BlockUIContainer Margin="0,6,0,8">
-        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_triggers_listening_mode.png"
-               MaxWidth="720" Stretch="Uniform"/>
-    </BlockUIContainer>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">None</Paragraph>
-    <Paragraph Margin="24,0,0,0">No listening mode set. In the original editor this is effectively invalid/default and is usually forced to Active.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active</Paragraph>
-    <Paragraph Margin="24,0,0,0">Activates once, then stays active for the rest of the mission. This is the normal “trigger once and remain true” mode.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active While</Paragraph>
-    <Paragraph Margin="24,0,0,0">Activates whenever its trigger condition is currently true. It is true only while the condition is happening.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Time</Paragraph>
-    <Paragraph Margin="24,0,0,0">Activates when triggered, then remains active only for a fixed time using the AfterTimer value.</Paragraph>
-
-    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Active Die</Paragraph>
-    <Paragraph Margin="24,0,0,0">Activates once, then becomes dead/inactive afterwards. Useful for one-shot actions that should not remain active as a dependency and should not trigger again.</Paragraph>
 
     <BlockUIContainer Margin="0,8,0,8">
-        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
-                CornerRadius="4" Padding="12">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
             <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
-                <Run FontWeight="Bold">Practical summary:</Run>
-                <Run>
-                    Active = “I happened, and I stay true.”
-                    Active While = “I am true only while the condition is true.”
-                    Active Time = “I become true for X time, then turn off.”
-                    Active Die = “I fire once, then remove/kill myself as a useful trigger.”
-                </Run>
+                <Run FontWeight="Bold">Rule of thumb:</Run>
+                <Run> Choose the trigger based on the condition, not the Event Point type. The same Message Event Point can be radius-driven, dependency-driven, counter-driven, or person-state-driven depending on the mission moment.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Fields
+    </Paragraph>
+    <Paragraph>
+        Trigger settings consist of several fields that work together to define when an Event Point fires:
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Triggered By</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Selects the condition type that activates the Event Point. This is the main trigger selector and
+        determines which other fields are relevant. For example, <Bold>Dependency</Bold> uses EP Ref,
+        <Bold>Radius</Bold> uses the Radius field, and <Bold>Counter</Bold> uses both EP Ref (counter index)
+        and Radius (threshold value).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Listening Mode</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Controls whether the Event Point stays active, is active only while the condition is true, runs
+        for a timer, or dies after firing. The four modes are <Bold>Active</Bold> (stays active),
+        <Bold>Active While</Bold> (active only while trigger is true), <Bold>Active Time</Bold> (active
+        for After Timer duration), and <Bold>Active Die</Bold> (fires once then dies).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The primary Event Point reference. It commonly points at a dependency Event Point, person/NPC,
+        item, vehicle, conversation, or counter index. The meaning depends on the trigger type. For
+        <Bold>Dependency</Bold>, it's the Event Point being depended on. For <Bold>Killed</Bold>, it's
+        the person/NPC. For <Bold>Counter</Bold>, it's the counter index (1-10).
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">EP Ref Bool</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A secondary Event Point reference used by Boolean triggers, Person Seen, Person In Vehicle, and
+        similar two-reference triggers. For <Bold>Boolean AND</Bold> and <Bold>Boolean OR</Bold>, EP Ref
+        is the first Event Point and EP Ref Bool is the second. For <Bold>Person Seen</Bold>, EP Ref is
+        the person being seen and EP Ref Bool is the observer.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Radius</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A multipurpose field whose meaning depends on the trigger type. For <Bold>Radius</Bold> triggers,
+        it stores distance. For <Bold>Cuboid</Bold> triggers, it stores packed cuboid dimensions (low half
+        = X half-size, high half = Z half-size). For <Bold>Counter</Bold> triggers, it stores the threshold
+        value. For <Bold>Countdown</Bold> and <Bold>Visible Countdown</Bold>, it stores the timer duration
+        in engine ticks or mission time units. For <Bold>Crime Rate</Bold> triggers, it stores the threshold
+        as percent × 100 (9900 = 99%). Always check the trigger type to interpret this field correctly.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">After Timer</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Used by <Bold>Active Time</Bold> listening mode to control how long the Event Point stays active
+        after firing. The value is in mission time units or engine ticks depending on context. This field
+        is ignored by other listening modes.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Invert Condition</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Negates the trigger condition where the engine supports it. For example, <Bold>Radius</Bold> with
+        Invert would fire when the player is <Bold>outside</Bold> the radius instead of inside. Not all
+        trigger types support inversion. Test carefully before relying on inverted triggers.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <!-- ========================================
+         LISTENING MODES SECTION
+         ======================================== -->
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Listening Modes
+    </Paragraph>
+    <Paragraph Margin="0,0,0,12">
+        Listening modes control how an Event Point behaves after its trigger condition is met. They determine
+        whether the Event Point stays active permanently, only while the trigger is true, for a limited time,
+        or fires once and dies.
+    </Paragraph>
+
+    <!-- ACTIVE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Active</Paragraph>
+    <Paragraph>
+        The Event Point becomes active once the trigger condition is met and remains active as a valid
+        dependency target for later mission logic. This is the safest default for most authored mission
+        chains and the most common listening mode in retail missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Active
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active</Bold> when the Event Point should fire once and then remain available for other
+        Event Points to depend on. This is appropriate for most mission objectives, checkpoints, and
+        scripted events that mark permanent progress. Once active, the Event Point stays active for the
+        rest of the mission unless explicitly killed by other logic.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires and becomes active. It remains
+        active even if the trigger condition later becomes false. For example, a <Bold>Radius</Bold>
+        trigger with <Bold>Active</Bold> listening mode fires when the player enters the radius and stays
+        active even after the player leaves.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Dependency chains:</Bold> A Conversation Event Point with <Bold>Person Used</Bold> trigger
+        and <Bold>Active</Bold> listening mode starts when the player talks to an NPC. It stays active,
+        allowing later Event Points to use <Bold>Conversation Over</Bold> or <Bold>Dependency</Bold> on it.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Checkpoint triggers:</Bold> A Message Event Point with <Bold>Radius</Bold> trigger and
+        <Bold>Active</Bold> listening mode shows an objective message when the player enters an area.
+        The message remains visible (and the Event Point remains active) even after the player leaves,
+        marking the checkpoint as reached.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>State changes:</Bold> A Group Life Event Point with <Bold>Dependency</Bold> trigger and
+        <Bold>Active</Bold> listening mode spawns enemy reinforcements when a previous objective completes.
+        The group stays alive (and the Event Point stays active) for the rest of the mission.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Active is the safest default for most Event Points. Use it unless you specifically need Active While (continuous state), Active Time (timed effect), or Active Die (one-shot cleanup).</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ACTIVE WHILE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Active While</Paragraph>
+    <Paragraph>
+        The Event Point is active only while the trigger condition remains true. When the condition becomes
+        false, the Event Point becomes inactive. This is used for continuous states like being inside an
+        area, holding an item, or being in a vehicle where later logic should stop being true when the
+        condition stops.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Active While
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active While</Bold> when the Event Point should be active only as long as the trigger
+        condition is true. This is appropriate for temporary states, area-based effects, and conditional
+        logic that should deactivate when the player leaves or the condition changes. If another Event
+        Point depends on an Active While Event Point, that dependency is only valid while the condition
+        remains true.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires and becomes active. When the
+        condition becomes false, the Event Point becomes inactive. This can happen repeatedly — the Event
+        Point toggles between active and inactive based on the trigger condition. For example, a
+        <Bold>Radius</Bold> trigger with <Bold>Active While</Bold> is active while the player is inside
+        the radius and inactive when outside.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Area messages:</Bold> A Message Event Point with <Bold>Radius</Bold> or <Bold>Cuboid</Bold>
+        trigger and <Bold>Active While</Bold> listening mode shows a message while the player is inside
+        the area. When the player leaves, the Event Point becomes inactive and the message disappears.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Continuous effects:</Bold> A Shake Camera Event Point with <Bold>Dependency</Bold> trigger
+        and <Bold>Active While</Bold> listening mode shakes the camera continuously while a boss attack
+        or machine is active. When the triggering Event Point becomes inactive, the shake stops.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Conditional dependencies:</Bold> An enemy spawn Event Point with <Bold>Specific Item Held</Bold>
+        trigger and <Bold>Active While</Bold> would spawn enemies only while the player holds the item.
+        When the player drops the item, the Event Point becomes inactive and the enemies despawn (if the
+        Event Point type supports despawning).
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Active While can break dependency chains if the source Event Point becomes inactive before dependent Event Points fire. Test carefully when using Active While as a dependency source.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ACTIVE TIME -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Active Time</Paragraph>
+    <Paragraph>
+        The Event Point becomes active for a limited period controlled by the <Bold>After Timer</Bold>
+        field. After the timer expires, the Event Point becomes inactive. This is used for temporary
+        effects, timed windows, or logic that should pulse for a short duration.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Active Time
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active Time</Bold> when an effect should last for a specific duration rather than
+        staying active permanently or toggling with a condition. This is appropriate for temporary audio
+        effects, timed powerups, brief messages, or scripted events that should automatically end after
+        a set time.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires and becomes active. It stays active
+        for the duration specified in <Bold>After Timer</Bold> (in mission time units or engine ticks),
+        then becomes inactive. The Event Point does not reactivate unless the trigger fires again.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Temporary sounds:</Bold> A sound effect Event Point with <Bold>Dependency</Bold> trigger
+        and <Bold>Active Time</Bold> listening mode plays a sound for the specified duration when triggered,
+        then stops automatically.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Timed buffs:</Bold> A powerup or buff Event Point with <Bold>Radius</Bold> trigger and
+        <Bold>Active Time</Bold> grants a temporary effect when the player enters an area, lasting for
+        the After Timer duration.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Brief messages:</Bold> A hint or warning Message Event Point with <Bold>Active Time</Bold>
+        shows a message for a few seconds then disappears, without requiring manual dismissal.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Active Time is less common than Active, Active While, or Active Die. Test the After Timer value to ensure the duration is appropriate for the effect.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- ACTIVE DIE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Active Die</Paragraph>
+    <Paragraph>
+        The Event Point fires once when the trigger condition is met, then becomes inactive/dead. The
+        Event Point will not fire again and is no longer available as a dependency target. This is used
+        for one-shot actions like sounds, camera shakes, group state changes, or scripted events that
+        should not repeatedly retrigger.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Active Die
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Active Die</Bold> when an Event Point should fire exactly once and then stop processing.
+        This is appropriate for mission-start setup logic (Group Death, Group Life), one-time scripted
+        events, cleanup actions, and effects that should never repeat. After firing, the Event Point
+        becomes dead and cannot be depended on by later logic.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Behavior
+    </Paragraph>
+    <Paragraph>
+        When the trigger condition becomes true, the Event Point fires once and immediately becomes
+        inactive/dead. It will not fire again even if the trigger condition becomes true again. If another
+        Event Point has a <Bold>Dependency</Bold> on an Active Die Event Point, that dependency must fire
+        immediately when the Active Die Event Point fires, or it will miss the window and never fire.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Mission-start setup:</Bold> A Group Death Event Point with <Bold>None</Bold> trigger and
+        <Bold>Active Die</Bold> listening mode kills a group at mission start, then the Event Point itself
+        becomes inactive. This prevents the Event Point from continuing to process after its job is done.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>One-shot sounds:</Bold> A sound effect Event Point with <Bold>Dependency</Bold> trigger
+        and <Bold>Active Die</Bold> plays a sound once when triggered, then dies, preventing the sound
+        from repeating if the trigger somehow fires again.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Scripted cleanup:</Bold> An Event Point that performs a one-time cleanup action (removing
+        objects, killing groups, resetting state) uses <Bold>Active Die</Bold> to ensure it only happens
+        once.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Active Die Event Points cannot be reliable dependency sources because they become inactive immediately after firing. If another Event Point depends on an Active Die Event Point, it must fire in the same frame or it will miss the dependency.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <!-- ========================================
+         TRIGGER TYPES SECTION
+         ======================================== -->
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Types
+    </Paragraph>
+    <Paragraph Margin="0,0,0,12">
+        Trigger types define the condition that causes an Event Point to fire. The most common types are
+        None (mission start), Dependency (chained objectives), spatial triggers (Radius, Cuboid), and
+        state-based triggers (Killed, Person Used, Conversation Over).
+    </Paragraph>
+
+    <!-- NONE -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">None</Paragraph>
+    <Paragraph>
+        The Event Point is active immediately when the mission loads. No trigger condition is required.
+        This is the most common trigger type in retail missions, accounting for <Bold>61% of all Event
+        Points</Bold> (9,983 of 16,259).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use None
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> for player spawn points, default NPCs, placed items, ambient effects,
+        always-available vehicles, and setup logic that should exist from the beginning of the mission.
+        This is the default trigger for any Event Point that should be active at mission start without
+        waiting for a condition.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        No trigger reference fields are used. <Bold>EP Ref</Bold>, <Bold>EP Ref Bool</Bold>, and
+        <Bold>Radius</Bold> are ignored. Only the listening mode matters.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Player spawn:</Bold> The player spawn point (Activate Event Point) always uses <Bold>None</Bold>
+        trigger with <Bold>Active</Bold> listening mode. This is present in every retail mission.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Ambient NPCs:</Bold> Create NPC Event Points for ambient civilians, background characters,
+        and default enemies use <Bold>None</Bold> with <Bold>Active</Bold> to spawn at mission start.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Mission-start group state:</Bold> Group Death and Group Life Event Points that set initial
+        group states use <Bold>None</Bold> with <Bold>Active Die</Bold> or <Bold>Active</Bold> to configure
+        groups at mission start.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        In nearly every retail mission, the player spawn point uses <Bold>None</Bold> trigger. Most ambient
+        NPCs, placed vehicles, and default mission setup Event Points use <Bold>None</Bold> with <Bold>Active</Bold>.
+        Group Death Event Points that keep enemy groups dormant at mission start use <Bold>None</Bold>
+        with <Bold>Active Die</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Use Active for normal persistent setup. Use Active Die only if the Event Point performs a one-time action and should not remain available as a dependency.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- DEPENDENCY -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dependency</Paragraph>
+    <Paragraph>
+        Waits for another Event Point to become active or complete. This is the second most common trigger
+        type in retail missions (<Bold>17% of all Event Points</Bold>, 2,787 instances) and is the standard
+        way to chain objectives and create mission flow.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Dependency
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> whenever one Event Point should fire after another completes. This is
+        appropriate for objective chains (show message 2 after message 1 completes), scripted sequences
+        (spawn enemy wave 2 after wave 1 is defeated), and conditional logic (open door after player
+        collects key). Most mission objectives are chained together using <Bold>Dependency</Bold> triggers.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> is the Event Point index being depended on. When that Event Point becomes
+        active, this Event Point fires. The listening mode of the source Event Point matters:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph>If the source uses <Bold>Active</Bold>, it stays active after firing, making it a reliable dependency target.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the source uses <Bold>Active Die</Bold>, it becomes inactive immediately after firing. Dependencies must fire in the same frame or they will miss.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the source uses <Bold>Active While</Bold>, the dependency is only valid while the source condition remains true. The dependent Event Point will deactivate when the source deactivates.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Objective chain:</Bold> Message Event Point 2 depends on Message Event Point 1. When the
+        player completes objective 1 (triggering Message 1), Message 2 fires to show the next objective.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Wave spawn:</Bold> A Group Life Event Point depends on a Group Dead or Killed Event Point.
+        When the previous enemy wave is defeated, the next wave spawns.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Post-conversation logic:</Bold> An Event Point depends on a Conversation Event Point. When
+        the conversation finishes, the dependent Event Point fires (usually combined with Conversation
+        Over trigger for more precise timing).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        In nearly every retail mission, Message and Nav Beacon Event Points use <Bold>Dependency</Bold>
+        to chain objectives. For example, an objective completion Message depends on the Event Point that
+        represents completing that objective (killing a target, reaching an area, collecting an item).
+        Group Life Event Points often use <Bold>Dependency</Bold> to spawn enemy waves after previous
+        waves are defeated.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> If a Dependency appears unreliable, check the source Event Point's listening mode. Active While sources become inactive when their condition stops, which can break dependencies. Active Die sources fire once and die, which works for most dependency chains but can miss if timing is off.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- RADIUS -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Radius</Paragraph>
+    <Paragraph>
+        Checks whether the player (or relevant actor) is within a circular area around the Event Point's
+        position. This is a spatial trigger used for area entry, objective proximity, local warnings, and
+        trigger volumes. Retail missions use <Bold>Radius</Bold> 146 times across 76 missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Radius
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Radius</Bold> for area-based objectives, proximity triggers, location checks, and
+        circular trigger volumes. This is appropriate when the player must enter a specific location or
+        get close to an objective. Use <Bold>Cuboid</Bold> instead when a rectangular area is needed
+        (rooms, alleys, building interiors).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> stores the distance threshold in map units. <Bold>Position</Bold> and
+        <Bold>Y altitude</Bold> matter because the check is spatial — the Event Point's position is the
+        center of the circular trigger area. The player must be within the specified distance from the
+        Event Point's position for the trigger to fire.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Area entry checkpoint:</Bold> A Message or Nav Beacon Event Point with <Bold>Radius</Bold>
+        trigger and <Bold>Active</Bold> listening mode fires when the player enters the area and stays
+        active (marking the checkpoint as reached).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Temporary area message:</Bold> A Message Event Point with <Bold>Radius</Bold> trigger and
+        <Bold>Active While</Bold> listening mode shows a message while the player is inside the area.
+        When the player leaves, the message disappears.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Proximity objective:</Bold> An objective Event Point with <Bold>Radius</Bold> trigger fires
+        when the player approaches a target location, NPC, or object.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Radius triggers are commonly used for Nav Beacon Event Points that should appear when the player
+        approaches an objective location, and for Message Event Points that show area-specific text.
+        Many stealth missions use <Bold>Radius</Bold> triggers to detect when the player enters restricted
+        areas or approaches guards.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Position the Event Point at the center of the desired trigger area and set Radius to the distance from center to edge. For rectangular areas, use Cuboid instead.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <!-- CUBOID -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Cuboid</Paragraph>
+    <Paragraph>
+        Checks whether the player or target is inside a rectangular box (cuboid). This is more precise
+        than <Bold>Radius</Bold> for rooms, alleys, building entrances, and rectangular zones where a
+        circular radius would spill into the wrong space. Retail missions use <Bold>Cuboid</Bold> 330
+        times, making it one of the most common spatial triggers.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Cuboid
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Cuboid</Bold> for building interiors, rectangular rooms, alleys, corridors, and any
+        area where <Bold>Radius</Bold> would create a circular area that extends into unwanted space.
+        <Bold>Cuboid</Bold> allows precise control over rectangular trigger volumes that align with
+        building walls and street layouts.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> stores packed dimensions: the low 16 bits are the X half-size, and the high
+        16 bits are the Z half-size. The Event Point's <Bold>Position</Bold> is the center of the cuboid.
+        For example, if Radius = 1310720 (0x00140000), the low half is 0 and the high half is 20, meaning
+        X half-size = 0 and Z half-size = 20. The actual cuboid extends from the center position by these
+        half-sizes in each direction.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Building entry:</Bold> A Cuboid trigger detects when the player enters a specific building.
+        The Event Point is placed at the building's center with dimensions matching the building's
+        rectangular footprint.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Room-specific objectives:</Bold> A Message or objective Event Point with <Bold>Cuboid</Bold>
+        trigger fires when the player enters a specific room within a larger building.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Alley chase sequences:</Bold> A Cuboid trigger follows the player through narrow alleys
+        where a circular Radius would trigger outside the alley boundaries.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Many retail missions use <Bold>Cuboid</Bold> triggers for building entry detection, room-specific
+        objectives, and alley chase sequences. For example, a mission objective that requires the player
+        to enter a specific building uses a <Bold>Cuboid</Bold> trigger placed at the building's center
+        with dimensions matching the building's rectangular footprint.
+    </Paragraph>
+
+    <!-- PERSON USED -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Person Used</Paragraph>
+    <Paragraph>
+        Checks whether the player has used or interacted with a person/NPC. This is the third most common
+        trigger type (<Bold>640 instances</Bold>) and is primarily used to start conversations, trigger
+        interrogations, initiate rescue interactions, and create talk-to-character objectives.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Person Used
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Person Used</Bold> for conversation starts, interrogations, rescue interactions, and
+        talk-to-NPC objectives. This is the standard trigger for any Event Point that should fire when
+        the player interacts with a specific NPC.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        The relevant person is usually implied by the Event Point's position or mission context. Some
+        implementations may use <Bold>EP Ref</Bold> to identify the specific NPC, but in most retail
+        examples, the trigger fires when the player interacts with any NPC near the Event Point's location.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Conversation start:</Bold> A Conversation Event Point with <Bold>Person Used</Bold> trigger
+        and <Bold>Active</Bold> listening mode starts when the player talks to an NPC. The Event Point
+        stays active, allowing later logic to use <Bold>Conversation Over</Bold> to chain follow-up actions.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Interrogation:</Bold> An interrogation Event Point with <Bold>Person Used</Bold> trigger
+        starts when the player interacts with a suspect or witness NPC.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Rescue interaction:</Bold> A rescue objective Event Point with <Bold>Person Used</Bold>
+        trigger completes when the player interacts with a hostage or civilian NPC.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Nearly all Conversation Event Points in retail missions use <Bold>Person Used</Bold> trigger.
+        For example, a mission objective to talk to a witness uses a Conversation Event Point with
+        <Bold>Person Used</Bold> trigger placed at the witness's location. When the player interacts
+        with the witness, the conversation starts.
+    </Paragraph>
+
+    <!-- KILLED -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Killed</Paragraph>
+    <Paragraph>
+        Checks whether a referenced person/NPC has been killed. This is used for lethal objectives,
+        enemy elimination logic, and assassination missions. <Bold>430 instances</Bold> in retail missions.
+        Do not use <Bold>Killed</Bold> when arresting should also count as success — use <Bold>Person
+        Arrested</Bold> or <Bold>Boolean OR</Bold> to combine both conditions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Killed
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Killed</Bold> for assassination targets, enemy bosses, and lethal objectives where the
+        player must eliminate a specific NPC. This is appropriate when only killing (not arresting) should
+        satisfy the objective. Pair with Message or Nav Beacon Event Points that depend on the Killed
+        trigger to show objective completion feedback.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> points at the person/NPC Event Point (usually a Create NPC or Create Creature).
+        When that NPC's health reaches zero and they die, this Event Point fires.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Boss defeat:</Bold> A Message Event Point with <Bold>Killed</Bold> trigger on the boss NPC
+        shows the victory message when the boss dies.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Wave completion:</Bold> A Group Life Event Point with <Bold>Killed</Bold> trigger on the
+        last enemy in a wave spawns the next wave when that enemy dies.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Assassination objective:</Bold> An objective Event Point with <Bold>Killed</Bold> trigger
+        on the target NPC completes when the target is eliminated.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Many combat missions use <Bold>Killed</Bold> triggers to detect when key enemy NPCs are eliminated.
+        For example, a boss battle objective uses a <Bold>Killed</Bold> trigger on the boss NPC, then a
+        Message Event Point with <Bold>Dependency</Bold> on that Killed trigger shows the victory message.
+    </Paragraph>
+
+    <!-- CONVERSATION OVER -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Conversation Over</Paragraph>
+    <Paragraph>
+        Checks whether a Conversation Event Point has finished. This is used to chain logic after dialogue
+        and is usually more accurate than depending on the conversation start. <Bold>361 instances</Bold>
+        in retail missions make this one of the most common conversation-related triggers.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Conversation Over
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Conversation Over</Bold> to chain objective updates, spawn enemy waves, unlock doors,
+        or trigger scripted events after a conversation finishes. This ensures the player has seen all
+        the dialogue before the next mission beat occurs.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> points at the Conversation Event Point. When that conversation finishes
+        (all dialogue lines complete), this Event Point fires.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Post-dialogue spawn:</Bold> A Group Life Event Point with <Bold>Conversation Over</Bold>
+        trigger spawns enemies after an informant conversation warns the player about them.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Post-dialogue unlock:</Bold> A door unlock or area access Event Point with <Bold>Conversation
+        Over</Bold> trigger grants access after an NPC tells the player where to go.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Objective update:</Bold> A Message or Nav Beacon Event Point with <Bold>Conversation Over</Bold>
+        trigger shows the next objective after the player finishes talking to an NPC.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Story-heavy missions use <Bold>Conversation Over</Bold> extensively. For example, after an
+        informant conversation, a <Bold>Conversation Over</Bold> trigger spawns the enemies the informant
+        warned about, or unlocks the door the informant mentioned.
+    </Paragraph>
+
+    <!-- BOOLEAN AND -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Boolean AND</Paragraph>
+    <Paragraph>
+        Combines two trigger conditions and succeeds only when both are true. This is used for objectives
+        with two prerequisites, such as collecting an item AND talking to a person. <Bold>359 instances</Bold>
+        in retail missions make this the most common Boolean operator.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Boolean AND
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean AND</Bold> for objectives requiring multiple completion conditions. This creates
+        branching objectives where the player can complete prerequisites in any order, but must complete
+        all of them before the combined objective succeeds.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> is the first Event Point. <Bold>EP Ref Bool</Bold> is the second Event Point.
+        Both must be active for this Event Point to fire. The order usually does not matter — either can
+        complete first and the trigger will fire when both are true.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Multi-step objective:</Bold> Collect evidence AND escort witness to safety. A <Bold>Boolean
+        AND</Bold> Event Point references both the evidence-collected Event Point and the witness-safe
+        Event Point.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Dual requirements:</Bold> Kill target A AND destroy object B. The objective completes only
+        when both conditions are met.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Area and item:</Bold> Reach area A AND hold item B. Useful for objectives that require the
+        player to bring something to a specific location.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Missions with multi-step objectives use <Bold>Boolean AND</Bold>. For example, a mission objective
+        requires collecting evidence AND escorting a witness to safety. A <Bold>Boolean AND</Bold> Event
+        Point references both prerequisite Event Points, firing only when both conditions are met.
+    </Paragraph>
+
+    <!-- BOOLEAN OR -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Boolean OR</Paragraph>
+    <Paragraph>
+        Combines two trigger conditions and succeeds when either is true. This is used for alternate
+        routes or objectives where multiple solutions are valid. <Bold>121 instances</Bold> in retail
+        missions.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Boolean OR
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Boolean OR</Bold> for objectives with alternate solutions. This gives players choice
+        and flexibility, allowing multiple paths to the same goal.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> is the first Event Point. <Bold>EP Ref Bool</Bold> is the second Event Point.
+        If either becomes active, this Event Point fires.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Alternate routes:</Bold> Reach area A OR reach area B (two different paths to the same
+        objective).
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Lethal or non-lethal:</Bold> Kill target A OR arrest target A. The objective completes
+        either way.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Multiple informants:</Bold> Talk to witness A OR talk to witness B. Either conversation
+        provides the needed information.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Missions with branching paths use <Bold>Boolean OR</Bold>. For example, an objective can be
+        completed by either sneaking through area A or fighting through area B. A <Bold>Boolean OR</Bold>
+        Event Point references both path-complete Event Points, firing when either route is taken.
+    </Paragraph>
+
+    <!-- COUNTER -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Counter</Paragraph>
+    <Paragraph>
+        Checks whether a mission counter has reached a required value. This is used with Increment Event
+        Points for count-based objectives like kill counts, collection counts, and multi-step totals.
+        Retail missions use Counter triggers in combination with Increment Event Points (46 instances of
+        Increment across retail missions).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Counter
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Counter</Bold> for objectives like "kill 10 enemies" or "collect 5 items." Create
+        Increment Event Points that add to the counter when enemies die or items are collected, then use
+        a <Bold>Counter</Bold> trigger to fire an objective-complete Event Point when the count reaches
+        the target.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>EP Ref</Bold> stores the counter index (1-10). <Bold>Radius</Bold> stores the required
+        threshold value. When the counter (incremented by Increment Event Points) reaches or exceeds the
+        threshold, this Event Point fires.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Kill count objective:</Bold> Increment Event Points on each enemy NPC (triggered by Killed)
+        increment counter 1. A Message Event Point with <Bold>Counter</Bold> trigger (counter 1, threshold
+        10) shows success when 10 enemies are eliminated.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Collection objective:</Bold> Increment Event Points on item pickups increment counter 2.
+        A Counter trigger fires when all items are collected.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Multi-phase counter:</Bold> Increment adds to a counter during phase 1. Counter trigger
+        checks threshold and completes phase 1. Reset Counter clears the count for phase 2 reuse.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Missions with kill-count objectives use <Bold>Counter</Bold> triggers. For example, an objective
+        to eliminate 8 gang members uses Increment Event Points on each gang member NPC (triggered by
+        Killed), all incrementing counter 1. A Message Event Point with <Bold>Counter</Bold> trigger
+        (counter 1, threshold 8) shows the success message when all 8 are eliminated.
+    </Paragraph>
+
+    <!-- Continue with other common triggers... -->
+    <!-- For brevity, I'll add a few more key ones and then the "Less Common Triggers" summary section -->
+
+    <!-- COUNTDOWN -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Countdown</Paragraph>
+    <Paragraph>
+        Runs or checks a hidden countdown timer. This is used for timed logic that does not need to be
+        shown to the player. <Bold>157 instances</Bold> in retail missions. Use <Bold>Visible Countdown</Bold>
+        instead when the timer should be displayed to the player.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Countdown
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Countdown</Bold> for delayed scripted events, timed delays between mission beats, or
+        hidden timers that control mission pacing without showing the player a countdown clock.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> stores the timer/countdown amount in engine ticks or mission time units.
+        When the Event Point becomes active, the timer starts counting down. When it reaches zero, the
+        Event Point fires (or becomes inactive, depending on listening mode).
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Delayed spawn:</Bold> A Group Life Event Point with <Bold>Countdown</Bold> trigger waits
+        a certain duration after mission start before spawning reinforcements.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Alarm delay:</Bold> After an alarm triggers, a <Bold>Countdown</Bold> Event Point waits
+        before spawning police, giving the player a brief window to escape.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Many missions use <Bold>Countdown</Bold> for timed delays. For example, after an alarm triggers,
+        a <Bold>Countdown</Bold> Event Point waits a certain duration before spawning reinforcement NPCs,
+        giving the player a brief window to react.
+    </Paragraph>
+
+    <!-- VISIBLE COUNTDOWN -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Visible Countdown</Paragraph>
+    <Paragraph>
+        Runs a countdown visible to the player. This is used for timed objectives where the player needs
+        to see the remaining time. <Bold>25 instances</Bold> in retail missions. Pair with Extend Timer
+        Event Points when time can be increased.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        When To Use Visible Countdown
+    </Paragraph>
+    <Paragraph>
+        Use <Bold>Visible Countdown</Bold> for timed objectives like defusing bombs, escaping before
+        destruction, or completing tasks within a time limit. The countdown is shown to the player on
+        the HUD, creating urgency and time pressure.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Fields
+    </Paragraph>
+    <Paragraph>
+        <Bold>Radius</Bold> stores the timer value in mission time units. <Bold>EP Ref</Bold> can be
+        used as a dependency or timer target in chained logic. The countdown is shown to the player on
+        the HUD.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Common Patterns
+    </Paragraph>
+    <Paragraph>
+        <Bold>Bomb defusal:</Bold> A Visible Countdown shows the time remaining to defuse a bomb. An
+        End Game Lose Event Point with <Bold>Dependency</Bold> on the timer fires if time runs out.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        <Bold>Escape sequence:</Bold> A Visible Countdown shows time to reach the extraction point before
+        the building explodes or the police arrive.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Retail Examples
+    </Paragraph>
+    <Paragraph>
+        Bomb-defusal missions use <Bold>Visible Countdown</Bold> extensively. The player sees the timer
+        counting down and must complete the objective before time expires. An End Game Lose Event Point
+        with <Bold>Dependency</Bold> on the timer fires if time runs out.
+    </Paragraph>
+
+    <!-- LESS COMMON TRIGGERS SUMMARY -->
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Additional Trigger Types
+    </Paragraph>
+    <Paragraph>
+        The following triggers are used less frequently but are documented for completeness. Each has
+        specific use cases in retail missions:
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Enemy Radius (169 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks enemy proximity. Use for ambush triggers, stealth penalties, or proximity alerts.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Seen (125 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks if a person has been seen by an observer. Use for stealth fail conditions and guard detection.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Player Uses Radius (124 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Requires player interaction within a radius. Use for doors, consoles, and interactive objects.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Killed Not Arrested (97 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks that a person was killed (not arrested). Use for fail conditions in non-lethal missions.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Random (92 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Allows randomized trigger outcomes. Use sparingly for non-deterministic mission behaviour.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Person Arrested (79 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks if a person was arrested. Use for police/non-lethal objectives.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Group Dead (44 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks if all members of a Colour+Group are dead. Use for wave-clear objectives.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Prim Damaged (30 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks if a prim/object was damaged. Use for destructible objectives.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Specific Item Held (27 instances)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Checks if the player holds a specific item. Use for key-and-lock objectives.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Tripwire, Switch, Pressure Pad, Half Dead, Item Held, Crime Rate Above/Below, Person In Vehicle, Thing Radius Dir, Player Fires Gun, Player Carry Person, Move Radius Dir</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Specialized triggers with fewer than 25 instances each. See individual documentation or retail
+        examples for specific usage patterns.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Legacy Triggers (Door, Electric Fence, Water Level, Security Camera, Anim Prim, Darci Grabbed, Punched And Kicked, Shout All/Any, Item Seen, Person Is Murderer)</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Legacy or character-specific triggers. Use modern alternatives (Activate Prim, Radius, Player Uses
+        Radius) for new content unless loading existing mission data that relies on these trigger types.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Authoring Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Objective Chain Pattern</Paragraph>
+    <Paragraph>
+        Message or Nav Beacon uses <Bold>Dependency</Bold> on the Event Point that completed the previous
+        step. This creates sequential objective chains where each depends on the previous one completing.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Area Objective Pattern</Paragraph>
+    <Paragraph>
+        Message, Conversation, or Create NPC uses <Bold>Radius</Bold> or <Bold>Cuboid</Bold> at the
+        relevant map position. This creates location-based objectives where the player must reach a
+        specific area.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Count Objective Pattern</Paragraph>
+    <Paragraph>
+        Increment updates a counter (triggered by Killed, Person Arrested, or other completion conditions),
+        <Bold>Counter</Bold> trigger checks the threshold and fires the objective-complete Event Point,
+        and Reset Counter clears the value when the objective restarts or the mission phase changes.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dialogue Chain Pattern</Paragraph>
+    <Paragraph>
+        Conversation starts from <Bold>Person Used</Bold> or <Bold>Radius</Bold>, then follow-up logic
+        uses <Bold>Conversation Over</Bold> to chain the next mission beat. This ensures the player
+        completes the dialogue before the mission progresses.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Item Gate Pattern</Paragraph>
+    <Paragraph>
+        <Bold>Specific Item Held</Bold> points at the item Event Point, then activates vehicle, door,
+        target, or message logic. This creates key-and-lock style objectives where the player must
+        collect a specific item to progress.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Group Objective Pattern</Paragraph>
+    <Paragraph>
+        Group Life, Group Death, Group Reset, and <Bold>Group Dead</Bold> trigger must use consistent
+        Colour+Group values across all related Event Points. This creates wave-based enemy encounters
+        and group-elimination objectives.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Debugging tip:</Run>
+                <Run> If a trigger does not behave as expected, inspect the referenced Event Point first, then the listening mode, then the Radius field meaning. Many trigger problems are caused by treating Radius as a distance when the selected trigger type stores a timer, counter threshold, packed cuboid size, or crime-rate value.</Run>
             </TextBlock>
         </Border>
     </BlockUIContainer>

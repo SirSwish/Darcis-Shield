@@ -1,0 +1,212 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Stall Car Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Forces a referenced Create Vehicle Event Point into a stalled state when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Stall Car Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Stall Car</Bold> Event Point targets an existing <Bold>Create Vehicle</Bold> Event
+        Point and applies a stall action to that vehicle. It is used when a mission wants a vehicle
+        to stop working, become unusable, or be removed from active driving as part of scripted
+        logic.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Stall Car is not the same as Lock Vehicle. Lock Vehicle changes whether a vehicle can be
+        entered. Stall Car represents the vehicle failing or stopping as a mission event, often after
+        a waypoint, chase step, or other scripted condition.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Stall Car when a specific vehicle should break down, stop, or become disabled after a mission condition.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Stall Car uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group should usually
+        match the vehicle, chase, crash, escape, or objective chain that causes the stall.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        The Stall Car Event Point's own position is usually not the vehicle position. The vehicle is
+        selected by the <Bold>Vehicle</Bold> field. Use this point's position for organising the
+        event chain unless the trigger itself is spatial.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the vehicle stalls. Existing missions use <Bold>Dependency</Bold>
+        with <Bold>Active</Bold>, where another Event Point such as a Simple Waypoint or Kill
+        Waypoint causes the stall.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Stall Car-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Stall Car has one type-specific setting. <Bold>Data[0]</Bold> stores the vehicle Event Point
+        index.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Vehicle</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Vehicle is the Event Point index of the <Bold>Create Vehicle</Bold> entry that should be
+        stalled. The editor stores this value in the range <Bold>1-2048</Bold>. It should point at
+        the vehicle itself, not the waypoint, enemy, message, or trigger that causes the stall.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Vehicle is the Create Vehicle Event Point being stalled. EP Ref belongs to the trigger condition and is usually a different Event Point.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Stall Car
+    </Paragraph>
+    <Paragraph>
+        Existing Stall Car usage is focused on scripted mission state changes. Useful trigger
+        patterns are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Dependency</Bold> - stalls the vehicle after another Event Point fires.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - the observed listening mode for Stall Car entries.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Create the vehicle first, note its Event Point index, then trigger Stall Car from the mission condition that should disable it.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Stall Car Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Stall After A Waypoint</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> on a Simple Waypoint when a vehicle should stall after a route,
+        chase, or scripted movement step reaches a particular point.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>carbomb1.ucm</Bold>, Stall Car <Bold>285</Bold> stalls Vehicle Event Point
+        <Bold>82</Bold>. It uses <Bold>Dependency</Bold> on Event Point <Bold>92</Bold>, a
+        <Bold>Simple Waypoint</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Vehicle</Bold> to the Create Vehicle Event Point that should stall. Set
+        <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and set <Bold>EP Ref</Bold> to the
+        waypoint or mission step that should cause the stall.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Stall After A Kill Waypoint</Paragraph>
+    <Paragraph>
+        Use a dependency on a Kill Waypoint when the vehicle should stall after a related waypoint or
+        route target has been removed.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>carbomb1.ucm</Bold>, Stall Car <Bold>286</Bold> stalls Vehicle Event Point
+        <Bold>6</Bold>. It uses <Bold>Dependency</Bold> on Event Point <Bold>8</Bold>, a
+        <Bold>Kill Waypoint</Bold> that kills Event Point <Bold>5</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Disable A Player-Drivable Vehicle</Paragraph>
+    <Paragraph>
+        Stall Car can target vehicles that are otherwise player-drivable. This is useful when a
+        mission needs to stop an escape route, force a transition, or make a chase vehicle fail at a
+        scripted moment.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>police1.ucm</Bold>, Stall Car <Bold>164</Bold> stalls Vehicle Event Point
+        <Bold>71</Bold>, a <Bold>Taxi</Bold> with <Bold>Player Drives</Bold> behaviour. It is
+        triggered by <Bold>Dependency</Bold> on Event Point <Bold>90</Bold>, a Simple Waypoint.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Driving Test Or Route Fail State</Paragraph>
+    <Paragraph>
+        Stall Car can also be used in driving-focused missions when a route or test condition should
+        stop the active vehicle.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive1a.ucm</Bold>, Stall Car <Bold>70</Bold> stalls Vehicle Event Point
+        <Bold>2</Bold>, a <Bold>Police Sedan</Bold>. It is triggered by <Bold>Dependency</Bold> on
+        Event Point <Bold>167</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Stall Car Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the <Bold>Create Vehicle</Bold> Event Point to stall.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Stall Car</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Vehicle</Bold> to the Create Vehicle Event Point index.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger, usually <Bold>Dependency</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>EP Ref</Bold> to the Event Point that should cause the stall.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Active</Bold> for the listening mode.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the vehicle before and after the trigger to confirm it stalls at the intended mission moment.</Paragraph></ListItem>
+        <ListItem><Paragraph>Keep related vehicle logic grouped by colour and letter for easier debugging.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Vehicle points at the intended Create Vehicle Event Point, EP Ref points at the trigger condition, and the vehicle stalls only at the correct mission moment.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

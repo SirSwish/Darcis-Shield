@@ -1,0 +1,385 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Count Up Timer Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Starts a visible timer that counts upward from zero when triggered. Can be used for timed mission logic, challenges, and cone penalty setups.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Count Up Timer Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Count Up Timer</Bold> Event Point starts a visible timer that counts upward from
+        zero when the Event Point is triggered.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is useful when the mission needs to show the player how long they have been doing
+        something, how long they have taken to complete a challenge, or how much time has accumulated
+        during a timed sequence.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Count Up Timer can be used with <Bold>Cone Penalties</Bold>, but it is not limited to cone
+        challenges. It is a general visible count-up timer that can be placed behind any mission
+        trigger where a visible increasing timer is useful.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_count_up_timer_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple summary:</Run>
+                <Run>
+                    Count Up Timer starts a visible timer at 0 and counts upward while active.
+                    It has no type-specific properties; the important setup is when and how it is triggered.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding a Count Up Timer Event Point
+    </Paragraph>
+    <Paragraph>
+        To add one, click <Bold>Add</Bold> in the Event Points panel, select
+        <Bold>Count Up Timer</Bold> from the Event Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the standard common properties and trigger
+        settings. Count Up Timer does not have any additional type-specific fields.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_count_up_timer_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Count Up Timer uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. The position is usually less important
+        than it is for physical world objects, because the purpose of the Event Point is to start a
+        visible timer rather than place a visible pickup or actor. However, it is still helpful to
+        place it near the area or mission logic it belongs to so the file remains readable.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_count_up_timer_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Type-Specific Properties
+    </Paragraph>
+    <Paragraph>
+        Count Up Timer has <Bold>no type-specific properties</Bold>. There is no timer value to enter
+        here and no item type, NPC type, object type, or special configuration section.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The key setup is the <Bold>trigger</Bold>. The Event Point starts counting upward when its
+        trigger condition is satisfied.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run>
+                    If the timer does not start, look at the trigger configuration first.
+                    Count Up Timer has no special internal settings; it depends on the trigger firing.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Count Up Timer should be placed behind the mission event that starts the timed section.
+        This could be a player entering an area, pressing a switch, starting a race, accepting an
+        objective, finishing a conversation, or any other mission condition.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Common trigger examples include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Player Enters Radius</Bold> — the timer starts when the player enters an area.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Enters Cuboid</Bold> — the timer starts when the player enters a boxed region.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Uses in Radius</Bold> — the timer starts when the player uses a switch/object.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> — the timer starts after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Finished</Bold> — the timer starts after dialogue completes.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>None / Game Starts</Bold> — the timer starts immediately when the mission begins.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_count_up_timer_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run>
+                    Count Up Timer starts when its own trigger fires.
+                    If you want a timed challenge to begin when the player enters an area, the Count Up Timer must use that area trigger or depend on another Event Point that uses that trigger.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Using Count Up Timer for Timed Mission Logic
+    </Paragraph>
+    <Paragraph>
+        Count Up Timer can be used as part of a time-limit style mission setup. For example, the
+        player enters an area and has a certain amount of time to complete a task. The timer counts
+        up from zero, while other mission logic can decide what happens if the player takes too long
+        or completes the task successfully.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        A typical timed mission sequence might look like this:
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>The player enters a trigger radius or starts the objective.</Paragraph></ListItem>
+        <ListItem><Paragraph>The <Bold>Count Up Timer</Bold> starts and becomes visible.</Paragraph></ListItem>
+        <ListItem><Paragraph>The player attempts to complete the objective before the time becomes too high.</Paragraph></ListItem>
+        <ListItem><Paragraph>Separate mission logic checks whether the task has been completed or failed.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the player completes the task, the mission continues or awards the objective.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the player fails, another Event Point can trigger a mission failure or penalty.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        Count Up Timer by itself only starts the visible count-up display. It does not automatically
+        decide success or failure unless other Event Points are also used to check or respond to the
+        timer/mission state.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Design note:</Run>
+                <Run>
+                    Use Count Up Timer to show elapsed time. Use other Event Points to define what happens when the player succeeds, fails, or runs out of allowed time.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Using Count Up Timer with Cone Penalties
+    </Paragraph>
+    <Paragraph>
+        Count Up Timer can be used with <Bold>Cone Penalties</Bold>. In that setup, the visible timer
+        counts upward, and hitting traffic cones can add penalty time.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Cone Penalties only makes sense if a Count Up Timer also exists. Without a Count Up Timer,
+        there is no visible upward timer for Cone Penalties to modify.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_count_up_timer_cone_penalties_setup.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Cone Penalty Setup Requirements
+    </Paragraph>
+    <Paragraph>
+        For a cone penalty challenge, the following Event Points are normally required:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Count Up Timer</Bold> — starts the visible count-up timer.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Cone Penalties</Bold> — adds penalty time when cone transgressions happen.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Create Barrel</Bold> Event Points set to <Bold>Traffic Cone</Bold> — the cone objects that can be hit.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        The practical chain is:
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Count Up Timer is active -> Traffic Cone is hit -> Cone Penalties adds penalty time
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        The Count Up Timer is the visible timer. Cone Penalties modifies that timer. The Traffic Cone
+        objects provide the transgression events.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Cone setup warning:</Run>
+                <Run>
+                    Do not add Cone Penalties by itself and expect a visible timer.
+                    The Count Up Timer must exist, and the cone objects must be created separately using Create Barrel set to Traffic Cone.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Examples
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Timed Area Challenge</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The player enters a radius and the Count Up Timer starts. The player must reach a target,
+        complete an objective, or escape before other mission logic decides that too much time has
+        passed.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Driving or Cone Challenge</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        The timer starts when the challenge begins. Traffic cones are placed using Create Barrel.
+        Cone Penalties is present so that hitting cones increases the timer.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Mission Objective Time Trial</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use Count Up Timer to show how long the player has taken to complete an optional or required
+        task. Other mission Event Points can award success or failure based on the mission setup.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Visible Pressure Timer</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Start the timer when a dangerous sequence begins so the player can see time accumulating,
+        even if the mission does not strictly fail at a specific threshold.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Count Up Timer Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what should start the timer.</Paragraph></ListItem>
+        <ListItem><Paragraph>Click <Bold>Add</Bold> in the Event Points panel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Select <Bold>Count Up Timer</Bold> and click <Bold>OK</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a letter group and colour that fits your mission organisation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the Event Point near the area or logic it belongs to, if useful for readability.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the trigger that starts the timer, such as Player Enters Radius, Dependency, Player Uses in Radius, or None / Game Starts.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Listening Mode according to the behaviour you need for the mission sequence.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using cone penalties, add Cone Penalties and create Traffic Cone objects using Create Barrel.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add any additional success/failure logic needed for the mission.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission in game.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Basic Cone Challenge Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create the route or challenge area.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Count Up Timer</Bold> and trigger it when the challenge starts.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Cone Penalties</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add <Bold>Create Barrel</Bold> Event Points and set them to <Bold>Traffic Cone</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Place the cones around the route.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add success/failure logic for completing or failing the challenge.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test that the timer starts, cones can be hit, and penalties increase the timer.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The timer does not start</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Count Up Timer Event Point exists.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm its trigger condition is firing.</Paragraph></ListItem>
+        <ListItem><Paragraph>If using Dependency, confirm the Dependency EP points to the Event Point that should start the timer.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test with None / Game Starts to confirm the timer itself works.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Cone penalties do not add time</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm a Count Up Timer exists and is active.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Cone Penalties Event Point exists.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the cones were created using Create Barrel set to Traffic Cone.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the player is actually hitting the cone objects during the active challenge.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The timer starts too early or too late</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the trigger used by the Count Up Timer.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use a Dependency trigger if another Event Point should start the timer.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use Player Enters Radius or Player Uses in Radius if the timer should start from player action.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Count Up Timer is simple, but it often sits inside larger mission logic.
+                    It starts the visible timer; the surrounding Event Points decide what the timer means.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,463 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Increment Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Increments mission counters by a configured amount. Used with Counter trigger logic to build multi-step objectives, kill counts, collection counts, progress gates, and conditional mission flow.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Increment Does
+    </Paragraph>
+    <Paragraph>
+        The <Bold>Increment</Bold> Event Point increases one of the mission counters by a value chosen
+        by the mission creator.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        These are the same counters used by the <Bold>Counter</Bold> trigger guard in the Trigger
+        Settings section. The Increment Event Point changes a counter. The Counter trigger watches a
+        counter and fires when that counter reaches a required threshold.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This makes Increment useful for building mission logic such as “kill two enemies,” “collect
+        three items,” “visit all checkpoints,” “destroy all targets,” or “complete several separate
+        steps before the next objective starts.”
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_overview.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Simple summary:</Run>
+                <Run>
+                    Increment adds a value to a counter. A separate Event Point using the Counter trigger can watch that counter and fire once the counter reaches a threshold.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Adding an Increment Event Point
+    </Paragraph>
+    <Paragraph>
+        Click <Bold>Add</Bold> in the Event Points panel, select <Bold>Increment</Bold> from the Event
+        Point type list, and click <Bold>OK</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The <Bold>Edit EventPoint</Bold> window opens with the standard common properties, trigger
+        settings, and the Increment-specific fields.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_add_type.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Increment uses the normal Event Point common properties: index number, Event Point type,
+        letter group, colour, position, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The position of an Increment Event Point is usually not gameplay-critical because it does not
+        place a physical object in the world. The important parts are the counter it modifies, the
+        amount it adds, and the trigger that causes the increment to happen.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Even though the position is not usually important, it is still helpful to place Increment
+        Event Points near the related objective, NPC, item, or logic area so the mission remains easy
+        to understand later.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_common_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Increment Properties
+    </Paragraph>
+    <Paragraph>
+        Increment has two type-specific properties:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Counter Index</Bold> — which mission counter should be changed.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Increment By</Bold> — how much should be added to that counter when this Event
+                Point fires.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_properties.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Counter Index
+    </Paragraph>
+    <Paragraph>
+        <Bold>Counter Index</Bold> specifies which counter this Increment Event Point modifies.
+        Missions can use multiple counters. In practice, counters are usually referred to by index
+        number, commonly <Bold>0–9</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Counter Index is critical because it must match the counter being watched elsewhere by a
+        <Bold>Counter</Bold> trigger. If Increment modifies counter 6, but the Counter trigger is
+        watching counter 4, the trigger will not fire from this increment.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical Counter Index detail:</Run>
+                <Run>
+                    The Counter Index on the Increment Event Point must match the Counter Index used by the Counter trigger that is waiting for the threshold.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Increment By
+    </Paragraph>
+    <Paragraph>
+        <Bold>Increment By</Bold> controls how much is added to the selected counter when the Event
+        Point fires.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Most simple setups increment by <Bold>1</Bold>. For example, each defeated enemy may add 1 to
+        a kill counter. However, the increment does not have to be 1. You can increment by a larger
+        amount if a task should count for more progress.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        For example, a difficult enemy could increment a counter by 2, while a normal enemy increments
+        by 1. A major objective could increment by 5 if the threshold is designed around weighted
+        progress.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        How Increment Works with Counter Triggers
+    </Paragraph>
+    <Paragraph>
+        Increment and Counter trigger logic are two separate pieces of the same system.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Increment Event Point:
+    Adds value to counter X.
+
+Counter Trigger:
+    Watches counter X.
+    Fires when counter X reaches threshold Y.
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        A Counter trigger normally has two important parameters:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem>
+            <Paragraph>
+                <Bold>Counter Index Number</Bold> — which counter the trigger is watching.
+            </Paragraph>
+        </ListItem>
+        <ListItem>
+            <Paragraph>
+                <Bold>Threshold</Bold> — the counter value required before the trigger fires.
+            </Paragraph>
+        </ListItem>
+    </List>
+
+    <Paragraph Margin="0,6,0,0">
+        All counters start at <Bold>0</Bold>. If a Counter trigger watches counter 6 with threshold 2,
+        then it will fire once counter 6 has been incremented to 2 or higher.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_counter_trigger.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Mental model:</Run>
+                <Run>
+                    Increment is the thing that changes the number. Counter trigger is the thing that reacts when the number is high enough.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Trigger Settings for Increment
+    </Paragraph>
+    <Paragraph>
+        The Increment Event Point also needs its own trigger. This trigger decides when the counter
+        should be increased.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Common Increment trigger examples include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Killed or Arrested</Bold> — increment when a target NPC is killed or arrested.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Killed Not Arrested</Bold> — increment only when a target NPC is killed.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Person Arrested</Bold> — increment when a target NPC is arrested.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Item Held</Bold> or <Bold>Specific Item Held</Bold> — increment when the player has a required item.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Player Enters Radius</Bold> — increment when the player reaches a checkpoint.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> — increment after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Conversation Finished</Bold> — increment after a conversation completes.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Switch</Bold> or <Bold>Player Uses in Radius</Bold> — increment when the player uses something.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_trigger_settings.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2"
+                CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Do not forget:</Run>
+                <Run>
+                    Increment has its own trigger. The counter only changes when the Increment Event Point fires.
+                    Setting Counter Index and Increment By is not enough by itself.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#666" Margin="0,18,0,14"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Example: Trigger a Message After Two Enemies Are Killed
+    </Paragraph>
+    <Paragraph>
+        This example uses counter 6 to track whether two enemy NPCs have been killed. Once both are
+        dead, a congratulation message fires.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Image Source="pack://application:,,,/UrbanChaosMissionEditor;component/Help/Images/mission_increment_two_enemy_example.png"
+               MaxWidth="720" Stretch="Uniform"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        High-Level Logic
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,6,0,8">
+        <Border Background="#25272B" BorderBrush="#444" BorderThickness="1"
+                CornerRadius="4" Padding="10">
+            <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontFamily="Consolas">
+Enemy 1 killed -&gt; Increment counter 6 by 1
+Enemy 2 killed -&gt; Increment counter 6 by 1
+
+Counter 6 reaches threshold 2 -&gt; Message fires
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <Paragraph>
+        Since all counters start at 0, counter 6 reaches 2 only after both increments have happened.
+        The message Event Point can then be triggered by a Simple Waypoint or other logic node that
+        uses the Counter trigger.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">
+        Step-by-Step Setup
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create two enemy NPC Event Points.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create one Increment Event Point for the first enemy.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the first Increment Event Point to <Bold>Counter Index = 6</Bold> and <Bold>Increment By = 1</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the first Increment Event Point trigger to fire when enemy 1 is killed.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create another Increment Event Point for the second enemy.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the second Increment Event Point to <Bold>Counter Index = 6</Bold> and <Bold>Increment By = 1</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the second Increment Event Point trigger to fire when enemy 2 is killed.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create a Simple Waypoint or logic Event Point that uses the <Bold>Counter</Bold> trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set that Counter trigger to <Bold>Counter Index = 6</Bold> and <Bold>Threshold = 2</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Trigger the congratulation message from that Counter-triggered logic Event Point, usually through a dependency.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test the mission by killing each enemy and confirming the message appears only after both are dead.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Design note:</Run>
+                <Run>
+                    You can increment by more than 1. A harder enemy could increment by 2, or a major objective could increment by a larger amount if your threshold is designed around weighted progress.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Practical Uses
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Kill or Arrest Counts</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Increment a counter each time a required enemy is killed or arrested. A Counter trigger can
+        then fire when enough enemies have been dealt with.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Collection Objectives</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Increment a counter each time the player collects or obtains a required item. Fire the next
+        objective when the collection threshold is reached.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Checkpoint Progress</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Increment a counter when the player reaches each checkpoint. Use the Counter trigger to detect
+        when all required checkpoints have been visited.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Multi-Part Objective Completion</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Increment the same counter from several different tasks. When the total reaches the required
+        threshold, unlock the next part of the mission.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Weighted Progress</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use different Increment By values to make some tasks count more than others. For example, a
+        hard enemy might count as 2 progress points while a normal enemy counts as 1.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Increment Workflow
+    </Paragraph>
+
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide what progress you want to track.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose a counter index, such as counter 6.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create an Increment Event Point for each action that should add progress.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Increment Event Point to the same <Bold>Counter Index</Bold> if they are contributing to the same objective.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Increment By</Bold> to the amount each action should add.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set each Increment Event Point’s trigger so it fires when the relevant action occurs.</Paragraph></ListItem>
+        <ListItem><Paragraph>Create another Event Point that uses the <Bold>Counter</Bold> trigger guard.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Counter trigger to watch the same <Bold>Counter Index</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set the Counter trigger <Bold>Threshold</Bold> to the required total.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use that Counter-triggered Event Point to start the next objective, message, win condition, reward, or mission event.</Paragraph></ListItem>
+        <ListItem><Paragraph>Save and test every way the counter can be incremented.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,14,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Troubleshooting
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The counter-triggered event never fires</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Increment Event Points are actually triggering.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Increment Event Points use the same Counter Index as the Counter trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the threshold is reachable from the total increments.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the Counter trigger is on the Event Point that should respond to the counter reaching the threshold.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test with a lower threshold to confirm the logic chain works.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The event fires too early</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check whether the threshold is too low.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether an Increment Event Point is firing more than once.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether Increment By is larger than expected.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether another Event Point is also incrementing the same Counter Index.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">The wrong objective progresses</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Check the Counter Index on every Increment Event Point involved.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check the Counter Index on every Counter trigger.</Paragraph></ListItem>
+        <ListItem><Paragraph>Make sure different objectives are not accidentally sharing the same counter index.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use consistent colours, groups, or notes to keep counter logic organised.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">An enemy death does not increment the counter</Paragraph>
+    <List MarkerStyle="Disc" Margin="32,0,0,0">
+        <ListItem><Paragraph>Confirm the Increment Event Point trigger references the correct NPC Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Check whether the trigger should be <Bold>Killed or Arrested</Bold>, <Bold>Killed Not Arrested</Bold>, or <Bold>Person Arrested</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Confirm the NPC actually reaches the trigger condition during gameplay.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1"
+                CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Final note:</Run>
+                <Run>
+                    Increment is powerful because it lets multiple independent actions contribute to one shared mission condition.
+                    Keep counter indexes organised and always make sure the Increment and Counter trigger are using the same counter.
+                </Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

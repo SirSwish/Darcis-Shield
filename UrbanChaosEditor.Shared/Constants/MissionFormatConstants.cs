@@ -12,6 +12,8 @@ public static class MissionFormatConstants
 {
     public const int MissionCurrentVersion = 10;
     public const int MaxEventPoints = 512;
+    public const int GameUnitsPerStorey = 256;
+    public const int GameUnitsPerQuarterStorey = GameUnitsPerStorey / 4;
 
     public const int SpeakerRadio = 0;
     public const int SpeakerPlaceName = 0x100;

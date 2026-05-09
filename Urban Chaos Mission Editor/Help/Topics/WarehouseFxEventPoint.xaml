@@ -1,0 +1,280 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Warehouse FX Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Sets an audio or ambience preset for indoor areas (warehouses), such as police stations, restaurants, clubs, and offices.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Warehouse FX Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Warehouse FX</Bold> Event Point applies an audio or atmosphere preset to the
+        surrounding area. The preset is chosen from five available types: <Bold>Silence</Bold>,
+        <Bold>Police HQ</Bold>, <Bold>Restaurant</Bold>, <Bold>Hi-Tech/Office</Bold>, and
+        <Bold>Club Music</Bold>.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        These presets set the ambient sound or music that plays when the player is in or near the
+        Event Point's location. In the game's terminology, "warehouse" refers to indoor areas in
+        general. The most commonly used preset in retail missions is <Bold>Police HQ</Bold>, which
+        appears in police station interiors.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Place a Warehouse FX Event Point in the indoor area where the audio preset should apply. Choose the Type that matches the location (Police HQ for police stations, Restaurant for dining areas, Club Music for nightclubs).</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Warehouse FX uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. <Bold>Position</Bold> is important
+        because it defines where the audio preset applies — the Event Point should be placed inside
+        or near the area that should have that atmosphere. Colour and letter group are usually not
+        critical for Warehouse FX.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position defines where the audio preset is active. Place the Warehouse FX Event Point inside
+        or near the indoor area that should have that atmosphere. For example, a Police HQ preset
+        should be placed inside the police station building.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Y Altitude
+    </Paragraph>
+    <Paragraph>
+        Y altitude should match the floor or interior height of the area. Indoor areas can be at
+        different vertical levels, so setting the correct Y value ensures the preset applies at the
+        intended floor.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        All retail Warehouse FX Event Points use <Bold>None</Bold>, which applies the preset as soon
+        as the mission loads. Other trigger types could be used if the atmosphere should change at a
+        scripted moment, but this is not observed in retail data.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        All retail Warehouse FX examples use <Bold>Active</Bold>. This is appropriate for an audio
+        preset that should remain in effect once applied. Other listening modes are not needed unless
+        the preset should dynamically change or toggle.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Warehouse FX-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Warehouse FX has one type-specific setting. From <Bold>warefxsetup.cpp</Bold>,
+        <Bold>Data[0]</Bold> stores the audio preset type as an index into the available presets.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Type</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Type selects which audio or atmosphere preset to apply. The available types are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>0: Silence</Bold> - removes ambient sound. Not used in retail missions.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>1: Police HQ</Bold> - police station interior ambience. The most common retail preset, used 6 times across police station missions.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>2: Restaurant</Bold> - dining area ambience. Used once in retail.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>3: Hi-Tech/Office</Bold> - office or high-tech facility ambience. Not used in retail missions.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>4: Club Music</Bold> - nightclub or party music. Used twice in retail.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Choose the Type that matches the location. Police HQ for police stations, Restaurant for dining areas, Club Music for nightclubs or parties. Silence can be used to remove ambient sound in areas where quiet is important.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Warehouse FX
+    </Paragraph>
+    <Paragraph>
+        All retail Warehouse FX Event Points use <Bold>None</Bold> with <Bold>Active</Bold>, meaning
+        the preset is applied at mission start. Other plausible trigger patterns include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - the standard retail pattern. The audio preset is applied as soon as the mission loads and remains in effect.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - would apply the preset when another Event Point fires, useful if the atmosphere should change mid-mission.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius</Bold> with <Bold>Active</Bold> - would apply the preset when the player enters the area, though this is not needed if the preset should be active from mission start.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> Multiple Warehouse FX Event Points can be placed in different areas of the same mission. Each Event Point applies its preset to its own area, allowing different parts of the map to have different audio atmospheres.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Warehouse FX Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Police Station Interior</Paragraph>
+    <Paragraph>
+        Use <Bold>Police HQ</Bold> preset when a mission has a police station interior that should
+        have the appropriate ambient sound. This is the most common Warehouse FX usage in retail data.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>police2.ucm</Bold>, Warehouse FX <Bold>269</Bold> uses <Bold>Police HQ</Bold> preset
+        (type 1) with trigger <Bold>None</Bold> and listening mode <Bold>Active</Bold>. It is placed
+        at position X: 20639, Y: 1280, Z: 22154, inside the police station building. When the mission
+        loads, the police HQ ambience is immediately active at that location.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Warehouse FX</Bold> Event Point inside the police station interior. Set
+        <Bold>Type</Bold> to <Bold>Police HQ</Bold>, <Bold>Triggered By</Bold> to <Bold>None</Bold>,
+        and listening mode to <Bold>Active</Bold>. Adjust the position and Y altitude to match the
+        police station floor.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Restaurant Or Dining Area</Paragraph>
+    <Paragraph>
+        Use <Bold>Restaurant</Bold> preset when a mission has a dining area, restaurant, or cafe that
+        should have dining ambience.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanic1.ucm</Bold>, Warehouse FX <Bold>406</Bold> uses <Bold>Restaurant</Bold>
+        preset (type 2) with trigger <Bold>None</Bold> and listening mode <Bold>Active</Bold>. It is
+        placed at position X: 29323, Y: 768, Z: 22983, inside a restaurant or dining area.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Warehouse FX</Bold> Event Point inside the restaurant area. Set <Bold>Type</Bold>
+        to <Bold>Restaurant</Bold>, <Bold>Triggered By</Bold> to <Bold>None</Bold>, and listening
+        mode to <Bold>Active</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Nightclub Or Party Area</Paragraph>
+    <Paragraph>
+        Use <Bold>Club Music</Bold> preset when a mission has a nightclub, party, or other area where
+        music should be playing.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanic1.ucm</Bold>, Warehouse FX <Bold>407</Bold> uses <Bold>Club Music</Bold>
+        preset (type 4) with trigger <Bold>None</Bold> and listening mode <Bold>Active</Bold>. It is
+        placed at position X: 23710, Y: 1536, Z: 10269, inside a nightclub or party area. In
+        <Bold>moo.ucm</Bold>, Warehouse FX <Bold>9</Bold> also uses <Bold>Club Music</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a <Bold>Warehouse FX</Bold> Event Point inside the club or party area. Set
+        <Bold>Type</Bold> to <Bold>Club Music</Bold>, <Bold>Triggered By</Bold> to <Bold>None</Bold>,
+        and listening mode to <Bold>Active</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Multiple Presets In One Mission</Paragraph>
+    <Paragraph>
+        A single mission can have multiple Warehouse FX Event Points with different presets. Each
+        preset applies to its own area, allowing different parts of the map to have different audio
+        atmospheres.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>botanic1.ucm</Bold>, Warehouse FX <Bold>406</Bold> uses <Bold>Restaurant</Bold> in
+        one area, while Warehouse FX <Bold>407</Bold> uses <Bold>Club Music</Bold> in another area.
+        In <Bold>police3.ucm</Bold>, multiple Warehouse FX Event Points all use <Bold>Police HQ</Bold>
+        but are placed in different parts of the police station interior.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add a Warehouse FX Event Point for each distinct indoor area. Set each one's Type to match
+        that area's purpose. Position each Event Point inside its corresponding area so the presets do
+        not overlap unintentionally.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Unused Presets</Paragraph>
+    <Paragraph>
+        Two of the five available presets (<Bold>Silence</Bold> and <Bold>Hi-Tech/Office</Bold>) are
+        not used in any retail mission. They remain available for custom missions.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed pattern</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Of 8 retail Warehouse FX Event Points, 6 use <Bold>Police HQ</Bold>, 2 use <Bold>Club
+        Music</Bold>, and 1 uses <Bold>Restaurant</Bold>. <Bold>Silence</Bold> (type 0) and
+        <Bold>Hi-Tech/Office</Bold> (type 3) are never used.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to apply</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        <Bold>Silence</Bold> could be used to remove ambient sound in a specific area, such as a
+        quiet room or stealth section. <Bold>Hi-Tech/Office</Bold> could be used for office buildings,
+        labs, or high-tech facilities. Both presets are valid and available, just unused in retail.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Warehouse FX Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Identify the indoor area that should have a specific audio atmosphere.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Warehouse FX</Bold> Event Point inside that area.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Type</Bold> to the preset that matches the location: <Bold>Police HQ</Bold> for police stations, <Bold>Restaurant</Bold> for dining areas, <Bold>Club Music</Bold> for nightclubs, <Bold>Hi-Tech/Office</Bold> for offices, or <Bold>Silence</Bold> to remove ambient sound.</Paragraph></ListItem>
+        <ListItem><Paragraph>Adjust the Event Point's <Bold>position</Bold> and <Bold>Y altitude</Bold> to match the area's location and floor height.</Paragraph></ListItem>
+        <ListItem><Paragraph>For mission-start presets (the standard pattern), set <Bold>Triggered By</Bold> to <Bold>None</Bold> and listening mode to <Bold>Active</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted atmosphere changes, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> or <Bold>Radius</Bold> and configure the appropriate trigger parameters.</Paragraph></ListItem>
+        <ListItem><Paragraph>If the mission has multiple indoor areas with different atmospheres, add a Warehouse FX Event Point for each area with the appropriate Type.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the mission in-game and confirm each audio preset applies in the correct area and at the intended moment.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The Type matches the location (Police HQ for police stations, Restaurant for dining, Club Music for nightclubs), the position is inside the target area, and the preset applies at the intended moment.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

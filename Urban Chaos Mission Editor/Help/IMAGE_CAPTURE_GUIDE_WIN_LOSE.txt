@@ -1,0 +1,11 @@
+Mission Editor Help Image Capture Guide - Win and Lose Event Points
+=============================================================
+
+WinLoseEventPoints.xaml
+-----------------------
+mission_win_lose_overview.png - Mission viewport or Event Points list showing one Win Event Point and one Lose Event Point.
+mission_win_lose_add_type.png - Add New EventPoint window showing the Win and/or Lose Event Point type selected.
+mission_win_lose_common_properties.png - Edit EventPoint window showing common properties for a Win or Lose Event Point.
+mission_win_lose_trigger_settings.png - Trigger settings for a simple Win or Lose condition, such as Person Arrested -> Win or Person Dead -> Lose.
+mission_win_lose_boolean_logic.png - Example setup showing Boolean AND / Boolean OR or Simple Waypoint dependency logic used before a Win/Lose Event Point.
+mission_win_lose_multiple_endings.png - Event Points list or viewport showing multiple Win and/or Lose Event Points for different mission-ending conditions.

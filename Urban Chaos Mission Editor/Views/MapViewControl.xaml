@@ -21,7 +21,8 @@
         <ScrollViewer x:Name="ScrollContainer"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
-                      PanningMode="Both">
+                      PanningMode="Both"
+                      ScrollChanged="ScrollContainer_ScrollChanged">
 
             <!-- Zoomable content -->
             <Grid x:Name="ZoomContainer" RenderOptions.BitmapScalingMode="NearestNeighbor">
@@ -67,12 +68,26 @@
                         Panel.ZIndex="3"
                         IsHitTestVisible="False"/>
 
+                    <!-- 4b. Roof Tiles Layer -->
+                    <ovl:RoofTilesLayer x:Name="RoofTilesLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowRoofTiles, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                        Panel.ZIndex="4"
+                        IsHitTestVisible="False"/>
+
+                    <!-- 4c. PAP Altitudes Layer -->
+                    <ovl:RoofAltitudesLayer x:Name="RoofAltitudesLayer"
+                        Width="8192" Height="8192"
+                        Visibility="{Binding ShowRoofAltitudes, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                        Panel.ZIndex="5"
+                        IsHitTestVisible="False"/>
+
                     <!-- 5. Light Layer -->
                     <ovl:LightLayer x:Name="LightLayer"
                         Width="8192" Height="8192"
                         Visibility="{Binding ShowLights, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
                         ShowRanges="{Binding ShowLightRanges}"
-                        Panel.ZIndex="4"
+                        Panel.ZIndex="6"
                         IsHitTestVisible="False"/>
 
               
@@ -88,6 +103,7 @@
                         EventPoints="{Binding EventPoints}"
                         SelectedEventPoint="{Binding SelectedEventPoint}"
                         Visibility="{Binding ShowEventPoints, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
+                        Panel.ZIndex="100"
                         IsHitTestVisible="False"/>
 
                 </Grid>

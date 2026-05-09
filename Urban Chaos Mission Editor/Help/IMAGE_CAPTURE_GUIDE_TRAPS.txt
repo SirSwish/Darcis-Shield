@@ -1,0 +1,14 @@
+Mission Editor Help Image Capture Guide - Traps
+===========================================
+
+TrapsEventPoint.xaml
+--------------------
+mission_traps_overview.png - Mission viewport or Event Points list showing a Traps / Steam Jet Event Point.
+mission_traps_add_type.png - Add New EventPoint window with Traps selected.
+mission_traps_common_properties.png - Edit EventPoint window showing common properties such as index, type, group, colour, position, and facing.
+mission_traps_position_facing.png - Viewport showing the placed trap and its orange facing-direction handle.
+mission_traps_active_while.png - Listening Mode dropdown/control clearly set to Active While.
+mission_traps_type.png - Trap Type field showing Steam Jet selected.
+mission_traps_direction.png - Direction dropdown or controls showing Up, Forward, and Down.
+mission_traps_animation_parameters.png - Speed, Steps, and Range fields visible.
+mission_traps_step_pattern.png - Step activation checkboxes visible, ideally with an example pattern such as on/off/off/on/off.

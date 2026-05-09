@@ -1,0 +1,13 @@
+Mission Editor Help Image Manifest - Create Mist
+==============================================
+
+Place these screenshots under:
+Help/Images/
+
+CreateMistEventPoint.xaml
+-------------------------
+mission_create_mist_overview.png
+mission_create_mist_add_type.png
+mission_create_mist_common_properties.png
+mission_create_mist_position.png
+mission_create_mist_trigger_settings.png

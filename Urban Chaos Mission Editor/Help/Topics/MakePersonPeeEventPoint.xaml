@@ -1,0 +1,250 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Make Person Pee Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Makes a target NPC or person Event Point perform the urination animation when mission logic triggers it.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Make Person Pee Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Make Person Pee</Bold> Event Point targets an NPC or person Event Point and makes that
+        character perform the urination animation. The target is chosen by the <Bold>Waypoint</Bold>
+        field, which stores the Event Point index of the character that should urinate.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        This is a comedic feature from the original game, typically used for ambient city NPCs to add
+        environmental detail or humor. All retail instances fire at mission start, meaning certain
+        NPCs are already urinating when the player loads into the mission. One retail example uses
+        <Bold>Active While</Bold> listening mode, which continuously triggers the animation rather than
+        firing once.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Set Waypoint to the Event Point index of the NPC that should urinate. When this Event Point fires, that character performs the urination animation.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Make Person Pee uses the standard Event Point common properties: index number, Event Point
+        type, letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Colour and letter group can be used to
+        associate the Make Person Pee Event Point with its target NPC. Position does not affect which
+        NPC is targeted, but can be used to place the Event Point near the target for organisation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position does not affect which NPC is made to urinate. The target comes from the
+        <Bold>Waypoint</Bold> field in the type-specific settings. Use position to keep the Make
+        Person Pee Event Point near the target NPC for easier mission organisation.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        All retail Make Person Pee Event Points use <Bold>None</Bold>, which fires the Event Point at
+        mission start. Other trigger types like <Bold>Dependency</Bold> or <Bold>Radius</Bold> could
+        be used if the animation should happen at a specific scripted moment or when the player
+        approaches.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Listening Mode
+    </Paragraph>
+    <Paragraph>
+        Most retail Make Person Pee examples use <Bold>Active</Bold>, which triggers the animation
+        once when the Event Point fires. One example uses <Bold>Active While</Bold>, which
+        continuously re-triggers the animation. <Bold>Active</Bold> is appropriate for a single
+        urination animation; <Bold>Active While</Bold> would make the animation loop or repeat.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Make Person Pee-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Make Person Pee has one type-specific setting. From <Bold>PeeSetup.cpp</Bold>,
+        <Bold>Data[0]</Bold> stores the target waypoint index.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Waypoint</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Waypoint is the Event Point index of the NPC or person that should urinate. The editor allows
+        values from <Bold>1</Bold> to <Bold>2048</Bold>. It should point to a <Bold>Create NPC</Bold>
+        or other person/character Event Point, not to a vehicle, object, or non-character entry.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Create or identify the NPC Event Point first, note its index number, then create the Make Person Pee Event Point and set Waypoint to that index.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Make Person Pee
+    </Paragraph>
+    <Paragraph>
+        All retail Make Person Pee Event Points use <Bold>None</Bold> triggers, meaning they fire at
+        mission start. Other plausible trigger patterns include:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active</Bold> - the standard retail pattern. The NPC urinates once at mission start.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>None</Bold> with <Bold>Active While</Bold> - observed in one retail mission. The NPC continuously or repeatedly performs the animation.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> with <Bold>Active</Bold> - would trigger the animation once when another Event Point fires, such as after a scripted event or objective step.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Radius</Bold> with <Bold>Active</Bold> - would trigger the animation when the player approaches the NPC.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Important:</Run>
+                <Run> The target Waypoint must point to an NPC or person Event Point that exists when the Make Person Pee Event Point fires. If the target does not exist or is not a valid character, the animation will not play.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Make Person Pee Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Ambient NPC Animation At Mission Start</Paragraph>
+    <Paragraph>
+        Use <Bold>None</Bold> with <Bold>Active</Bold> when an NPC should be urinating as soon as the
+        mission loads. This is the standard retail pattern and is typically used for ambient city NPCs
+        to add environmental detail.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>factory1.ucm</Bold>, Make Person Pee <Bold>443</Bold> targets Event Point
+        <Bold>442</Bold>. It uses trigger <Bold>None</Bold> with listening mode <Bold>Active</Bold>.
+        When the mission loads, the NPC at Event Point <Bold>442</Bold> performs the urination
+        animation once.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Create or identify the NPC Event Point. Add a <Bold>Make Person Pee</Bold> Event Point, set
+        <Bold>Waypoint</Bold> to the NPC's Event Point index, set <Bold>Triggered By</Bold> to
+        <Bold>None</Bold>, and use listening mode <Bold>Active</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Continuous Animation With Active While</Paragraph>
+    <Paragraph>
+        Use <Bold>Active While</Bold> instead of <Bold>Active</Bold> when the animation should
+        continuously repeat or loop. This is uncommon but observed in one retail mission.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>wstores1D.ucm</Bold>, Make Person Pee <Bold>49</Bold> targets Event Point
+        <Bold>341</Bold>. It uses trigger <Bold>None</Bold> with listening mode <Bold>Active
+        While</Bold>. The NPC at Event Point <Bold>341</Bold> continuously performs the urination
+        animation as long as the trigger condition is true (which is always, because the trigger is
+        None).
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Use <Bold>Active While</Bold> instead of <Bold>Active</Bold> when the animation should loop
+        or repeat. Test carefully to ensure the continuous animation does not interfere with other NPC
+        behaviour or mission logic.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Scripted Animation Trigger</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> with <Bold>Active</Bold> if the urination should happen at a
+        specific scripted moment rather than at mission start. This is not observed in retail but
+        would be a plausible pattern.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        A mission has an NPC who should urinate after the player triggers a specific conversation or
+        enters a specific area. The Make Person Pee Event Point uses <Bold>Dependency</Bold> on the
+        conversation-complete or area-entry Event Point, with listening mode <Bold>Active</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> and <Bold>EP Ref</Bold> to the Event
+        Point that should cause the animation. Use listening mode <Bold>Active</Bold> for a one-time
+        animation.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Radius-Triggered Animation</Paragraph>
+    <Paragraph>
+        Use <Bold>Radius</Bold> with <Bold>Active</Bold> if the urination should happen when the
+        player approaches the NPC. This is not observed in retail but would be a plausible pattern for
+        player-triggered ambient behaviour.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Hypothetical example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        An NPC should urinate when the player gets close. The Make Person Pee Event Point uses
+        <Bold>Radius</Bold> trigger with an appropriate radius value and listening mode
+        <Bold>Active</Bold>. When the player enters the radius, the NPC performs the animation once.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the Make Person Pee Event Point at the NPC's position. Set <Bold>Triggered By</Bold> to
+        <Bold>Radius</Bold>, set an appropriate radius value, and use listening mode <Bold>Active</Bold>
+        so the animation triggers once when the player approaches.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Make Person Pee Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Create or identify the NPC or person Event Point that should urinate.</Paragraph></ListItem>
+        <ListItem><Paragraph>Note that NPC's Event Point index number.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Make Person Pee</Bold> Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>Waypoint</Bold> to the NPC's Event Point index.</Paragraph></ListItem>
+        <ListItem><Paragraph>For mission-start animation, set <Bold>Triggered By</Bold> to <Bold>None</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>For scripted animation, set <Bold>Triggered By</Bold> to <Bold>Dependency</Bold> or <Bold>Radius</Bold> and configure the appropriate trigger parameters.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use listening mode <Bold>Active</Bold> for a one-time animation or <Bold>Active While</Bold> for continuous/looping animation.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the animation in-game and confirm it triggers at the intended moment and that the target NPC exists when the Event Point fires.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> The Waypoint points to a valid NPC or person Event Point, the trigger fires only at the intended moment, and the target NPC exists when the Make Person Pee Event Point fires.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>

@@ -1,0 +1,261 @@
+<FlowDocument xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              Foreground="#E0E0E0"
+              Background="#1E1F22"
+              FontFamily="Segoe UI"
+              FontSize="14"
+              PagePadding="32,24,32,24">
+
+    <Paragraph FontSize="28" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Sign Event Point
+    </Paragraph>
+    <Paragraph Foreground="#A0A0A0" FontSize="13" Margin="0,0,0,16">
+        Displays a directional driving sign, usually while a vehicle or tracked entity is inside a direction-aware trigger area.
+    </Paragraph>
+
+    <BlockUIContainer>
+        <Border Height="1" Background="#444" Margin="0,0,0,12"/>
+    </BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,4,0,4">
+        What Sign Event Points Do
+    </Paragraph>
+    <Paragraph>
+        A <Bold>Sign</Bold> Event Point controls an on-screen or world-guidance sign such as a
+        right turn, U-turn, ahead, or stop instruction. Existing mission usage strongly suggests
+        these are intended for driving or route guidance rather than general player-facing message
+        text.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        Sign Event Points are normally spatial and direction-aware. The sign appears while the
+        referenced thing is moving through, or near, the Event Point area. Use Message Event Points
+        for written instructions; use Sign when the player needs simple route signage.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A2F3A" BorderBrush="#4A5A7A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#AFC8FF">
+                <Run FontWeight="Bold">Practical meaning:</Run>
+                <Run> Use Sign for route cues such as turn, stop, or continue. Its position, radius, direction, and flip flags are what make the cue appear in the right place and orientation.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Common Properties
+    </Paragraph>
+    <Paragraph>
+        Sign uses the standard Event Point common properties: index number, Event Point type,
+        letter group, colour, position, facing direction, trigger settings, and listening mode.
+    </Paragraph>
+    <Paragraph Margin="0,6,0,0">
+        The index number and Event Point type are automatic. Letter group and colour are useful for
+        keeping route signs grouped with the vehicle, waypoint, objective, or driving sequence they
+        support.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Position
+    </Paragraph>
+    <Paragraph>
+        Position anchors the sign trigger in the world. Place the Sign Event Point where the route
+        cue should become relevant: before a corner, at a stopping point, or along the path where
+        the player or vehicle should receive the instruction.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Facing Direction
+    </Paragraph>
+    <Paragraph>
+        Facing direction matters when the trigger is direction-aware. For <Bold>Move Radius Dir</Bold>
+        style setups, test the approach direction carefully. A sign can appear correct from one
+        approach but not another if the direction does not match the route.
+    </Paragraph>
+
+    <Paragraph FontSize="18" FontWeight="SemiBold" Foreground="#9FE3A6" Margin="0,10,0,4">
+        Trigger Settings
+    </Paragraph>
+    <Paragraph>
+        Trigger settings decide when the sign appears. Existing route signs commonly use
+        <Bold>Move Radius Dir</Bold> with <Bold>Active While</Bold>, so the sign is only shown while
+        the relevant entity is in the correct directional radius. Dependency can be used when a sign
+        should be enabled by another Event Point.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Sign-Specific Settings
+    </Paragraph>
+    <Paragraph>
+        Sign has two type-specific settings. <Bold>Data[0]</Bold> stores the selected sign type.
+        <Bold>Data[1]</Bold> stores flip flags for the sign artwork.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Sign Type</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Sign Type chooses the instruction shown by the sign. The available types are:
+    </Paragraph>
+    <List MarkerStyle="Disc" Margin="40,2,0,0">
+        <ListItem><Paragraph><Bold>U-Turn</Bold> - tells the route to reverse direction.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Right Turn</Bold> - tells the route to turn right.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Ahead</Bold> - tells the route to continue forward.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Stop</Bold> - tells the route to stop or pause at the marked location.</Paragraph></ListItem>
+    </List>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Flip Left / Right</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Flip Left / Right mirrors the sign horizontally. This is commonly useful for turning signs
+        when the same artwork needs to point in the opposite route direction.
+    </Paragraph>
+
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Flip Top / Bottom</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Flip Top / Bottom mirrors the sign vertically. Use this only when the sign artwork needs
+        vertical inversion; most observed signs do not require it.
+    </Paragraph>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#2A3A2A" BorderBrush="#4A7A4A" BorderThickness="1" CornerRadius="4" Padding="12">
+            <TextBlock TextWrapping="Wrap" Foreground="#A0E0A0">
+                <Run FontWeight="Bold">Authoring tip:</Run>
+                <Run> Pick the sign instruction first, then use flip flags to make the artwork match the route. Do not change the trigger type just to fix a mirrored sign.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        How Missions Trigger Signs
+    </Paragraph>
+    <Paragraph>
+        Existing Sign usage is mostly tied to directional movement checks. Useful trigger patterns
+        are:
+    </Paragraph>
+
+    <List MarkerStyle="Disc" Margin="16,2,0,0">
+        <ListItem><Paragraph><Bold>Move Radius Dir</Bold> - shows the sign while the referenced moving thing is inside the directional radius.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Dependency</Bold> - enables a sign after another Event Point has fired.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Enemy Radius</Bold> - ties the sign to an enemy-related spatial condition.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active While</Bold> - keeps the sign visible only while the trigger condition remains true.</Paragraph></ListItem>
+        <ListItem><Paragraph><Bold>Active</Bold> - activates the sign from a dependency or one-shot condition.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Critical trigger detail:</Run>
+                <Run> Direction-aware signs must be tested from the actual route approach. If the sign appears late, early, or from the wrong direction, adjust position, radius, and facing direction before changing the sign type.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+    <BlockUIContainer><Border Height="1" Background="#666" Margin="0,18,0,14"/></BlockUIContainer>
+
+    <Paragraph FontSize="26" FontWeight="Bold" Foreground="#FFD700" Margin="0,0,0,4">
+        Common Sign Patterns
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Route Guidance Sign</Paragraph>
+    <Paragraph>
+        Use <Bold>Move Radius Dir</Bold> with <Bold>Active While</Bold> when the sign should show
+        only while the vehicle or moving target is approaching the route cue correctly.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive2.ucm</Bold>, Sign <Bold>121</Bold> is <Bold>Ahead</Bold> with
+        <Bold>Flip Left / Right</Bold>. It uses <Bold>Move Radius Dir</Bold>, references Event Point
+        <Bold>1</Bold>, has radius <Bold>992</Bold>, and uses <Bold>Active While</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Place the sign before the route instruction becomes important. Set the sign type, set
+        <Bold>Triggered By</Bold> to <Bold>Move Radius Dir</Bold>, reference the moving target or
+        route entity, and tune the radius and facing direction in-game.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Stop Or Turn Sequence</Paragraph>
+    <Paragraph>
+        A sequence can use multiple Sign Event Points along the route, each with its own sign type,
+        position, and radius. This gives the player a simple chain of visual driving instructions.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive3.ucm</Bold>, Signs <Bold>303-305</Bold> create a short route sequence:
+        <Bold>U-Turn</Bold>, <Bold>Stop</Bold>, and <Bold>Right Turn</Bold>. Each uses
+        <Bold>Move Radius Dir</Bold>, references Event Point <Bold>1</Bold>, and uses
+        <Bold>Active While</Bold>.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">How to author it</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        Add one Sign Event Point per route instruction. Keep them in the same colour and letter
+        group, use consistent EP Ref settings, then tune each radius so signs hand off cleanly as
+        the vehicle moves through the course.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Mirrored Turn Sign</Paragraph>
+    <Paragraph>
+        Use <Bold>Flip Left / Right</Bold> when the same sign artwork needs to point the opposite
+        way. This is especially useful for route signage where a right-turn asset may be mirrored to
+        fit the road layout.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive3.ucm</Bold>, Sign <Bold>302</Bold> is
+        <Bold>Right Turn</Bold> with <Bold>Flip Left / Right</Bold>. It uses
+        <Bold>Move Radius Dir</Bold>, radius <Bold>672</Bold>, and <Bold>Active While</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Dependency-Enabled Sign</Paragraph>
+    <Paragraph>
+        Use <Bold>Dependency</Bold> when a sign should appear only after another mission condition
+        has completed. This can be used to reveal route guidance after a prior step, checkpoint, or
+        scripted state change.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive2.ucm</Bold>, Sign <Bold>120</Bold> is <Bold>Right Turn</Bold> and uses
+        <Bold>Dependency</Bold> on Event Point <Bold>119</Bold> with <Bold>Active While</Bold>.
+    </Paragraph>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,12,0,4">Enemy Radius Sign</Paragraph>
+    <Paragraph>
+        Use <Bold>Enemy Radius</Bold> only when the sign should be tied to an enemy-related spatial
+        condition. This is unusual for signs, so test it carefully.
+    </Paragraph>
+    <Paragraph FontWeight="SemiBold" Foreground="#E8B84B" Margin="8,8,0,1">Observed example</Paragraph>
+    <Paragraph Margin="24,0,0,0">
+        In <Bold>testdrive3.ucm</Bold>, Sign <Bold>247</Bold> is <Bold>Right Turn</Bold> and uses
+        <Bold>Enemy Radius</Bold>, referencing Event Point <Bold>1</Bold> with radius
+        <Bold>1920</Bold>.
+    </Paragraph>
+
+    <BlockUIContainer><Border Height="1" Background="#444" Margin="0,14,0,12"/></BlockUIContainer>
+
+    <Paragraph FontSize="22" FontWeight="SemiBold" Foreground="#7AD7FF" Margin="0,0,0,4">
+        Basic Sign Workflow
+    </Paragraph>
+    <List MarkerStyle="Decimal" Margin="16,2,0,0">
+        <ListItem><Paragraph>Decide which route instruction is needed: U-Turn, Right Turn, Ahead, or Stop.</Paragraph></ListItem>
+        <ListItem><Paragraph>Add a <Bold>Sign</Bold> Event Point at the location where the cue should appear.</Paragraph></ListItem>
+        <ListItem><Paragraph>Choose the <Bold>Sign Type</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Apply <Bold>Flip Left / Right</Bold> or <Bold>Flip Top / Bottom</Bold> only if the artwork orientation needs it.</Paragraph></ListItem>
+        <ListItem><Paragraph>For driving guidance, set <Bold>Triggered By</Bold> to <Bold>Move Radius Dir</Bold>.</Paragraph></ListItem>
+        <ListItem><Paragraph>Set <Bold>EP Ref</Bold> to the moving target, vehicle route entity, or controlling Event Point.</Paragraph></ListItem>
+        <ListItem><Paragraph>Use <Bold>Active While</Bold> when the sign should appear only while the target is inside the trigger area.</Paragraph></ListItem>
+        <ListItem><Paragraph>Test the route from the intended approach direction and tune position, radius, and facing direction.</Paragraph></ListItem>
+    </List>
+
+    <BlockUIContainer Margin="0,8,0,8">
+        <Border Background="#4A2424" BorderBrush="#C45A5A" BorderThickness="2" CornerRadius="4" Padding="14">
+            <TextBlock TextWrapping="Wrap" Foreground="#FFD0D0" FontSize="15">
+                <Run FontWeight="Bold">Final checklist:</Run>
+                <Run> Sign Type matches the route instruction, flip flags make the artwork face correctly, EP Ref points at the intended target, and the trigger radius/facing direction work from the real driving approach.</Run>
+            </TextBlock>
+        </Border>
+    </BlockUIContainer>
+
+</FlowDocument>
