@@ -6,10 +6,13 @@
         Background="#101014"
         WindowStartupLocation="CenterOwner"
         Focusable="True"
+        KeyboardNavigation.DirectionalNavigation="None"
+        KeyboardNavigation.TabNavigation="None"
         Loaded="Window_Loaded"
         Closed="Window_Closed"
-        KeyDown="Window_KeyDown"
-        KeyUp="Window_KeyUp">
+        Deactivated="Window_Deactivated"
+        PreviewKeyDown="Window_KeyDown"
+        PreviewKeyUp="Window_KeyUp">
     <Grid>
         <Viewport3D x:Name="Viewport"
                     Focusable="True"
@@ -129,6 +132,7 @@
                         IsSnapToTickEnabled="False"
                         Width="160"
                         Margin="0,2,0,2"
+                        Focusable="False"
                         ValueChanged="SldViewDistance_Changed"/>
             </StackPanel>
         </Border>

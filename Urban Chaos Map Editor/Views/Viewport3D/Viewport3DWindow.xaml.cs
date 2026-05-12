@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using UrbanChaosEditor.Shared.Constants;
+using UrbanChaosEditor.Shared.Services.Textures;
 using UrbanChaosMapEditor.Models.Viewport3D;
 using UrbanChaosMapEditor.Services.Buildings;
 using UrbanChaosMapEditor.Services.Core;
@@ -606,11 +607,15 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         private void RebuildSkybox()
         {
             // Pull the active world / variant from the same source SceneBuilder uses.
+            // Reflection (no type check) so it works against any host VM that happens to
+            // expose Map.TextureWorld / Map.UseBetaTextures — the Map Editor's shell does,
+            // the Light/Mission Editors don't, which is why we need the fallback below.
             int world = 0;
             string? variant = null;
             try
             {
-                if (Application.Current?.MainWindow?.DataContext is MainWindowViewModel shell)
+                var shell = Application.Current?.MainWindow?.DataContext;
+                if (shell is not null)
                 {
                     var mapProp = shell.GetType().GetProperty("Map");
                     var map = mapProp?.GetValue(shell);
@@ -624,6 +629,25 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
                 }
             }
             catch { }
+
+            // Fallback for editors whose shell VM doesn't expose Map.TextureWorld
+            // (Mission Editor, Light Editor): read world directly from the map bytes
+            // and the variant from the texture cache's active set. Matches the pattern
+            // used in SceneBuilder.BuildFacets / BuildRoofTiles.
+            if (world <= 0 && MapDataService.Instance.IsLoaded)
+            {
+                try
+                {
+                    world = new TexturesAccessor(MapDataService.Instance).ReadTextureWorld();
+                    variant = TextureCacheService.Instance.ActiveSet.Equals("beta", StringComparison.OrdinalIgnoreCase)
+                        ? "Beta"
+                        : "Release";
+                }
+                catch
+                {
+                    world = 0;
+                }
+            }
 
             if (world <= 0)
             {
@@ -841,6 +865,12 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e) => _held.Remove(e.Key);
+
+        // If the window loses activation while a key is held (alt-tab, click another window),
+        // the matching KeyUp won't reach us — clear so the camera doesn't keep turning.
+        // NB: don't use LostKeyboardFocus here; it bubbles up from descendants too, so it
+        // would wipe _held the moment focus drifted between any two child controls.
+        private void Window_Deactivated(object? sender, EventArgs e) => _held.Clear();
 
         private void Viewport_MouseDown(object sender, MouseButtonEventArgs e)
         {
