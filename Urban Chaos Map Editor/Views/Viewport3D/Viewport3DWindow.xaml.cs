@@ -80,14 +80,18 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         private readonly ModelVisual3D _cablesVisual = new();
         private readonly ModelVisual3D _primsVisual = new();
         private readonly ModelVisual3D _roofTilesVisual = new();
+        private readonly ModelVisual3D _skyboxVisual = new();
+        private readonly TranslateTransform3D _skyboxTransform = new(0, 0, 0);
         private readonly List<Viewport3DOverlayLayer> _overlayLayers = new();
 
         private SceneBuilder? _builder;
         private DateTime _lastTick;
         private readonly DispatcherTimer _cullRefreshTimer;
         private ViewportCullRegion? _lastBuiltCull;
-        private readonly double? _cullDistance;
-        private readonly double? _cullMargin;
+        private double? _cullDistance;
+        private double? _cullMargin;
+        private Slider? _viewDistanceSlider;
+        private TextBlock? _viewDistanceLabel;
 
         private object? _mapVmObject;
         private INotifyPropertyChanged? _mapVmNotify;
@@ -107,16 +111,29 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
         {
             InitializeComponent();
 
-            _cullDistance = cullDistance;
-            _cullMargin = cullMargin;
-            if (_cullDistance.HasValue)
-                Camera.FarPlaneDistance = Math.Max(256.0, _cullDistance.Value + (_cullMargin ?? CameraConstants.ViewportCullMargin) * 2.0);
+            _cullDistance = cullDistance ?? CameraConstants.ViewportCullDistance;
+            _cullMargin = cullMargin ?? CameraConstants.ViewportCullMargin;
+            ApplyFarPlaneFromCull();
+
+            // Seed the slider with the active cull distance so the UI matches the actual state.
+            SldViewDistance.Value = Math.Clamp(_cullDistance.Value, SldViewDistance.Minimum, SldViewDistance.Maximum);
+            UpdateViewDistanceLabel();
+
+            // Skybox spans ±SkyboxRadius from camera; corners are at radius*sqrt(3) away.
+            // Ensure the far plane includes them.
+            double minFarForSky = SkyboxBuilder.SkyboxRadius * Math.Sqrt(3.0) + 256.0;
+            if (Camera.FarPlaneDistance < minFarForSky)
+                Camera.FarPlaneDistance = minFarForSky;
 
             _cullRefreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(CameraConstants.ViewportCullRefreshMilliseconds)
             };
             _cullRefreshTimer.Tick += OnCullRefreshTimerTick;
+
+            // Skybox is added first so opaque scene geometry overdraws it where present.
+            _skyboxVisual.Transform = _skyboxTransform;
+            SceneRoot.Children.Add(_skyboxVisual);
 
             SceneRoot.Children.Add(_terrainVisual);
             SceneRoot.Children.Add(_facetsVisual);
@@ -233,6 +250,24 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             _builder = new SceneBuilder();
 
+            // Warn the user if PRIM directories aren't configured. Prims will
+            // render as green sphere placeholders until they're set in the
+            // Prim Editor (Settings are shared between the two apps).
+            var primSvc = PrimModelService.Instance;
+            if (string.IsNullOrWhiteSpace(primSvc.PrimDirectory) || !System.IO.Directory.Exists(primSvc.PrimDirectory))
+            {
+                MessageBox.Show(this,
+                    "The PRIM directory is not configured.\n\n" +
+                    "To render prims as their actual 3D models (instead of green sphere placeholders), " +
+                    "open the Prim Editor and set:\n\n" +
+                    "  File → Open Directory…  (your PRIM files, e.g. server\\prims)\n" +
+                    "  File → Set Texture Directory…  (your prim textures, e.g. Tex###hi.tga)\n\n" +
+                    "These settings are shared between the Prim Editor and the Map Editor.",
+                    "PRIM Directory Not Set",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+
             HookMapVm();
             SyncLayerButtonsFromSource();
 
@@ -253,6 +288,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             BuildingsChangeBus.Instance.Changed += OnFacetsChanged;
             RoofsChangeBus.Instance.Changed += OnRoofTilesChanged;
+            RoofTexturesChangeBus.Instance.Changed += OnRoofTilesChanged;
 
             ObjectsChangeBus.Instance.Changed += OnPrimsChanged;
 
@@ -287,6 +323,7 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
 
             BuildingsChangeBus.Instance.Changed -= OnFacetsChanged;
             RoofsChangeBus.Instance.Changed -= OnRoofTilesChanged;
+            RoofTexturesChangeBus.Instance.Changed -= OnRoofTilesChanged;
 
             ObjectsChangeBus.Instance.Changed -= OnPrimsChanged;
 
@@ -492,6 +529,43 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             RebuildAll();
         }
 
+        private void ApplyFarPlaneFromCull()
+        {
+            double cull = _cullDistance ?? CameraConstants.ViewportCullDistance;
+            double margin = _cullMargin ?? CameraConstants.ViewportCullMargin;
+            double far = Math.Max(256.0, cull + margin * 2.0);
+
+            // Skybox corners are at radius*sqrt(3) — never clip them.
+            double minFarForSky = SkyboxBuilder.SkyboxRadius * Math.Sqrt(3.0) + 256.0;
+            Camera.FarPlaneDistance = Math.Max(far, minFarForSky);
+        }
+
+        private void UpdateViewDistanceLabel()
+        {
+            if (LblViewDistance != null)
+                LblViewDistance.Text = $"View Distance: {(int)(_cullDistance ?? CameraConstants.ViewportCullDistance)}";
+        }
+
+        private void SldViewDistance_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // ValueChanged can fire during InitializeComponent (before the constructor
+            // wires up the timer and builder). Bail out until the window is fully set up.
+            if (_cullRefreshTimer is null)
+                return;
+
+            _cullDistance = e.NewValue;
+            // Scale margin to roughly 1/12 of view distance — keeps the soft buffer
+            // proportional so the boundary feels equally soft across the slider range.
+            _cullMargin = Math.Max(96.0, e.NewValue / 12.0);
+            ApplyFarPlaneFromCull();
+            UpdateViewDistanceLabel();
+
+            // Trigger a rebuild now (slider changes don't move the camera signature bucket).
+            _lastBuiltCull = null;
+            if (!_cullRefreshTimer.IsEnabled)
+                _cullRefreshTimer.Start();
+        }
+
         private void OnMapClearedHandler(object? sender, EventArgs e)
         {
             _terrainVisual.Content = null;
@@ -517,12 +591,55 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             var cull = CreateCullRegion();
             _lastBuiltCull = cull;
 
+            RebuildSkybox();
             RebuildTerrain(cull);
             RebuildFacets(cull);
             RebuildCables(cull);
             RebuildPrims(cull);
             RebuildRoofTiles(cull);
             RebuildOverlayLayers(cull);
+        }
+
+        private int _lastSkyboxWorld = -1;
+        private string? _lastSkyboxVariant;
+
+        private void RebuildSkybox()
+        {
+            // Pull the active world / variant from the same source SceneBuilder uses.
+            int world = 0;
+            string? variant = null;
+            try
+            {
+                if (Application.Current?.MainWindow?.DataContext is MainWindowViewModel shell)
+                {
+                    var mapProp = shell.GetType().GetProperty("Map");
+                    var map = mapProp?.GetValue(shell);
+                    if (map != null)
+                    {
+                        var t = map.GetType();
+                        if (t.GetProperty("TextureWorld")?.GetValue(map) is int w) world = w;
+                        if (t.GetProperty("UseBetaTextures")?.GetValue(map) is bool useBeta)
+                            variant = useBeta ? "Beta" : "Release";
+                    }
+                }
+            }
+            catch { }
+
+            if (world <= 0)
+            {
+                _skyboxVisual.Content = null;
+                _lastSkyboxWorld = -1;
+                _lastSkyboxVariant = null;
+                return;
+            }
+
+            if (world == _lastSkyboxWorld && string.Equals(variant, _lastSkyboxVariant, StringComparison.Ordinal))
+                return; // already built for this world+variant
+
+            var bmp = SkyboxBuilder.ResolveSkyBitmap(world, variant);
+            _skyboxVisual.Content = SkyboxBuilder.Build(bmp);
+            _lastSkyboxWorld = world;
+            _lastSkyboxVariant = variant;
         }
 
         private void RebuildOverlayLayers(ViewportCullRegion cull)
@@ -702,6 +819,12 @@ namespace UrbanChaosMapEditor.Views.Viewport3D
             Camera.Position = new Point3D(cam.X, cam.Y, cam.Z);
             Camera.LookDirection = cam.Forward;
             Camera.UpDirection = new Vector3D(0, 1, 0);
+
+            // Keep the skybox centred on the camera so the camera can never reach its edge.
+            _skyboxTransform.OffsetX = cam.X;
+            _skyboxTransform.OffsetY = cam.Y;
+            _skyboxTransform.OffsetZ = cam.Z;
+
             UpdateHud(cam);
         }
 

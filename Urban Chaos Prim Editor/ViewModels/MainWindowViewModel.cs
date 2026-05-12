@@ -155,7 +155,14 @@ namespace UrbanChaosPrimEditor.ViewModels
                 RaisePropertyChanged(nameof(SelectedTexturePixelWidth));
                 RaisePropertyChanged(nameof(SelectedTexturePixelHeight));
                 if (!_suppressTextureEditorSync)
+                {
+                    // Reset selection to the full texture, then preview. The TextureSelection
+                    // setter only fires the preview when the rect changes, so we always invoke
+                    // it explicitly here — otherwise back-to-back texture clicks (where the rect
+                    // is already (0,0,1,1)) would leave the 3D preview stuck on the first pick.
                     TextureSelection = new Rect(0, 0, 1, 1);
+                    PreviewTextureOnSelectedFace();
+                }
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -852,6 +859,12 @@ namespace UrbanChaosPrimEditor.ViewModels
             }
             else
             {
+                // TextureTile fields U0..U3 are the texture's corners going clockwise
+                // (TL, TR, BR, BL). The PRM quad's geometric perimeter is A→B→D→C, so
+                // the diagonal opposite A is D (not C). Map accordingly:
+                //   A → TL (U0,V0)   B → TR (U1,V1)   D → BR (U2,V2)   C → BL (U3,V3)
+                // Mapping C/D the other way around produces the sheared / parallelogram
+                // artifact because the geometric A-D diagonal then runs TL→BL in UV space.
                 PrmQuadrangle quad = _currentModel.Quadrangles[face.Index];
                 _currentModel.Quadrangles[face.Index] = quad with
                 {
@@ -860,10 +873,10 @@ namespace UrbanChaosPrimEditor.ViewModels
                     VA = tile.V0,
                     UB = tile.U1,
                     VB = tile.V1,
-                    UC = tile.U2,
-                    VC = tile.V2,
-                    UD = tile.U3,
-                    VD = tile.V3
+                    UC = tile.U3,
+                    VC = tile.V3,
+                    UD = tile.U2,
+                    VD = tile.V2
                 };
             }
         }

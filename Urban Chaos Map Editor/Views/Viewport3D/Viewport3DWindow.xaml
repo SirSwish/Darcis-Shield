@@ -113,6 +113,23 @@
                           Margin="0,2,0,2"
                           Checked="LayerToggle_Changed"
                           Unchecked="LayerToggle_Changed"/>
+
+                <Separator Margin="0,8,0,4"/>
+
+                <TextBlock x:Name="LblViewDistance"
+                           Text="View Distance: 3072"
+                           Foreground="White"
+                           FontSize="11"
+                           Margin="0,2,0,2"/>
+                <Slider x:Name="SldViewDistance"
+                        Minimum="1024"
+                        Maximum="16384"
+                        Value="3072"
+                        TickFrequency="1024"
+                        IsSnapToTickEnabled="False"
+                        Width="160"
+                        Margin="0,2,0,2"
+                        ValueChanged="SldViewDistance_Changed"/>
             </StackPanel>
         </Border>
     </Grid>

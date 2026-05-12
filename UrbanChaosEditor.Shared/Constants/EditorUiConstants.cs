@@ -56,6 +56,9 @@ public static class Scene3DConstants
     public const double CylinderRadius = 18.0;
     public const int CylinderStacks = 8;
     public const int CylinderSlices = 10;
+
+    /// <summary>Uniform scale applied to PRIM 3D models when placed on the map.</summary>
+    public const double PrimModelScale = 0.25;
 }
 
 /// <summary>

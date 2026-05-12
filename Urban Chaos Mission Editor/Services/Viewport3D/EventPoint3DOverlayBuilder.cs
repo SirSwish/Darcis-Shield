@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using UrbanChaosMissionEditor.ViewModels;
 using UrbanChaosMapEditor.Services.Viewport3D;
@@ -12,7 +14,7 @@ public static class EventPoint3DOverlayBuilder
     private const double EngineToViewY = 0.25;
     private const int MaxLabels = 80;
     private const int RingSegments = 32;
-    private const double MarkerRadius = 10.0;
+    private const double MarkerRadius = 22.0;
 
     private readonly record struct EventPointCandidate(
         int Index,
@@ -26,6 +28,40 @@ public static class EventPoint3DOverlayBuilder
     public static Model3DGroup Build(IEnumerable<EventPointViewModel> eventPoints, ViewportCullRegion? cull = null)
     {
         var group = new Model3DGroup();
+        var candidates = CollectCandidates(eventPoints, cull);
+        AddMergedSpheres(group, candidates);
+        AddMergedRings(group, candidates);
+        return group;
+    }
+
+    /// <summary>
+    /// Build billboard index labels for each EP. Labels are staggered vertically
+    /// (3 height tiers by index % 3) so consecutive / clustered EPs don't stack
+    /// their labels on top of each other.
+    /// </summary>
+    public static Model3DGroup BuildLabels(IEnumerable<EventPointViewModel> eventPoints, ViewportCullRegion? cull = null)
+    {
+        var group = new Model3DGroup();
+        var candidates = CollectCandidates(eventPoints, cull);
+
+        // Tier offsets — chosen so labels don't overlap their own sphere either.
+        // The sphere top sits at Y + 10 + MarkerRadius; add a base gap of 6 then stagger.
+        double baseY = 10.0 + MarkerRadius + 6.0;
+        double[] tierOffsets = { 0.0, 18.0, 36.0 };
+
+        foreach (var ep in candidates.OrderBy(ep => ep.DistanceSq).Take(MaxLabels))
+        {
+            double tier = tierOffsets[Math.Abs(ep.Index) % tierOffsets.Length];
+            AddOutlinedLabel(group, ep.Index.ToString(CultureInfo.InvariantCulture),
+                ep.X, ep.Y + baseY + tier, ep.Z);
+        }
+
+        return group;
+    }
+
+    private static List<EventPointCandidate> CollectCandidates(
+        IEnumerable<EventPointViewModel> eventPoints, ViewportCullRegion? cull)
+    {
         var candidates = new List<EventPointCandidate>();
 
         foreach (var ep in eventPoints)
@@ -59,13 +95,7 @@ public static class EventPoint3DOverlayBuilder
                 cull?.DistanceSquaredToPoint(x, z) ?? 0.0));
         }
 
-        AddMergedSpheres(group, candidates);
-        AddMergedRings(group, candidates);
-
-        foreach (var ep in candidates.OrderBy(ep => ep.DistanceSq).Take(MaxLabels))
-            AddLabel(group, $"EP {ep.Index}", ep.X, ep.Y + 34.0, ep.Z);
-
-        return group;
+        return candidates;
     }
 
     private static void AddMergedSpheres(Model3DGroup group, IReadOnlyList<EventPointCandidate> candidates)
@@ -147,71 +177,92 @@ public static class EventPoint3DOverlayBuilder
         mesh.TriangleIndices.Add(baseIdx + 3);
     }
 
-    private static void AddLabel(Model3DGroup group, string text, double x, double y, double z)
+    /// <summary>
+    /// Emit a billboard quad above the sphere with the EP index rendered as white
+    /// glyphs with a black outline — no opaque background, so the outline is the
+    /// only thing separating the digits from the scene behind.
+    /// </summary>
+    private static void AddOutlinedLabel(Model3DGroup group, string text, double x, double y, double z)
     {
-        const double width = 72.0;
-        const double height = 26.0;
+        // Build the text geometry once, oriented in 2D, then place into the world quad.
+        var typeface = new Typeface(
+            new FontFamily("Segoe UI"),
+            FontStyles.Normal,
+            FontWeights.Bold,
+            FontStretches.Normal);
+
+        const double emSize = 28.0;
+        var formatted = new FormattedText(
+            text,
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            emSize,
+            Brushes.White,
+            1.0);
+
+        // Rasterise into a fixed-size bitmap. We size the bitmap to the actual text
+        // bounds so the brush isn't stretched (which would soften the outline).
+        double pad = 6.0;
+        int bmpW = (int)Math.Ceiling(formatted.Width + pad * 2);
+        int bmpH = (int)Math.Ceiling(formatted.Height + pad * 2);
+
+        var dv = new DrawingVisual();
+        using (var dc = dv.RenderOpen())
+        {
+            var geom = formatted.BuildGeometry(new Point(pad, pad));
+            var pen = new Pen(Brushes.Black, 1.0) { LineJoin = PenLineJoin.Round };
+            pen.Freeze();
+            dc.DrawGeometry(Brushes.White, pen, geom);
+        }
+
+        var rtb = new RenderTargetBitmap(bmpW, bmpH, 96, 96, PixelFormats.Pbgra32);
+        rtb.Render(dv);
+        rtb.Freeze();
+
+        var brush = new ImageBrush(rtb) { Stretch = Stretch.Fill, TileMode = TileMode.None };
+        brush.Freeze();
+        var diffuse = new DiffuseMaterial(brush);
+        var emissive = new EmissiveMaterial(brush);
+        var matGroup = new MaterialGroup();
+        matGroup.Children.Add(diffuse);
+        matGroup.Children.Add(emissive);
+        matGroup.Freeze();
+
+        // World-space quad sized proportionally to the bitmap so glyph aspect is preserved.
+        // 0.55 view-units per pixel ≈ readable from 200+ units away without dominating.
+        double scale = 0.55;
+        double width = bmpW * scale;
+        double height = bmpH * scale;
         const double quadZ = -2.0;
 
-        var label = new TextBlock
-        {
-            Text = text,
-            Width = 128,
-            Height = 48,
-            FontFamily = new FontFamily("Segoe UI"),
-            FontWeight = FontWeights.Bold,
-            FontSize = 22,
-            TextAlignment = TextAlignment.Center,
-            Foreground = Brushes.White,
-            Background = new SolidColorBrush(Color.FromArgb(220, 20, 20, 24)),
-            Padding = new Thickness(4)
-        };
-        label.Measure(new Size(label.Width, label.Height));
-        label.Arrange(new Rect(0, 0, label.Width, label.Height));
-
-        var material = new DiffuseMaterial(new VisualBrush(label) { Stretch = Stretch.Fill });
         var mesh = new MeshGeometry3D();
-
-        // Front-facing quad: visible from +Z, text reads left-to-right.
-        int frontBase = mesh.Positions.Count;
+        // Front-facing quad (visible from +Z): the text reads left-to-right.
         mesh.Positions.Add(new Point3D(x - width / 2, y - height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x + width / 2, y - height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x + width / 2, y + height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x - width / 2, y + height / 2, z + quadZ));
-
         mesh.TextureCoordinates.Add(new Point(0, 1));
         mesh.TextureCoordinates.Add(new Point(1, 1));
         mesh.TextureCoordinates.Add(new Point(1, 0));
         mesh.TextureCoordinates.Add(new Point(0, 0));
+        mesh.TriangleIndices.Add(0); mesh.TriangleIndices.Add(1); mesh.TriangleIndices.Add(2);
+        mesh.TriangleIndices.Add(0); mesh.TriangleIndices.Add(2); mesh.TriangleIndices.Add(3);
 
-        mesh.TriangleIndices.Add(frontBase + 0);
-        mesh.TriangleIndices.Add(frontBase + 1);
-        mesh.TriangleIndices.Add(frontBase + 2);
-        mesh.TriangleIndices.Add(frontBase + 0);
-        mesh.TriangleIndices.Add(frontBase + 2);
-        mesh.TriangleIndices.Add(frontBase + 3);
-
-        // Back-facing quad: reversed winding makes -Z the visible side, and the U
-        // coordinate is mirrored so the text still reads left-to-right.
-        int backBase = mesh.Positions.Count;
+        // Back-facing quad (visible from -Z): reversed winding, U mirrored so it still reads correctly.
         mesh.Positions.Add(new Point3D(x - width / 2, y - height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x + width / 2, y - height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x + width / 2, y + height / 2, z + quadZ));
         mesh.Positions.Add(new Point3D(x - width / 2, y + height / 2, z + quadZ));
-
         mesh.TextureCoordinates.Add(new Point(1, 1));
         mesh.TextureCoordinates.Add(new Point(0, 1));
         mesh.TextureCoordinates.Add(new Point(0, 0));
         mesh.TextureCoordinates.Add(new Point(1, 0));
+        mesh.TriangleIndices.Add(4); mesh.TriangleIndices.Add(6); mesh.TriangleIndices.Add(5);
+        mesh.TriangleIndices.Add(4); mesh.TriangleIndices.Add(7); mesh.TriangleIndices.Add(6);
+        mesh.Freeze();
 
-        mesh.TriangleIndices.Add(backBase + 0);
-        mesh.TriangleIndices.Add(backBase + 2);
-        mesh.TriangleIndices.Add(backBase + 1);
-        mesh.TriangleIndices.Add(backBase + 0);
-        mesh.TriangleIndices.Add(backBase + 3);
-        mesh.TriangleIndices.Add(backBase + 2);
-
-        group.Children.Add(new GeometryModel3D(mesh, material));
+        group.Children.Add(new GeometryModel3D(mesh, matGroup));
     }
 
     private static void AppendSphere(MeshGeometry3D mesh, double cx, double cy, double cz, double r, int stacks, int slices)

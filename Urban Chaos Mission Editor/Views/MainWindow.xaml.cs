@@ -31,6 +31,7 @@ public partial class MainWindow : Window
 
     private Viewport3DWindow? _viewport3DWindow;
     private ModelVisual3D? _eventPointOverlayVisual;
+    private ModelVisual3D? _eventPointLabelVisual;
     private ModelVisual3D? _lightOverlayVisual;
     private GridLength _lastLeftPanelWidth = new(280);
     private GridLength _lastRightPanelWidth = new(420);
@@ -313,6 +314,7 @@ public partial class MainWindow : Window
             return;
 
         _eventPointOverlayVisual = new ModelVisual3D();
+        _eventPointLabelVisual = new ModelVisual3D();
         _lightOverlayVisual = new ModelVisual3D
         {
         };
@@ -324,7 +326,8 @@ public partial class MainWindow : Window
         _viewport3DWindow = new Viewport3DWindow(new[]
         {
             new Viewport3DOverlayLayer("Lights", _lightOverlayVisual, cull => MissionLight3DOverlayBuilder.Build(cull)),
-            new Viewport3DOverlayLayer("Event Points", _eventPointOverlayVisual, cull => EventPoint3DOverlayBuilder.Build(vm.EventPoints, cull))
+            new Viewport3DOverlayLayer("Event Points", _eventPointOverlayVisual, cull => EventPoint3DOverlayBuilder.Build(vm.EventPoints, cull)),
+            new Viewport3DOverlayLayer("EP Labels", _eventPointLabelVisual, cull => EventPoint3DOverlayBuilder.BuildLabels(vm.EventPoints, cull))
         },
         cullDistance: 1024.0,
         cullMargin: 128.0)
@@ -336,6 +339,7 @@ public partial class MainWindow : Window
             ReadOnlyLightsDataService.Instance.LightsCleared -= On3DLightsChanged;
             _viewport3DWindow = null;
             _eventPointOverlayVisual = null;
+            _eventPointLabelVisual = null;
             _lightOverlayVisual = null;
         };
         _viewport3DWindow.Show();

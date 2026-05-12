@@ -16,6 +16,7 @@ using UrbanChaosMapEditor.Services.Roofs;
 using UrbanChaosMapEditor.Services.Styles;
 using UrbanChaosMapEditor.Services.Textures;
 using UrbanChaosEditor.Shared.Constants;
+using Prims = UrbanChaosMapEditor.Services.Prims;
 
 namespace UrbanChaosMapEditor.Services.Viewport3D
 {
@@ -50,6 +51,31 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
         // Cached procedural ladder tile (generated once, shared across all ladder facets).
         private static BitmapSource? _ladderTile;
+
+        // Prims excluded from the 3D viewer's snap-to-ground — they stay at the
+        // height stored in the .iam file. Includes wall-mounted canopies and other
+        // prims whose authored Y is already correct.
+        private static readonly HashSet<int> SnapToGroundExcludedPrimNumbers = new()
+        {
+            19,  // Green Canopy 1
+            20,  // Damaged Green Canopy 1
+            21,  // Green Canopy 2
+            22,  // Damaged Green Canopy 2
+            24,  // Damaged Green Canopy 3
+            123, // Brown Canopy
+            124, // Colored Lights
+            209, // Blue Canopy
+            210, // Double Blue Canopy
+            211, // Corner Blue Canopy
+            241, // Brown Yellow Canopy
+        };
+
+        // Subset of the above that also receive a +304 engine-Y visual lift (the
+        // wall canopies sit low in the file but render attached to upper walls).
+        private static readonly HashSet<int> WallCanopyLiftPrimNumbers = new()
+        {
+            19, 20, 21, 22, 24, 123, 209, 210, 211, 241,
+        };
 
         public SceneBuilder()
         {
@@ -440,12 +466,18 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
 
                     default:
                         {
+                            // Grounded fence: no OnBuilding flag → base follows terrain curvature
+                            // along the entire length, not just linearly between Y0/Y1 endpoints.
+                            bool groundConform = IsFenceFacetType(f.Type)
+                                && (f.Flags & FacetFlags.OnBuilding) == 0;
+
                             bool textured = false;
                             if (canTexture)
                             {
                                 textured = TryAddTexturedWall(
                                     f, snap, x0, z0, y0, x1, z1, y1, vertical,
-                                    worldNum, variant!, texBuckets, texMaterials);
+                                    worldNum, variant!, texBuckets, texMaterials,
+                                    groundConform);
                             }
                             if (!textured)
                             {
@@ -454,7 +486,10 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                                     mesh = new MeshGeometry3D();
                                     flatMeshes[f.Type] = mesh;
                                 }
-                                AddWallQuad(mesh, x0, z0, y0, x1, z1, y1, vertical);
+                                if (groundConform)
+                                    AddGroundConformedFenceFallback(mesh, f, x0, z0, x1, z1, vertical);
+                                else
+                                    AddWallQuad(mesh, x0, z0, y0, x1, z1, y1, vertical);
                             }
                             break;
                         }
@@ -647,7 +682,8 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             double verticalExtent,
             int worldNumber, string variant,
             Dictionary<string, MeshGeometry3D> texBuckets,
-            Dictionary<string, Material> texMaterials)
+            Dictionary<string, Material> texMaterials,
+            bool groundConform = false)
         {
             if (snap.Styles == null || snap.Styles.Length == 0) return false;
 
@@ -715,8 +751,17 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     double xB = x0 + (x1 - x0) * tB;
                     double zA = z0 + (z1 - z0) * tA;
                     double zB = z0 + (z1 - z0) * tB;
-                    double yBaseA = yBase0 + (yBase1 - yBase0) * tA;
-                    double yBaseB = yBase0 + (yBase1 - yBase0) * tB;
+                    double yBaseA, yBaseB;
+                    if (groundConform)
+                    {
+                        yBaseA = SampleTerrainY(xA, zA);
+                        yBaseB = SampleTerrainY(xB, zB);
+                    }
+                    else
+                    {
+                        yBaseA = yBase0 + (yBase1 - yBase0) * tA;
+                        yBaseB = yBase0 + (yBase1 - yBase0) * tB;
+                    }
 
                     // Only special-case shortened block heights.
                     // Normal/full-height facets keep the original UV logic.
@@ -908,6 +953,66 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             catch { return false; }
         }
 
+        // Bilinear terrain sample at an arbitrary world (x, z) point. Used to drape
+        // grounded fences over the heightmap so their base follows the terrain curve
+        // instead of linearly interpolating between stored endpoint Ys.
+        private double SampleTerrainY(double worldX, double worldZ)
+        {
+            int N = MapConstants.TilesPerSide;
+            int tile = MapConstants.TileSize;
+
+            double fx = worldX / tile;
+            double fz = worldZ / tile;
+            int cx = (int)Math.Floor(fx);
+            int cz = (int)Math.Floor(fz);
+            double u = fx - cx;
+            double v = fz - cz;
+
+            double y00 = ReadCornerY(cx,     cz,     N);
+            double y10 = ReadCornerY(cx + 1, cz,     N);
+            double y01 = ReadCornerY(cx,     cz + 1, N);
+            double y11 = ReadCornerY(cx + 1, cz + 1, N);
+
+            double a = y00 * (1.0 - u) + y10 * u;
+            double b = y01 * (1.0 - u) + y11 * u;
+            return a * (1.0 - v) + b * v;
+        }
+
+        private double ReadCornerY(int cx, int cz, int N)
+        {
+            int tx = Math.Max(0, Math.Min(cx - 1, N - 1));
+            int ty = Math.Max(0, Math.Min(cz - 1, N - 1));
+            sbyte h;
+            try { h = _heights.ReadHeight(tx, ty); }
+            catch { h = 0; }
+            return h * HeightScale;
+        }
+
+        // Untextured fallback for grounded fences: emit one panel per cell-step so the
+        // base follows the terrain instead of slanting between Y0 and Y1.
+        private void AddGroundConformedFenceFallback(
+            MeshGeometry3D mesh, DFacetRec f,
+            double x0, double z0, double x1, double z1,
+            double verticalExtent)
+        {
+            int dxCells = Math.Abs(f.X1 - f.X0);
+            int dzCells = Math.Abs(f.Z1 - f.Z0);
+            int panelsAcross = Math.Max(1, Math.Max(dxCells, dzCells));
+
+            for (int col = 0; col < panelsAcross; col++)
+            {
+                double tA = (double)col / panelsAcross;
+                double tB = (double)(col + 1) / panelsAcross;
+                double xA = x0 + (x1 - x0) * tA;
+                double xB = x0 + (x1 - x0) * tB;
+                double zA = z0 + (z1 - z0) * tA;
+                double zB = z0 + (z1 - z0) * tB;
+                double yA = SampleTerrainY(xA, zA);
+                double yB = SampleTerrainY(xB, zB);
+                AddWallQuad(mesh, xA, zA, yA, xB, zB, yB, verticalExtent);
+            }
+        }
+
         private static void AddWallQuad(
             MeshGeometry3D mesh,
             double x0, double z0, double yBase0,
@@ -967,7 +1072,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
         }
 
         // =====================================================================
-        // PRIMS (red spheres)
+        // PRIMS (3D models from PRIM files)
         // =====================================================================
         public Model3D? BuildPrims(ViewportCullRegion? cull = null)
         {
@@ -978,11 +1083,27 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             catch { return null; }
             if (snap.Prims == null || snap.Prims.Length == 0) return null;
 
-            // Share one sphere mesh for all prims; place via one merged mesh (cheaper than per-prim visuals).
-            var mesh = new MeshGeometry3D();
-            double radius = Scene3DConstants.CylinderRadius;
+            // ── DIAGNOSTIC LOGGING ──────────────────────────────────────────
+            string logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "UrbanChaosMapEditor",
+                "prim-render.log");
+            try { System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!); } catch { }
+
+            var primService = Prims.PrimModelService.Instance;
+            var group = new Model3DGroup();
+
+            // Fallback sphere mesh for prims without models - now BRIGHT GREEN to diagnose
+            var fallbackMesh = new MeshGeometry3D();
+            double fallbackRadius = Scene3DConstants.CylinderRadius;
             int stacks = Scene3DConstants.CylinderStacks;
             int slices = Scene3DConstants.CylinderSlices;
+            bool hasFallbacks = false;
+
+            int modelCount = 0;
+            int fallbackCount = 0;
+            var primNumbersWithModels = new HashSet<int>();
+            var primNumbersWithoutModels = new HashSet<int>();
 
             foreach (var p in snap.Prims)
             {
@@ -997,21 +1118,111 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                 double cx = uiCol * MapConstants.MapWhoCellSize + (255 - p.X);
                 double cz = uiRow * MapConstants.MapWhoCellSize + (255 - p.Z);
 
+                // Per-prim visual Z nudge (viewer-only; file's prim.Z is untouched).
+                if (p.PrimNumber == 124)
+                    cz += 128; // Colored Lights — shift right ~2 tiles
+
                 // Prim Y: file value is in engine units (same convention as facet Y0/Y1).
                 double cy = p.Y * EngineToViewY;
 
-                if (cull.HasValue && !cull.Value.IntersectsBounds(cx - radius, cz - radius, cx + radius, cz + radius))
+                if (cull.HasValue && !cull.Value.IntersectsBounds(cx - fallbackRadius, cz - fallbackRadius, cx + fallbackRadius, cz + fallbackRadius))
                     continue;
 
-                AppendSphere(mesh, cx, cy, cz, radius, stacks, slices);
+                // Try to load the actual 3D model
+                var model = primService.GetMesh(p.PrimNumber);
+
+                if (model != null)
+                {
+                    // Apply transforms in order: scale → rotation (yaw around Y) → translate
+                    // Prim.Yaw: 0..255 maps to 0..360 degrees.
+                    // Add a 180° visual offset so the 3D model faces the same direction
+                    // as the in-game prim (the 2D interpreter is left untouched).
+                    double yawDegrees = ((p.Yaw / 255.0) * 360.0) + 180.0;
+
+                    // Visual snap-to-ground: if the model's lowest point would sit below
+                    // the floor (terrain corner heights or PAP cell altitude — same logic
+                    // as the 2D FloorSnapService), raise it so its base rests on the floor.
+                    // The .iam file's prim.Y is left untouched; this is viewer-only.
+                    // Wall-mounted prims (canopies/awnings) are excluded so they stay at
+                    // the file's stored height, then receive a fixed visual lift.
+                    double finalY = cy;
+                    if (SnapToGroundExcludedPrimNumbers.Contains(p.PrimNumber))
+                    {
+                        // Skip snap. Wall canopies additionally receive a fixed +304
+                        // engine-Y lift; other excluded prims (e.g. Colored Lights)
+                        // stay at the file's stored Y.
+                        if (WallCanopyLiftPrimNumbers.Contains(p.PrimNumber))
+                            finalY = cy + 304 * EngineToViewY;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Rect3D modelBounds = model.Bounds;
+                            if (!modelBounds.IsEmpty)
+                            {
+                                double scaledMinY = modelBounds.Y * Scene3DConstants.PrimModelScale;
+                                short snapEngineY = FloorSnapService.CalculateSnapY(p.MapWhoIndex, p.X, p.Z);
+                                double floorViewY = snapEngineY * EngineToViewY;
+                                double lowestPointY = cy + scaledMinY;
+                                if (lowestPointY < floorViewY)
+                                    finalY = floorViewY - scaledMinY;
+                            }
+                        }
+                        catch
+                        {
+                            // Fall back to raw file Y on any error.
+                        }
+                    }
+
+                    var transformGroup = new Transform3DGroup();
+                    transformGroup.Children.Add(new ScaleTransform3D(Scene3DConstants.PrimModelScale, Scene3DConstants.PrimModelScale, Scene3DConstants.PrimModelScale));
+                    transformGroup.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(0, 1, 0), yawDegrees)));
+                    transformGroup.Children.Add(new TranslateTransform3D(cx, finalY, cz));
+
+                    // Wrap the frozen model in a new group and apply transform
+                    var primGroup = new Model3DGroup { Transform = transformGroup };
+                    primGroup.Children.Add(model);
+                    group.Children.Add(primGroup);
+                    modelCount++;
+                    primNumbersWithModels.Add(p.PrimNumber);
+                }
+                else
+                {
+                    // Fallback to GREEN sphere when model unavailable (so we can diagnose)
+                    AppendSphere(fallbackMesh, cx, cy, cz, fallbackRadius, stacks, slices);
+                    hasFallbacks = true;
+                    fallbackCount++;
+                    primNumbersWithoutModels.Add(p.PrimNumber);
+                }
             }
 
-            if (mesh.Positions.Count == 0) return null;
-            mesh.Freeze();
+            // Write diagnostic log
+            try
+            {
+                var primDir = primService.PrimDirectory ?? "(NOT SET)";
+                var texDir = primService.TextureDirectory ?? "(NOT SET)";
+                var log = $"[{DateTime.Now:HH:mm:ss}] BuildPrims called\n" +
+                          $"  PRIM dir: {primDir}\n" +
+                          $"  Texture dir: {texDir}\n" +
+                          $"  Total prims in map: {snap.Prims.Length}\n" +
+                          $"  Models rendered: {modelCount}\n" +
+                          $"  Fallback spheres: {fallbackCount}\n" +
+                          $"  Unique prim numbers WITH models: [{string.Join(",", primNumbersWithModels)}]\n" +
+                          $"  Unique prim numbers WITHOUT models: [{string.Join(",", primNumbersWithoutModels)}]\n\n";
+                System.IO.File.AppendAllText(logPath, log);
+            }
+            catch { }
 
-            var mat = GetSolidMaterial(Color.FromRgb(230, 40, 40));
-            var group = new Model3DGroup();
-            group.Children.Add(new GeometryModel3D(mesh, mat) { BackMaterial = mat });
+            // Add fallback spheres if any prims lacked models - BRIGHT GREEN now
+            if (hasFallbacks && fallbackMesh.Positions.Count > 0)
+            {
+                fallbackMesh.Freeze();
+                var mat = GetSolidMaterial(Color.FromRgb(0, 255, 0)); // BRIGHT GREEN
+                group.Children.Add(new GeometryModel3D(fallbackMesh, mat) { BackMaterial = mat });
+            }
+
+            if (group.Children.Count == 0) return null;
             group.Freeze();
             return group;
         }
@@ -1331,16 +1542,46 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                     {
                         if (isWarehouse)
                         {
-                            // Warehouse RF4: use tex000 from the world texture set.
-                            string meshKey = $"rf4|ware|tex000|diag={(diagNWSE ? 1 : 0)}";
+                            // Warehouse RF4: prefer per-cell roof texture from the .MAP file.
+                            // entry == 0 (or no .MAP loaded) → fall back to tex000hi.
+                            ushort roofEntry = RoofTextureService.Instance.ReadEntry(cellX, cellZ);
+
+                            int totalIndex;
+                            int rf4Rot;
+                            string texKey;
+
+                            if (roofEntry == 0)
+                            {
+                                totalIndex = 0;
+                                rf4Rot = 0;
+                                texKey = "tex000";
+                            }
+                            else
+                            {
+                                var (rGroup, rTexNum, rRotIdx) = RoofTextureService.DecodeEntry(roofEntry);
+
+                                // Mirror RoofTextureOverlayLayer's 2D rotation mapping, then convert
+                                // to AddRf4Quad's convention (same (360 - x) % 360 flip the floor path uses).
+                                int angle2D = rRotIdx switch { 0 => 180, 1 => 90, 2 => 0, 3 => 270, _ => 0 };
+                                rf4Rot = (360 - angle2D) % 360;
+                                totalIndex = rTexNum;
+                                texKey = $"{rGroup}{rTexNum}";
+                            }
+
+                            string meshKey = $"rf4|ware|{texKey}|rot={rf4Rot}|diag={(diagNWSE ? 1 : 0)}";
 
                             if (!texMeshes.TryGetValue(meshKey, out var mesh))
                             {
-                                if (!TextureResolver.TryResolve(0, 0, 0, 0, worldNum, variant!, out var bmp) || bmp == null)
+                                if (!TextureResolver.TryResolveByIndex(totalIndex, worldNum, variant!, out var bmp) || bmp == null)
                                 {
-                                    fallbackMesh ??= new MeshGeometry3D();
-                                    AddRf4Quad(fallbackMesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
-                                    continue;
+                                    // Last resort: try tex000hi explicitly before falling back to grey.
+                                    if (totalIndex == 0 ||
+                                        !TextureResolver.TryResolveByIndex(0, worldNum, variant!, out bmp) || bmp == null)
+                                    {
+                                        fallbackMesh ??= new MeshGeometry3D();
+                                        AddRf4Quad(fallbackMesh, x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
+                                        continue;
+                                    }
                                 }
 
                                 mesh = new MeshGeometry3D();
@@ -1348,7 +1589,7 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
                                 texMaterials[meshKey] = GetTextureMaterial(meshKey, bmp);
                             }
 
-                            AddRf4Quad(texMeshes[meshKey], x0, z0, x1, z1, yNW, yNE, ySE, ySW, 0, diagNWSE);
+                            AddRf4Quad(texMeshes[meshKey], x0, z0, x1, z1, yNW, yNE, ySE, ySW, rf4Rot, diagNWSE);
                         }
                         else
                         {
@@ -1470,7 +1711,27 @@ namespace UrbanChaosMapEditor.Services.Viewport3D
             try { snap = _buildings.ReadSnapshot(); }
             catch { return null; }
 
+            // Ensure the sibling .MAP file (if present) is loaded for per-cell roof textures.
+            RoofTextureService.Instance.EnsureLoadedForCurrentMap();
+
             TryResolveVariantAndWorld(out string? variant, out int worldNum);
+            // Fallback for editors whose shell VM doesn't expose Map.TextureWorld/UseBetaTextures
+            // (Mission Editor, Light Editor): read world directly from the map bytes and the
+            // variant from the texture cache's active set. Same pattern as BuildFacets.
+            if (worldNum <= 0)
+            {
+                try
+                {
+                    worldNum = _textures.ReadTextureWorld();
+                    variant = TextureCacheService.Instance.ActiveSet.Equals("beta", StringComparison.OrdinalIgnoreCase)
+                        ? "Beta"
+                        : "Release";
+                }
+                catch
+                {
+                    worldNum = 0;
+                }
+            }
             bool canTexture = worldNum > 0 && !string.IsNullOrEmpty(variant);
 
             var group = new Model3DGroup();
